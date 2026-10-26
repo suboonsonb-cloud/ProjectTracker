@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SG&amp;A Tracker Desk</title>
+<link rel="stylesheet" href="css/desk.css">
+</head>
+<body>
+<header class="top">
+  <h1>SG&amp;A Tracker Desk <span class="buildtag" title="App version — check this matches the latest file you downloaded">v26-Oct r11</span></h1>
+  <span class="file" id="fileName">No workbook loaded</span><button type="button" class="connchip hidden" id="connChip">🔗 connect</button>
+  <span class="spacer"></span>
+  <span class="hgrp today" title="'Today' drives statuses, the Gantt today line and the current-month marker. It advances automatically at midnight in the chosen time zone."><span class="glab">TODAY</span><b id="todayLbl"></b><select id="tzSel" aria-label="Time zone"></select></span>
+  <span id="chgBadge" class="badge-changes hidden">0 unsaved</span><span id="saveState" class="savestate"></span>
+  <span class="hgrp"><span class="glab">FILE</span><button class="btn ghost" id="btnOpen">Open workbook…</button><button class="btn primary" id="btnSave" disabled>Save to Excel</button><button class="btn ghost" id="btnCopy" disabled title="Save the workbook (with your changes) to a new file">Save a copy…</button></span>
+  <span class="hgrp"><button class="btn ghost" id="btnSet" title="Settings — maintain dropdown lists and status / delay rules">⚙<span class="hlbl"> Settings</span></button><button class="btn ghost" id="btnHelp" title="Help">?<span class="hlbl"> Help</span></button></span>
+</header>
+<div id="envWarn"></div>
+<nav class="tabs hidden" id="tabs"></nav>
+<main id="main"></main>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer">
+  <header><h3 id="dTitle">Edit</h3><button class="btn small" id="dClose">Close</button></header>
+  <div class="body" id="dBody"></div>
+  <footer id="dFoot"></footer>
+</aside>
+<div class="toast" id="toast"></div>
+<div class="modal" id="confirm"><div class="box"></div></div>
+<div class="modal" id="help"><div class="box">
+  <h2>How this app works</h2>
+  <p>This page runs entirely in your browser. It does not connect to the internet or to any server. It opens the SG&amp;A tracker <b>.xlsx</b>, lets you edit the 5 input sheets (Projects, Activities, Benefits, Realisation, RAIDD) and writes your changes straight back into the same workbook. It only changes the input cells you edited, so formulas, tables, charts and formatting stay exactly as they were.</p>
+  <h2>Recommended set-up with SharePoint (no third party)</h2>
+  <ol class="steps">
+    <li>In SharePoint, open the document library and click <b>Sync</b> (or "Add shortcut to My files") so the workbook appears in File Explorer through OneDrive.</li>
+    <li>Open this HTML in <b>Microsoft Edge or Google Chrome</b> and click <b>Open workbook…</b>. Pick the synced file.</li>
+    <li>Make your changes and click <b>Save to Excel</b>. The file is overwritten in place, and OneDrive uploads it to SharePoint automatically.</li>
+    <li>Other browsers (Firefox, Safari) download an updated copy instead. Upload it to SharePoint with the same name to replace the old one.</li>
+  </ol>
+  <h2>If a save does not reach SharePoint, or "goes back" to an old version</h2>
+  <ol class="steps">
+    <li><b>Open the right file.</b> Only a file in your <b>OneDrive-synced</b> folder reaches SharePoint (in File Explorer: your organisation → the SharePoint library, created with <i>Sync</i> or <i>Add shortcut to My files</i>). Files opened from the SharePoint website, Downloads, Teams or e-mail are local copies — saving them changes only the copy.</li>
+    <li><b>Close the workbook in Excel</b> (desktop <i>and</i> Excel for the web) before saving here. With AutoSave on, Excel writes its own copy back and your save "reverts".</li>
+    <li><b>Wait for OneDrive's green tick</b> on the file before opening it here, and after saving. If OneDrive shows a conflict, it keeps both files (one with your PC name) — keep the newer one.</li>
+    <li>The app now <b>checks the file again after saving</b> (header shows ✓ saved & verified). If the file was replaced it warns you and offers <b>Merge & save again</b>, which reloads the current file and re-applies your changes so nobody's edits are lost.</li>
+    <li>If the SharePoint library requires <b>check-out</b>, check the file out first (or ask the site owner to turn that setting off for this library).</li>
+  </ol>
+  <h2>Important</h2>
+  <ul>
+    <li><b>Close the workbook in Excel before saving from here</b>, and make sure nobody else is editing it. Otherwise OneDrive may create a conflict copy.</li>
+    <li>Calculated fields (status, completion, IDs, forecast dates, Gantt dates, value totals) come from the <b>last Excel calculation</b>. The app tells Excel to recalculate everything when the file is next opened. Open it once in Excel (desktop or web) after saving; when Excel saves it, the new values show here.</li>
+    <li>New Projects, Tasks and Benefits get their ID straight away. The app writes it into the <b>ID Lock (saved ID)</b> column, so you can link RAIDD items and actuals before Excel recalculates.</li>
+    <li>The app checks whether the file changed on disk since you opened it and warns you before overwriting.</li>
+    <li><b>Projects &amp; tasks:</b> open <b>Projects</b>, click a project to open its workspace, and edit its details and tasks stage by stage (+ Add task creates the next Task ID automatically). Each project workspace also holds its <b>Business benefit plan</b> (benefit lines with drivers; projects without one are flagged ⚑ in the list). <b>+ New project</b> opens an empty workspace: enter the name, BU, CF and plan dates, then use <b>Add standard task per stage</b> or add your own. The <b>Projects / Tasks / Benefits</b> switch on the filter bar shows the flat task list.</li>
+    <li><b>⇄ E2E flows:</b> draw each end-to-end process as an <b>AS-IS (before)</b> and a <b>TO-BE (new design)</b> swimlane, and tag the steps with the projects that deliver them (drag a project from the right-hand list onto a step, or press <b>Link</b> and click the steps). Each project page lists its linked steps with <b>Open in flow</b> and <b>Link to steps…</b>. Saved to the E2E_Flows and E2E_Map sheets.</li>
+    <li><b>⚡ Quick update:</b> one table of all projects — type the new <b>Progress %</b> (or click 0/25/50/75/100), pick phase or On-Hold / Cancelled, set plan dates and write Done / Next steps / Issues. Filter by CF, process area and status (tick / untick). Every change stamps Last Updated with today.</li>
+    <li><b>Status filters:</b> on the Dashboard, Projects list, RAIDD and Quick update, status is a row of tick boxes — untick to hide a status, tick to show it again, <i>only</i> to show just that one, <b>All</b> to reset.</li>
+    <li><b>⇄ Sync old file:</b> open this workbook (the database), click <b>⇄ Sync old file</b> and pick the old-format <i>Project 2T Club Update</i> file. The app matches projects (Legacy ID → name), shows every difference with a verdict (Fill · Old newer · Conflict · DB newer · Ignored) and pre-ticks only safe updates. Progress and phase never go backwards; misplaced old cells are ignored; new old-file projects can be added (likely duplicates are left unticked). Apply, then Review changes → Save to Excel. A sync baseline is stored in Migration_Log (N–R) so the next sync knows which side changed.</li>
+    <li><b>⚙ Settings:</b> maintain the dropdown lists (Initiatives, Org structure BU · CF · Process Area, Regions, Workstream leaders, People) and the status / delay rules (slip tolerance, forecast threshold, stage weights). Dropdowns are searchable — type to filter; where “＋ new allowed” shows, typing a new value offers “＋ Add”.</li>
+    <li><b>Today &amp; time zone:</b> the TODAY box in the header sets the date used for statuses, the Gantt red today line and the red current-month marker. It moves forward automatically at midnight in the chosen time zone (default Asia/Bangkok), even if the page stays open. Excel uses the same idea: set <b>Time zone (UTC offset)</b> on the Lists sheet.</li>
+  </ul>
+  <div style="text-align:right;margin-top:12px"><button class="btn primary" id="helpClose">Got it</button></div>
+</div></div>
+<input type="file" id="filePick" accept=".xlsx" class="hidden">
+
+<script src="js/00-config.js"></script>
+<script src="js/01-core.js"></script>
+<script src="js/02-calc.js"></script>
+<script src="js/03-io.js"></script>
+<script src="js/03b-connect.js"></script>
+<script src="js/03c-sharepoint.js"></script>
+<script src="js/04-dashboard.js"></script>
+<script src="js/05-benefit-analysis.js"></script>
+<script src="js/06-list-editor.js"></script>
+<script src="js/07-realisation.js"></script>
+<script src="js/08-gantt.js"></script>
+<script src="js/09-projects.js"></script>
+<script src="js/10-settings.js"></script>
+<script src="js/11-sync.js"></script>
+<script src="js/12-projects-list.js"></script>
+<script src="js/13-studio-embed.js"></script>
+<script src="js/14-e2e.js"></script>
+<script src="js/14b-e2e-import.js"></script>
+<script src="js/15-boot.js"></script>
+</body>
+</html>
