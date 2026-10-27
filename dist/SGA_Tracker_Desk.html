@@ -18,7 +18,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 header.top{position:sticky;top:0;z-index:30;background:var(--navy);color:#fff;display:flex;align-items:center;gap:10px;padding:10px 16px;flex-wrap:wrap}
 header.top h1{font-size:16px;margin:0;font-weight:600;letter-spacing:.2px}
 header.top .file{font-size:12px;opacity:.85;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-header.top .spacer{flex:1}
+header.top .spacer{flex:1 1 0;min-width:0}
 .btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:8px;padding:7px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .btn:hover{border-color:#b9c2cf}
 .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
@@ -355,6 +355,20 @@ header.top #fileName{max-width:190px;overflow:hidden;text-overflow:ellipsis;whit
 .alfilters{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px;font-size:12.5px}.alfilters input[type=search]{min-width:220px}.alfilters label{display:inline-flex;gap:4px;align-items:center}
 .altab td{vertical-align:top}.altab .clip{display:inline-block;max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom}
 .alarea{font-size:11px;padding:1px 7px;border-radius:9px;background:#EEF2F7;color:#334155;white-space:nowrap}.alarea.a-Project{background:#E3EDF9;color:#1F4E79}.alarea.a-Task{background:#E7F5EA;color:#1E6B24}.alarea.a-RAIDD{background:#FDECEC;color:#9B1C1C}.alarea.a-Benefit,.alarea.a-Actuals{background:#FFF4DB;color:#7A4B00}.alarea.a-E2Eflow{background:#F1ECFD;color:#5B3DB5}
+.accchip{margin-left:6px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;border-radius:999px;padding:2px 10px;font-size:12px;cursor:pointer;white-space:nowrap}.accchip:hover{background:rgba(255,255,255,.22)}.accchip.hidden{display:none}
+body.role-viewer #main input:not([type=search]):not([type=checkbox]):not(.stq):not([id^=al]):not([id^=f_]):not(#q),body.role-viewer #main textarea{background:#F6F7F9;cursor:not-allowed}
+/* sign-in page */
+.loginpage{position:fixed;inset:0;z-index:300;display:grid;place-items:center;padding:16px;background:linear-gradient(135deg,#1F3864 0%,#2E75B6 100%)}
+.lpcard{width:min(400px,100%);background:#fff;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.25);padding:28px 26px 18px;display:flex;flex-direction:column;gap:12px}
+.lpbrand{display:flex;gap:12px;align-items:center;margin-bottom:4px}.lplogo{width:46px;height:46px;border-radius:10px;background:#1F3864;color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px}
+.lpbrand h1{margin:0;font-size:20px;color:#1F3864}.lpbrand p{margin:2px 0 0;font-size:12px;color:#5E6B7D;max-width:290px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lpf{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:#334155}.lpf input{font:inherit;font-weight:400;font-size:14px;padding:9px 11px;border:1px solid #CBD5E1;border-radius:8px}.lpf input:focus{outline:2px solid #2E75B6;outline-offset:0;border-color:#2E75B6}
+.lprem{display:flex;gap:8px;align-items:center;font-size:13px;color:#334155}.lpgo{padding:10px;font-size:15px}.lpms{padding:9px}
+.lperr{background:#FEF3F2;color:#B42318;border:1px solid #FECDCA;border-radius:8px;padding:8px 10px;font-size:13px}
+.lphint{font-size:11.5px;color:#5E6B7D;margin:2px 0 0}.lpclose{align-self:center;border:0;background:none;color:#5E6B7D;font-size:12px;text-decoration:underline;cursor:pointer}
+@media (max-width:1600px){#fileName{max-width:110px}.connchip,.accchip{padding:2px 8px;font-size:11.5px}}
+@media (max-width:1400px){#fileName{max-width:80px}}
+@media (max-width:1700px){.hl2{display:none}}
 </style>
 </head>
 <body>
@@ -364,7 +378,7 @@ header.top #fileName{max-width:190px;overflow:hidden;text-overflow:ellipsis;whit
   <span class="spacer"></span>
   <span class="hgrp today" title="'Today' drives statuses, the Gantt today line and the current-month marker. It advances automatically at midnight in the chosen time zone."><span class="glab">TODAY</span><b id="todayLbl"></b><select id="tzSel" aria-label="Time zone"></select></span>
   <span id="chgBadge" class="badge-changes hidden">0 unsaved</span><span id="saveState" class="savestate"></span>
-  <span class="hgrp"><span class="glab">FILE</span><button class="btn ghost" id="btnOpen">Open workbook…</button><button class="btn primary" id="btnSave" disabled>Save to Excel</button><button class="btn ghost" id="btnCopy" disabled title="Save the workbook (with your changes) to a new file">Save a copy…</button></span>
+  <span class="hgrp"><span class="glab">FILE</span><button class="btn ghost" id="btnOpen">Open<span class="hl2"> workbook</span>…</button><button class="btn primary" id="btnSave" disabled>Save<span class="hl2"> to Excel</span></button><button class="btn ghost" id="btnCopy" disabled title="Save the workbook (with your changes) to a new file"><span class="hl2">Save a </span>copy…</button></span>
   <span class="hgrp"><button class="btn ghost" id="btnSet" title="Settings — maintain dropdown lists and status / delay rules">⚙<span class="hlbl"> Settings</span></button><button class="btn ghost" id="btnHelp" title="Help">?<span class="hlbl"> Help</span></button></span>
 </header>
 <div id="envWarn"></div>
@@ -530,7 +544,7 @@ async function loadWorkbook(buf,name,handle,lastMod){
   }
   const need=["Projects","Activities","Benefits","Realisation","RAIDD","Lists","Plan_Calc"];
   for(const n of need){if(!sheets[n])throw new Error(`Sheet "${n}" not found — is this the SG&A tracker workbook?`)}
-  for(const n of [...need,...["Master_Data","Benefit_Plan","Migration_Log","E2E_Flows","E2E_Map","Activity_Log"].filter(n=>sheets[n])]){
+  for(const n of [...need,...["Master_Data","Benefit_Plan","Migration_Log","E2E_Flows","E2E_Map","Activity_Log","Users"].filter(n=>sheets[n])]){
     const doc=parser.parseFromString(await entryText(by[sheets[n].path]),"application/xml");
     const sd=doc.getElementsByTagNameNS(NS,"sheetData")[0];const rows=new Map(),cells=new Map(),vals=new Map();
     for(const row of sd.getElementsByTagNameNS(NS,"row")){
@@ -542,7 +556,7 @@ async function loadWorkbook(buf,name,handle,lastMod){
   const names={};
   for(const dn of wbDoc.getElementsByTagNameNS(NS,"definedName")){const nm=dn.getAttribute("name");if(!dn.getAttribute("localSheetId"))names[nm]=dn.textContent}
   let coreMod=0;if(by["docProps/core.xml"]){const m=(await entryText(by["docProps/core.xml"])).match(/<dcterms:modified[^>]*>([^<]+)</);if(m)coreMod=Date.parse(m[1])||0}
-  Object.assign(S,{zip:list,byName:by,sst,sheets,names,dirty:new Set(),changes:[],handle,fileName:name,lastMod,newRows:{},wbDoc,_coreMod:coreMod,extraParts:{},_logFor:null});try{E2E_CACHE=null}catch(e){}
+  Object.assign(S,{zip:list,byName:by,sst,sheets,names,dirty:new Set(),changes:[],handle,fileName:name,lastMod,newRows:{},wbDoc,_coreMod:coreMod,extraParts:{},_logFor:null,_wbParts:null});try{ACC=null}catch(e){}try{E2E_CACHE=null}catch(e){}
 }
 function cellValue(c,sst){
   const t=c.getAttribute("t");
@@ -556,6 +570,7 @@ function cellValue(c,sst){
 }
 function gv(sheet,col,row){const v=S.sheets[sheet].vals.get(col+row);return v===undefined?"":v}
 function setCell(sheet,col,row,val){
+  if(typeof accessGuard==="function")accessGuard(sheet,col,row,val);
   const sh=S.sheets[sheet];const ref=col+row;const doc=sh.doc;
   let rowEl=sh.rows.get(row);
   if(!rowEl){rowEl=doc.createElementNS(NS,"row");rowEl.setAttribute("r",row);
@@ -771,6 +786,7 @@ async function saveLocationCheck(){let skip=false;try{skip=localStorage.getItem(
   try{if(document.getElementById("locNo")?.checked)localStorage.setItem("sga_saveloc_ok","1")}catch(e){}
   if(k==="ok"){S._locOk=true;return true}if(k==="copy"){return "copy"}return false}
 async function save(asCopy){
+  if(!asCopy&&typeof canEdit==="function"&&!canEdit()){toast("View only — you can't save changes",4000);return}
   if(hasE2E()){await e2eFlush();clearTimeout(E2E_MAPQ);e2eRebuildMap();updateBadge()}/* commit text being typed in the flow editor + current E2E_Map */
   if(!asCopy&&!S.changes.length){toast("Nothing to save");return}
   if(!asCopy)await ensureUser();
@@ -849,6 +865,7 @@ $("#filePick").addEventListener("change",async e=>{const f=e.target.files[0];if(
 async function ingest(buf,name,handle,lastMod){
   if(S.changes.length&&!confirm("You have unsaved changes. Discard them and open another file?"))return;
   try{toast("Reading workbook…",20000);await loadWorkbook(buf,name,handle,lastMod);$("#fileName").textContent=name+(handle?" · saves in place":" · saves as download");
+    if(typeof accessGate==="function"){toast("",1);if(!(await accessGate()))return}
     $("#tabs").classList.remove("hidden");updateBadge();toast("Workbook loaded",1500);if(handle&&typeof rememberWorkbook==="function")rememberWorkbook(handle);if(typeof paintConn==="function")paintConn();view=view||"Dashboard";render();tickToday(false)}
   catch(e){console.error(e);toast("Could not open: "+e.message,7000)}
 }
@@ -1073,8 +1090,8 @@ const TABS=["Dashboard","Gantt","Projects","Activities","Benefits","Realisation"
 function renderTabs(){const b=t=>`<button class="${t===view?"on":""}" data-t="${t}">${t==="Changes"?`Review changes (${S.changes.length?e2eNetCount(netChanges()):0})`:t==="Quick"?"⚡ Quick update":t==="E2E"?"⇄ E2E flows":t}</button>`;
   $("#tabs").innerHTML=`<div class="tgrp rep"><span class="glab">REPORTS</span>${["Dashboard","Gantt"].map(b).join("")}</div>
    <div class="tgrp inp"><span class="glab">UPDATE DATA</span>${["Projects","E2E"].map(b).join("")}</div>
-   <div class="tgrp inp"><span class="glab">IMPORT</span><button class="${view==="Sync"?"on":""}" data-t="Sync">⇄ Sync old file${SY.plan?" ●":""}</button></div>
-   <div class="tgrp sav"><span class="glab">SAVE</span>${b("Changes")}</div>`;requestAnimationFrame(stickVars);
+   ${typeof canEdit==="function"&&!canEdit()?`<div class="tgrp rep"><span class="glab">VIEW ONLY</span><span class="muted" style="font-size:12px;padding:0 8px">Ask an Admin for edit access</span></div>`:`<div class="tgrp inp"><span class="glab">IMPORT</span><button class="${view==="Sync"?"on":""}" data-t="Sync">⇄ Sync old file${SY.plan?" ●":""}</button></div>
+   <div class="tgrp sav"><span class="glab">SAVE</span>${b("Changes")}</div>`}`;requestAnimationFrame(stickVars);
   $("#tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{if(b.dataset.t==="Projects"&&view==="Projects"){UI.proj=null}const ch=view!==b.dataset.t;if(b.dataset.t==="E2E"){if(view==="E2E"&&UI.e2e.home===false){e2eFlush()}UI.e2e.home=true}view=b.dataset.t;render();if(ch&&view!=="E2E")window.scrollTo(0,0)})}
 function render(){
   if(!S.zip||view!=="E2E")e2eHide();
@@ -1870,7 +1887,7 @@ function hubHead(k){const [nb,help]=HUB[k];return `<div class="card pad ptop"><d
 function projHead(simple){return `<div class="card pad ptop"><div class="ptoprow">${pviewToggle()}${plistToggle()}<span style="flex:1"></span><button class="btn new" id="quNew">＋ New project</button></div>
     <p class="muted" style="margin:6px 0 0;font-size:12px">${simple?"Type progress / plan end / next steps right in the row · <b>▸</b> more fields · project name = full project with task Gantt · then <b>Save to Excel</b>."
       :"Every column of the Projects sheet · click a row = full project with task Gantt · <b>⚑</b> = RAIDD · <b>▾</b> on a column header = filter / sort · then <b>Save to Excel</b>."}</p></div>`}
-function plistToggle(){return `<span class="pvwrap"><span class="pvlab">Project view</span><span class="seg" title="Simple = update view (important fields first, ▸ for more). Table = every column."><button data-pl="simple" class="${UI.plist!=="table"?"on":""}">Simple</button><button data-pl="table" class="${UI.plist==="table"?"on":""}">Table</button></span></span>`}
+function plistToggle(){return `<span class="pvwrap"><span class="pvlab">Project view</span><span class="seg" title="Summary = update view (important fields first, ▸ for more). Table = every column."><button data-pl="simple" class="${UI.plist!=="table"?"on":""}">Summary</button><button data-pl="table" class="${UI.plist==="table"?"on":""}">Table</button></span></span>`}
 function bindPview(m){m.querySelectorAll("[data-pv]").forEach(b=>b.onclick=()=>{UI.pview=b.dataset.pv;UI.proj=null;render()});m.querySelectorAll("[data-pl]").forEach(b=>b.onclick=()=>{UI.plist=b.dataset.pl;render()})}
 function openProject(r){UI.wsOpen=false;$("#drawer").classList.remove("on");$("#scrim").classList.remove("on");UI.sel=null;view="Projects";UI.proj=r;render();window.scrollTo(0,0)}
 function vProjHub(m){if(UI.proj!=null&&!rowsOf("Projects").includes(UI.proj))UI.proj=null;
@@ -2227,9 +2244,9 @@ document.addEventListener("change",e=>{const el=e.target;if(el.dataset&&el.datas
 function usedCount(col,v){return rowsOf("Projects").filter(r=>String(gv("Projects",col,r))===v).length}
 function setNamed(nm,v){const n=nameRef(nm);if(n)setCell(n.sh,n.col,n.r1,v)}
 function vSettings(m){
-  const tab=UI.stab||"lists";const y=window.scrollY;
+  let tab=UI.stab||(isAdmin()?"lists":"log");if(!isAdmin()&&!["log","warn"].includes(tab))tab="log";const y=window.scrollY;
   const head=`<div class="banner" style="background:#F3EEFC;border:1px solid #D9CCF5;color:#3B2A6B"><b>⚙ SETTINGS</b><span>Maintain the dropdown lists and the status / delay rules. Changes write to the <b>Master_Data</b> and <b>Lists</b> sheets when you click <b>Save to Excel</b>, and everything in this app recalculates straight away.</span></div>
-   <div class="toolbar"><span class="seg">${[["lists","Master lists"],["rules","Status & delay rules"],["today","Excel ‘today’ & time zone"],["log","🕘 Activity log"],["warn","⚠ Warnings"]].map(([k,t])=>`<button data-st="${k}" class="${tab===k?"on":""}">${t}</button>`).join("")}</span></div>`;
+   <div class="toolbar"><span class="seg">${(isAdmin()?[["lists","Master lists"],["rules","Status & delay rules"],["today","Excel ‘today’ & time zone"],["users","👤 Users"],["log","🕘 Activity log"],["warn","⚠ Warnings"]]:[["log","🕘 Activity log"],["warn","⚠ Warnings"]]).map(([k,t])=>`<button data-st="${k}" class="${tab===k?"on":""}">${t}</button>`).join("")}</span></div>`;
   let body="";
   if(tab==="lists"){if(!hasMD()){body=`<div class="note">This workbook has no Master_Data sheet. Open the latest SGA_Reduction_Initiative_Tracker.xlsx.</div>`}else{
     const t=(title,sub,cols,rows,addId)=>`<div class="card pad stcard"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0">${title}</h2><span class="muted">${sub}</span><span style="flex:1"></span><input type="search" class="stq" data-q="${addId}" placeholder="Filter…" value="${esc((UI.stq||{})[addId]||"")}"><button class="btn small new" data-add="${addId}">+ Add</button></div>
@@ -2272,6 +2289,7 @@ function vSettings(m){
        Forecast column / Gantt hatching: in-progress task is <b>At risk of delay</b> when % done trails % of plan time elapsed by more than ${pt===""?15:Math.round(+pt*100)} points; a not-started task is at risk when an earlier stage is forecast to finish after its own plan end and after this task should start.</p></div></div>
       <div class="card pad stcard"><h2 style="margin-top:0">Standard stage weights</h2><p class="muted" style="margin-top:0">Used for project completion % (stage weighting) and the standard stage time windows (new task dates, “Add standard task per stage”).</p>
       <div class="stgrid"><div><h4>Waterfall</h4>${wt("L_WWF","L_StageWF")}</div><div><h4>Agile</h4>${wt("L_WAG","L_StageAG")}</div></div></div>`}
+  else if(tab==="users"){body=vUsers()}
   else if(tab==="log"){body=vActivity()}
   else if(tab==="warn"){body=vWarnings()}
   else{const tz=setting("S_TZ"),pc=setting("S_PCTZ"),ao=setting("S_AsOf");
@@ -2282,7 +2300,7 @@ function vSettings(m){
       <p class="muted" style="font-size:12px">This app uses the time zone chosen in the header (TODAY box). If an as-of date is set here, the app uses it too, so both show the same statuses.</p></div>`}
   m.innerHTML=head+body;window.scrollTo(0,y);
   m.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{UI.stab=b.dataset.st;if(b.dataset.st!=="rules")UI.rulesBase=null;vSettings(m)});
-  if(tab==="log"){bindActivity(m,()=>vSettings(m));return}if(tab==="warn"){bindWarnings(m,()=>vSettings(m));return}
+  if(tab==="users"){bindUsers(m,()=>vSettings(m));return}if(tab==="log"){bindActivity(m,()=>vSettings(m));return}if(tab==="warn"){bindWarnings(m,()=>vSettings(m));return}
   const re=()=>{liveCalc();renderTabs();vSettings(m)};
   m.querySelectorAll(".stq").forEach(el=>el.oninput=()=>{UI.stq=UI.stq||{};UI.stq[el.dataset.q]=el.value;const p=el.selectionStart;vSettings(m);const n=m.querySelector(`[data-q="${el.dataset.q}"]`);n.focus();n.setSelectionRange(p,p)});
   m.querySelectorAll("[data-md]").forEach(el=>el.onchange=()=>{const ref=el.dataset.md,c=ref.replace(/\d+/,""),r=+ref.replace(/[A-Z]+/,"");const ov=mg(c,r),nv=el.value.trim();if(nv===ov)return;
@@ -2322,7 +2340,7 @@ function vChanges(m){
   m.innerHTML=`<div class="banner" style="background:#EAF6EC;border:1px solid #BFE3C6;color:#1E5B23"><b>SAVE</b><span>Review what will be written into the Excel file, then save. Only the listed input cells change; formulas, charts and formatting are untouched.</span></div><div class="card pad"><h2>Unsaved changes (${tot})</h2>
   ${tot?`${fl.length||mapOnly?`<h3 style="margin:6px 0">Process flows (E2E)</h3><div class="tablewrap" style="margin-bottom:12px"><table class="data"><tr><th>Flow</th><th>Version</th><th>What changed</th></tr>${fl.map(x=>`<tr><td>${esc(x.name)}</td><td>${x.ver}</td><td>${esc(x.text)}</td></tr>`).join("")}${mapOnly?`<tr><td colspan="3">E2E_Map refreshed from the diagrams</td></tr>`:""}</table></div>`:""}${rows.length?`<h3 style="margin:6px 0">Cells</h3>`:""}<p class="muted">These changes will be written into the workbook when you click <b>Save to Excel</b>. Nothing else in the file is touched.</p>
   <div class="tablewrap" ${rows.length?"":'hidden'}><table class="data"><tr><th>Project</th><th>Sheet</th><th>Cell</th><th>Column</th><th>Old</th><th>New</th></tr>${rows.map((c,ix)=>{const kk=rpK(c);const hd=ix===0||kk!==rpK(rows[ix-1])?`<tr class="grph"><td colspan="6"><b>${esc(kk)}</b> <span class="muted">— ${rows.filter(x=>rpK(x)===kk).length} change(s)${rows.some(x=>rpK(x)===kk&&x.sheet==="Activities"&&x.ref.replace(/\d+/g,"")===FA.act)?" · progress spread across the project's tasks by stage weight":""}</span></td></tr>`:"";const col=(CFG[c.sheet]?CFG[c.sheet].cols:[]).find(x=>x.col===c.ref.replace(/\d+/,""));
-   const f=v=>{const x=col&&col.type==="date"?fmtDate(v):col&&col.type==="pct"?fmtPct(v):v;const t=String(x??"");return t.length>140?t.slice(0,140)+"… ("+t.length.toLocaleString()+" characters)":x};const first={old:c.orig};const rw=+c.ref.replace(/[A-Z]+/g,"");
+   const f=v=>{if(c.sheet==="Users"&&/^C\d/.test(c.ref))return v?"••••••":"";const x=col&&col.type==="date"?fmtDate(v):col&&col.type==="pct"?fmtPct(v):v;const t=String(x??"");return t.length>140?t.slice(0,140)+"… ("+t.length.toLocaleString()+" characters)":x};const first={old:c.orig};const rw=+c.ref.replace(/[A-Z]+/g,"");
    return hd+`<tr><td><span class="clip">${esc(rowProject(c.sheet,rw))}</span></td><td>${c.sheet}</td><td>${c.ref}</td><td>${esc(col?col.h:"")}</td><td class="muted">${esc(f(first.old))}</td><td><b>${esc(f(c.val))}</b></td></tr>`}).join("")}</table></div>
   <p style="margin-top:12px"><button class="btn primary" id="saveNow">Save to Excel</button> <button class="btn" id="discard">Discard all changes</button></p>`:`<p class="muted">No unsaved changes.</p>`}</div>`;
   if($("#saveNow"))$("#saveNow").onclick=()=>save(false);
@@ -2342,7 +2360,7 @@ const LOG_HEAD = ["When", "Who", "Area", "Record", "Field", "Old value", "New va
 function graphUser() { try { if (typeof G_PCA !== "undefined" && G_PCA) { const a = G_PCA.getActiveAccount() || G_PCA.getAllAccounts()[0]; if (a) return a.name || a.username || ""; } } catch (e) { } return ""; }
 function savedUser() { try { return localStorage.getItem("sga_user") || ""; } catch (e) { return ""; } }
 function setSavedUser(v) { try { v ? localStorage.setItem("sga_user", v) : localStorage.removeItem("sga_user"); } catch (e) { } }
-function curUser() { return savedUser() || graphUser() || ""; }
+function curUser() { return (typeof ACC !== "undefined" && ACC && ACC.name) || savedUser() || graphUser() || ""; }
 async function ensureUser() {
   if (curUser()) return true;
   const k = await choose("Who is saving?", `<p>Your name goes into the <b>activity log</b> (Settings → Activity log) next to every change you save. Asked once on this computer.</p>
@@ -2355,26 +2373,35 @@ document.addEventListener("input", e => { if (e.target && e.target.id === "whoNa
 /* ---- the sheet ---- */
 const hasLog = () => !!(S.sheets && S.sheets[LOG_SHEET] && S.sheets[LOG_SHEET].doc);
 function logRows() { if (!hasLog()) return []; const out = []; for (const r of S.sheets[LOG_SHEET].rows.keys()) if (r > 1 && gv(LOG_SHEET, "A", r) !== "") out.push(r); return out.sort((a, b) => a - b); }
-async function ensureLogSheet() {
-  if (hasLog()) return true;
-  const enc = new TextEncoder(); const by = S.byName;
-  const ct = parser.parseFromString(await entryText(by["[Content_Types].xml"]), "application/xml");
-  const relsName = "xl/_rels/workbook.xml.rels"; const rels = parser.parseFromString(await entryText(by[relsName]), "application/xml");
+/* add a new worksheet to the open workbook (sheet XML + workbook.xml + rels + [Content_Types]) */
+async function ensureSheet(name, colsXml, head, cols) {
+  if (S.sheets[name] && S.sheets[name].doc) return S.sheets[name];
+  const enc = new TextEncoder(); const by = S.byName; S.extraParts = S.extraParts || {};
+  const relsName = "xl/_rels/workbook.xml.rels";
+  const parsed = S._wbParts || (S._wbParts = {
+    ct: parser.parseFromString(await entryText(by["[Content_Types].xml"]), "application/xml"),
+    rels: parser.parseFromString(await entryText(by[relsName]), "application/xml") });
+  const { ct, rels } = parsed;
   let n = 1; while (by["xl/worksheets/sheet" + n + ".xml"]) n++; const path = "xl/worksheets/sheet" + n + ".xml";
-  const relIds = [...rels.getElementsByTagName("Relationship")].map(r => r.getAttribute("Id")); let k = 1; while (relIds.includes("rIdLog" + k)) k++; const rid = "rIdLog" + k;
+  const relIds = [...rels.getElementsByTagName("Relationship")].map(r => r.getAttribute("Id")); let k = 1; while (relIds.includes("rIdX" + k)) k++; const rid = "rIdX" + k;
   const R = rels.createElementNS(rels.documentElement.namespaceURI, "Relationship");
   R.setAttribute("Id", rid); R.setAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet"); R.setAttribute("Target", "worksheets/sheet" + n + ".xml"); rels.documentElement.appendChild(R);
   const O = ct.createElementNS(ct.documentElement.namespaceURI, "Override"); O.setAttribute("PartName", "/" + path); O.setAttribute("ContentType", "application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"); ct.documentElement.appendChild(O);
   const shs = S.wbDoc.getElementsByTagNameNS(NS, "sheets")[0]; const ids = [...shs.getElementsByTagNameNS(NS, "sheet")].map(s => +s.getAttribute("sheetId") || 0);
-  const sh = S.wbDoc.createElementNS(NS, "sheet"); sh.setAttribute("name", LOG_SHEET); sh.setAttribute("sheetId", Math.max(0, ...ids) + 1); sh.setAttributeNS(RNS, "r:id", rid); shs.appendChild(sh);
-  const xml = `<worksheet xmlns="${NS}" xmlns:r="${RNS}"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols><col min="1" max="1" width="18" customWidth="1"/><col min="2" max="2" width="18" customWidth="1"/><col min="3" max="3" width="14" customWidth="1"/><col min="4" max="4" width="44" customWidth="1"/><col min="5" max="5" width="24" customWidth="1"/><col min="6" max="7" width="36" customWidth="1"/><col min="8" max="8" width="16" customWidth="1"/></cols><sheetData/><autoFilter ref="A1:H1"/></worksheet>`;
+  const sh = S.wbDoc.createElementNS(NS, "sheet"); sh.setAttribute("name", name); sh.setAttribute("sheetId", Math.max(0, ...ids) + 1); sh.setAttributeNS(RNS, "r:id", rid); shs.appendChild(sh);
+  const last = cols[cols.length - 1];
+  const xml = `<worksheet xmlns="${NS}" xmlns:r="${RNS}"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>${colsXml}</cols><sheetData/><autoFilter ref="A1:${last}1"/></worksheet>`;
   const doc = parser.parseFromString(xml, "application/xml"); const sd = doc.getElementsByTagNameNS(NS, "sheetData")[0];
   const ent = { name: path, method: 0, time: 0, date: 0x21, crc: 0, csize: 0, usize: 0, data: new Uint8Array(0) }; S.zip.push(ent); by[path] = ent;
-  S.sheets[LOG_SHEET] = { path, doc, sd, rows: new Map(), cells: new Map(), vals: new Map() };
-  S.extraParts = S.extraParts || {};
+  S.sheets[name] = { path, doc, sd, rows: new Map(), cells: new Map(), vals: new Map() };
   S.extraParts[relsName] = () => enc.encode('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n' + ser.serializeToString(rels).replace(/^<\?xml[^>]*>\s*/, ""));
   S.extraParts["[Content_Types].xml"] = () => enc.encode('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n' + ser.serializeToString(ct).replace(/^<\?xml[^>]*>\s*/, ""));
-  logWrite(1, LOG_HEAD);
+  const nn = S.changes.length; head.forEach((v, i) => setCell(name, cols[i], 1, v)); S.changes.length = nn; S.dirty.add(name);
+  return S.sheets[name];
+}
+async function ensureLogSheet() {
+  if (hasLog()) return true;
+  await ensureSheet(LOG_SHEET, '<col min="1" max="1" width="18" customWidth="1"/><col min="2" max="2" width="18" customWidth="1"/><col min="3" max="3" width="14" customWidth="1"/><col min="4" max="4" width="44" customWidth="1"/><col min="5" max="5" width="24" customWidth="1"/><col min="6" max="7" width="36" customWidth="1"/><col min="8" max="8" width="16" customWidth="1"/>', LOG_HEAD, LOG_COLS);
   return true;
 }
 function logWrite(r, vals) { const n = S.changes.length; vals.forEach((v, i) => setCell(LOG_SHEET, LOG_COLS[i], r, v)); S.changes.length = n; }   // the log itself is not a "change"
@@ -2384,6 +2411,8 @@ function logLines(all) {
   const out = []; const fmtv = (col, v) => { const x = col && col.type === "date" ? fmtDate(v) : col && col.type === "pct" ? fmtPct(v) : v; const t = String(x ?? ""); return t.length > 300 ? t.slice(0, 300) + "…" : t; };
   const area = { Projects: "Project", Activities: "Task", Benefits: "Benefit", RAIDD: "RAIDD", Realisation: "Actuals", Master_Data: "Settings", Lists: "Settings", Benefit_Plan: "Benefit plan", Migration_Log: "Sync" };
   for (const c of all) {
+    if (c.sheet === "Users") { const r = +c.ref.replace(/[A-Z]+/g, ""), cl = c.ref.replace(/\d+/g, ""); if (r === 1) continue; const pw = cl === UC.pw;
+      out.push(["Access", String(gv("Users", "B", r) || c.orig || "") + (gv("Users", "A", r) ? " · " + gv("Users", "A", r) : ""), (U_HEAD[U_COLS.indexOf(cl)] || cl) + (pw ? (c.val ? " (set / reset)" : " (cleared)") : ""), pw ? "" : String(c.orig ?? ""), pw ? "" : String(c.val ?? ""), "Users!" + c.ref]); continue; }
     if (c.sheet === LOG_SHEET || (typeof E2EF !== "undefined" && (c.sheet === E2EF || c.sheet === E2EM))) continue;
     const r = +c.ref.replace(/[A-Z]+/g, ""), colL = c.ref.replace(/\d+/g, "");
     const col = (CFG[c.sheet] ? CFG[c.sheet].cols : []).find(x => x.col === colL);
@@ -2468,6 +2497,242 @@ function bindWarnings(m, re) {
     const h = hiddenWarns(); setHiddenWarns(h.includes(k) ? h.filter(x => x !== k) : [...h, k]); try { sessionStorage.removeItem("sga_env_dismiss"); } catch (e) { } envCheck(); re(); });
   const a = m.querySelector("#wAll"); if (a) a.onclick = () => { setHiddenWarns([]); try { localStorage.removeItem("sga_saveloc_ok"); sessionStorage.removeItem("sga_env_dismiss"); } catch (e) { } envCheck(); re(); toast("All warnings will show again"); };
 }
+
+/* 10c-access.js — sign-in page, roles, BU access and user maintenance.
+   Users are a table in the workbook (sheet "Users") — Excel is the database, so an Admin can also maintain it in Excel:
+     A Name · B Email (login) · C Password · D Role · E BU access · F Active · G Notes
+   Role:      Admin = see + edit everything, Settings, Users · Editor = edit + save inside their BU access · Viewer = read only, inside their BU access
+   BU access: comma list of BUs or Corporate Functions (e.g. "Finance, Procurement"); blank / All = every BU. Admin always sees all.
+   Password:  blank = signs in with the e-mail only · typed in Excel as plain text works too (Settings → Users → "Secure passwords" hashes them)
+   Remember me: the browser saves the password (autofill) and the Desk keeps the user signed in on this computer for 30 days.
+   Only an Admin, signed in, can add people / change access: Settings → 👤 Users.
+   NOTE: this controls what the Desk lets people do. Anyone who can open the .xlsx in Excel can still edit it there —
+   real protection = SharePoint folder permissions (who can open / edit the file). */
+"use strict";
+const USERS_SHEET = "Users", U_COLS = ["A", "B", "C", "D", "E", "F", "G"], U_HEAD = ["Name", "Email (login)", "Password", "Role", "BU access", "Active", "Notes"];
+const UC = { name: "A", login: "B", pw: "C", role: "D", bu: "E", active: "F", notes: "G" };
+const ROLES = ["Admin", "Editor", "Viewer"], PW_MIN = 4;
+const ROLE_INFO = { Admin: "Sees and edits everything; Settings and Users", Editor: "Sees and edits the projects of their BU access; can save", Viewer: "Sees the projects of their BU access; read only" };
+let ACC = null;   // signed-in {r, login, name, role, bu:[...] | null}
+
+const hasUsers = () => !!(S.sheets && S.sheets[USERS_SHEET] && S.sheets[USERS_SHEET].doc);
+function userRows() { if (!hasUsers()) return []; const out = []; for (const r of S.sheets[USERS_SHEET].rows.keys()) if (r > 1 && String(gv(USERS_SHEET, UC.login, r) || "").trim()) out.push(r); return out.sort((a, b) => a - b); }
+const buParse = v => { const a = String(v || "").split(/[,;\n]+/).map(x => x.trim()).filter(Boolean); return !a.length || a.some(x => /^(all|\*)$/i.test(x)) ? null : a; };
+const uGet = r => { const role0 = String(gv(USERS_SHEET, UC.role, r) || "").trim(); const role = ROLES.find(x => x.toLowerCase() === role0.toLowerCase()) || "Viewer";
+  return { r, name: String(gv(USERS_SHEET, UC.name, r) || ""), login: String(gv(USERS_SHEET, UC.login, r) || "").trim(), role, pw: String(gv(USERS_SHEET, UC.pw, r) ?? ""), buTxt: String(gv(USERS_SHEET, UC.bu, r) || ""), bu: buParse(gv(USERS_SHEET, UC.bu, r)),
+    active: !/^(n|no|false|0|inactive)$/i.test(String(gv(USERS_SHEET, UC.active, r) ?? "Y").trim()), notes: String(gv(USERS_SHEET, UC.notes, r) || "") }; };
+const allUsers = () => userRows().map(uGet);
+const accessOn = () => allUsers().some(u => u.active && u.role === "Admin");
+const role = () => !accessOn() ? "Admin" : ACC ? ACC.role : "Viewer";
+const canEdit = () => role() !== "Viewer";
+const isAdmin = () => role() === "Admin";
+
+/* ---- password: PBKDF2-SHA256 hash, or plain text typed in Excel ---- */
+const b64 = u8 => btoa(String.fromCharCode(...u8)), unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const isHashed = s => /^pbkdf2\$\d+\$/.test(String(s || ""));
+async function pwHash(pw, saltB64, iter = 120000) {
+  const salt = saltB64 ? unb64(saltB64) : crypto.getRandomValues(new Uint8Array(16));
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveBits"]);
+  const bits = new Uint8Array(await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt, iterations: iter }, key, 256));
+  return `pbkdf2$${iter}$${b64(salt)}$${b64(bits)}`;
+}
+async function pwCheck(pw, stored) { stored = String(stored ?? ""); if (stored === "") return true; if (!isHashed(stored)) return pw === stored; const p = stored.split("$"); return (await pwHash(pw, p[2], +p[1])) === stored; }
+
+/* ---- BU scope: what this user sees and may edit ---- */
+function scope() { return accessOn() && ACC && ACC.role !== "Admin" && ACC.bu ? ACC.bu.map(x => x.toLowerCase()) : null; }
+function projInScope(r, sc) { sc = sc || scope(); if (!sc) return true; const bu = String(gv("Projects", FP.bu, r) || "").toLowerCase(), cf = String(gv("Projects", FP.cf, r) || "").toLowerCase();
+  if (!bu && !cf) return true; /* a new, not yet classified project */ return sc.includes(bu) || sc.includes(cf); }
+let SC_CACHE = { k: "" };
+const _rowsOf0 = rowsOf;
+function scopeSets() { const sc = scope(); const k = (ACC ? ACC.login + ACC.bu : "") + "|" + S.changes.length + "|" + S.fileName; if (SC_CACHE.k === k) return SC_CACHE;
+  const pr = _rowsOf0("Projects").filter(r => projInScope(r, sc)); const pids = new Set(pr.map(pId)); const bids = new Set(_rowsOf0("Benefits").filter(r => pids.has(gv("Benefits", FB.pid, r))).map(r => gv("Benefits", FB.id, r)));
+  return SC_CACHE = { k, pr: new Set(pr), pids, bids }; }
+rowsOf = function (sheet) {
+  const a = _rowsOf0(sheet); if (!scope()) return a; const X = scopeSets();
+  if (sheet === "Projects") return a.filter(r => X.pr.has(r));
+  const pc = { Activities: FA.pid, Benefits: FB.pid, RAIDD: FD.pid, Realisation: FR.pid }[sheet];
+  if (pc) return a.filter(r => { const p = gv(sheet, pc, r); return !p || X.pids.has(p) || (sheet === "Realisation" && X.bids.has(gv(sheet, FR.bid, r))); });
+  if (sheet === "Benefit_Plan") return a.filter(r => { const b = gv(sheet, "B", r); return !b || X.bids.has(b); });
+  return a;
+};
+
+/* ---- writes that bypass the guard (own password, first set-up) ---- */
+let ACC_BYPASS = false;
+function uSet(r, col, v) { ACC_BYPASS = true; try { setCell(USERS_SHEET, col, r, v); } finally { ACC_BYPASS = false; } }
+async function ensureUsersSheet() {
+  if (hasUsers()) return; ACC_BYPASS = true;
+  try { await ensureSheet(USERS_SHEET, '<col min="1" max="1" width="24" customWidth="1"/><col min="2" max="2" width="34" customWidth="1"/><col min="3" max="3" width="22" customWidth="1"/><col min="4" max="4" width="10" customWidth="1"/><col min="5" max="5" width="28" customWidth="1"/><col min="6" max="6" width="8" customWidth="1"/><col min="7" max="7" width="40" customWidth="1"/>', U_HEAD, U_COLS); }
+  finally { ACC_BYPASS = false; }
+}
+function uFreeRow() { const rs = userRows(); let r = 2; while (rs.includes(r)) r++; return r; }
+
+/* ---- the guard: every cell write goes through setCell ---- */
+function _projRow(id) { for (const r of _rowsOf0("Projects")) if (pId(r) === id) return r; return null; }
+function accessGuard(sheet, col, row, val) {
+  if (ACC_BYPASS || typeof LOG_SHEET !== "undefined" && sheet === LOG_SHEET) return;
+  if (!accessOn()) return;
+  if (!ACC) throw new Error("Sign in first");
+  if (sheet === USERS_SHEET && ACC.role !== "Admin") throw new Error("Only an Admin can change users");
+  if (ACC.role === "Viewer") { toast("View only — ask an Admin for edit access", 4000); throw new Error("View only"); }
+  if ((sheet === "Master_Data" || sheet === "Lists") && ACC.role !== "Admin" && view === "Settings") throw new Error("Only an Admin can change Settings");
+  const sc = scope(); if (!sc) return;
+  const deny = () => { toast("Outside your BU access — ask an Admin", 4000); throw new Error("Outside your BU access"); };
+  if (sheet === "Projects") { if (!projInScope(row, sc)) deny();
+    if ((col === FP.bu || col === FP.cf) && val) { const other = String(gv("Projects", col === FP.bu ? FP.cf : FP.bu, row) || "").toLowerCase(); if (!sc.includes(String(val).toLowerCase()) && !sc.includes(other)) deny(); } return; }
+  const pc = { Activities: FA.pid, Benefits: FB.pid, RAIDD: FD.pid, Realisation: FR.pid }[sheet];
+  if (pc) { const pid = col === pc && val ? val : gv(sheet, pc, row); if (pid) { const pr = _projRow(pid); if (pr && !projInScope(pr, sc)) deny(); } }
+}
+
+/* ---- session / remember me ---- */
+const SESS_KEY = "sga_acc";
+function sessSave(keep) { const v = JSON.stringify({ login: ACC.login, until: keep ? Date.now() + 30 * 864e5 : 0 }); try { sessionStorage.setItem(SESS_KEY, v); if (keep) localStorage.setItem(SESS_KEY, v); else localStorage.removeItem(SESS_KEY); localStorage.setItem("sga_lastlogin", ACC.login); } catch (e) { } }
+function sessGet() { try { const v = JSON.parse(sessionStorage.getItem(SESS_KEY) || localStorage.getItem(SESS_KEY) || "null"); if (v && v.until && v.until < Date.now()) { localStorage.removeItem(SESS_KEY); return null; } return v; } catch (e) { return null; } }
+function sessClear() { try { sessionStorage.removeItem(SESS_KEY); localStorage.removeItem(SESS_KEY); } catch (e) { } }
+function signInAs(u, keep) { ACC = { r: u.r, login: u.login, name: u.name || u.login, role: u.role, bu: u.role === "Admin" ? null : u.bu }; SC_CACHE = { k: "" }; sessSave(keep); paintAcc(); }
+function signOut() { ACC = null; sessClear(); paintAcc(); accessGate(true).then(ok => { if (ok && view) render(); }); }
+
+/* ---- after a workbook is opened: who are you? ---- */
+function graphAccount() { try { if (typeof G_PCA !== "undefined" && G_PCA) return G_PCA.getActiveAccount() || G_PCA.getAllAccounts()[0] || null; } catch (e) { } return null; }
+async function accessGate(force) {
+  paintAcc(); if (!accessOn()) { ACC = null; paintAcc(); return true; }
+  const users = allUsers().filter(u => u.active); const find = l => users.find(u => u.login.toLowerCase() === String(l || "").toLowerCase());
+  if (!force) {
+    const s = sessGet(); const u = s && find(s.login); if (u) { signInAs(u, !!s.until); return true; }
+    const g = graphAccount(); const gu = g && (find(g.username) || find(g.name)); if (gu) { signInAs(gu, false); toast(`Signed in as ${gu.name || gu.login} (Microsoft 365)`, 3000); return true; }
+  }
+  return await loginPage();
+}
+/* the sign-in page: a real <form> so Edge / Chrome offer to save the password and fill it in next time */
+function loginPage(msg) {
+  return new Promise(res => {
+    let pg = document.getElementById("loginPage"); if (pg) pg.remove();
+    pg = document.createElement("div"); pg.id = "loginPage"; pg.className = "loginpage"; pg.setAttribute("role", "dialog"); pg.setAttribute("aria-modal", "true"); pg.setAttribute("aria-labelledby", "lpH");
+    let last = ""; try { last = localStorage.getItem("sga_lastlogin") || ""; } catch (e) { }
+    const ms = typeof gReady === "function" && gReady();
+    pg.innerHTML = `<form class="lpcard" id="lpForm" autocomplete="on" novalidate>
+      <div class="lpbrand"><span class="lplogo" aria-hidden="true">SG&amp;A</span><div><h1 id="lpH">Tracker Desk</h1><p>${esc(S.fileName || "")}</p></div></div>
+      ${msg ? `<div class="lperr" role="alert">${esc(msg)}</div>` : ""}
+      <label class="lpf"><span>Email</span><input id="lpUser" name="username" type="email" autocomplete="username" required value="${esc(last)}" placeholder="name@thaiunion.com"></label>
+      <label class="lpf"><span>Password</span><input id="lpPw" name="password" type="password" autocomplete="current-password" placeholder="Leave blank if you have none"></label>
+      <label class="lprem"><input type="checkbox" id="lpKeep" checked> Remember me on this computer</label>
+      <button type="submit" class="btn primary lpgo">Sign in</button>
+      ${ms ? `<button type="button" class="btn lpms" id="lpMs">Sign in with Microsoft</button>` : ""}
+      <p class="lphint">Remember me: you stay signed in here for 30 days and your browser can save the password. No access yet, or forgot the password? Ask an Admin — they add people in Settings → 👤 Users.</p>
+      <button type="button" class="lpclose" id="lpClose">Close workbook</button></form>`;
+    document.body.appendChild(pg);
+    const f = pg.querySelector("#lpForm"), u = pg.querySelector("#lpUser"), p = pg.querySelector("#lpPw");
+    setTimeout(() => (u.value ? p : u).focus(), 30);
+    const done = ok => { pg.remove(); res(ok); };
+    f.onsubmit = async e => { e.preventDefault(); const users = allUsers().filter(x => x.active); const x = users.find(y => y.login.toLowerCase() === u.value.trim().toLowerCase());
+      if (!x || !(await pwCheck(p.value, x.pw))) { pg.remove(); res(await loginPage(x && !p.value ? "Password needed for this account" : "Wrong email or password")); return; }
+      signInAs(x, pg.querySelector("#lpKeep").checked); toast(`Welcome, ${x.name || x.login}${x.role !== "Admin" && x.bu ? " · " + x.bu.join(", ") : ""}`, 2500); done(true); };
+    pg.querySelector("#lpClose").onclick = () => { done(false); closeWorkbook(); };
+    const m = pg.querySelector("#lpMs"); if (m) m.onclick = async () => { try { await gToken(true); const g = graphAccount(); const x = g && allUsers().filter(y => y.active).find(y => [g.username, g.name].some(v => v && v.toLowerCase() === y.login.toLowerCase()));
+      if (x) { signInAs(x, pg.querySelector("#lpKeep").checked); done(true); } else { pg.remove(); res(await loginPage(`${g ? g.username : "That account"} is not in the user list`)); } } catch (err) { pg.remove(); res(await loginPage("Microsoft sign-in failed: " + err.message)); } };
+  });
+}
+function closeWorkbook() { ACC = null; Object.assign(S, { zip: null, sheets: {}, changes: [], handle: null, fileName: "" }); $("#fileName").textContent = "No workbook loaded"; $("#tabs").classList.add("hidden"); updateBadge(); paintAcc(); render(); }
+
+/* ---- header chip + role look ---- */
+function paintAcc() {
+  const r = role(); document.body.classList.toggle("role-viewer", r === "Viewer" && !!S.zip); document.body.classList.toggle("role-editor", r === "Editor");
+  let c = document.getElementById("accChip");
+  if (!c) { const f = document.getElementById("connChip"); if (!f) return; c = document.createElement("button"); c.type = "button"; c.id = "accChip"; c.className = "accchip"; f.after(c); c.onclick = accMenu; }
+  if (!S.zip || !accessOn()) { c.classList.add("hidden"); return; }
+  const sc = ACC && ACC.role !== "Admin" && ACC.bu ? ACC.bu.join(", ") : "all BUs";
+  c.classList.remove("hidden"); c.textContent = ACC ? `👤 ${ACC.name.split(/[ .@]/)[0]}${ACC.role === "Admin" ? " ★" : ACC.role === "Viewer" ? " 👁" : ""}` : "👤 Sign in";
+  c.title = ACC ? `${ACC.name} · ${ACC.role} · ${sc} — click for password / sign out` : "Sign in";
+  const sv = document.getElementById("btnSave"); if (sv) sv.classList.toggle("hidden", r === "Viewer");
+}
+async function accMenu() {
+  if (!ACC) { if (await loginPage() && view) render(); return; }
+  const sc = ACC.role !== "Admin" && ACC.bu ? ACC.bu.join(", ") : "All BUs";
+  const k = await choose(`${esc(ACC.name)} · ${ACC.role}`, `<p class="muted" style="margin-top:0">${esc(ACC.login)}<br>${esc(ROLE_INFO[ACC.role])}.<br>BU access: <b>${esc(sc)}</b></p>`, [["c", "Close"], ...(ACC.role === "Admin" ? [["users", "Manage users"]] : []), ["pw", "Change my password"], ["out", "Sign out", "primary"]]);
+  if (k === "out") signOut(); else if (k === "pw") changeMyPw(); else if (k === "users") { view = "Settings"; UI.stab = "users"; render(); }
+}
+async function changeMyPw() {
+  const k = await choose("Change my password", `<label class="field"><span>Current password</span><input id="cpOld" type="password" autocomplete="current-password"></label><label class="field"><span>New password (min. ${PW_MIN} characters)</span><input id="cpNew" type="password" autocomplete="new-password"></label><label class="field"><span>Repeat new password</span><input id="cpNew2" type="password" autocomplete="new-password"></label>`, [["c", "Cancel"], ["ok", "Change", "primary"]]);
+  if (k !== "ok") return; const g = id => (document.getElementById(id) || {}).value || ""; const o = g("cpOld"), n = g("cpNew"), n2 = g("cpNew2"); const u = uGet(ACC.r);
+  if (!(await pwCheck(o, u.pw))) { toast("Current password is wrong", 5000); return; }
+  if (n.length < PW_MIN || n !== n2) { toast(n !== n2 ? "The new passwords don't match" : `Use at least ${PW_MIN} characters`, 5000); return; }
+  uSet(ACC.r, UC.pw, await pwHash(n)); toast("Password changed — click Save to Excel to keep it", 6000); if (view) render();
+}
+
+/* ---- Settings → 👤 Users (Admin only) ---- */
+function buChoices() { const a = [...(hasMD() ? mdList("L_BU") : listFromName("L_BU")), ...(hasMD() ? mdList("L_CF") : listFromName("L_CF"))]; _rowsOf0("Projects").forEach(r => { a.push(gv("Projects", FP.bu, r), gv("Projects", FP.cf, r)); }); return uniqOrder(a.map(x => String(x || "").trim()).filter(Boolean)); }
+function vUsers() {
+  if (!accessOn()) return `<div class="card pad stcard" style="max-width:900px"><h2 style="margin-top:0">👤 Users &amp; sign-in</h2>
+    <div class="note" style="margin:0 0 12px">Sign-in is <b>off</b> — anyone who opens this workbook in the Desk sees and edits everything.</div>
+    <p>Turn it on by creating the first <b>Admin</b> (you). After that only a signed-in Admin can add people here, with a <b>role</b> (Admin / Editor / Viewer) and <b>BU access</b> (e.g. Finance, Procurement) — they only see and edit the projects of those BUs. The list is the <b>Users</b> sheet of the workbook, so it applies to everyone.</p>
+    <div class="fgrid"><label class="field"><span>Your name</span><input id="uaName" value="${esc(curUser())}"></label><label class="field"><span>Email (login)</span><input id="uaLogin" type="email" placeholder="name@thaiunion.com"></label>
+    <label class="field"><span>Password (min. ${PW_MIN})</span><input id="uaPw" type="password" autocomplete="new-password"></label><label class="field"><span>Repeat password</span><input id="uaPw2" type="password" autocomplete="new-password"></label></div>
+    <p><button class="btn primary" id="uaOn">Turn on sign-in</button></p>
+    <p class="muted" style="font-size:12px">Sign-in controls what the Desk allows. To stop people editing the file in Excel itself, set the SharePoint folder permissions (read vs edit).</p></div>`;
+  const us = allUsers(); const last = {};
+  if (typeof logRows === "function") for (const r of logRows()) { const w = String(gv(LOG_SHEET, "B", r) || ""), t = String(gv(LOG_SHEET, "A", r) || ""); if (!last[w] || t > last[w]) last[w] = t; }
+  const pend = S.changes.some(c => c.sheet === USERS_SHEET); const plain = us.filter(u => u.pw && !isHashed(u.pw)).length;
+  return `<div class="card pad stcard"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h2 style="margin:0">👤 Users &amp; sign-in</h2><span class="muted">${us.filter(u => u.active).length} active · sign-in is on · only Admins see this page</span><span style="flex:1"></span>${plain ? `<button class="btn small" id="uSecure" title="Passwords typed into the Excel sheet are plain text — replace them with hashes">🔒 Secure ${plain} password${plain > 1 ? "s" : ""}</button>` : ""}<button class="btn small new" id="uAdd">+ Add user</button></div>
+    ${pend ? `<div class="note" style="margin:10px 0 0">User changes are not saved yet — click <b>Save to Excel</b> so they apply for everyone.</div>` : ""}
+    <div class="tablewrap" style="margin-top:10px"><table class="data sttab"><thead><tr><th>Name</th><th>Email (login)</th><th>Password</th><th>Role</th><th>BU access <span class="muted" style="font-weight:400">(blank = all)</span></th><th>Active</th><th>Last change saved</th><th>Notes</th><th></th></tr></thead><tbody>
+    ${us.map(u => `<tr${u.active ? "" : ' class="muted"'}><td><input data-uf="${UC.name}" data-ur="${u.r}" value="${esc(u.name)}" style="width:140px" aria-label="Name"></td><td><input data-uf="${UC.login}" data-ur="${u.r}" value="${esc(u.login)}" style="width:230px" aria-label="Email"></td>
+      <td style="white-space:nowrap">${!u.pw ? `<span class="muted">none — email only</span>` : isHashed(u.pw) ? "set" : `<span style="color:#B54708">plain text</span>`} <button class="btn small" data-upw="${u.r}">${u.pw ? "Reset" : "Set"}</button></td>
+      <td><select data-uf="${UC.role}" data-ur="${u.r}" aria-label="Role">${ROLES.map(x => `<option ${x === u.role ? "selected" : ""}>${x}</option>`).join("")}</select></td>
+      <td>${u.role === "Admin" ? `<span class="muted">All (Admin)</span>` : `<input data-uf="${UC.bu}" data-ur="${u.r}" list="buList" value="${esc(u.buTxt)}" placeholder="All" style="width:170px" aria-label="BU access">`}</td>
+      <td><input type="checkbox" data-uact="${u.r}" ${u.active ? "checked" : ""} aria-label="Active"></td>
+      <td class="muted" style="font-size:12px">${esc(last[u.name] || last[u.login] || "—")}</td><td><input data-uf="${UC.notes}" data-ur="${u.r}" value="${esc(u.notes)}" style="width:150px" aria-label="Notes"></td>
+      <td>${ACC && ACC.r === u.r ? '<span class="usedn">you</span>' : `<button class="btn small danger" data-udel="${u.r}">Delete</button>`}</td></tr>`).join("")}</tbody></table></div>
+    <datalist id="buList"><option value="All">${buChoices().map(x => `<option value="${esc(x)}">`).join("")}</datalist>
+    <div class="stgrid" style="margin-top:12px">${ROLES.map(r => `<div class="kp" style="display:block"><b>${r}</b><div class="muted" style="font-size:12px">${ROLE_INFO[r]}</div></div>`).join("")}</div>
+    <p class="muted" style="font-size:12px">BU access = BU or Corporate Function names, comma separated (e.g. <i>Finance, Procurement</i>). Changes apply after <b>Save to Excel</b> and go into the Activity log. The same table is the <b>Users</b> sheet in Excel (${U_HEAD.join(" · ")}); a password typed there in plain text works — 🔒 Secure turns it into a hash. At least one active Admin is always kept. To turn sign-in off, delete the other users, then <a href="#" id="uOff">turn sign-in off</a>.</p></div>`;
+}
+function bindUsers(m, re0) {
+  const re = () => { re0(); try { renderTabs(); } catch (e) { } };
+  const g = id => (m.querySelector("#" + id) || {}).value || "";
+  const on = m.querySelector("#uaOn"); if (on) on.onclick = async () => {
+    const name = g("uaName").trim(), login = g("uaLogin").trim(), pw = g("uaPw"), pw2 = g("uaPw2");
+    if (!name || !login) { toast("Fill in your name and email"); return; } if (pw.length < PW_MIN || pw !== pw2) { toast(pw !== pw2 ? "Passwords don't match" : `Use at least ${PW_MIN} characters`, 5000); return; }
+    await ensureUsersSheet(); const r = uFreeRow(); const h = await pwHash(pw);
+    uSet(r, UC.name, name); uSet(r, UC.login, login); uSet(r, UC.pw, h); uSet(r, UC.role, "Admin"); uSet(r, UC.bu, "All"); uSet(r, UC.active, "Y"); uSet(r, UC.notes, "First Admin");
+    signInAs(uGet(r), true); if (typeof setSavedUser === "function") setSavedUser(name); re(); toast("Sign-in is on — click Save to Excel so it applies to everyone", 7000);
+  };
+  const adminsLeft = (exceptR, roleOverride) => allUsers().filter(u => u.active && (u.r === exceptR ? roleOverride === "Admin" : u.role === "Admin")).length;
+  const set = (r, c, v) => { try { setCell(USERS_SHEET, c, r, v); return true; } catch (e) { toast(e.message); return false; } };
+  m.querySelectorAll("[data-uf]").forEach(el => el.onchange = () => { const r = +el.dataset.ur, c = el.dataset.uf; let v = el.value.trim();
+    if (c === UC.login && !v) { toast("Email can't be empty"); re(); return; }
+    if (c === UC.login && allUsers().some(u => u.r !== r && u.login.toLowerCase() === v.toLowerCase())) { toast("That email is already used"); re(); return; }
+    if (c === UC.role && adminsLeft(r, v) < 1) { toast("Keep at least one active Admin"); re(); return; }
+    set(r, c, v); if (ACC && ACC.r === r) { const u = uGet(r); ACC.name = u.name || u.login; ACC.role = u.role; ACC.login = u.login; ACC.bu = u.role === "Admin" ? null : u.bu; SC_CACHE = { k: "" }; paintAcc(); } re(); });
+  m.querySelectorAll("[data-uact]").forEach(el => el.onchange = () => { const r = +el.dataset.uact; if (!el.checked && (ACC && ACC.r === r)) { toast("You can't deactivate yourself"); re(); return; }
+    if (!el.checked && uGet(r).role === "Admin" && adminsLeft(r, "x") < 1) { toast("Keep at least one active Admin"); re(); return; }
+    set(r, UC.active, el.checked ? "Y" : "N"); re(); });
+  m.querySelectorAll("[data-upw]").forEach(b => b.onclick = async () => { const u = uGet(+b.dataset.upw);
+    const k = await choose((u.pw ? "Reset" : "Set") + " password — " + esc(u.name || u.login), `<label class="field"><span>New password (min. ${PW_MIN}) — tell the user; they can change it with 👤 → Change my password</span><input id="rpNew" type="text" value="${esc(Math.random().toString(36).slice(2, 6) + "-" + Math.random().toString(36).slice(2, 7))}"></label>`, [["c", "Cancel"], ...(u.pw ? [["clr", "Remove (email only)"]] : []), ["ok", "Set password", "primary"]]);
+    const v = (document.getElementById("rpNew") || {}).value || "";
+    if (k === "clr") { set(u.r, UC.pw, ""); re(); return; }
+    if (k !== "ok") return; if (v.length < PW_MIN) { toast(`Use at least ${PW_MIN} characters`); return; } set(u.r, UC.pw, await pwHash(v)); toast("Password set — Save to Excel to apply", 5000); re(); });
+  m.querySelectorAll("[data-udel]").forEach(b => b.onclick = async () => { const u = uGet(+b.dataset.udel);
+    if (u.role === "Admin" && u.active && adminsLeft(u.r, "x") < 1) { toast("Keep at least one active Admin"); return; }
+    if (await choose("Delete user?", `<p>Remove <b>${esc(u.name || u.login)}</b> (${u.role})? Their past changes stay in the Activity log.</p>`, [["c", "Cancel"], ["ok", "Delete", "danger"]]) !== "ok") return;
+    U_COLS.forEach(c => set(u.r, c, "")); re(); });
+  const sec = m.querySelector("#uSecure"); if (sec) sec.onclick = async () => { let n = 0; for (const u of allUsers()) if (u.pw && !isHashed(u.pw)) { if (set(u.r, UC.pw, await pwHash(u.pw))) n++; } toast(`${n} password(s) hashed — Save to Excel to apply`, 5000); re(); };
+  const add = m.querySelector("#uAdd"); if (add) add.onclick = async () => {
+    const k = await choose("Add user", `<div class="fgrid"><label class="field"><span>Name</span><input id="uaName"></label><label class="field"><span>Email (login)</span><input id="uaLogin" type="email" placeholder="name@thaiunion.com"></label>
+      <label class="field"><span>Role</span><select id="uaRole">${ROLES.map(r => `<option ${r === "Editor" ? "selected" : ""}>${r}</option>`).join("")}</select></label>
+      <label class="field"><span>BU access (comma separated · blank = all)</span><input id="uaBu" list="buList2" placeholder="e.g. Finance, Procurement"><datalist id="buList2"><option value="All">${buChoices().map(x => `<option value="${esc(x)}">`).join("")}</datalist></label>
+      <label class="field"><span>Password (min. ${PW_MIN}) — blank = signs in with the email only</span><input id="uaPw" type="text" value=""></label>
+      <label class="field"><span>Notes</span><input id="uaNotes"></label></div>`, [["c", "Cancel"], ["ok", "Add", "primary"]]);
+    if (k !== "ok") return; const v = id => ((document.getElementById(id) || {}).value || "").trim();
+    const name = v("uaName"), login = v("uaLogin"), rl = v("uaRole"), pw = v("uaPw"), bu = v("uaBu");
+    if (!login) { toast("Email is needed"); return; } if (allUsers().some(u => u.login.toLowerCase() === login.toLowerCase())) { toast("That email is already used"); return; }
+    if (pw && pw.length < PW_MIN) { toast(`Use at least ${PW_MIN} characters`); return; }
+    const r = uFreeRow(); set(r, UC.name, name || login); set(r, UC.login, login); if (pw) set(r, UC.pw, await pwHash(pw)); set(r, UC.role, rl); set(r, UC.bu, rl === "Admin" ? "All" : (bu || "All")); set(r, UC.active, "Y"); if (v("uaNotes")) set(r, UC.notes, v("uaNotes"));
+    re(); toast(`${name || login} added as ${rl}${rl !== "Admin" && bu ? " · " + bu : ""} — Save to Excel to apply`, 7000); };
+  const off = m.querySelector("#uOff"); if (off) off.onclick = async e => { e.preventDefault();
+    if (allUsers().length > 1) { toast("Delete the other users first", 5000); return; }
+    if (await choose("Turn sign-in off?", `<p>Anyone who opens the workbook in the Desk will see and edit everything.</p>`, [["c", "Cancel"], ["ok", "Turn off", "danger"]]) !== "ok") return;
+    for (const u of allUsers()) U_COLS.forEach(c => set(u.r, c, "")); ACC = null; sessClear(); paintAcc(); re(); toast("Sign-in off after you save"); };
+}
+document.addEventListener("input", e => { if (e.target && /^(uaName|uaLogin|uaNotes|uaBu|uaPw|rpNew)$/.test(e.target.id)) e.target.setAttribute("value", e.target.value); });
 
 /* =====================================================================================
    SYNC FROM THE OLD-FORMAT TRACKER (Project 2T Club Update)  →  this workbook (database)
@@ -3046,7 +3311,7 @@ const E2EF="E2E_Flows",E2EM="E2E_Map",EF={id:"B",name:"C",area:"D",ver:"E",owner
 const EM={fid:"B",fname:"C",ver:"D",no:"E",lane:"F",sid:"G",step:"H",chg:"I",repl:"J",pid:"K",cp:"R",key:"S",hrs:"T",saved:"U",cost:"V"},EM_FIRST=6,EM_LAST=1505,VERS=["AS-IS","TO-BE"];
 UI.e2e=UI.e2e||{flow:null,ver:"TO-BE",all:false,q:"",chip:"count",tags:true,link:null,focus:null,full:true};
 const hasE2E=()=>!!(S.sheets[E2EF]&&S.sheets[E2EF].vals&&S.sheets[E2EM]&&S.sheets[E2EM].vals);
-function eSet(sh,c,r,v){if(String(gv(sh,c,r))===String(v??""))return;setCell(sh,c,r,v)}
+function eSet(sh,c,r,v){if(String(gv(sh,c,r))===String(v??""))return;if(sh===E2EM&&typeof canEdit==="function"&&!canEdit())return;setCell(sh,c,r,v)}
 let E2E_CACHE=null;
 function e2eFlows(){if(E2E_CACHE)return E2E_CACHE;const out=[];if(!hasE2E())return out;const by={};
   for(let r=EF_FIRST;r<=EF_LAST;r++){const id=String(gv(E2EF,EF.id,r)||"");if(!id)continue;const ver=String(gv(E2EF,EF.ver,r)||"AS-IS").toUpperCase().includes("TO")?"TO-BE":"AS-IS";

@@ -6,8 +6,8 @@ const TABS=["Dashboard","Gantt","Projects","Activities","Benefits","Realisation"
 function renderTabs(){const b=t=>`<button class="${t===view?"on":""}" data-t="${t}">${t==="Changes"?`Review changes (${S.changes.length?e2eNetCount(netChanges()):0})`:t==="Quick"?"⚡ Quick update":t==="E2E"?"⇄ E2E flows":t}</button>`;
   $("#tabs").innerHTML=`<div class="tgrp rep"><span class="glab">REPORTS</span>${["Dashboard","Gantt"].map(b).join("")}</div>
    <div class="tgrp inp"><span class="glab">UPDATE DATA</span>${["Projects","E2E"].map(b).join("")}</div>
-   <div class="tgrp inp"><span class="glab">IMPORT</span><button class="${view==="Sync"?"on":""}" data-t="Sync">⇄ Sync old file${SY.plan?" ●":""}</button></div>
-   <div class="tgrp sav"><span class="glab">SAVE</span>${b("Changes")}</div>`;requestAnimationFrame(stickVars);
+   ${typeof canEdit==="function"&&!canEdit()?`<div class="tgrp rep"><span class="glab">VIEW ONLY</span><span class="muted" style="font-size:12px;padding:0 8px">Ask an Admin for edit access</span></div>`:`<div class="tgrp inp"><span class="glab">IMPORT</span><button class="${view==="Sync"?"on":""}" data-t="Sync">⇄ Sync old file${SY.plan?" ●":""}</button></div>
+   <div class="tgrp sav"><span class="glab">SAVE</span>${b("Changes")}</div>`}`;requestAnimationFrame(stickVars);
   $("#tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{if(b.dataset.t==="Projects"&&view==="Projects"){UI.proj=null}const ch=view!==b.dataset.t;if(b.dataset.t==="E2E"){if(view==="E2E"&&UI.e2e.home===false){e2eFlush()}UI.e2e.home=true}view=b.dataset.t;render();if(ch&&view!=="E2E")window.scrollTo(0,0)})}
 function render(){
   if(!S.zip||view!=="E2E")e2eHide();

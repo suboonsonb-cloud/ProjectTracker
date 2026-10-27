@@ -69,6 +69,7 @@ async function saveLocationCheck(){let skip=false;try{skip=localStorage.getItem(
   try{if(document.getElementById("locNo")?.checked)localStorage.setItem("sga_saveloc_ok","1")}catch(e){}
   if(k==="ok"){S._locOk=true;return true}if(k==="copy"){return "copy"}return false}
 async function save(asCopy){
+  if(!asCopy&&typeof canEdit==="function"&&!canEdit()){toast("View only — you can't save changes",4000);return}
   if(hasE2E()){await e2eFlush();clearTimeout(E2E_MAPQ);e2eRebuildMap();updateBadge()}/* commit text being typed in the flow editor + current E2E_Map */
   if(!asCopy&&!S.changes.length){toast("Nothing to save");return}
   if(!asCopy)await ensureUser();
@@ -147,6 +148,7 @@ $("#filePick").addEventListener("change",async e=>{const f=e.target.files[0];if(
 async function ingest(buf,name,handle,lastMod){
   if(S.changes.length&&!confirm("You have unsaved changes. Discard them and open another file?"))return;
   try{toast("Reading workbook…",20000);await loadWorkbook(buf,name,handle,lastMod);$("#fileName").textContent=name+(handle?" · saves in place":" · saves as download");
+    if(typeof accessGate==="function"){toast("",1);if(!(await accessGate()))return}
     $("#tabs").classList.remove("hidden");updateBadge();toast("Workbook loaded",1500);if(handle&&typeof rememberWorkbook==="function")rememberWorkbook(handle);if(typeof paintConn==="function")paintConn();view=view||"Dashboard";render();tickToday(false)}
   catch(e){console.error(e);toast("Could not open: "+e.message,7000)}
 }

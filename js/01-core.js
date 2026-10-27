@@ -101,7 +101,7 @@ async function loadWorkbook(buf,name,handle,lastMod){
   }
   const need=["Projects","Activities","Benefits","Realisation","RAIDD","Lists","Plan_Calc"];
   for(const n of need){if(!sheets[n])throw new Error(`Sheet "${n}" not found — is this the SG&A tracker workbook?`)}
-  for(const n of [...need,...["Master_Data","Benefit_Plan","Migration_Log","E2E_Flows","E2E_Map","Activity_Log"].filter(n=>sheets[n])]){
+  for(const n of [...need,...["Master_Data","Benefit_Plan","Migration_Log","E2E_Flows","E2E_Map","Activity_Log","Users"].filter(n=>sheets[n])]){
     const doc=parser.parseFromString(await entryText(by[sheets[n].path]),"application/xml");
     const sd=doc.getElementsByTagNameNS(NS,"sheetData")[0];const rows=new Map(),cells=new Map(),vals=new Map();
     for(const row of sd.getElementsByTagNameNS(NS,"row")){
@@ -113,7 +113,7 @@ async function loadWorkbook(buf,name,handle,lastMod){
   const names={};
   for(const dn of wbDoc.getElementsByTagNameNS(NS,"definedName")){const nm=dn.getAttribute("name");if(!dn.getAttribute("localSheetId"))names[nm]=dn.textContent}
   let coreMod=0;if(by["docProps/core.xml"]){const m=(await entryText(by["docProps/core.xml"])).match(/<dcterms:modified[^>]*>([^<]+)</);if(m)coreMod=Date.parse(m[1])||0}
-  Object.assign(S,{zip:list,byName:by,sst,sheets,names,dirty:new Set(),changes:[],handle,fileName:name,lastMod,newRows:{},wbDoc,_coreMod:coreMod,extraParts:{},_logFor:null});try{E2E_CACHE=null}catch(e){}
+  Object.assign(S,{zip:list,byName:by,sst,sheets,names,dirty:new Set(),changes:[],handle,fileName:name,lastMod,newRows:{},wbDoc,_coreMod:coreMod,extraParts:{},_logFor:null,_wbParts:null});try{ACC=null}catch(e){}try{E2E_CACHE=null}catch(e){}
 }
 function cellValue(c,sst){
   const t=c.getAttribute("t");
@@ -127,6 +127,7 @@ function cellValue(c,sst){
 }
 function gv(sheet,col,row){const v=S.sheets[sheet].vals.get(col+row);return v===undefined?"":v}
 function setCell(sheet,col,row,val){
+  if(typeof accessGuard==="function")accessGuard(sheet,col,row,val);
   const sh=S.sheets[sheet];const ref=col+row;const doc=sh.doc;
   let rowEl=sh.rows.get(row);
   if(!rowEl){rowEl=doc.createElementNS(NS,"row");rowEl.setAttribute("r",row);

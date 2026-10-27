@@ -11,7 +11,7 @@ const E2EF="E2E_Flows",E2EM="E2E_Map",EF={id:"B",name:"C",area:"D",ver:"E",owner
 const EM={fid:"B",fname:"C",ver:"D",no:"E",lane:"F",sid:"G",step:"H",chg:"I",repl:"J",pid:"K",cp:"R",key:"S",hrs:"T",saved:"U",cost:"V"},EM_FIRST=6,EM_LAST=1505,VERS=["AS-IS","TO-BE"];
 UI.e2e=UI.e2e||{flow:null,ver:"TO-BE",all:false,q:"",chip:"count",tags:true,link:null,focus:null,full:true};
 const hasE2E=()=>!!(S.sheets[E2EF]&&S.sheets[E2EF].vals&&S.sheets[E2EM]&&S.sheets[E2EM].vals);
-function eSet(sh,c,r,v){if(String(gv(sh,c,r))===String(v??""))return;setCell(sh,c,r,v)}
+function eSet(sh,c,r,v){if(String(gv(sh,c,r))===String(v??""))return;if(sh===E2EM&&typeof canEdit==="function"&&!canEdit())return;setCell(sh,c,r,v)}
 let E2E_CACHE=null;
 function e2eFlows(){if(E2E_CACHE)return E2E_CACHE;const out=[];if(!hasE2E())return out;const by={};
   for(let r=EF_FIRST;r<=EF_LAST;r++){const id=String(gv(E2EF,EF.id,r)||"");if(!id)continue;const ver=String(gv(E2EF,EF.ver,r)||"AS-IS").toUpperCase().includes("TO")?"TO-BE":"AS-IS";

@@ -85,9 +85,9 @@ document.addEventListener("change",e=>{const el=e.target;if(el.dataset&&el.datas
 function usedCount(col,v){return rowsOf("Projects").filter(r=>String(gv("Projects",col,r))===v).length}
 function setNamed(nm,v){const n=nameRef(nm);if(n)setCell(n.sh,n.col,n.r1,v)}
 function vSettings(m){
-  const tab=UI.stab||"lists";const y=window.scrollY;
+  let tab=UI.stab||(isAdmin()?"lists":"log");if(!isAdmin()&&!["log","warn"].includes(tab))tab="log";const y=window.scrollY;
   const head=`<div class="banner" style="background:#F3EEFC;border:1px solid #D9CCF5;color:#3B2A6B"><b>⚙ SETTINGS</b><span>Maintain the dropdown lists and the status / delay rules. Changes write to the <b>Master_Data</b> and <b>Lists</b> sheets when you click <b>Save to Excel</b>, and everything in this app recalculates straight away.</span></div>
-   <div class="toolbar"><span class="seg">${[["lists","Master lists"],["rules","Status & delay rules"],["today","Excel ‘today’ & time zone"],["log","🕘 Activity log"],["warn","⚠ Warnings"]].map(([k,t])=>`<button data-st="${k}" class="${tab===k?"on":""}">${t}</button>`).join("")}</span></div>`;
+   <div class="toolbar"><span class="seg">${(isAdmin()?[["lists","Master lists"],["rules","Status & delay rules"],["today","Excel ‘today’ & time zone"],["users","👤 Users"],["log","🕘 Activity log"],["warn","⚠ Warnings"]]:[["log","🕘 Activity log"],["warn","⚠ Warnings"]]).map(([k,t])=>`<button data-st="${k}" class="${tab===k?"on":""}">${t}</button>`).join("")}</span></div>`;
   let body="";
   if(tab==="lists"){if(!hasMD()){body=`<div class="note">This workbook has no Master_Data sheet. Open the latest SGA_Reduction_Initiative_Tracker.xlsx.</div>`}else{
     const t=(title,sub,cols,rows,addId)=>`<div class="card pad stcard"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0">${title}</h2><span class="muted">${sub}</span><span style="flex:1"></span><input type="search" class="stq" data-q="${addId}" placeholder="Filter…" value="${esc((UI.stq||{})[addId]||"")}"><button class="btn small new" data-add="${addId}">+ Add</button></div>
@@ -130,6 +130,7 @@ function vSettings(m){
        Forecast column / Gantt hatching: in-progress task is <b>At risk of delay</b> when % done trails % of plan time elapsed by more than ${pt===""?15:Math.round(+pt*100)} points; a not-started task is at risk when an earlier stage is forecast to finish after its own plan end and after this task should start.</p></div></div>
       <div class="card pad stcard"><h2 style="margin-top:0">Standard stage weights</h2><p class="muted" style="margin-top:0">Used for project completion % (stage weighting) and the standard stage time windows (new task dates, “Add standard task per stage”).</p>
       <div class="stgrid"><div><h4>Waterfall</h4>${wt("L_WWF","L_StageWF")}</div><div><h4>Agile</h4>${wt("L_WAG","L_StageAG")}</div></div></div>`}
+  else if(tab==="users"){body=vUsers()}
   else if(tab==="log"){body=vActivity()}
   else if(tab==="warn"){body=vWarnings()}
   else{const tz=setting("S_TZ"),pc=setting("S_PCTZ"),ao=setting("S_AsOf");
@@ -140,7 +141,7 @@ function vSettings(m){
       <p class="muted" style="font-size:12px">This app uses the time zone chosen in the header (TODAY box). If an as-of date is set here, the app uses it too, so both show the same statuses.</p></div>`}
   m.innerHTML=head+body;window.scrollTo(0,y);
   m.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{UI.stab=b.dataset.st;if(b.dataset.st!=="rules")UI.rulesBase=null;vSettings(m)});
-  if(tab==="log"){bindActivity(m,()=>vSettings(m));return}if(tab==="warn"){bindWarnings(m,()=>vSettings(m));return}
+  if(tab==="users"){bindUsers(m,()=>vSettings(m));return}if(tab==="log"){bindActivity(m,()=>vSettings(m));return}if(tab==="warn"){bindWarnings(m,()=>vSettings(m));return}
   const re=()=>{liveCalc();renderTabs();vSettings(m)};
   m.querySelectorAll(".stq").forEach(el=>el.oninput=()=>{UI.stq=UI.stq||{};UI.stq[el.dataset.q]=el.value;const p=el.selectionStart;vSettings(m);const n=m.querySelector(`[data-q="${el.dataset.q}"]`);n.focus();n.setSelectionRange(p,p)});
   m.querySelectorAll("[data-md]").forEach(el=>el.onchange=()=>{const ref=el.dataset.md,c=ref.replace(/\d+/,""),r=+ref.replace(/[A-Z]+/,"");const ov=mg(c,r),nv=el.value.trim();if(nv===ov)return;
@@ -180,7 +181,7 @@ function vChanges(m){
   m.innerHTML=`<div class="banner" style="background:#EAF6EC;border:1px solid #BFE3C6;color:#1E5B23"><b>SAVE</b><span>Review what will be written into the Excel file, then save. Only the listed input cells change; formulas, charts and formatting are untouched.</span></div><div class="card pad"><h2>Unsaved changes (${tot})</h2>
   ${tot?`${fl.length||mapOnly?`<h3 style="margin:6px 0">Process flows (E2E)</h3><div class="tablewrap" style="margin-bottom:12px"><table class="data"><tr><th>Flow</th><th>Version</th><th>What changed</th></tr>${fl.map(x=>`<tr><td>${esc(x.name)}</td><td>${x.ver}</td><td>${esc(x.text)}</td></tr>`).join("")}${mapOnly?`<tr><td colspan="3">E2E_Map refreshed from the diagrams</td></tr>`:""}</table></div>`:""}${rows.length?`<h3 style="margin:6px 0">Cells</h3>`:""}<p class="muted">These changes will be written into the workbook when you click <b>Save to Excel</b>. Nothing else in the file is touched.</p>
   <div class="tablewrap" ${rows.length?"":'hidden'}><table class="data"><tr><th>Project</th><th>Sheet</th><th>Cell</th><th>Column</th><th>Old</th><th>New</th></tr>${rows.map((c,ix)=>{const kk=rpK(c);const hd=ix===0||kk!==rpK(rows[ix-1])?`<tr class="grph"><td colspan="6"><b>${esc(kk)}</b> <span class="muted">— ${rows.filter(x=>rpK(x)===kk).length} change(s)${rows.some(x=>rpK(x)===kk&&x.sheet==="Activities"&&x.ref.replace(/\d+/g,"")===FA.act)?" · progress spread across the project's tasks by stage weight":""}</span></td></tr>`:"";const col=(CFG[c.sheet]?CFG[c.sheet].cols:[]).find(x=>x.col===c.ref.replace(/\d+/,""));
-   const f=v=>{const x=col&&col.type==="date"?fmtDate(v):col&&col.type==="pct"?fmtPct(v):v;const t=String(x??"");return t.length>140?t.slice(0,140)+"… ("+t.length.toLocaleString()+" characters)":x};const first={old:c.orig};const rw=+c.ref.replace(/[A-Z]+/g,"");
+   const f=v=>{if(c.sheet==="Users"&&/^C\d/.test(c.ref))return v?"••••••":"";const x=col&&col.type==="date"?fmtDate(v):col&&col.type==="pct"?fmtPct(v):v;const t=String(x??"");return t.length>140?t.slice(0,140)+"… ("+t.length.toLocaleString()+" characters)":x};const first={old:c.orig};const rw=+c.ref.replace(/[A-Z]+/g,"");
    return hd+`<tr><td><span class="clip">${esc(rowProject(c.sheet,rw))}</span></td><td>${c.sheet}</td><td>${c.ref}</td><td>${esc(col?col.h:"")}</td><td class="muted">${esc(f(first.old))}</td><td><b>${esc(f(c.val))}</b></td></tr>`}).join("")}</table></div>
   <p style="margin-top:12px"><button class="btn primary" id="saveNow">Save to Excel</button> <button class="btn" id="discard">Discard all changes</button></p>`:`<p class="muted">No unsaved changes.</p>`}</div>`;
   if($("#saveNow"))$("#saveNow").onclick=()=>save(false);

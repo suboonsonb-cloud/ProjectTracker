@@ -11,7 +11,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 header.top{position:sticky;top:0;z-index:30;background:var(--navy);color:#fff;display:flex;align-items:center;gap:10px;padding:10px 16px;flex-wrap:wrap}
 header.top h1{font-size:16px;margin:0;font-weight:600;letter-spacing:.2px}
 header.top .file{font-size:12px;opacity:.85;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-header.top .spacer{flex:1}
+header.top .spacer{flex:1 1 0;min-width:0}
 .btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:8px;padding:7px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .btn:hover{border-color:#b9c2cf}
 .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
@@ -348,3 +348,17 @@ header.top #fileName{max-width:190px;overflow:hidden;text-overflow:ellipsis;whit
 .alfilters{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px;font-size:12.5px}.alfilters input[type=search]{min-width:220px}.alfilters label{display:inline-flex;gap:4px;align-items:center}
 .altab td{vertical-align:top}.altab .clip{display:inline-block;max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom}
 .alarea{font-size:11px;padding:1px 7px;border-radius:9px;background:#EEF2F7;color:#334155;white-space:nowrap}.alarea.a-Project{background:#E3EDF9;color:#1F4E79}.alarea.a-Task{background:#E7F5EA;color:#1E6B24}.alarea.a-RAIDD{background:#FDECEC;color:#9B1C1C}.alarea.a-Benefit,.alarea.a-Actuals{background:#FFF4DB;color:#7A4B00}.alarea.a-E2Eflow{background:#F1ECFD;color:#5B3DB5}
+.accchip{margin-left:6px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;border-radius:999px;padding:2px 10px;font-size:12px;cursor:pointer;white-space:nowrap}.accchip:hover{background:rgba(255,255,255,.22)}.accchip.hidden{display:none}
+body.role-viewer #main input:not([type=search]):not([type=checkbox]):not(.stq):not([id^=al]):not([id^=f_]):not(#q),body.role-viewer #main textarea{background:#F6F7F9;cursor:not-allowed}
+/* sign-in page */
+.loginpage{position:fixed;inset:0;z-index:300;display:grid;place-items:center;padding:16px;background:linear-gradient(135deg,#1F3864 0%,#2E75B6 100%)}
+.lpcard{width:min(400px,100%);background:#fff;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.25);padding:28px 26px 18px;display:flex;flex-direction:column;gap:12px}
+.lpbrand{display:flex;gap:12px;align-items:center;margin-bottom:4px}.lplogo{width:46px;height:46px;border-radius:10px;background:#1F3864;color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px}
+.lpbrand h1{margin:0;font-size:20px;color:#1F3864}.lpbrand p{margin:2px 0 0;font-size:12px;color:#5E6B7D;max-width:290px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lpf{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:#334155}.lpf input{font:inherit;font-weight:400;font-size:14px;padding:9px 11px;border:1px solid #CBD5E1;border-radius:8px}.lpf input:focus{outline:2px solid #2E75B6;outline-offset:0;border-color:#2E75B6}
+.lprem{display:flex;gap:8px;align-items:center;font-size:13px;color:#334155}.lpgo{padding:10px;font-size:15px}.lpms{padding:9px}
+.lperr{background:#FEF3F2;color:#B42318;border:1px solid #FECDCA;border-radius:8px;padding:8px 10px;font-size:13px}
+.lphint{font-size:11.5px;color:#5E6B7D;margin:2px 0 0}.lpclose{align-self:center;border:0;background:none;color:#5E6B7D;font-size:12px;text-decoration:underline;cursor:pointer}
+@media (max-width:1600px){#fileName{max-width:110px}.connchip,.accchip{padding:2px 8px;font-size:11.5px}}
+@media (max-width:1400px){#fileName{max-width:80px}}
+@media (max-width:1700px){.hl2{display:none}}

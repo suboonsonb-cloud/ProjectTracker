@@ -9,7 +9,7 @@ const LOG_HEAD = ["When", "Who", "Area", "Record", "Field", "Old value", "New va
 function graphUser() { try { if (typeof G_PCA !== "undefined" && G_PCA) { const a = G_PCA.getActiveAccount() || G_PCA.getAllAccounts()[0]; if (a) return a.name || a.username || ""; } } catch (e) { } return ""; }
 function savedUser() { try { return localStorage.getItem("sga_user") || ""; } catch (e) { return ""; } }
 function setSavedUser(v) { try { v ? localStorage.setItem("sga_user", v) : localStorage.removeItem("sga_user"); } catch (e) { } }
-function curUser() { return savedUser() || graphUser() || ""; }
+function curUser() { return (typeof ACC !== "undefined" && ACC && ACC.name) || savedUser() || graphUser() || ""; }
 async function ensureUser() {
   if (curUser()) return true;
   const k = await choose("Who is saving?", `<p>Your name goes into the <b>activity log</b> (Settings → Activity log) next to every change you save. Asked once on this computer.</p>
@@ -22,26 +22,35 @@ document.addEventListener("input", e => { if (e.target && e.target.id === "whoNa
 /* ---- the sheet ---- */
 const hasLog = () => !!(S.sheets && S.sheets[LOG_SHEET] && S.sheets[LOG_SHEET].doc);
 function logRows() { if (!hasLog()) return []; const out = []; for (const r of S.sheets[LOG_SHEET].rows.keys()) if (r > 1 && gv(LOG_SHEET, "A", r) !== "") out.push(r); return out.sort((a, b) => a - b); }
-async function ensureLogSheet() {
-  if (hasLog()) return true;
-  const enc = new TextEncoder(); const by = S.byName;
-  const ct = parser.parseFromString(await entryText(by["[Content_Types].xml"]), "application/xml");
-  const relsName = "xl/_rels/workbook.xml.rels"; const rels = parser.parseFromString(await entryText(by[relsName]), "application/xml");
+/* add a new worksheet to the open workbook (sheet XML + workbook.xml + rels + [Content_Types]) */
+async function ensureSheet(name, colsXml, head, cols) {
+  if (S.sheets[name] && S.sheets[name].doc) return S.sheets[name];
+  const enc = new TextEncoder(); const by = S.byName; S.extraParts = S.extraParts || {};
+  const relsName = "xl/_rels/workbook.xml.rels";
+  const parsed = S._wbParts || (S._wbParts = {
+    ct: parser.parseFromString(await entryText(by["[Content_Types].xml"]), "application/xml"),
+    rels: parser.parseFromString(await entryText(by[relsName]), "application/xml") });
+  const { ct, rels } = parsed;
   let n = 1; while (by["xl/worksheets/sheet" + n + ".xml"]) n++; const path = "xl/worksheets/sheet" + n + ".xml";
-  const relIds = [...rels.getElementsByTagName("Relationship")].map(r => r.getAttribute("Id")); let k = 1; while (relIds.includes("rIdLog" + k)) k++; const rid = "rIdLog" + k;
+  const relIds = [...rels.getElementsByTagName("Relationship")].map(r => r.getAttribute("Id")); let k = 1; while (relIds.includes("rIdX" + k)) k++; const rid = "rIdX" + k;
   const R = rels.createElementNS(rels.documentElement.namespaceURI, "Relationship");
   R.setAttribute("Id", rid); R.setAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet"); R.setAttribute("Target", "worksheets/sheet" + n + ".xml"); rels.documentElement.appendChild(R);
   const O = ct.createElementNS(ct.documentElement.namespaceURI, "Override"); O.setAttribute("PartName", "/" + path); O.setAttribute("ContentType", "application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"); ct.documentElement.appendChild(O);
   const shs = S.wbDoc.getElementsByTagNameNS(NS, "sheets")[0]; const ids = [...shs.getElementsByTagNameNS(NS, "sheet")].map(s => +s.getAttribute("sheetId") || 0);
-  const sh = S.wbDoc.createElementNS(NS, "sheet"); sh.setAttribute("name", LOG_SHEET); sh.setAttribute("sheetId", Math.max(0, ...ids) + 1); sh.setAttributeNS(RNS, "r:id", rid); shs.appendChild(sh);
-  const xml = `<worksheet xmlns="${NS}" xmlns:r="${RNS}"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols><col min="1" max="1" width="18" customWidth="1"/><col min="2" max="2" width="18" customWidth="1"/><col min="3" max="3" width="14" customWidth="1"/><col min="4" max="4" width="44" customWidth="1"/><col min="5" max="5" width="24" customWidth="1"/><col min="6" max="7" width="36" customWidth="1"/><col min="8" max="8" width="16" customWidth="1"/></cols><sheetData/><autoFilter ref="A1:H1"/></worksheet>`;
+  const sh = S.wbDoc.createElementNS(NS, "sheet"); sh.setAttribute("name", name); sh.setAttribute("sheetId", Math.max(0, ...ids) + 1); sh.setAttributeNS(RNS, "r:id", rid); shs.appendChild(sh);
+  const last = cols[cols.length - 1];
+  const xml = `<worksheet xmlns="${NS}" xmlns:r="${RNS}"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>${colsXml}</cols><sheetData/><autoFilter ref="A1:${last}1"/></worksheet>`;
   const doc = parser.parseFromString(xml, "application/xml"); const sd = doc.getElementsByTagNameNS(NS, "sheetData")[0];
   const ent = { name: path, method: 0, time: 0, date: 0x21, crc: 0, csize: 0, usize: 0, data: new Uint8Array(0) }; S.zip.push(ent); by[path] = ent;
-  S.sheets[LOG_SHEET] = { path, doc, sd, rows: new Map(), cells: new Map(), vals: new Map() };
-  S.extraParts = S.extraParts || {};
+  S.sheets[name] = { path, doc, sd, rows: new Map(), cells: new Map(), vals: new Map() };
   S.extraParts[relsName] = () => enc.encode('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n' + ser.serializeToString(rels).replace(/^<\?xml[^>]*>\s*/, ""));
   S.extraParts["[Content_Types].xml"] = () => enc.encode('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n' + ser.serializeToString(ct).replace(/^<\?xml[^>]*>\s*/, ""));
-  logWrite(1, LOG_HEAD);
+  const nn = S.changes.length; head.forEach((v, i) => setCell(name, cols[i], 1, v)); S.changes.length = nn; S.dirty.add(name);
+  return S.sheets[name];
+}
+async function ensureLogSheet() {
+  if (hasLog()) return true;
+  await ensureSheet(LOG_SHEET, '<col min="1" max="1" width="18" customWidth="1"/><col min="2" max="2" width="18" customWidth="1"/><col min="3" max="3" width="14" customWidth="1"/><col min="4" max="4" width="44" customWidth="1"/><col min="5" max="5" width="24" customWidth="1"/><col min="6" max="7" width="36" customWidth="1"/><col min="8" max="8" width="16" customWidth="1"/>', LOG_HEAD, LOG_COLS);
   return true;
 }
 function logWrite(r, vals) { const n = S.changes.length; vals.forEach((v, i) => setCell(LOG_SHEET, LOG_COLS[i], r, v)); S.changes.length = n; }   // the log itself is not a "change"
@@ -51,6 +60,8 @@ function logLines(all) {
   const out = []; const fmtv = (col, v) => { const x = col && col.type === "date" ? fmtDate(v) : col && col.type === "pct" ? fmtPct(v) : v; const t = String(x ?? ""); return t.length > 300 ? t.slice(0, 300) + "…" : t; };
   const area = { Projects: "Project", Activities: "Task", Benefits: "Benefit", RAIDD: "RAIDD", Realisation: "Actuals", Master_Data: "Settings", Lists: "Settings", Benefit_Plan: "Benefit plan", Migration_Log: "Sync" };
   for (const c of all) {
+    if (c.sheet === "Users") { const r = +c.ref.replace(/[A-Z]+/g, ""), cl = c.ref.replace(/\d+/g, ""); if (r === 1) continue; const pw = cl === UC.pw;
+      out.push(["Access", String(gv("Users", "B", r) || c.orig || "") + (gv("Users", "A", r) ? " · " + gv("Users", "A", r) : ""), (U_HEAD[U_COLS.indexOf(cl)] || cl) + (pw ? (c.val ? " (set / reset)" : " (cleared)") : ""), pw ? "" : String(c.orig ?? ""), pw ? "" : String(c.val ?? ""), "Users!" + c.ref]); continue; }
     if (c.sheet === LOG_SHEET || (typeof E2EF !== "undefined" && (c.sheet === E2EF || c.sheet === E2EM))) continue;
     const r = +c.ref.replace(/[A-Z]+/g, ""), colL = c.ref.replace(/\d+/g, "");
     const col = (CFG[c.sheet] ? CFG[c.sheet].cols : []).find(x => x.col === colL);
