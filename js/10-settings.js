@@ -85,9 +85,9 @@ document.addEventListener("change",e=>{const el=e.target;if(el.dataset&&el.datas
 function usedCount(col,v){return rowsOf("Projects").filter(r=>String(gv("Projects",col,r))===v).length}
 function setNamed(nm,v){const n=nameRef(nm);if(n)setCell(n.sh,n.col,n.r1,v)}
 function vSettings(m){
-  let tab=UI.stab||(isAdmin()?"lists":"log");if(!isAdmin()&&!["log","warn"].includes(tab))tab="log";const y=window.scrollY;
+  let tab=UI.stab||(isAdmin()?"lists":"log");if(!isAdmin()&&!["log","warn","disp"].includes(tab))tab="log";const y=window.scrollY;
   const head=`<div class="banner" style="background:#F3EEFC;border:1px solid #D9CCF5;color:#3B2A6B"><b>⚙ SETTINGS</b><span>Maintain the dropdown lists and the status / delay rules. Changes write to the <b>Master_Data</b> and <b>Lists</b> sheets when you click <b>Save to database</b>, and everything in this app recalculates straight away.</span></div>
-   <div class="toolbar"><span class="seg">${(isAdmin()?[["lists","Master lists"],["rules","Status & delay rules"],["today","Excel ‘today’ & time zone"],["users","👤 Users"],["log","🕘 Activity log"],["warn","⚠ Warnings"]]:[["log","🕘 Activity log"],["warn","⚠ Warnings"]]).map(([k,t])=>`<button data-st="${k}" class="${tab===k?"on":""}">${t}</button>`).join("")}</span></div>`;
+   <div class="toolbar"><span class="seg">${(isAdmin()?[["lists","Master lists"],["rules","Status & delay rules"],["today","Excel ‘today’ & time zone"],["users","👤 Users"],["log","🕘 Activity log"],["warn","⚠ Warnings"],["disp","▦ Display"]]:[["log","🕘 Activity log"],["warn","⚠ Warnings"],["disp","▦ Display"]]).map(([k,t])=>`<button data-st="${k}" class="${tab===k?"on":""}">${t}</button>`).join("")}</span></div>`;
   let body="";
   if(tab==="lists"){if(!hasMD()){body=`<div class="note">This workbook has no Master_Data sheet. Open the latest SGA_Reduction_Initiative_Tracker.xlsx.</div>`}else{
     const t=(title,sub,cols,rows,addId)=>`<div class="card pad stcard"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0">${title}</h2><span class="muted">${sub}</span><span style="flex:1"></span><input type="search" class="stq" data-q="${addId}" placeholder="Filter…" value="${esc((UI.stq||{})[addId]||"")}"><button class="btn small new" data-add="${addId}">+ Add</button></div>
@@ -133,6 +133,7 @@ function vSettings(m){
   else if(tab==="users"){body=vUsers()}
   else if(tab==="log"){body=vActivity()}
   else if(tab==="warn"){body=vWarnings()}
+  else if(tab==="disp"){body=`<div class="card pad"><h2>Projects → Summary: columns</h2><p class="muted" style="font-size:12px">Untick to hide a column. Saved in this browser only (each person chooses their own).</p><div class="qcolbox">${quColsHtml()}</div></div>`}
   else{const tz=setting("S_TZ"),pc=setting("S_PCTZ"),ao=setting("S_AsOf");
     body=`<div class="card pad stcard" style="max-width:820px"><h2 style="margin-top:0">Excel ‘today’ (Lists → S_Today)</h2>
       <div class="fgrid"><div class="field"><label>Report time zone (UTC offset, hours) — Bangkok = 7</label><input type="number" step="0.5" id="sTZ" value="${esc(tz)}"></div>
@@ -141,7 +142,7 @@ function vSettings(m){
       <p class="muted" style="font-size:12px">This app uses the time zone chosen in the header (TODAY box). If an as-of date is set here, the app uses it too, so both show the same statuses.</p></div>`}
   m.innerHTML=head+body;window.scrollTo(0,y);
   m.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{UI.stab=b.dataset.st;if(b.dataset.st!=="rules")UI.rulesBase=null;vSettings(m)});
-  if(tab==="users"){bindUsers(m,()=>vSettings(m));return}if(tab==="log"){bindActivity(m,()=>vSettings(m));return}if(tab==="warn"){bindWarnings(m,()=>vSettings(m));return}
+  if(tab==="users"){bindUsers(m,()=>vSettings(m));return}if(tab==="log"){bindActivity(m,()=>vSettings(m));return}if(tab==="warn"){bindWarnings(m,()=>vSettings(m));return}if(tab==="disp"){quColsBind(m,()=>toast("Saved — the Summary view uses it",2500));return}
   const re=()=>{liveCalc();renderTabs();vSettings(m)};
   m.querySelectorAll(".stq").forEach(el=>el.oninput=()=>{UI.stq=UI.stq||{};UI.stq[el.dataset.q]=el.value;const p=el.selectionStart;vSettings(m);const n=m.querySelector(`[data-q="${el.dataset.q}"]`);n.focus();n.setSelectionRange(p,p)});
   m.querySelectorAll("[data-md]").forEach(el=>el.onchange=()=>{const ref=el.dataset.md,c=ref.replace(/\d+/,""),r=+ref.replace(/[A-Z]+/,"");const ov=mg(c,r),nv=el.value.trim();if(nv===ov)return;

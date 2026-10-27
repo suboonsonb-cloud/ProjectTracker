@@ -438,6 +438,16 @@ select.qst,select.qts{font-size:12px;font-weight:600;border-radius:12px;padding:
 .qmeta label{display:flex;align-items:center;gap:3px;font-size:11px;color:#667}
 .qmeta select,.qmeta input{font-size:11px;padding:2px 4px;height:24px;max-width:150px}
 .qmeta input{width:120px}
+/* r28 — quick plan + hide columns */
+.qbtns2{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.qplan .qlrow input[type=month]{font-size:12px;padding:2px 4px}
+.qppv{font-size:11px;margin-top:4px}
+details.qcols{margin:0 0 6px;font-size:12px}
+details.qcols summary{cursor:pointer;display:inline-block;padding:3px 10px;border:1px solid #ccd;border-radius:14px;background:#fff}
+.qcolbox{display:flex;flex-wrap:wrap;gap:12px;padding:8px 2px}
+.qcolck{display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer}
+.qsimple.hide-tree .qtree,.qsimple.hide-ppl .qppl,.qsimple.hide-raidd .qraidd,.qsimple.hide-ben .qben{display:none}
+.qsimple.hide-act .qbact,.qsimple.hide-act .qlogbtn,.qsimple.hide-act .qbbar .a{display:none}
 </style>
 </head>
 <body>
@@ -2456,9 +2466,9 @@ document.addEventListener("change",e=>{const el=e.target;if(el.dataset&&el.datas
 function usedCount(col,v){return rowsOf("Projects").filter(r=>String(gv("Projects",col,r))===v).length}
 function setNamed(nm,v){const n=nameRef(nm);if(n)setCell(n.sh,n.col,n.r1,v)}
 function vSettings(m){
-  let tab=UI.stab||(isAdmin()?"lists":"log");if(!isAdmin()&&!["log","warn"].includes(tab))tab="log";const y=window.scrollY;
+  let tab=UI.stab||(isAdmin()?"lists":"log");if(!isAdmin()&&!["log","warn","disp"].includes(tab))tab="log";const y=window.scrollY;
   const head=`<div class="banner" style="background:#F3EEFC;border:1px solid #D9CCF5;color:#3B2A6B"><b>⚙ SETTINGS</b><span>Maintain the dropdown lists and the status / delay rules. Changes write to the <b>Master_Data</b> and <b>Lists</b> sheets when you click <b>Save to database</b>, and everything in this app recalculates straight away.</span></div>
-   <div class="toolbar"><span class="seg">${(isAdmin()?[["lists","Master lists"],["rules","Status & delay rules"],["today","Excel ‘today’ & time zone"],["users","👤 Users"],["log","🕘 Activity log"],["warn","⚠ Warnings"]]:[["log","🕘 Activity log"],["warn","⚠ Warnings"]]).map(([k,t])=>`<button data-st="${k}" class="${tab===k?"on":""}">${t}</button>`).join("")}</span></div>`;
+   <div class="toolbar"><span class="seg">${(isAdmin()?[["lists","Master lists"],["rules","Status & delay rules"],["today","Excel ‘today’ & time zone"],["users","👤 Users"],["log","🕘 Activity log"],["warn","⚠ Warnings"],["disp","▦ Display"]]:[["log","🕘 Activity log"],["warn","⚠ Warnings"],["disp","▦ Display"]]).map(([k,t])=>`<button data-st="${k}" class="${tab===k?"on":""}">${t}</button>`).join("")}</span></div>`;
   let body="";
   if(tab==="lists"){if(!hasMD()){body=`<div class="note">This workbook has no Master_Data sheet. Open the latest SGA_Reduction_Initiative_Tracker.xlsx.</div>`}else{
     const t=(title,sub,cols,rows,addId)=>`<div class="card pad stcard"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0">${title}</h2><span class="muted">${sub}</span><span style="flex:1"></span><input type="search" class="stq" data-q="${addId}" placeholder="Filter…" value="${esc((UI.stq||{})[addId]||"")}"><button class="btn small new" data-add="${addId}">+ Add</button></div>
@@ -2504,6 +2514,7 @@ function vSettings(m){
   else if(tab==="users"){body=vUsers()}
   else if(tab==="log"){body=vActivity()}
   else if(tab==="warn"){body=vWarnings()}
+  else if(tab==="disp"){body=`<div class="card pad"><h2>Projects → Summary: columns</h2><p class="muted" style="font-size:12px">Untick to hide a column. Saved in this browser only (each person chooses their own).</p><div class="qcolbox">${quColsHtml()}</div></div>`}
   else{const tz=setting("S_TZ"),pc=setting("S_PCTZ"),ao=setting("S_AsOf");
     body=`<div class="card pad stcard" style="max-width:820px"><h2 style="margin-top:0">Excel ‘today’ (Lists → S_Today)</h2>
       <div class="fgrid"><div class="field"><label>Report time zone (UTC offset, hours) — Bangkok = 7</label><input type="number" step="0.5" id="sTZ" value="${esc(tz)}"></div>
@@ -2512,7 +2523,7 @@ function vSettings(m){
       <p class="muted" style="font-size:12px">This app uses the time zone chosen in the header (TODAY box). If an as-of date is set here, the app uses it too, so both show the same statuses.</p></div>`}
   m.innerHTML=head+body;window.scrollTo(0,y);
   m.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{UI.stab=b.dataset.st;if(b.dataset.st!=="rules")UI.rulesBase=null;vSettings(m)});
-  if(tab==="users"){bindUsers(m,()=>vSettings(m));return}if(tab==="log"){bindActivity(m,()=>vSettings(m));return}if(tab==="warn"){bindWarnings(m,()=>vSettings(m));return}
+  if(tab==="users"){bindUsers(m,()=>vSettings(m));return}if(tab==="log"){bindActivity(m,()=>vSettings(m));return}if(tab==="warn"){bindWarnings(m,()=>vSettings(m));return}if(tab==="disp"){quColsBind(m,()=>toast("Saved — the Summary view uses it",2500));return}
   const re=()=>{liveCalc();renderTabs();vSettings(m)};
   m.querySelectorAll(".stq").forEach(el=>el.oninput=()=>{UI.stq=UI.stq||{};UI.stq[el.dataset.q]=el.value;const p=el.selectionStart;vSettings(m);const n=m.querySelector(`[data-q="${el.dataset.q}"]`);n.focus();n.setSelectionRange(p,p)});
   m.querySelectorAll("[data-md]").forEach(el=>el.onchange=()=>{const ref=el.dataset.md,c=ref.replace(/\d+/,""),r=+ref.replace(/[A-Z]+/,"");const ov=mg(c,r),nv=el.value.trim();if(nv===ov)return;
@@ -3449,6 +3460,33 @@ function benAgg(pid){const now=Date.now();if(!QBEN.v||now-QBEN.t>400){const BS=b
       ms.forEach((mm,i)=>{if(mm.s<=TODAY){x.ptd+=+b.plan[i]||0;x.atd+=+b.act[i]||0}else if(mm.s<=TODAY+366)x.p12+=+b.plan[i]||0})}
     QBEN={t:now,v:o}}return QBEN.v[pid]||null}
 /* quick "log actual" right in the row: pick one-off / every month, a month, drag the bar or type the amount */
+/* quick "✎ plan" in the row: driver, amount (bar), recurring / one-off, start month, ramp-up */
+const QPK=[["trh","Hours saved / month"],["cr","Cost reduction (THB)"],["ca","Cost avoidance (THB)"],["rg","Revenue growth (THB)"]];
+function quPlanHtml(r){const pid=pId(r);const st=UI.qu.plan&&UI.qu.plan[r];if(!st)return "";const {lines}=quLogLines(pid);if(!lines.length)return "";
+  const ln=lines.find(b=>b.id===st.line)||lines[0];st.line=ln.id;const br=ln.r;const g=c=>gv("Benefits",c,br);const n=c=>+g(c)||0;
+  if(!st.init){st.init=1;st.kind=n(FB.trh)?"trh":n(FB.cr)?"cr":n(FB.ca)?"ca":n(FB.rg)?"rg":"cr";st.amt=n(FB[st.kind]);st.nat=g(FB.nature)||"Recurring";st.basis=g(FB.basis)||"Monthly";const sm=+g(FB.start)||0;st.start=sm?isoFromSerial(sm).slice(0,7):"";st.ramp=g(FB.ramp)===""?"":n(FB.ramp)}
+  if(g(FB.phase)==="Custom")return `<div class="qlog qplan" data-qplan="${r}"><div class="muted" style="font-size:12px">${esc(ln.id)} uses a <b>custom monthly plan</b> — change it in the full benefit plan.</div><div class="qlbtns"><button type="button" class="btn small" data-qpx="${r}">Close</button><a href="#" class="btn small primary" data-qben="${r}">Open benefit plan ›</a></div></div>`;
+  const thb=st.kind!=="trh";const mx=quRngMax(Math.max(st.amt,n(FB[st.kind]))*2);const rate=g(FB.rate)===""?(+setting("S_Rate")||0):n(FB.rate);
+  const gm=thb?st.amt/((st.nat!=="One-off"&&st.basis==="Annual")?12:1):st.amt*rate;const yr=st.nat==="One-off"?gm:gm*12;
+  return `<div class="qlog qplan" data-qplan="${r}">
+    ${lines.length>1?`<label class="qlrow"><span>Line</span><select data-qpf="line">${lines.map(b=>`<option value="${esc(b.id)}" ${b.id===ln.id?"selected":""}>${esc(b.id)} · ${esc(String(b.desc||"").slice(0,28))}</option>`).join("")}</select></label>`:""}
+    <div class="qlseg" role="radiogroup" aria-label="Recurring or one-off"><button type="button" data-qpn="Recurring" class="${st.nat!=="One-off"?"on":""}">Recurring</button><button type="button" data-qpn="One-off" class="${st.nat==="One-off"?"on":""}">One-off</button></div>
+    <label class="qlrow"><span>Driver</span><select data-qpf="kind">${QPK.map(([k,t])=>`<option value="${k}" ${k===st.kind?"selected":""}>${t}</option>`).join("")}</select></label>
+    <div class="qlamt"><input type="range" data-qpf="rng" min="0" max="${mx}" step="${thb?(mx>20000?500:100):0.5}" value="${st.amt}" aria-label="Plan amount"><input type="number" data-qpf="amt" min="0" step="any" value="${st.amt}" aria-label="Plan amount"><span class="muted">${thb?(st.nat==="One-off"?"THB total":`<select data-qpf="basis" class="mini"><option ${st.basis!=="Annual"?"selected":""}>Monthly</option><option ${st.basis==="Annual"?"selected":""}>Annual</option></select>`):"hrs/m"}</span><button type="button" class="btn small" data-qpx2 title="Make the bar go higher">×2</button></div>
+    <div class="qlrow"><span>Start</span><input type="month" data-qpf="start" value="${esc(st.start)}" aria-label="Realisation start month"><span>Ramp</span><input type="number" data-qpf="ramp" min="0" max="36" step="1" value="${st.ramp}" style="width:52px" aria-label="Ramp-up months"><span class="muted">m</span></div>
+    <div class="muted qppv">= <b>${fmtShort(yr)}</b> THB ${st.nat==="One-off"?"one-off":"/ year"}${thb?"":` (${fmtNum(st.amt)} h × ${fmtNum(rate)} THB/h × 12)`} · was ${fmtShort(ln.gross)}</div>
+    <div class="qlbtns"><button type="button" class="btn small" data-qpx="${r}">Close</button><button type="button" class="btn small primary" data-qps="${r}">Save plan</button></div></div>`}
+function quPlanSave(r){const st=UI.qu.plan[r];const {lines}=quLogLines(pId(r));const ln=lines.find(b=>b.id===st.line);if(!ln)return 0;const br=ln.r;let n=0;
+  const put=(c,v)=>{if(String(gv("Benefits",c,br))!==String(v)){setCell("Benefits",c,br,v);n++}};
+  put(FB[st.kind],st.amt?+st.amt:"");put(FB.nature,st.nat);if(st.kind!=="trh"&&st.nat!=="One-off")put(FB.basis,st.basis);
+  put(FB.start,st.start?serialFromIso(st.start+"-01"):"");put(FB.ramp,st.ramp===""?"":Math.max(0,Math.round(+st.ramp)));return n}
+/* Summary columns the user can hide (Settings → Display, or ⚙ Columns on the page) — kept per browser */
+const QCOLS=[["tree","E2E ▸ Lane"],["ppl","People"],["raidd","RAIDD"],["ben","Benefit (plan + actual)"],["act","Actual (inside Benefit)"]];
+function quColPref(){try{return JSON.parse(localStorage.getItem("itd.quCols")||"{}")||{}}catch(e){return {}}}
+function quColSet(k,hide){const p=quColPref();if(hide)p[k]=1;else delete p[k];try{localStorage.setItem("itd.quCols",JSON.stringify(p))}catch(e){}UI.quCols=p}
+function quColCls(){const p=UI.quCols||quColPref();return QCOLS.filter(([k])=>p[k]).map(([k])=>"hide-"+k).join(" ")}
+function quColsHtml(){const p=UI.quCols||quColPref();return QCOLS.map(([k,t])=>`<label class="qcolck"><input type="checkbox" data-qcol="${k}" ${p[k]?"":"checked"}> ${esc(t)}</label>`).join("")}
+function quColsBind(root,after){root.querySelectorAll("[data-qcol]").forEach(c=>c.onchange=()=>{quColSet(c.dataset.qcol,!c.checked);after()})}
 function quRngMax(v){v=Math.max(1000,+v||0);const p=Math.pow(10,Math.floor(Math.log10(v))-1);return Math.ceil(v/p)*p}
 function quLogLines(pid){const BS=benefitSeries();return {BS,lines:BS.list.filter(b=>b.pid===pid&&!b.drop)}}
 function quLogHtml(r){const pid=pId(r);const st=UI.qu.log&&UI.qu.log[r];if(!st)return "";const {BS,lines}=quLogLines(pid);if(!lines.length)return "";
@@ -3473,7 +3511,7 @@ function quBenCell(r){const pid=pId(r);const b=pid?benAgg(pid):null;if(!b)return
   return `<a href="#" data-qben="${r}" class="qbenlink" title="Open the project's benefit plan (plan vs actual by month)"><div class="qbplan"><span class="vtag plan">PLAN</span><b>${fmtShort(b.rec)}</b><span class="muted">/yr</span>${b.one?` <span class="muted">+ ${fmtShort(b.one)} one-off</span>`:""}</div>
     <div class="qbbar" aria-hidden="true"><span class="p" style="width:${b.ptd/mx*100}%"></span><span class="a" style="width:${b.atd/mx*100}%"></span></div>
     <div class="qbact"><span class="vtag act">ACTUAL</span>${b.ptd||b.atd?`<b>${fmtShort(b.atd)}</b> <span class="muted">of ${fmtShort(b.ptd)} to date</span> ${pct==null?"":`<b class="${pct>=.9?"good":pct>=.6?"mid":"bad"}">${Math.round(pct*100)}%</b>`}`:`<span class="muted">starts ${b.p12?"within 12 m":"later"}</span>`}</div></a>
-    ${UI.qu.log&&UI.qu.log[r]?quLogHtml(r):(typeof canEdit!=="function"||canEdit()?`<button type="button" class="btn small qlogbtn" data-qlo="${r}">＋ Log actual</button>`:"")}`}
+    ${UI.qu.log&&UI.qu.log[r]?quLogHtml(r):UI.qu.plan&&UI.qu.plan[r]?quPlanHtml(r):(typeof canEdit!=="function"||canEdit()?`<div class="qbtns2"><button type="button" class="btn small qplanbtn" data-qpo="${r}">✎ Plan</button><button type="button" class="btn small qlogbtn" data-qlo="${r}">＋ Log actual</button></div>`:"")}`}
 function quRowSimple(r){const L=pLive(r);const pc=Math.round((L.comp||0)*1000)/10;const pl=quPlanned(r);const F=UI.qu;const open=F.open.has(r);
   const inp=(k,v,type,extra="")=>`<input data-qu="${r}" data-k="q${r}_${k}" data-f="${k}" type="${type}" value="${esc(v)}" ${extra}>`;
   const behind=pl!==""&&(L.comp||0)+0.005<pl;const proc=gv("Projects",FP.proc,r);
@@ -3542,7 +3580,23 @@ function quBindRow(m,tr){
     addNew("RAIDD",()=>({[FD.type]:"Issue",[FD.pid]:pid,[FD.tid]:tid,[FD.status]:"Open",[FD.raised]:TODAY,[FD.desc]:"Delay — reason: "}));toast("Write why it is late and the new Due date (when it will be done) — the task forecast moves to that date.",7000)});
   tr.querySelectorAll("[data-qts]").forEach(el=>el.onchange=()=>{const t=+el.dataset.qts,r=+el.dataset.r;try{setCell("Activities",FA.ovr,t,el.value)}catch(e){toast(e.message,5000);return}quStamp(r);liveCalc();UI.qu.edited.add(r);const y=scrollY;vQuick($("#main"),true);window.scrollTo(0,y)});
   const reRow=r=>{const tr2=m.querySelector(`tr[data-row="${r}"]`);if(!tr2)return;const cell=tr2.querySelector("td.qben");if(cell){cell.innerHTML=quBenCell(r);quBindRow(m,tr2)}};
-  tr.querySelectorAll("[data-qlo]").forEach(b=>b.onclick=()=>{const r=+b.dataset.qlo;UI.qu.log=UI.qu.log||{};UI.qu.log[r]={type:"one"};reRow(r)});
+  tr.querySelectorAll("[data-qlo]").forEach(b=>b.onclick=()=>{const r=+b.dataset.qlo;UI.qu.log=UI.qu.log||{};UI.qu.log[r]={type:"one"};if(UI.qu.plan)delete UI.qu.plan[r];reRow(r)});
+  tr.querySelectorAll("[data-qpo]").forEach(b=>b.onclick=()=>{const r=+b.dataset.qpo;UI.qu.plan=UI.qu.plan||{};UI.qu.plan[r]={};if(UI.qu.log)delete UI.qu.log[r];reRow(r)});
+  tr.querySelectorAll("[data-qplan]").forEach(box=>{const r=+box.dataset.qplan,st=UI.qu.plan[r];const q=k=>box.querySelector(`[data-qpf="${k}"]`);
+    box.querySelector("[data-qpx]").onclick=()=>{delete UI.qu.plan[r];reRow(r)};if(!q("amt"))return;
+    const keepFocus=k=>{reRow(r);const el=m.querySelector(`[data-qplan="${r}"] [data-qpf="${k}"]`);if(el)el.focus()};
+    if(q("line"))q("line").onchange=e=>{UI.qu.plan[r]={line:e.target.value};reRow(r)};
+    box.querySelectorAll("[data-qpn]").forEach(b=>b.onclick=()=>{st.nat=b.dataset.qpn;reRow(r)});
+    q("kind").onchange=e=>{st.kind=e.target.value;const {lines}=quLogLines(pId(r));const ln=lines.find(b=>b.id===st.line);st.amt=ln?(+gv("Benefits",FB[st.kind],ln.r)||0):0;reRow(r)};
+    if(q("basis"))q("basis").onchange=e=>{st.basis=e.target.value;reRow(r)};
+    q("start").onchange=e=>{st.start=e.target.value;reRow(r)};q("ramp").onchange=e=>{st.ramp=e.target.value;reRow(r)};
+    const R=q("rng");const grow=v=>{if(v>+R.max){const nm=quRngMax(v*2);R.max=nm}};
+    R.oninput=()=>{st.amt=+R.value;q("amt").value=st.amt};R.onchange=()=>keepFocus("rng");
+    q("amt").oninput=()=>{st.amt=Math.max(0,+q("amt").value||0);grow(st.amt);R.value=st.amt};q("amt").onchange=()=>keepFocus("amt");
+    q("amt").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();st.amt=Math.max(0,+q("amt").value||0);box.querySelector("[data-qps]").click()}};
+    box.querySelector("[data-qpx2]").onclick=()=>{R.max=quRngMax(+R.max*2)};
+    box.querySelector("[data-qps]").onclick=()=>{let n=0;try{n=quPlanSave(r)}catch(e){toast(e.message,5000);return}delete UI.qu.plan[r];if(n){quStamp(r);QBEN.t=0}
+      toast(n?"Benefit plan updated. Save to database to keep it.":"Nothing changed",4500);quAfter(m,r,!!n)}});
   tr.querySelectorAll("[data-qlog]").forEach(box=>{const r=+box.dataset.qlog,st=UI.qu.log[r];
     box.querySelectorAll("[data-qlt]").forEach(b=>b.onclick=()=>{st.type=b.dataset.qlt;reRow(r)});
     const q=k=>box.querySelector(`[data-ql="${k}"]`);
@@ -3602,14 +3656,15 @@ function vQuick(m,simple){const F=UI.qu;F.simple=!!simple;liveCalc();const {all,
   const sts=off.size?STL.slice():STL.filter(s=>P2.some(r=>pStat(r)===s));const re=()=>{const y=scrollY;vQuick(m,simple);window.scrollTo(0,y)};
   const head=simple?projHead(true)
    :`<div class="banner inp"><b>⚡ QUICK UPDATE</b><span>Update many projects on one screen. Type a new <b>Progress %</b> (or click 0 / 25 / 50 / 75 / 100) and the project's tasks are filled stage by stage. A box is saved into the workbook when you leave it (Tab / Enter / click elsewhere); <b>Esc</b> undoes the box you are in. Each change stamps <b>Last Updated</b> = today — check them in <b>Review changes</b>, then <b>Save to database</b>.</span></div>`;
-  const thead=simple?`<tr><th class="qx"><button type="button" class="qxb" id="quAll" title="Open / close all">${F.open.size?"▾":"▸"}</button></th><th class="qtree">E2E ▸ Lane</th><th class="qn">Project</th><th>People</th><th>Status</th><th>RAIDD</th><th class="num">Progress %</th><th>Plan start → end</th><th>Benefit · plan vs actual</th><th>Next steps</th><th>Updated</th></tr>`
+  const thead=simple?`<tr><th class="qx"><button type="button" class="qxb" id="quAll" title="Open / close all">${F.open.size?"▾":"▸"}</button></th><th class="qtree">E2E ▸ Lane</th><th class="qn">Project</th><th class="qppl">People</th><th>Status</th><th class="qraidd">RAIDD</th><th class="num">Progress %</th><th>Plan start → end</th><th class="qben">Benefit · plan vs actual</th><th>Next steps</th><th>Updated</th></tr>`
    :`<tr><th class="qn">Project</th><th>Status</th><th class="num">Progress %</th><th>Phase (legacy)</th><th>Override</th><th>Plan start</th><th>Plan end</th><th>Target Q</th><th>Last update — Done</th><th>Next steps</th><th>Issues / blockers</th><th>Updated</th></tr>`;
   m.innerHTML=head+quFilterBar()+`
-  <div class="card tablewrap qwrap ${simple?"qsimple":""}"><table class="data qu"><thead>${thead}</thead><tbody>
+  ${simple?`<details class="qcols"><summary>⚙ Columns</summary><div class="qcolbox">${quColsHtml()}<span class="muted" style="font-size:11px">Also in Settings → Display</span></div></details>`:""}
+  <div class="card tablewrap qwrap ${simple?"qsimple "+quColCls():""}"><table class="data qu"><thead>${thead}</thead><tbody>
   ${rows.map(r=>quRowHtml(r)+(simple&&F.open.has(r)?quDetHtml(r):"")).join("")||`<tr><td colspan="12" class="muted">No projects match the filters</td></tr>`}</tbody></table></div><datalist id="quTeams">${uniq(_rowsOf0Safe("Projects").map(r=>String(gv("Projects","AB",r)||"").trim()).filter(Boolean)).sort().map(x=>`<option value="${esc(x)}">`).join("")}</datalist><datalist id="quPeople">${uniq([...listFromName("L_Leader"),..._rowsOf0Safe("Projects").flatMap(x=>[gv("Projects",FP.lead,x),gv("Projects",FP.wsl,x)])].filter(Boolean)).sort().map(x=>`<option value="${esc(x)}">`).join("")}</datalist>
   <p class="muted" style="font-size:12px">The blue bar is actual progress; the thin dark mark is where the plan says the project should be today. Status follows the <b>task</b> dates — when you change plan dates you are asked whether to move the task plan too.</p>`;
   quFilterBind(m,re);m.querySelectorAll("tr[data-row],tr.qdet").forEach(tr=>quBindRow(m,tr));
-  if(simple){bindPview(m);$("#quNew").onclick=newProject;
+  if(simple){quColsBind(m,()=>{const w=m.querySelector(".qwrap");if(w)w.className="card tablewrap qwrap qsimple "+quColCls()});bindPview(m);$("#quNew").onclick=newProject;
     const qa=$("#quAll");if(qa)qa.onclick=()=>{if(F.open.size)F.open.clear();else rows.forEach(r=>F.open.add(r));re()}}}
 
 

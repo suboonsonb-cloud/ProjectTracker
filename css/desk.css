@@ -431,3 +431,13 @@ select.qst,select.qts{font-size:12px;font-weight:600;border-radius:12px;padding:
 .qmeta label{display:flex;align-items:center;gap:3px;font-size:11px;color:#667}
 .qmeta select,.qmeta input{font-size:11px;padding:2px 4px;height:24px;max-width:150px}
 .qmeta input{width:120px}
+/* r28 — quick plan + hide columns */
+.qbtns2{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.qplan .qlrow input[type=month]{font-size:12px;padding:2px 4px}
+.qppv{font-size:11px;margin-top:4px}
+details.qcols{margin:0 0 6px;font-size:12px}
+details.qcols summary{cursor:pointer;display:inline-block;padding:3px 10px;border:1px solid #ccd;border-radius:14px;background:#fff}
+.qcolbox{display:flex;flex-wrap:wrap;gap:12px;padding:8px 2px}
+.qcolck{display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer}
+.qsimple.hide-tree .qtree,.qsimple.hide-ppl .qppl,.qsimple.hide-raidd .qraidd,.qsimple.hide-ben .qben{display:none}
+.qsimple.hide-act .qbact,.qsimple.hide-act .qlogbtn,.qsimple.hide-act .qbbar .a{display:none}
