@@ -533,9 +533,6 @@ details.qcols summary{cursor:pointer;display:inline-block;padding:3px 10px;borde
 .etb:focus-visible{outline:2px solid #2E90FA}
 .e2etree .etl::before{content:"";position:absolute;left:-1px;top:50%;width:10px;border-top:1.5px solid #CFC7F7}
 .etb.par{border-color:#7A5AF8;background:#F1EDFF}
-/* r39 — signature, bottom-right */
-#sig{position:fixed;right:14px;bottom:8px;z-index:50;pointer-events:none;user-select:none;font-family:"Segoe Script","Brush Script MT","Lucida Handwriting","Snell Roundhand",cursive;font-size:17px;color:#1F3864;opacity:.55;transform:rotate(-4deg);letter-spacing:.3px}
-@media print{#sig{opacity:.8}}
 </style>
 </head>
 <body>
@@ -4873,6 +4870,5 @@ if(!("DecompressionStream" in window)){document.body.insertAdjacentHTML("afterbe
 (()=>{const sel=$("#tzSel");const list=TZ_LIST.includes(TZ)?TZ_LIST:[TZ,...TZ_LIST];sel.innerHTML=list.map(z=>`<option${z===TZ?" selected":""}>${z}</option>`).join("");sel.onchange=()=>setTZ(sel.value);paintClock()})();
 render();envCheck();$("#connChip").onclick=connMenu;paintConn();(async()=>{if(!(await bootSpConnect()))await bootConnect()})();
 </script>
-<div id="sig" aria-hidden="true">SuboonsonB</div>
 </body>
 </html>
