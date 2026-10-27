@@ -442,3 +442,11 @@ details.qcols summary{cursor:pointer;display:inline-block;padding:3px 10px;borde
 .qsimple.hide-tree .qtree,.qsimple.hide-ppl .qppl,.qsimple.hide-raidd .qraidd,.qsimple.hide-ben .qben{display:none}
 .qsimple.hide-act .qbact,.qsimple.hide-act .qlogbtn,.qsimple.hide-act .qbbar .a{display:none}
 .rdfl{font-size:12px;white-space:nowrap}.rdln{font-size:11px;color:#667;white-space:nowrap}
+/* r30 — Gantt: each breakdown layer shaded, deeper = lighter */
+.g-row.gd0{background:#CCD8E8}
+.g-row.gd1{background:#DCE4EF}
+.g-row.gd2{background:#E8EEF6}
+.g-row.gd3{background:#F2F5FA}
+.g-row.gd4,.g-row.gd5{background:#FAFBFD}
+.g-row.gr.gd0{background:#DAE3EF}.g-row.gr.gd1{background:#E6ECF4}.g-row.gr.gd2{background:#EFF3F8}.g-row.gr.gd3{background:#F6F8FB}.g-row.gr.gd4,.g-row.gr.gd5{background:#fff}
+.g-row.ghl{background:#FFF1D9}
