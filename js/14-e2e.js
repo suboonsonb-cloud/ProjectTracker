@@ -194,6 +194,8 @@ window.addEventListener("message",ev=>{const m=ev.data;if(!m||m.src!=="swimlane"
     if(e2eWriteDoc(f,ver,m.doc)){if(f.id+"|"+ver===E2E_SENT.key)E2E_SENT.js=JSON.stringify(m.doc);e2eQueueMap();e2eSidePanel();updateBadge();const tb=document.getElementById("e2eTimeBox");if(tb)tb.innerHTML=e2eTimeHtml(e2eFlow(f.id))}return}
   if(m.type==="openProject"){const r=projRowById(m.id);if(r)openProject(r);else toast("Project "+m.id+" is not in this workbook");return}
   if(m.type==="linkDone"){UI.e2e.link=null;e2eSidePanel();return}
+  if(m.type==="download"&&m.blob){download(m.blob,m.name||"flow.png");return}
+  if(m.type==="pptx"&&m.pages){e2ePptx(m.pages,m.name).then(()=>toast("Saved PowerPoint ("+m.pages.length+" slide"+(m.pages.length>1?"s":"")+")"),e=>toast("Could not make the PowerPoint: "+e.message,6000));return}
   if(m.type==="template"){const cb=e2eTplWait;e2eTplWait=null;if(cb)cb(m.doc);return}});
 let e2eTplWait=null;
 function e2eTemplate(kind){return new Promise(res=>{e2eTplWait=res;e2ePost({type:"template",kind});setTimeout(()=>{if(e2eTplWait===res){e2eTplWait=null;res(null)}},2500)})}

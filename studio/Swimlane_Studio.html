@@ -59,6 +59,7 @@ aside.insp{border-left:1px solid var(--line);padding:12px}
 .field label{font-size:12px;color:var(--muted)}
 .field input,.field select,.field textarea{border:1px solid var(--line);border-radius:6px;padding:5px 7px;background:var(--panel)}
 .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chk{display:inline-flex;gap:6px;align-items:center;margin-right:14px;font-size:13px;cursor:pointer}
 .sw{width:22px;height:22px;border-radius:5px;border:1px solid var(--line);cursor:pointer;padding:0}
 .sw.on{outline:2px solid var(--sel);outline-offset:1px}
 .kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--line);border-radius:4px;padding:1px 4px;background:var(--chip)}
@@ -100,7 +101,7 @@ body.embed #brand{display:none}.embhint{display:none;font-size:12px;color:var(--
   <span class="grp" id="gDocs"><select class="doc" id="docSel" aria-label="Diagram"></select><button class="btn" id="bNew" title="New diagram">＋ New</button><button class="btn" id="bDup" title="Duplicate this diagram">Duplicate</button><button class="btn" id="bDel" title="Delete this diagram">Delete</button></span>
   <span class="grp"><button class="btn" id="bUndo" title="Undo (Ctrl+Z)">↶</button><button class="btn" id="bRedo" title="Redo (Ctrl+Y)">↷</button></span>
   <span class="grp"><button class="btn" id="bLane" title="Add a lane at the end">＋ Lane</button><button class="btn" id="bSec" title="Add a section (phase band) across all lanes">＋ Section</button><button class="btn" id="bOri" title="Switch lanes between columns and rows">⇄ Rotate lanes</button><button class="btn" id="bTidy" title="Re-route every arrow around the boxes, avoiding other arrows (undo with Ctrl+Z). Dragging an arrow afterwards makes it manual again.">✨ Tidy arrows</button></span>
-  <span class="grp"><button class="btn" id="bZo" title="Zoom out">−</button><span class="zoomv" id="zv">100%</span><button class="btn" id="bZi" title="Zoom in">＋</button><button class="btn" id="bFit" title="Fit the whole sheet to the window (keeps fitting when you resize)">Fit</button><button class="btn" id="bFitW" title="Fill the window width">Width</button></span>
+  <span class="grp"><button class="btn" id="bZo" title="Zoom out">−</button><span class="zoomv" id="zv">100%</span><button class="btn" id="bZi" title="Zoom in">＋</button><button class="btn" id="bFit" title="Fit the whole sheet to the window (keeps fitting when you resize)">Fit</button><button class="btn" id="bFitW" title="Fill the window width">Width</button><button class="btn" id="bSaveAs" title="Save this flow as a picture (PNG) or PDF — one picture / PDF page per diagram page">⬇ Save as…</button></span>
   <span class="grp" id="gFiles"><button class="btn" id="bOpen" title="Open a saved .json diagram">Open…</button><button class="btn" id="bSave" title="Save the diagram as a .json file">Save file</button><button class="btn" id="bPng" title="Download a PNG image (2×)">PNG</button><button class="btn" id="bSvg" title="Download an SVG image">SVG</button><button class="btn primary" id="bCopy" title="Copy the diagram as an image — paste straight into PowerPoint">Copy image</button></span>
   <span class="grp"><button class="btn" id="bPal" title="Show or hide the shapes bar on the left">◂ Hide shapes</button><button class="btn" id="bPanel" title="Show or hide the properties panel on the right">Hide properties</button><button class="btn" id="bHelp">Help</button></span>
   <input type="file" id="fileIn" accept=".json,application/json" hidden>
@@ -813,7 +814,7 @@ document.getElementById("bHelp").onclick=()=>modal(`<h2>How to use Swimlane Stud
   <li><b>To PowerPoint</b> — <b>Copy image</b> and paste into the slide, or download a PNG / SVG.</li></ol>
   <div class="row" style="justify-content:flex-end"><button class="btn primary" data-x="ok">Got it</button></div>`,()=>{});
 /* files */
-function dl(blob,name){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)}
+function dl(blob,name){if(EMBED){post({type:"download",blob,name});return}const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)}
 const fname=ext=>(D.name||"swimlane").replace(/[\\/:*?"<>|]+/g,"_")+"."+ext;
 document.getElementById("bSave").onclick=()=>{dl(new Blob([JSON.stringify({app:"Swimlane Studio",v:1,doc:D},null,1)],{type:"application/json"}),fname("json"));toast("Saved "+fname("json"))};
 document.getElementById("bOpen").onclick=()=>document.getElementById("fileIn").click();
@@ -823,6 +824,37 @@ function exportSVG(){const {W,H}=size();return `<svg xmlns="http://www.w3.org/20
 document.getElementById("bSvg").onclick=()=>{dl(new Blob([exportSVG()],{type:"image/svg+xml"}),fname("svg"));toast("Downloaded "+fname("svg"))};
 function pngBlob(scale=2){return new Promise((res,rej)=>{const {W,H}=size();const img=new Image();img.onload=()=>{const c=document.createElement("canvas");c.width=W*scale;c.height=H*scale;const x=c.getContext("2d");x.scale(scale,scale);x.drawImage(img,0,0);c.toBlob(b=>b?res(b):rej(new Error("export failed")),"image/png")};img.onerror=()=>rej(new Error("could not draw the diagram"));
   img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(exportSVG())})}
+/* ---- Save as PNG / PDF: one picture per diagram page ---- */
+function pageDocs(){if(!D.pages||D.pages.length<2)return [{name:"",n:1,D}];const j=pgJoin(D);return D.pages.map((p,i)=>({name:p.name,n:i+1,cur:p.id===D.pg,D:pgSplit(JSON.parse(JSON.stringify(j)),p.id)}))}
+function withDoc(d,fn){const keep=D,kS=UI.sel,kL=UI.selLink,kP=POP;D=d;UI.sel=new Set();UI.selLink=null;try{return fn()}finally{D=keep;UI.sel=kS;UI.selLink=kL}}
+function rasterize(svg,W,H,scale,type){return new Promise((res,rej)=>{const img=new Image();img.onload=()=>{const c=document.createElement("canvas");c.width=Math.round(W*scale);c.height=Math.round(H*scale);const x=c.getContext("2d");x.fillStyle="#FFFFFF";x.fillRect(0,0,c.width,c.height);x.scale(scale,scale);x.drawImage(img,0,0);
+  c.toBlob(b=>b?res({blob:b,w:c.width,h:c.height}):rej(new Error("export failed")),type||"image/png",.92)};img.onerror=()=>rej(new Error("could not draw the diagram"));img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg)})}
+async function pageImage(pd,scale,type){const svg=withDoc(pd.D,exportSVG),{W,H}=withDoc(pd.D,size);const r=await rasterize(svg,W,H,scale,type);return {...r,W,H}}
+/* a small PDF writer: one page per picture (JPEG), page size = diagram size */
+async function pdfFromJpegs(pages){const enc=new TextEncoder(),parts=[],offs=[];let len=0;const add=x=>{const u=typeof x==="string"?enc.encode(x):x;parts.push(u);len+=u.length};
+  const n=pages.length,obj=k=>offs[k]=len;add("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n");
+  obj(1);add("1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n");
+  obj(2);add(`2 0 obj\n<< /Type /Pages /Count ${n} /Kids [${pages.map((_,i)=>(3+i*3)+" 0 R").join(" ")}] >>\nendobj\n`);
+  for(let i=0;i<n;i++){const p=pages[i],pw=+(p.W*.75).toFixed(2),ph=+(p.H*.75).toFixed(2),po=3+i*3,co=po+1,io=po+2;const jpg=new Uint8Array(await p.blob.arrayBuffer());const cs=`q ${pw} 0 0 ${ph} 0 0 cm /Im${i} Do Q`;
+    obj(po);add(`${po} 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pw} ${ph}] /Resources << /XObject << /Im${i} ${io} 0 R >> >> /Contents ${co} 0 R >>\nendobj\n`);
+    obj(co);add(`${co} 0 obj\n<< /Length ${cs.length} >>\nstream\n${cs}\nendstream\nendobj\n`);
+    obj(io);add(`${io} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${p.w} /Height ${p.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpg.length} >>\nstream\n`);add(jpg);add("\nendstream\nendobj\n")}
+  const total=3+n*3,xref=len;let x=`xref\n0 ${total}\n0000000000 65535 f \n`;for(let k=1;k<total;k++)x+=String(offs[k]).padStart(10,"0")+" 00000 n \n";
+  add(x+`trailer\n<< /Size ${total} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`);return new Blob(parts,{type:"application/pdf"})}
+const baseName=()=>((D.title?D.title+(D.tag?" "+D.tag:""):D.name)||"swimlane").replace(/[\\/:*?"<>|\[\]]+/g,"_").replace(/\s+/g," ").trim();
+function saveAsDialog(){const pd=pageDocs(),multi=pd.length>1;
+  modal(`<h2>Save as</h2><div class="field"><label>Format</label><div class="row"><label class="chk"><input type="radio" name="saFmt" value="png" checked> PNG picture</label><label class="chk"><input type="radio" name="saFmt" value="pdf"> PDF</label>${EMBED?`<label class="chk"><input type="radio" name="saFmt" value="pptx"> PowerPoint</label>`:""}</div></div>
+    ${multi?`<div class="field"><label>Pages</label><div class="row"><label class="chk"><input type="radio" name="saPg" value="all" checked> All ${pd.length} pages <span class="hint">(one picture / PDF page / slide per page)</span></label><label class="chk"><input type="radio" name="saPg" value="cur"> Only this page</label></div></div>`:""}
+    <p class="hint">File name: <b>${esc(baseName())}${multi?" - Page n":""}</b>. The picture shows the diagram as on screen, without selection handles.</p>
+    <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn" data-x="c">Cancel</button><button class="btn primary" data-x="ok">Save</button></div>`,async k=>{if(k!=="ok")return;
+    const fmt=(document.querySelector('input[name="saFmt"]:checked')||{}).value||"png",all=!multi||((document.querySelector('input[name="saPg"]:checked')||{}).value||"all")==="all";
+    const list=all?pd:pd.filter(p=>p.cur);const nm=p=>baseName()+(multi?" - "+(/^page\s*\d+$/i.test(p.name)?"Page "+p.n:p.name):"");
+    try{toast("Preparing "+(fmt==="pdf"?"PDF":list.length+" picture"+(list.length>1?"s":""))+"…");
+      if(fmt==="pptx"){const pages=[];for(const p of list){const r=await pageImage(p,2,"image/png");pages.push({blob:r.blob,w:r.W,h:r.H,title:nm(p)})}post({type:"pptx",pages,name:baseName()});return}
+      if(fmt==="pdf"){const imgs=[];for(const p of list)imgs.push(await pageImage(p,2,"image/jpeg"));dl(await pdfFromJpegs(imgs),baseName()+(all||!multi?"":" - "+nm(list[0]).split(" - ").pop())+".pdf");toast("Saved PDF ("+imgs.length+" page"+(imgs.length>1?"s":"")+")")}
+      else{for(const p of list){const r=await pageImage(p,2,"image/png");dl(r.blob,nm(p)+".png");await new Promise(z=>setTimeout(z,350))}toast("Saved "+list.length+" PNG picture"+(list.length>1?"s":""))}}
+    catch(e){toast("Could not save: "+e.message)}})}
+document.getElementById("bSaveAs").onclick=saveAsDialog;
 document.getElementById("bPng").onclick=async()=>{try{dl(await pngBlob(2),fname("png"));toast("Downloaded "+fname("png"))}catch(e){toast(e.message)}};
 document.getElementById("bCopy").onclick=async()=>{try{if(!window.ClipboardItem||!navigator.clipboard||!navigator.clipboard.write)throw new Error("this browser cannot copy images — use PNG instead");
   await navigator.clipboard.write([new ClipboardItem({"image/png":pngBlob(2)})]);toast("Copied — paste it into PowerPoint (Ctrl+V)")}catch(e){toast("Could not copy: "+e.message)}};
