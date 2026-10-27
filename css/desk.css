@@ -398,3 +398,32 @@ body.has-unsaved nav.tabs button[data-t="Changes"]{background:#FFC000;color:#1b1
 .qlamt{display:flex;align-items:center;gap:6px}.qlamt input[type=range]{flex:1;min-width:90px;accent-color:#1F7A3D}.qlamt input[type=number]{width:90px;font:inherit;padding:3px 6px;border:1px solid #D0D5DD;border-radius:6px}
 .qlvs{display:flex;align-items:center;gap:6px}.qlbar{position:relative;flex:1;height:8px;background:#EEF2F6;border-radius:4px;overflow:hidden;min-width:80px}.qlbar .pl{position:absolute;left:0;top:0;bottom:0;background:#C7D7EE}.qlbar .ac{position:absolute;left:0;top:2px;bottom:2px;background:#1F7A3D;border-radius:3px}
 .qlbtns{display:flex;justify-content:flex-end;gap:6px}
+/* r26 — Summary: E2E tree, RAIDD column, editable status, tasks in details */
+.qtree{font-size:11px;min-width:150px;max-width:210px;vertical-align:top}
+.qtree a{color:inherit;text-decoration:none}.qtree a:hover{text-decoration:underline;color:var(--accent,#1f6feb)}
+.qtf{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qtl{position:relative;padding-left:16px;line-height:1.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted,#667)}
+.qtl::before{content:"";position:absolute;left:5px;top:0;bottom:0;border-left:1px solid #b9c2cc}
+.qtl.last::before{bottom:50%}
+.qtl::after{content:"";position:absolute;left:5px;top:50%;width:8px;border-top:1px solid #b9c2cc}
+.qtnone{color:#99a;font-size:11px}
+.qraidd{min-width:96px;vertical-align:top}
+.qrd{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
+.qrdt{font-size:10px;padding:1px 6px;border-radius:9px;background:#eef1f5;color:#445;white-space:nowrap}
+.qrdt.t-Risk{background:#fff1e0;color:#9a5b00}.qrdt.t-Issue{background:#fde8e8;color:#a32020}
+.qrdt.t-Decision{background:#e8f0fe;color:#1d4fa8}.qrdt.t-Dependency{background:#f0e9fb;color:#5a32a3}
+.qrdt.od{background:#c62828;color:#fff}
+select.qst,select.qts{font-size:12px;font-weight:600;border-radius:12px;padding:2px 6px;border:1px solid #ccd;max-width:140px}
+.qst.st-OnTrack,.qts.st-OnTrack{background:#e6f4ea;color:#1e6b34}
+.qst.st-AtRisk,.qts.st-AtRisk{background:#fff4dc;color:#8a5a00}
+.qst.st-Delayed,.qts.st-Delayed{background:#fde8e8;color:#a32020}
+.qst.st-Completed,.qts.st-Completed{background:#e3eefc;color:#1d4fa8}
+.qst.st-OnHold,.qts.st-OnHold,.qst.st-Cancelled,.qts.st-Cancelled{background:#eceff3;color:#556}
+.qsto{font-size:10px;color:#99a;margin-top:2px}
+.qtk{margin-top:10px;border-radius:8px;transition:box-shadow .3s}
+.qtk.flash{box-shadow:0 0 0 3px #f4b400}
+.qtkt{width:100%;font-size:12px}.qtkt td,.qtkt th{padding:4px 6px}
+.qtkp{width:58px;text-align:right}
+.qtk .late{color:#c62828;font-weight:600}
+.qtkmsg{background:#fff8e1;border:1px solid #f4d06f;border-radius:6px;padding:6px 10px;margin-bottom:6px;font-size:12px}
+.qdly{white-space:nowrap}.qdly.on{background:#fde8e8;color:#a32020;border-color:#f3b4b4}
