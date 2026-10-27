@@ -380,3 +380,11 @@ body.has-unsaved nav.tabs button[data-t="Changes"]{background:#FFC000;color:#1b1
 .altab th:nth-child(1){width:90px}.altab th:nth-child(2){width:170px}.altab th:nth-child(3){width:80px}
 .nfdrops{display:grid;grid-template-columns:1fr 1fr;gap:8px}@media (max-width:700px){.nfdrops{grid-template-columns:1fr}}
 .nfdrops .nfdrop{font-size:12.5px;line-height:1.45}
+/* Gantt tree guides */
+.g-row .gtv,.g-row .gte{position:absolute;top:0;bottom:0;width:10px;pointer-events:none}
+.g-row .gtv{border-left:1.5px solid #B8C4D4}
+.g-row .gte{border-left:1.5px solid #B8C4D4}
+.g-row .gte::after{content:"";position:absolute;left:0;top:50%;width:9px;border-top:1.5px solid #B8C4D4}
+.g-row .gte.last{bottom:50%}
+.g-row.gf .g-name{font-size:13px;color:#1F3864}.g-row.gl .g-name{color:#1F3864;font-weight:600}
+.g-left .g-row{position:relative}
