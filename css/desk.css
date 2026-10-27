@@ -374,3 +374,7 @@ body.has-unsaved nav.tabs button[data-t="Changes"]{background:#FFC000;color:#1b1
 .hl3{display:none}@media (max-width:1700px){.hl3{display:inline}}
 @media (max-width:1400px){.hgrp.today .glab{display:none}#fileName{max-width:70px}}
 @media (max-width:1500px){#chgBadge{display:none}}
+.altab td{vertical-align:top}.altab .nowrap{white-space:nowrap}.alline{color:#475467;font-size:12.5px;margin-top:2px}
+.alverb{font-weight:600}.alverb.v-Created{color:#1E6B24}.alverb.v-Deleted{color:#B42318}.alverb.v-Updated{color:#1F4E79}.alverb.v-Changed{color:#5B3DB5}
+.alcan{cursor:pointer}.alcan:hover{background:#F5F8FC}.altw{color:#2E75B6;font-size:12px;white-space:nowrap}.alsub td{background:#FAFBFD;font-size:12.5px;padding-top:3px;padding-bottom:3px}.alfld{font-weight:600}
+.altab th:nth-child(1){width:90px}.altab th:nth-child(2){width:170px}.altab th:nth-child(3){width:80px}

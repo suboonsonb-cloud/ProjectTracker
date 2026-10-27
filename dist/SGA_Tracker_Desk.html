@@ -381,6 +381,10 @@ body.has-unsaved nav.tabs button[data-t="Changes"]{background:#FFC000;color:#1b1
 .hl3{display:none}@media (max-width:1700px){.hl3{display:inline}}
 @media (max-width:1400px){.hgrp.today .glab{display:none}#fileName{max-width:70px}}
 @media (max-width:1500px){#chgBadge{display:none}}
+.altab td{vertical-align:top}.altab .nowrap{white-space:nowrap}.alline{color:#475467;font-size:12.5px;margin-top:2px}
+.alverb{font-weight:600}.alverb.v-Created{color:#1E6B24}.alverb.v-Deleted{color:#B42318}.alverb.v-Updated{color:#1F4E79}.alverb.v-Changed{color:#5B3DB5}
+.alcan{cursor:pointer}.alcan:hover{background:#F5F8FC}.altw{color:#2E75B6;font-size:12px;white-space:nowrap}.alsub td{background:#FAFBFD;font-size:12.5px;padding-top:3px;padding-bottom:3px}.alfld{font-weight:600}
+.altab th:nth-child(1){width:90px}.altab th:nth-child(2){width:170px}.altab th:nth-child(3){width:80px}
 </style>
 </head>
 <body>
@@ -2421,21 +2425,32 @@ async function ensureLogSheet() {
 }
 function logWrite(r, vals) { const n = S.changes.length; vals.forEach((v, i) => setCell(LOG_SHEET, LOG_COLS[i], r, v)); S.changes.length = n; }   // the log itself is not a "change"
 
+/* only important edits are logged: input fields of these sheets (+ users and E2E flows) */
+const LOG_SHEETS_KEEP = ["Projects", "Activities", "Benefits", "RAIDD", "Realisation", "Master_Data", "Lists"];
 /* net changes → readable log lines */
 function logLines(all) {
   const out = []; const fmtv = (col, v) => { const x = col && col.type === "date" ? fmtDate(v) : col && col.type === "pct" ? fmtPct(v) : v; const t = String(x ?? ""); return t.length > 300 ? t.slice(0, 300) + "…" : t; };
   const area = { Projects: "Project", Activities: "Task", Benefits: "Benefit", RAIDD: "RAIDD", Realisation: "Actuals", Master_Data: "Settings", Lists: "Settings", Benefit_Plan: "Benefit plan", Migration_Log: "Sync" };
   for (const c of all) {
     if (c.sheet === "Users") { const r = +c.ref.replace(/[A-Z]+/g, ""), cl = c.ref.replace(/\d+/g, ""); if (r === 1) continue; const pw = cl === UC.pw;
-      out.push(["Access", String(gv("Users", "B", r) || c.orig || "") + (gv("Users", "A", r) ? " · " + gv("Users", "A", r) : ""), (U_HEAD[U_COLS.indexOf(cl)] || cl) + (pw ? (c.val ? " (set / reset)" : " (cleared)") : ""), pw ? "" : String(c.orig ?? ""), pw ? "" : String(c.val ?? ""), "Users!" + c.ref]); continue; }
+      const cell = col => all.find(y => y.sheet === "Users" && y.ref === col + r); const oB = cell("B") ? String(cell("B").orig ?? "") : String(gv("Users", "B", r) || ""), oA = cell("A") ? String(cell("A").orig ?? "") : String(gv("Users", "A", r) || "");
+      const nB = String(gv("Users", "B", r) || ""), nA = String(gv("Users", "A", r) || "");
+      const field = U_HEAD[U_COLS.indexOf(cl)] || cl, recO = oB + (oA ? " · " + oA : ""), recN = nB + (nA ? " · " + nA : "");
+      const replaced = oB && nB && oB.toLowerCase() !== nB.toLowerCase() && oA !== nA;   /* a deleted user's row re-used for a new person → log as delete + create */
+      if (replaced) { if (c.orig !== "" && c.orig != null) out.push(["Access", recO, field + (pw ? " (cleared)" : ""), pw ? "" : String(c.orig), "", "Users!" + c.ref]);
+        if (c.val !== "" && c.val != null) out.push(["Access", recN, field + (pw ? " (set / reset)" : ""), "", pw ? "" : String(c.val), "Users!" + c.ref]); continue; }
+      out.push(["Access", nB ? recN : recO, field + (pw ? (c.val ? " (set / reset)" : " (cleared)") : ""), pw ? "" : String(c.orig ?? ""), pw ? "" : String(c.val ?? ""), "Users!" + c.ref]); continue; }
     if (c.sheet === LOG_SHEET || (typeof E2EF !== "undefined" && (c.sheet === E2EF || c.sheet === E2EM))) continue;
+    if (!LOG_SHEETS_KEEP.includes(c.sheet)) continue;   /* system sheets (E2E_Map, Migration_Log, GanttKeys …) are not logged */
     const r = +c.ref.replace(/[A-Z]+/g, ""), colL = c.ref.replace(/\d+/g, "");
     const col = (CFG[c.sheet] ? CFG[c.sheet].cols : []).find(x => x.col === colL);
+    if (CFG[c.sheet] && (!col || col.kind && col.kind !== "in")) continue;   /* only input columns — no IDs, locks or calculated cells */
     let rec = ""; try { rec = rowProject(c.sheet, r) || ""; } catch (e) { }
-    if (c.sheet === "Activities" && typeof FA !== "undefined") { const t = gv("Activities", FA.id, r); const nm = gv("Activities", FA.task, r); if (t || nm) rec = (t ? t + " · " : "") + (nm || "") + (rec ? " (" + rec.split(" · ")[0] + ")" : ""); }
+    let fpre = "";
+    if (c.sheet === "Activities" && typeof FA !== "undefined") { const nm = gv("Activities", FA.task, r) || gv("Activities", FA.id, r); fpre = nm ? nm + " · " : ""; /* tasks are grouped under their project: one line per project */ }
     else if (c.sheet === "RAIDD" || c.sheet === "Benefits") { const id = gv(c.sheet, KEY[c.sheet], r); if (id) rec = id + (rec ? " (" + rec.split(" · ")[0] + ")" : ""); }
     const kind = String(c.orig ?? "") === "" ? "added" : String(c.val ?? "") === "" ? "cleared" : "";
-    out.push([area[c.sheet] || c.sheet, rec, (col ? col.h : colL) + (kind ? " (" + kind + ")" : ""), fmtv(col, c.orig), fmtv(col, c.val), c.sheet + "!" + c.ref]);
+    out.push([c.sheet === "Activities" ? "Task" : area[c.sheet] || c.sheet, rec, fpre + (col ? col.h : colL) + (kind ? " (" + kind + ")" : ""), fmtv(col, c.orig), fmtv(col, c.val), c.sheet + "!" + c.ref]);
   }
   try { for (const x of e2eChangeLines(all)) out.push(["E2E flow", x.name + " · " + x.ver, "Diagram", "", x.text, ""]); } catch (e) { }
   return out;
@@ -2461,20 +2476,38 @@ function vActivity() {
   const saves = new Set(all.map(x => x.v[0] + "|" + x.v[1])).size;
   const pend = S.changes.length ? logLines(netChanges()) : [];
   const sel = (id, list, v, all0) => `<select id="${id}"><option value="">${all0}</option>${list.map(x => `<option ${x === v ? "selected" : ""}>${esc(x)}</option>`).join("")}</select>`;
-  let lastKey = "";
-  const body = rows.slice(0, F.n).map(x => { const key = x.v[0] + "|" + x.v[1]; const hd = key !== lastKey ? `<tr class="grph"><td colspan="6"><b>${esc(x.v[0])}</b> · ${esc(x.v[1] || "(not named)")} <span class="muted">— ${rows.filter(y => y.v[0] + "|" + y.v[1] === key).length} change(s)</span></td></tr>` : ""; lastKey = key;
-    return hd + `<tr><td><span class="alarea a-${esc(x.v[2]).replace(/\W/g, "")}">${esc(x.v[2])}</span></td><td><span class="clip">${esc(x.v[3])}</span></td><td>${esc(x.v[4])}</td><td class="muted"><span class="clip">${esc(x.v[5])}</span></td><td><b class="clip">${esc(x.v[6])}</b></td><td class="muted" style="font-size:11px">${esc(x.v[7])}</td></tr>`; }).join("");
+  /* one line per action (save × area × record), its field changes underneath (▸) */
+  const NOUN = { Access: "user", Project: "project", Task: "tasks of", Benefit: "benefit line", RAIDD: "RAIDD item", Actuals: "actuals", Settings: "setting", "E2E flow": "flow", "Benefit plan": "benefit plan", Sync: "sync record" };
+  const groups = []; const gi = {};
+  for (const x of rows) { const k = x.v[0] + "|" + x.v[1] + "|" + x.v[2] + "|" + x.v[3]; if (!(k in gi)) { gi[k] = groups.length; groups.push({ k, when: x.v[0], who: x.v[1], area: x.v[2], rec: x.v[3], items: [] }); } groups[gi[k]].items.push(x); }
+  F.open = F.open || {};
+  const fld = f => String(f).replace(/\s*\((added|cleared|set \/ reset)\)$/, "");
+  const verb = g => { const it = g.items; if (g.area === "E2E flow") return "Changed"; const allNew = it.every(x => !x.v[5]), allGone = it.every(x => !x.v[6] && !/set \/ reset/.test(x.v[4]));
+    return allNew ? "Created" : allGone ? "Deleted" : "Updated"; };
+  const short = g => { const it = g.items.filter(x => x.v[4]); const parts = it.slice(0, 4).map(x => { const f = fld(x.v[4]); if (/password/i.test(f)) return /cleared/.test(x.v[4]) ? "password removed" : "password set"; const v = x.v[6] || "(blank)"; return `${f}: ${v.length > 40 ? v.slice(0, 40) + "…" : v}`; });
+    return parts.join(" · ") + (it.length > 4 ? ` · +${it.length - 4} more` : ""); };
+  const val = (x, nv) => { const f = x.v[4]; if (/password/i.test(f)) return /cleared/.test(f) ? "removed" : "changed"; const t = nv ? x.v[6] : x.v[5]; return t ? (t.length > 36 ? t.slice(0, 36) + "…" : t) : "blank"; };
+  const sentence = g => { const v = verb(g); const it = g.items;
+    if (v === "Created" || v === "Deleted") { const keys = it.filter(x => !/^(name|title|project name|task name|email)/i.test(fld(x.v[4]))).slice(0, 3).map(x => /password/i.test(x.v[4]) ? "password" : `${fld(x.v[4])}: ${val(x, v === "Created")}`); return keys.join(" · ") + (it.length > 4 ? " …" : ""); }
+    return it.slice(0, 3).map(x => /password/i.test(x.v[4]) ? "password changed" : `${fld(x.v[4])}: ${val(x, false)} → ${val(x, true)}`).join(" · ") + (it.length > 3 ? ` · +${it.length - 3} more` : ""); };
+  const body = groups.slice(0, F.n).map(g => { const v = verb(g), open = !!F.open[g.k], more = g.items.length > 3;
+    const sub = open ? g.items.map(x => `<tr class="alsub"><td colspan="3"></td><td><span class="alfld">${esc(fld(x.v[4]))}</span>: ${/password/i.test(x.v[4]) ? (/cleared/.test(x.v[4]) ? "removed" : "changed (hidden)") : `<span class="muted">${esc(x.v[5] || "blank")}</span> → <b>${esc(x.v[6] || "blank")}</b>`}</td></tr>`).join("") : "";
+    return `<tr class="alact${more ? " alcan" : ""}" ${more ? `data-alk="${esc(g.k)}" tabindex="0" role="button" aria-expanded="${open}" title="Show every change"` : ""}>
+      <td class="nowrap muted">${esc(g.when.slice(5))}</td><td class="nowrap">${esc(g.who || "—")}</td><td><span class="alarea a-${esc(g.area).replace(/\W/g, "")}">${esc(g.area)}</span></td>
+      <td><span class="alverb v-${v}">${v} ${NOUN[g.area] || ""}</span> <b>${esc(g.rec || "")}</b><div class="alline">${esc(sentence(g))}${more ? ` <span class="altw">${open ? "▾ less" : "▸ all changes"}</span>` : ""}</div></td></tr>` + sub; }).join("");
   return `<div class="card pad stcard"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0">Activity log</h2>
-      <span class="muted">${all.length ? `${all.length.toLocaleString()} change(s) in ${saves} save(s)` : "Nothing logged yet — every Save adds who changed what here (sheet “Activity_Log” in the workbook)."}</span><span style="flex:1"></span>
+      <span class="muted">${all.length ? `${saves} save(s)` : "Nothing logged yet — every Save adds who changed what here (sheet “Activity_Log” in the workbook)."}</span><span style="flex:1"></span>
       <span class="muted" style="font-size:12.5px">You: <b>${esc(curUser() || "not named")}</b></span><button class="btn small" id="alWho">✎ Change name</button></div>
     ${pend.length ? `<div class="note" style="margin:10px 0 0">${pend.length} unsaved change(s) will be logged as <b>${esc(curUser() || "(not named)")}</b> when you save. <a href="#" id="alRev">Review</a></div>` : ""}
     ${all.length ? `<div class="alfilters"><input type="search" id="alQ" placeholder="Search record, field, value…" value="${esc(F.q)}">${sel("alWhoF", whos, F.who, "Everyone")}${sel("alArea", areas, F.area, "All areas")}
       <label>From <input type="date" id="alFrom" value="${esc(F.from)}"></label><label>To <input type="date" id="alTo" value="${esc(F.to)}"></label>
-      ${F.q || F.who || F.area || F.from || F.to ? `<button class="btn small" id="alClr">✕ Clear</button>` : ""}<span class="muted" style="font-size:12px">${rows.length.toLocaleString()} shown</span><button class="btn small" id="alCsv">⬇ CSV</button></div>
-    <div class="tablewrap" style="max-height:620px;margin-top:8px"><table class="data altab"><thead><tr><th>Area</th><th>Record</th><th>Field</th><th>Old</th><th>New</th><th>Cell</th></tr></thead><tbody>${body || `<tr><td colspan="6" class="muted">No entries match</td></tr>`}</tbody></table></div>
-    ${rows.length > F.n ? `<p><button class="btn small" id="alMore">Show ${Math.min(500, rows.length - F.n)} more</button></p>` : ""}` : ""}</div>`;
+      ${F.q || F.who || F.area || F.from || F.to ? `<button class="btn small" id="alClr">✕ Clear</button>` : ""}<span class="muted" style="font-size:12px">${groups.length.toLocaleString()} change(s)</span><button class="btn small" id="alCsv">⬇ CSV</button></div>
+    <div class="tablewrap" style="max-height:620px;margin-top:8px"><table class="data altab"><thead><tr><th>When</th><th>Who</th><th>Area</th><th>What changed</th></tr></thead><tbody>${body || `<tr><td colspan="4" class="muted">No entries match</td></tr>`}</tbody></table></div>
+    ${groups.length > F.n ? `<p><button class="btn small" id="alMore">Show ${Math.min(500, groups.length - F.n)} more</button></p>` : ""}` : ""}</div>`;
 }
 function bindActivity(m, re) {
+  m.querySelectorAll("[data-alk]").forEach(t => { const tg = () => { const F = UI.alog; F.open[t.dataset.alk] ? delete F.open[t.dataset.alk] : F.open[t.dataset.alk] = 1; re(); }; t.onclick = tg; t.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); tg(); } }; });
+  const ex = m.querySelector("#alExp"); if (ex) ex.onclick = () => { const F = UI.alog; if (Object.keys(F.open).length) F.open = {}; else m.querySelectorAll("[data-alk]").forEach(t => F.open[t.dataset.alk] = 1); re(); };
   const F = UI.alog; const g = id => m.querySelector("#" + id);
   const set = (k, v) => { F[k] = v; F.n = 200; re(); };
   if (g("alQ")) { g("alQ").oninput = e => { clearTimeout(g("alQ")._t); const v = e.target.value; g("alQ")._t = setTimeout(() => { set("q", v); const n = document.getElementById("alQ"); if (n) { n.focus(); n.setSelectionRange(v.length, v.length); } }, 250); }; }
