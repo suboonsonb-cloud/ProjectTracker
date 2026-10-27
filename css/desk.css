@@ -526,3 +526,4 @@ details.qcols summary{cursor:pointer;display:inline-block;padding:3px 10px;borde
 .etb:focus-visible{outline:2px solid #2E90FA}
 .e2etree .etl::before{content:"";position:absolute;left:-1px;top:50%;width:10px;border-top:1.5px solid #CFC7F7}
 .etb.par{border-color:#7A5AF8;background:#F1EDFF}
+.qrdt.urg{background:#FFE8D6;color:#B54708;font-weight:700}

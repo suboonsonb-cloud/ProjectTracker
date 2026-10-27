@@ -170,8 +170,11 @@ function raiddUpd(r){const now=Date.now();if(!RDU.m||now-RDU.t>500){const m={};t
     for(const c of S.changes||[])if(c.sheet==="RAIDD")m[+String(c.ref).replace(/[A-Z]+/g,"")]=TODAY;RDU={t:now,m}}
   return RDU.m[r]||(+gv("RAIDD",FD.raised,r)||"")}
 function vRaidd(m){if(view==="RAIDD"){view="Projects";UI.pview="raidd";renderTabs()}UI.sort=UI.sort||{};if(!UI.sort.RAIDD)UI.sort.RAIDD={i:0,dir:-1};listView(m,"RAIDD",{noun:"RAIDD item",top:hubHead("raidd"),e2e:{pid:r=>gv("RAIDD",FD.pid,r),noun:"RAIDD items"},prefill:()=>({[FD.status]:"Open",[FD.raised]:TODAY}),
-  filters:[{k:"type",label:"Type"},{k:"status",label:"Status"},{k:"pid",label:"Project"}],
-  filterVal:(k,r)=>k==="flow"?((projE2E(gv("RAIDD",FD.pid,r)).flows[0]||{}).name||NOFLOW):gv("RAIDD",FD[k],r),
+  filters:[{k:"type",label:"Type"},{k:"status",label:"Status"},{k:"pid",label:"Project"},{k:"cf",label:"CF"},{k:"proc",label:"Process area"},{k:"team",label:"Division / team"},{k:"init",label:"Project type"},{k:"pic",label:"PIC"}],
+  filterVal:(k,r)=>{const pr=["cf","proc","team","init"].includes(k)?projRowById(gv("RAIDD",FD.pid,r)):null;
+    if(k==="cf")return pr?gv("Projects",FP.cf,pr)||"(blank)":"(no project)";if(k==="proc")return pr?gv("Projects",FP.proc,pr)||"(blank)":"(no project)";
+    if(k==="team")return pr?gv("Projects","AB",pr)||"(blank)":"(no project)";if(k==="init")return pr?gv("Projects",FP.init,pr)||"(blank)":"(no project)";
+    if(k==="pic")return gv("RAIDD",FD.re,r)||gv("RAIDD",FD.pic,r)||"(blank)";return gv("RAIDD",FD[k],r)},
   cols:[{h:"Updated",v:r=>raiddUpd(r),html:r=>{const u=raiddUpd(r);return u?`<span class="nowrap" title="Last change (activity log), else raised date">${fmtDate(u)}</span>`:`<span class="muted" title="No change saved since the activity log started, and no raised date">—</span>`}},{h:"Type",v:r=>gv("RAIDD",FD.type,r)},{h:"Project",v:r=>gv("RAIDD",FD.pid,r),html:r=>{const id=gv("RAIDD",FD.pid,r);const pr=id?projRowById(id):null;return `<span class="clip" title="${esc(id)}">${esc(pr?gv("Projects",FP.name,pr):id)}</span><div class="zid">${esc(id)}</div>`}},
     {h:"E2E flow",v:r=>Object.values(projE2E(gv("RAIDD",FD.pid,r)).by||{}).map(b=>b.name).join(", "),html:r=>{const b=Object.values(projE2E(gv("RAIDD",FD.pid,r)).by||{});return b.length?b.map(x=>`<div class="rdfl">⇄ ${esc(x.name)}</div>`).join(""):`<span class="muted">—</span>`}},
     {h:"Lane",v:r=>[...new Set(Object.values(projE2E(gv("RAIDD",FD.pid,r)).by||{}).flatMap(b=>b.lanes))].join(", "),html:r=>{const l=[...new Set(Object.values(projE2E(gv("RAIDD",FD.pid,r)).by||{}).flatMap(b=>b.lanes))].filter(Boolean);return l.length?l.map(x=>`<div class="rdln">${esc(x)}</div>`).join(""):`<span class="muted">—</span>`}},{h:"Task",v:r=>gv("RAIDD",FD.tid,r)},

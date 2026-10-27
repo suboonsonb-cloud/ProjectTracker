@@ -60,7 +60,7 @@ function quFocusTasks(r,want){const F=UI.qu;F.open.add(r);F.tkMsg=r;F.tkWant=wan
 /* RAIDD column: open items by type + the ⚑ button */
 function raiddCell(pid){const rs=raiddOf(pid);const open=rs.filter(x=>gv("RAIDD",FD.status,x)!=="Closed");const by={};open.forEach(x=>{const t=gv("RAIDD",FD.type,x)||"Item";by[t]=(by[t]||0)+1});
   const od=open.filter(x=>+gv("RAIDD",FD.due,x)&&+gv("RAIDD",FD.due,x)<TODAY&&gv("RAIDD",FD.type,x)!=="Re-plan").length;
-  return `${raiddBtn(pid)}${Object.keys(by).length?`<div class="qrd">${Object.entries(by).map(([t,n])=>`<span class="qrdt t-${esc(t).replace(/\W/g,"")}">${n} ${esc(t)}${n>1&&!/s$/.test(t)?"s":""}</span>`).join("")}${od?`<span class="qrdt od">${od} overdue</span>`:""}</div>`:""}`}
+  return `${raiddBtn(pid)}${Object.keys(by).length?`<div class="qrd">${Object.entries(by).map(([t,n])=>`<span class="qrdt t-${esc(t).replace(/\W/g,"")}">${n} ${esc(t)}${n>1&&!/s$/.test(t)?"s":""}</span>`).join("")}${od?`<span class="qrdt od">${od} overdue</span>`:""}${(()=>{const u=open.filter(raiddUrgent).length;return u?`<span class="qrdt urg" title="Overdue, due within 7 days or High priority">🔥 ${u} urgent</span>`:""})()}</div>`:""}`}
 /* tasks of the project inside the ▸ details: stage, task, PIC, plan, % done (editable), status */
 function quTasksHtml(r){const pid=pId(r);const ts=tasksOfProject(pid);const tovr=listFromName("L_TOvr");
   const W=UI.qu.tkWant,now=pStat(r);
@@ -326,8 +326,11 @@ function quAfter(m,r,changed,focusKey){if(changed)UI.qu.edited.add(r);
   if(wrap&&st){wrap.scrollTop=st[0];wrap.scrollLeft=st[1]}
   const c=m.querySelector("#quCount");if(c)c.textContent=quCountText();renderTabs()}
 /* RAIDD filter on the Projects page */
-const QU_RD=[["","All"],["open","Has open items"],["od","Has overdue items"],["none","No open items"],["t:Risk","Open Risk"],["t:Issue","Open Issue"],["t:Action","Open Action"],["t:Decision","Open Decision"],["t:Dependency","Open Dependency"],["t:Assumption","Open Assumption"],["t:Re-plan","Re-plan (any)"]];
+const QU_RD=[["","All"],["urg","🔥 Urgent"],["open","Has open items"],["od","Has overdue items"],["none","No open items"],["t:Risk","Open Risk"],["t:Issue","Open Issue"],["t:Action","Open Action"],["t:Decision","Open Decision"],["t:Dependency","Open Dependency"],["t:Assumption","Open Assumption"],["t:Re-plan","Re-plan (any)"]];
+/* urgent = open, not a re-plan, and overdue / due within 7 days / priority High or Critical */
+function raiddUrgent(x){if(gv("RAIDD",FD.status,x)==="Closed"||gv("RAIDD",FD.type,x)==="Re-plan")return false;const d=+gv("RAIDD",FD.due,x)||0;return (d&&d<=TODAY+7)||/high|critical|urgent/i.test(String(gv("RAIDD",FD.prio,x)||""))}
 function quRdPass(r,k){if(!k)return true;const rs=raiddOf(pId(r));const open=rs.filter(x=>gv("RAIDD",FD.status,x)!=="Closed");
+  if(k==="urg")return open.some(raiddUrgent);
   if(k==="open")return open.length>0;if(k==="none")return !open.length;
   if(k==="od")return open.some(x=>+gv("RAIDD",FD.due,x)&&+gv("RAIDD",FD.due,x)<TODAY&&gv("RAIDD",FD.type,x)!=="Re-plan");
   const t=k.slice(2);if(t==="Re-plan")return rs.some(x=>gv("RAIDD",FD.type,x)==="Re-plan");return open.some(x=>gv("RAIDD",FD.type,x)===t)}
