@@ -457,3 +457,5 @@ details.qcols summary{cursor:pointer;display:inline-block;padding:3px 10px;borde
 /* r32 — Gantt filters (same as dashboard) */
 .gq{display:flex;align-items:center;gap:6px;font-size:13px;color:#556}
 .gsttb{margin-top:-4px}
+/* r33 — Summary card grows with the table so the white background covers every column */
+.qwrap.qsimple{width:max-content;min-width:100%;overflow:visible;box-sizing:border-box}
