@@ -502,3 +502,6 @@ details.qcols summary{cursor:pointer;display:inline-block;padding:3px 10px;borde
 .qtkt tbody tr:nth-child(even) td{background:#FAFBFD}
 .qtkt td{border-bottom:1px solid #EEF1F5}
 .qsimple tr.qdet .qtkmsg{margin-bottom:8px}
+.qbplan.qclk,.qbact.qclk{border:1px dashed transparent}
+.qbplan.qclk:hover,.qbact.qclk:hover{border-color:#9DB3D3}
+.qbplan.qclk::after,.qbact.qclk::after{content:"✎";font-size:10px;color:#9AA7B8;margin-left:6px}
