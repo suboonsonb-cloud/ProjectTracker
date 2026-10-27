@@ -154,7 +154,7 @@ function vProjectWS(m,r){
    ${benSection(r,pid)}${e2eProjectSection(pid)}<p style="text-align:right;margin:14px 0"><button class="linkdanger" id="wsDel">Delete this project…</button></p><datalist id="dlPeople">${listFromName("L_People").map(o=>`<option value="${esc(o)}">`).join("")}</datalist>`;
   bindPview(m);$("#wsBack").onclick=()=>{UI.proj=null;UI.wsOpen=false;render()};
   $("#wsDet").ontoggle=e=>{if(e.target.id==="wsDet")UI.wsOpen=e.target.open};$("#wsMore").ontoggle=e=>{e.stopPropagation();UI.wsMore=e.target.open};
-  $("#wsGantt").onclick=()=>{if(pid){UI.gantt.proj=pid;UI.gantt.open.add(pid);UI.gantt.level="tasks";UI.gantt.bu=UI.gantt.cf=UI.gantt.proc=""}view="Gantt";UI.gantt._scrolled=false;render()};
+  $("#wsGantt").onclick=()=>{if(pid){UI.gantt.q=pid;UI.gantt.open.add(pid);UI.gantt.level="tasks";UI.gantt.bu=UI.gantt.cf=UI.gantt.proc=""}view="Gantt";UI.gantt._scrolled=false;render()};
   $("#wsDel").onclick=()=>askDelete("Projects",r);
   if($("#wsRp"))$("#wsRp").onclick=()=>addNew("RAIDD",()=>({[FD.type]:"Re-plan",[FD.pid]:pid,[FD.desc]:"Re-plan: extend project timeline — reason: ",[FD.status]:"Open",[FD.rpok]:"N",[FD.raised]:TODAY}));
   if($("#wsStd"))$("#wsStd").onclick=()=>{genStdPlan(r);wsRerender();toast("Standard tasks added — rename them and adjust dates as needed")};

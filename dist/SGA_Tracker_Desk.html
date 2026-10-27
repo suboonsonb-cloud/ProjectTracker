@@ -461,6 +461,9 @@ details.qcols summary{cursor:pointer;display:inline-block;padding:3px 10px;borde
 .g-late{position:absolute;top:3px;height:16px;border-radius:3px 0 0 3px;background:#C62828;opacity:.92;overflow:hidden;color:#fff;font-size:10px;font-weight:700;line-height:16px;padding-left:4px;white-space:nowrap}
 .g-late.t{top:4px;height:14px;line-height:14px}
 .g-latetag{position:absolute;top:3px;font-size:10px;font-weight:700;color:#fff;background:#C62828;border-radius:8px;padding:1px 6px;white-space:nowrap;pointer-events:auto}
+/* r32 — Gantt filters (same as dashboard) */
+.gq{display:flex;align-items:center;gap:6px;font-size:13px;color:#556}
+.gsttb{margin-top:-4px}
 </style>
 </head>
 <body>
@@ -2013,9 +2016,13 @@ function vGantt0(m){
   const bus=uniq(P.map(p=>fv(p,FP.bu)));const P1=P.filter(p=>!g.bu||fv(p,FP.bu)===g.bu);
   const cfs=uniq(P1.map(p=>fv(p,FP.cf)));if(g.cf&&!cfs.includes(g.cf))g.cf="";const P2=P1.filter(p=>!g.cf||fv(p,FP.cf)===g.cf);
   const procs=uniq(P2.map(p=>fv(p,FP.proc)));if(g.proc&&!procs.includes(g.proc))g.proc="";const P2b=P2.filter(p=>!g.proc||fv(p,FP.proc)===g.proc);
-  const teams=uniq(P2b.map(p=>fv(p,"AB")));if(g.team&&!teams.includes(g.team))g.team="";const P3=P2b.filter(p=>!g.team||fv(p,"AB")===g.team);
-  if(g.proj&&!P3.some(p=>p.id===g.proj))g.proj="";
-  let PR=P3.filter(p=>!g.proj||p.id===g.proj);
+  const teams=uniq(P2b.map(p=>fv(p,"AB")));if(g.team&&!teams.includes(g.team))g.team="";const P2c=P2b.filter(p=>!g.team||fv(p,"AB")===g.team);
+  const inits=uniq(P2c.map(p=>fv(p,FP.init)));if(g.init&&!inits.includes(g.init))g.init="";const P2d=P2c.filter(p=>!g.init||fv(p,FP.init)===g.init);
+  g.stOff=Array.isArray(g.stOff)?g.stOff:[];const off=new Set(g.stOff);const sts=off.size?STL.slice():STL.filter(st=>P2d.some(p=>pStat(p.r)===st));
+  const P3=P2d.filter(p=>!off.has(pStat(p.r)));
+  /* project box: an exact ID shows that project, any other text filters by ID / name */
+  const qq=String(g.q||"").trim();const exact=qq&&P3.find(p=>p.id===qq);const ql=qq.toLowerCase();
+  let PR=P3.filter(p=>!qq||(exact?p.id===qq:(p.id+" "+gv("Projects",FP.name,p.r)).toLowerCase().includes(ql)));
   if(g.hideDone)PR=PR.filter(p=>!["Completed","Cancelled"].includes(pStat(p.r)));
   const tasksBy={};rowsOf("Activities").forEach(r=>{const pid=gv("Activities",FA.pid,r);(tasksBy[pid]=tasksBy[pid]||[]).push(r)});
   const chg=changedRows("Activities");
@@ -2083,13 +2090,14 @@ function vGantt0(m){
   const openF=GRP?FLOWS.filter(F=>g.open.has("f:"+F.f.id)):[];
   const swim=openF.map(F=>`<div class="card pad gswim"><div class="e2esnaph"><b>⇄ ${esc(F.f.name)}</b><span class="muted">TO-BE swimlane — ${g.hl&&!String(g.hl).startsWith("f:")?"highlighted: "+esc(String(g.hl).includes("|")?String(g.hl).split("|").pop()+" lane":(projects().find(p=>p.id===g.hl)||{}).name||g.hl):"click a lane or a project in the Gantt to highlight its steps"}</span><span style="flex:1"></span><span class="gzbtns" role="group" aria-label="Zoom the swimlane"><button class="btn small" data-gsz="-" data-f="${esc(F.f.id)}" title="Zoom out">−</button><span class="gzv">${Math.round(((g.swz||{})[F.f.id]||1)*100)}%</span><button class="btn small" data-gsz="+" data-f="${esc(F.f.id)}" title="Zoom in">＋</button><button class="btn small" data-gsz="0" data-f="${esc(F.f.id)}" title="Fit to width">Fit</button></span><button class="btn small" data-gopenflow="${esc(F.f.id)}">Open in E2E flows ›</button></div>
      <div class="e2esnapimg gswimimg" data-gsnap="${esc(F.f.id)}" style="--gsz:${(g.swz||{})[F.f.id]||1}" title="Ctrl + scroll to zoom"></div></div>`).join("");
-  m.innerHTML=`${banner("report")}<div class="toolbar">${sel("gb","BU",bus,g.bu)}${sel("gf","CF",cfs,g.cf)}${sel("gc","Process",procs,g.proc)}${sel("gt","Team",teams,g.team||"")}${sel("gp","Project",P3.map(p=>p.id),g.proj)}
+  m.innerHTML=`${banner("report")}<div class="toolbar">${sel("gb","BU",bus,g.bu)}${sel("gf","CF",cfs,g.cf)}${sel("gc","Process",procs,g.proc)}${sel("gt","Team",teams,g.team||"")}${sel("gi","Project type",inits,g.init||"")}<label class="gq">Project <span style="width:260px;display:inline-block">${comboHtml("gQ",g.q||"",[{v:"",t:`All projects (${P3.length})`},...P3.map(p=>({v:p.id,t:p.id+" — "+gv("Projects",FP.name,p.r)}))],{strict:false})}</span></label>
     <span class="seg" title="Group the Gantt"><button data-ggrp="e2e" class="${g.grp!=="flat"?"on":""}">By E2E flow</button><button data-ggrp="flat" class="${g.grp==="flat"?"on":""}">Projects</button></span>
     <select id="gl"><option value="projects" ${g.level==="projects"?"selected":""}>Projects only</option><option value="stages" ${g.level==="stages"?"selected":""}>+ Stages</option><option value="tasks" ${g.level==="tasks"?"selected":""}>+ Stages + Tasks</option></select>
     <label class="muted" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="gh" ${g.hideDone?"checked":""}> Hide completed/cancelled</label>
     <button class="btn small" id="gx">Expand all</button><button class="btn small" id="gcoll">Collapse all</button>
     <span class="glegend2">${[["Done","Completed"],["On time","On time / remaining"],["At risk of delay","At risk"],["Late","Delayed"],["On-Hold","On hold"]].map(([k,l])=>`<span><i style="background:${FCB[k]}"></i>${l}</span>`).join("")}<span><i class="pl"></i>Plan (lower bar)</span><span><i class="td"></i>Today</span></span>
     <span style="flex:1"></span><span class="nowrapg"><span class="muted">Zoom</span><input type="range" id="gz" min="1" max="5" value="${g.zoom}"></span></div>
+    <div class="toolbar gsttb">${stChips(sts,off,b=>P2d.filter(p=>pStat(p.r)===b).length,"gst")}<span style="flex:1"></span><span class="muted" style="font-size:12px">${PR.length} of ${P.length} projects</span></div>
     ${noE2E?`<div class="warnbox" style="margin-bottom:10px">Grouping by E2E flow needs the E2E_Flows sheet — open <b>SGA_Reduction_Initiative_Tracker_17.xlsx</b> (this workbook is an older version).</div>`:""}${swim}<div class="gantt"><div class="g-left"><div class="g-head" style="display:flex;align-items:flex-end;padding:6px 8px;font-weight:700;font-size:12px;color:var(--navy)"><span class="g-name">${GRP?"E2E flow ▸ Lane ▸ Project ▸ Task":"Project ▸ Stage ▸ Task"}</span><span class="g-ppl" title="Workstream leader">WS leader</span><span class="g-ppl" title="Project lead (project rows) · PIC (task rows)">Lead / PIC</span><span class="g-meta">% done</span></div><div id="gL">${left}</div></div>
     <div class="g-right" id="gR"><div class="g-canvas" style="width:${W}px"><div class="g-head" style="position:sticky">${monthsHtml}</div>${right}
     ${TODAY>=min&&TODAY<=max?`<div class="g-today" style="left:${X(TODAY)}px" title="Today"></div>`:""}</div></div></div>
@@ -2098,7 +2106,8 @@ function vGantt0(m){
   const gl=$("#gL"),gr=$("#gR");gr.onscroll=()=>{gl.style.transform=`translateY(${-gr.scrollTop}px)`};
   gl.parentElement.addEventListener("wheel",e=>{if(!e.deltaY)return;e.preventDefault();gr.scrollTop+=e.deltaY},{passive:false});
   gr.style.maxHeight="calc(100vh - 290px)";gl.parentElement.style.maxHeight="calc(100vh - 290px)";
-  $("#gp").onchange=e=>{g.proj=e.target.value;if(g.proj)g.open.add(g.proj);vGantt(m)};$("#gc").onchange=e=>{g.proc=e.target.value;vGantt(m)};$("#gb").onchange=e=>{g.bu=e.target.value;g.cf="";g.proc="";g.proj="";vGantt(m)};$("#gf").onchange=e=>{g.cf=e.target.value;g.proc="";g.proj="";vGantt(m)};
+  $("#gQ").addEventListener("change",e=>{g.q=e.target.value.trim();if(g.q&&PR.some(p=>p.id===g.q)||projects().some(p=>p.id===g.q))g.open.add(g.q);vGantt(m)});
+  const giS=m.querySelector("#gi");if(giS)giS.onchange=e=>{g.init=e.target.value;vGantt(m)};bindStChips(m,"gst",g,()=>vGantt(m));$("#gc").onchange=e=>{g.proc=e.target.value;vGantt(m)};$("#gb").onchange=e=>{g.bu=e.target.value;g.cf="";g.proc="";g.proj="";vGantt(m)};$("#gf").onchange=e=>{g.cf=e.target.value;g.proc="";g.proj="";vGantt(m)};
   $("#gl").onchange=e=>{g.level=e.target.value;vGantt(m)};$("#gz").oninput=e=>{g.zoom=+e.target.value;vGantt(m)};$("#gh").onchange=e=>{g.hideDone=e.target.checked;vGantt(m)};
   $("#gx").onclick=()=>{PR.forEach(p=>g.open.add(p.id));if(GRP){FLOWS.forEach(F=>{g.open.add("f:"+F.f.id);F.lanes.forEach(L=>g.open.add("f:"+F.f.id+"|"+L.name))});g.open.add("f:none")}if(g.level==="projects")g.level="tasks";vGantt(m)};$("#gcoll").onclick=()=>{g.open.clear();vGantt(m)};
   m.querySelectorAll(".g-caret[data-p]").forEach(c=>c.onclick=e=>{e.stopPropagation();const id=c.dataset.p;g.open.has(id)?g.open.delete(id):g.open.add(id);if(g.level==="projects"&&g.open.has(id))g.level="tasks";vGantt(m)});
@@ -2275,7 +2284,7 @@ function vProjectWS(m,r){
    ${benSection(r,pid)}${e2eProjectSection(pid)}<p style="text-align:right;margin:14px 0"><button class="linkdanger" id="wsDel">Delete this project…</button></p><datalist id="dlPeople">${listFromName("L_People").map(o=>`<option value="${esc(o)}">`).join("")}</datalist>`;
   bindPview(m);$("#wsBack").onclick=()=>{UI.proj=null;UI.wsOpen=false;render()};
   $("#wsDet").ontoggle=e=>{if(e.target.id==="wsDet")UI.wsOpen=e.target.open};$("#wsMore").ontoggle=e=>{e.stopPropagation();UI.wsMore=e.target.open};
-  $("#wsGantt").onclick=()=>{if(pid){UI.gantt.proj=pid;UI.gantt.open.add(pid);UI.gantt.level="tasks";UI.gantt.bu=UI.gantt.cf=UI.gantt.proc=""}view="Gantt";UI.gantt._scrolled=false;render()};
+  $("#wsGantt").onclick=()=>{if(pid){UI.gantt.q=pid;UI.gantt.open.add(pid);UI.gantt.level="tasks";UI.gantt.bu=UI.gantt.cf=UI.gantt.proc=""}view="Gantt";UI.gantt._scrolled=false;render()};
   $("#wsDel").onclick=()=>askDelete("Projects",r);
   if($("#wsRp"))$("#wsRp").onclick=()=>addNew("RAIDD",()=>({[FD.type]:"Re-plan",[FD.pid]:pid,[FD.desc]:"Re-plan: extend project timeline — reason: ",[FD.status]:"Open",[FD.rpok]:"N",[FD.raised]:TODAY}));
   if($("#wsStd"))$("#wsStd").onclick=()=>{genStdPlan(r);wsRerender();toast("Standard tasks added — rename them and adjust dates as needed")};
