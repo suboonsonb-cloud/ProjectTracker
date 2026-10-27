@@ -505,3 +505,24 @@ details.qcols summary{cursor:pointer;display:inline-block;padding:3px 10px;borde
 .qbplan.qclk,.qbact.qclk{border:1px dashed transparent}
 .qbplan.qclk:hover,.qbact.qclk:hover{border-color:#9DB3D3}
 .qbplan.qclk::after,.qbact.qclk::after{content:"✎";font-size:10px;color:#9AA7B8;margin-left:6px}
+/* r38 — E2E process filter as a tree */
+.e2etree{padding:8px 12px 6px;margin-bottom:10px;border-left:4px solid #7A5AF8;background:#FBFAFF}
+.e2etree .eth{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:2px}
+.e2etree ul{list-style:none;margin:0;padding:0}
+.e2etree .etr{margin-left:10px}
+.e2etree .etf{position:relative;padding:2px 0 2px 18px}
+.e2etree .etf::before{content:"";position:absolute;left:0;top:0;bottom:0;border-left:1.5px solid #CFC7F7}
+.e2etree .etf.last::before{bottom:calc(100% - 14px)}
+.e2etree .etf::after{content:"";position:absolute;left:0;top:14px;width:12px;border-top:1.5px solid #CFC7F7}
+.e2etree .etc{display:inline-block;width:14px;margin-left:-2px;margin-right:2px;cursor:pointer;color:#7A5AF8;font-size:11px;user-select:none}
+.e2etree .etl{display:flex;flex-wrap:wrap;gap:4px 4px;margin:3px 0 3px 6px;padding:2px 0 2px 14px;border-left:1.5px solid #CFC7F7;position:relative}
+.e2etree .etl li{position:relative}
+.e2etree .etl li.zero{opacity:.55}
+.etb{all:unset;cursor:pointer;font-size:12.5px;padding:2px 9px;border-radius:12px;border:1px solid #D9D6FE;background:#fff;color:#344054;white-space:nowrap}
+.etb.ln{font-size:12px;padding:1px 8px}
+.etb b{font-weight:700;color:#5925DC;margin-left:2px}
+.etb:hover{border-color:#7A5AF8}
+.etb.on{background:#7A5AF8;border-color:#7A5AF8;color:#fff}.etb.on b{color:#fff}
+.etb:focus-visible{outline:2px solid #2E90FA}
+.e2etree .etl::before{content:"";position:absolute;left:-1px;top:50%;width:10px;border-top:1.5px solid #CFC7F7}
+.etb.par{border-color:#7A5AF8;background:#F1EDFF}

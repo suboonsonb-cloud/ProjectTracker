@@ -75,15 +75,25 @@ const NOFLOW="(not mapped to an E2E flow)";
 function e2eChip(pid,showNone){const x=projE2E(pid);if(!x.flows.length)return showNone?`<span class="pe2e none" title="Not linked to any E2E process step yet — link it on the E2E flows page">○ no E2E flow</span>`:"";
   return `<span class="pe2e" title="E2E: ${esc(x.flows.map(f=>f.name).join(", "))}${x.lanes.length?" · lanes: "+esc(x.lanes.join(", ")):""} · ${x.steps} TO-BE step(s)">⇄ ${esc(x.flows.map(f=>f.name).join(", "))}${x.steps?` · ${x.steps} step${x.steps>1?"s":""}`:""}</span>`}
 function e2eFilterOpts(rows){const fl=new Map();let none=0;for(const r of rows){const x=projE2E(pId(r));if(!x.flows.length)none++;for(const f of x.flows)fl.set(f.id,f.name)}return {flows:[...fl].sort((a,b)=>a[1].localeCompare(b[1])),none}}
-function passE2E(r,flow,lane){if(!flow)return true;const x=projE2E(pId(r));if(flow==="none")return !x.flows.length;if(!x.flows.some(f=>f.id===flow))return false;if(!lane)return true;
-  const f=e2eFlows().find(q=>q.id===flow);const d=f&&f.v["TO-BE"]&&f.v["TO-BE"].doc;return !!d&&(d.shapes||[]).some(sh=>(sh.proj||[]).includes(pId(r))&&laneOfShape(d,sh)===lane)}
+function passE2EPid(pid,flow,lane){if(!flow)return true;const x=projE2E(pid);if(flow==="none")return !x.flows.length;if(!x.flows.some(f=>f.id===flow))return false;if(!lane)return true;
+  const f=e2eFlows().find(q=>q.id===flow);const d=f&&f.v["TO-BE"]&&f.v["TO-BE"].doc;return !!d&&(d.shapes||[]).some(sh=>(sh.proj||[]).includes(pid)&&laneOfShape(d,sh)===lane)}
+function passE2E(r,flow,lane){return passE2EPid(pId(r),flow,lane)}
 function laneOpts(flow){if(!flow||flow==="none")return [];const f=e2eFlows().find(q=>q.id===flow);const d=f&&f.v["TO-BE"]&&f.v["TO-BE"].doc;return d?(d.lanes||[]).map(l=>l.name):[]}
-/* E2E process bar on the Projects page — one selection shared by the Simple and Table views */
-function e2eBar(rows){const F=UI.qu;const EO=e2eFilterOpts(rows);if(F.flow&&F.flow!=="none"&&!EO.flows.some(([id])=>id===F.flow)){F.flow="";F.lane=""}const lanes=laneOpts(F.flow);if(F.lane&&!lanes.includes(F.lane))F.lane="";
-  const cnt=id=>rows.filter(r=>passE2E(r,id,"")).length;const ch=(id,label,n,t)=>`<button type="button" class="e2ech${(F.flow||"")===id?" on":""}" data-e2ef="${esc(id)}" title="${esc(t||label)}">${esc(label)} <b>${n}</b></button>`;
-  return `<div class="card e2ebar" role="group" aria-label="Filter by end-to-end process"><span class="e2ebl">⇄ E2E process</span>${ch("","All projects",rows.length)}${EO.flows.map(([id,n])=>ch(id,n,cnt(id),"Projects linked to steps of "+n)).join("")}${ch("none","Not mapped yet",EO.none,"Projects not linked to any E2E step")}
-    ${lanes.length?`<span class="e2elrow"><span class="e2ebl2">Lane</span><span class="e2elanes">${["",...lanes].map(l=>`<button type="button" class="e2eln${(F.lane||"")===l?" on":""}" data-e2el="${esc(l)}">${esc(l||"All lanes")} <b>${rows.filter(r=>passE2E(r,F.flow,l)).length}</b></button>`).join("")}</span></span>`:""}</div>`}
-function e2eBarBind(m,re){m.querySelectorAll("[data-e2ef]").forEach(b=>b.onclick=()=>{UI.qu.flow=b.dataset.e2ef;UI.qu.lane="";re()});m.querySelectorAll("[data-e2el]").forEach(b=>b.onclick=()=>{UI.qu.lane=b.dataset.e2el;re()})}
+/* E2E process filter as a tree: All ▸ flow ▸ lanes. One selection (UI.qu.flow / lane) shared by Projects, Tasks, Benefits and the RAIDD log.
+   pidOf maps a row to its project ID; noun names what is counted. */
+function e2eBar(rows,pidOf,noun){pidOf=pidOf||pId;noun=noun||"projects";const F=UI.qu;F.eOpen=F.eOpen||new Set();
+  const fl=new Map();let none=0;for(const r of rows){const x=projE2E(pidOf(r));if(!x.flows.length)none++;for(const f of x.flows)fl.set(f.id,f.name)}const flows=[...fl].sort((a,b)=>a[1].localeCompare(b[1]));
+  if(F.flow&&F.flow!=="none"&&!fl.has(F.flow)){F.flow="";F.lane=""}const lanesSel=laneOpts(F.flow);if(F.lane&&!lanesSel.includes(F.lane))F.lane="";
+  const cnt=(id,l)=>rows.filter(r=>passE2EPid(pidOf(r),id,l||"")).length;
+  const node=(id,label,n,cls,title)=>`<button type="button" class="etb ${cls||""}${(F.flow||"")===id?(F.lane?" par":" on"):""}" data-e2ef="${esc(id)}" title="${esc(title||label)}">${label} <b>${n}</b></button>`;
+  const flowLi=([id,name],k)=>{const open=F.eOpen.has(id)||F.flow===id;const lanes=open?laneOpts(id):[];
+    return `<li class="etf${k===flows.length-1&&!none?" last":""}"><span class="etc" data-e2eo="${esc(id)}" title="${open?"Hide":"Show"} lanes">${open?"▾":"▸"}</span>${node(id,"⇄ "+esc(name),cnt(id),"","Only "+noun+" linked to "+name)}
+      ${open&&lanes.length?`<ul class="etl">${lanes.map((l,j)=>{const n=cnt(id,l);return `<li class="${j===lanes.length-1?"last":""}${n?"":" zero"}"><button type="button" class="etb ln${F.flow===id&&F.lane===l?" on":""}" data-e2ef="${esc(id)}" data-e2el="${esc(l)}" title="Only ${noun} in the ${esc(l)} lane">${esc(l)} <b>${n}</b></button></li>`}).join("")}</ul>`:""}</li>`};
+  return `<div class="card e2etree" role="group" aria-label="Filter by end-to-end process"><div class="eth"><span class="e2ebl">⇄ E2E process</span>${node("","All "+noun,rows.length,"all")}<span class="muted" style="font-size:11px">click a flow or lane to filter · ▸ shows the lanes</span></div>
+    <ul class="etr">${flows.map(flowLi).join("")}${none?`<li class="etf last"><span class="etc"></span>${node("none","○ Not mapped yet",none,"","No E2E step linked yet")}</li>`:""}</ul></div>`}
+function e2eBarBind(m,re){const F=UI.qu;F.eOpen=F.eOpen||new Set();
+  m.querySelectorAll("[data-e2ef]").forEach(b=>b.onclick=()=>{const f=b.dataset.e2ef,l=b.dataset.e2el||"";if(!l&&F.flow===f&&!F.lane&&f){F.flow="";}else{F.flow=f;F.lane=l}if(F.flow&&F.flow!=="none")F.eOpen.add(F.flow);re()});
+  m.querySelectorAll("[data-e2eo]").forEach(c=>c.onclick=()=>{const id=c.dataset.e2eo;if(F.eOpen.has(id)||F.flow===id){F.eOpen.delete(id);if(F.flow===id){F.flow="";F.lane=""}}else F.eOpen.add(id);re()})}
 /* RAIDD lives inside the project now: count + side panel */
 function raiddOf(pid){return rowsOf("RAIDD").filter(x=>gv("RAIDD",FD.pid,x)===pid&&(gv("RAIDD",FD.desc,x)!==""||gv("RAIDD",FD.type,x)!==""))}
 function raiddBtn(pid){if(!pid)return "";const rs=raiddOf(pid);const open=rs.filter(x=>gv("RAIDD",FD.status,x)!=="Closed");const od=open.filter(x=>+gv("RAIDD",FD.due,x)&&+gv("RAIDD",FD.due,x)<TODAY&&gv("RAIDD",FD.type,x)!=="Re-plan").length;
