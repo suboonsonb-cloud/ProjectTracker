@@ -124,15 +124,17 @@ const QPK=[["trh","Hours saved / month"],["cr","Cost reduction (THB)"],["ca","Co
 function quPlanHtml(r){const pid=pId(r);const st=UI.qu.plan&&UI.qu.plan[r];if(!st)return "";const {lines}=quLogLines(pid);if(!lines.length)return "";
   const ln=lines.find(b=>b.id===st.line)||lines[0];st.line=ln.id;const br=ln.r;const g=c=>gv("Benefits",c,br);const n=c=>+g(c)||0;
   if(!st.init){st.init=1;st.kind=n(FB.trh)?"trh":n(FB.cr)?"cr":n(FB.ca)?"ca":n(FB.rg)?"rg":"cr";st.amt=n(FB[st.kind]);st.nat=g(FB.nature)||"Recurring";st.basis=g(FB.basis)||"Monthly";const sm=+g(FB.start)||0;st.start=sm?isoFromSerial(sm).slice(0,7):"";st.ramp=g(FB.ramp)===""?"":n(FB.ramp)}
-  if(g(FB.phase)==="Custom")return `<div class="qlog qplan" data-qplan="${r}"><div class="muted" style="font-size:12px">${esc(ln.id)} uses a <b>custom monthly plan</b> — change it in the full benefit plan.</div><div class="qlbtns"><button type="button" class="btn small" data-qpx="${r}">Close</button><a href="#" class="btn small primary" data-qben="${r}">Open benefit plan ›</a></div></div>`;
+  if(g(FB.phase)==="Custom")return `<div class="qlog qplan" data-qplan="${r}"><div class="qlhd"><b>✎ Benefit plan</b></div><div class="muted" style="font-size:12px">${esc(ln.id)} uses a <b>custom monthly plan</b> — change it in the full benefit plan.</div><div class="qlbtns"><button type="button" class="btn small" data-qpx="${r}">Close</button><a href="#" class="btn small primary" data-qben="${r}">Open benefit plan ›</a></div></div>`;
   const thb=st.kind!=="trh";const mx=quRngMax(Math.max(st.amt,n(FB[st.kind]))*2);const rate=g(FB.rate)===""?(+setting("S_Rate")||0):n(FB.rate);
   const gm=thb?st.amt/((st.nat!=="One-off"&&st.basis==="Annual")?12:1):st.amt*rate;const yr=st.nat==="One-off"?gm:gm*12;
   return `<div class="qlog qplan" data-qplan="${r}">
+    <div class="qlhd"><b>✎ Benefit plan</b><a href="#" data-qben="${r}" class="muted">full plan ›</a></div>
     ${lines.length>1?`<label class="qlrow"><span>Line</span><select data-qpf="line">${lines.map(b=>`<option value="${esc(b.id)}" ${b.id===ln.id?"selected":""}>${esc(b.id)} · ${esc(String(b.desc||"").slice(0,28))}</option>`).join("")}</select></label>`:""}
     <div class="qlseg" role="radiogroup" aria-label="Recurring or one-off"><button type="button" data-qpn="Recurring" class="${st.nat!=="One-off"?"on":""}">Recurring</button><button type="button" data-qpn="One-off" class="${st.nat==="One-off"?"on":""}">One-off</button></div>
     <label class="qlrow"><span>Driver</span><select data-qpf="kind">${QPK.map(([k,t])=>`<option value="${k}" ${k===st.kind?"selected":""}>${t}</option>`).join("")}</select></label>
     <div class="qlamt"><input type="range" data-qpf="rng" min="0" max="${mx}" step="${thb?(mx>20000?500:100):0.5}" value="${st.amt}" aria-label="Plan amount"><input type="number" data-qpf="amt" min="0" step="any" value="${st.amt}" aria-label="Plan amount"><span class="muted">${thb?(st.nat==="One-off"?"THB total":`<select data-qpf="basis" class="mini"><option ${st.basis!=="Annual"?"selected":""}>Monthly</option><option ${st.basis==="Annual"?"selected":""}>Annual</option></select>`):"hrs/m"}</span><button type="button" class="btn small" data-qpx2 title="Make the bar go higher">×2</button></div>
-    <div class="qlrow"><span>Start</span><input type="month" data-qpf="start" value="${esc(st.start)}" aria-label="Realisation start month"><span>Ramp</span><input type="number" data-qpf="ramp" min="0" max="36" step="1" value="${st.ramp}" style="width:52px" aria-label="Ramp-up months"><span class="muted">m</span></div>
+    <div class="qlrow"><span>Benefit starts</span><input type="month" data-qpf="start" value="${esc(st.start)}" aria-label="Month the benefit starts"><span class="muted">${st.start?"":"blank = month after the project ends"}</span></div>
+    ${st.nat==="One-off"?"":`<div class="qlrow" title="How many months until the full amount is reached. 0 or 1 = full amount from the first month; 3 = builds up over 3 months (⅓, ⅔, full)."><span>Full amount after</span><input type="number" data-qpf="ramp" min="0" max="36" step="1" value="${st.ramp}" placeholder="1" style="width:52px" aria-label="Months until the full amount is reached"><span class="muted">month(s) — 1 = full from the start</span></div>`}
     <div class="muted qppv">= <b>${fmtShort(yr)}</b> THB ${st.nat==="One-off"?"one-off":"/ year"}${thb?"":` (${fmtNum(st.amt)} h × ${fmtNum(rate)} THB/h × 12)`} · was ${fmtShort(ln.gross)}</div>
     <div class="qlbtns"><button type="button" class="btn small" data-qpx="${r}">Close</button><button type="button" class="btn small primary" data-qps="${r}">Save plan</button></div></div>`}
 function quPlanSave(r){const st=UI.qu.plan[r];const {lines}=quLogLines(pId(r));const ln=lines.find(b=>b.id===st.line);if(!ln)return 0;const br=ln.r;let n=0;
@@ -155,6 +157,7 @@ function quLogHtml(r){const pid=pId(r);const st=UI.qu.log&&UI.qu.log[r];if(!st)r
   const amt=st.amt!=null?st.amt:(actM||Math.round(planM));const top=Math.max(refPlan,...ln.plan.map(v=>+v||0),amt,actM,...ln.act.map(v=>+v||0));const mx=quRngMax(top*2);
   const nMon=st.type==="mon"?cur-mi+1:1;
   return `<div class="qlog" data-qlog="${r}" data-pm="${planM}">
+    <div class="qlhd"><b>＋ Log actual</b><a href="#" data-qben="${r}" class="muted">full plan ›</a></div>
     ${lines.length>1?`<label class="qlrow"><span>Line</span><select data-ql="line">${lines.map(b=>`<option value="${esc(b.id)}" ${b.id===ln.id?"selected":""}>${esc(b.id)} · ${esc(String(b.desc||"").slice(0,28))}</option>`).join("")}</select></label>`:""}
     <div class="qlseg" role="radiogroup" aria-label="How the actual is realised"><button type="button" data-qlt="one" class="${st.type!=="mon"?"on":""}" aria-pressed="${st.type!=="mon"}">One-off</button><button type="button" data-qlt="mon" class="${st.type==="mon"?"on":""}" aria-pressed="${st.type==="mon"}">Every month</button></div>
     <label class="qlrow"><span>${st.type==="mon"?"From":"Month"}</span><select data-ql="mi">${ms.slice(from,cur+1).map((mm,j)=>`<option value="${from+j}" ${from+j===mi?"selected":""}>${mm.h}</option>`).reverse().join("")}</select>${st.type==="mon"?`<span class="muted">→ ${ms[cur].h} (${nMon} month${nMon>1?"s":""})</span>`:""}</label>
@@ -167,9 +170,10 @@ function quLogSave(r){const pid=pId(r);const st=UI.qu.log[r];const {BS,lines}=qu
   let n=0;for(const i of idx){const col=ms[i].col;if(String(gv("Realisation",col,rr))!==String(v)){setCell("Realisation",col,rr,v||"");n++}}QBEN.v=null;return n}
 function quBenCell(r){const pid=pId(r);const b=pid?benAgg(pid):null;if(!b)return `${benFlag(pid)||'<span class="muted">no benefit plan</span>'}<div><a href="#" data-qben="${r}" class="qbenadd">＋ add benefit</a></div>`;
   const pct=b.ptd?b.atd/b.ptd:null;const mx=Math.max(b.ptd,b.atd,1);
-  return `<a href="#" data-qben="${r}" class="qbenlink" title="Open the project's benefit plan (plan vs actual by month)"><div class="qbplan"><span class="vtag plan">PLAN</span><b>${fmtShort(b.rec)}</b><span class="muted">/yr</span>${b.one?` <span class="muted">+ ${fmtShort(b.one)} one-off</span>`:""}</div>
+  const ed=typeof canEdit!=="function"||canEdit();
+  return `<div class="qbenlink"><div class="qbplan${ed?" qclk":""}" ${ed?`data-qpo="${r}" title="Change the plan"`:""}><span class="vtag plan">PLAN</span><b>${fmtShort(b.rec)}</b><span class="muted">/yr</span>${b.one?` <span class="muted">+ ${fmtShort(b.one)} one-off</span>`:""}</div>
     <div class="qbbar" aria-hidden="true"><span class="p" style="width:${b.ptd/mx*100}%"></span><span class="a" style="width:${b.atd/mx*100}%"></span></div>
-    <div class="qbact"><span class="vtag act">ACTUAL</span>${b.ptd||b.atd?`<b>${fmtShort(b.atd)}</b> <span class="muted">of ${fmtShort(b.ptd)} to date</span> ${pct==null?"":`<b class="${pct>=.9?"good":pct>=.6?"mid":"bad"}">${Math.round(pct*100)}%</b>`}`:`<span class="muted">starts ${b.p12?"within 12 m":"later"}</span>`}</div></a>
+    <div class="qbact${ed?" qclk":""}" ${ed?`data-qlo="${r}" title="Log an actual"`:""}><span class="vtag act">ACTUAL</span>${b.ptd||b.atd?`<b>${fmtShort(b.atd)}</b> <span class="muted">of ${fmtShort(b.ptd)} to date</span> ${pct==null?"":`<b class="${pct>=.9?"good":pct>=.6?"mid":"bad"}">${Math.round(pct*100)}%</b>`}`:`<span class="muted">starts ${b.p12?"within 12 m":"later"}</span>`}</div></div>
     ${UI.qu.log&&UI.qu.log[r]?quLogHtml(r):UI.qu.plan&&UI.qu.plan[r]?quPlanHtml(r):(typeof canEdit!=="function"||canEdit()?`<div class="qbtns2"><button type="button" class="btn small qplanbtn" data-qpo="${r}">✎ Plan</button><button type="button" class="btn small qlogbtn" data-qlo="${r}">＋ Log actual</button></div>`:"")}`}
 function quRowSimple(r){const L=pLive(r);const pc=Math.round((L.comp||0)*1000)/10;const pl=quPlanned(r);const F=UI.qu;const open=F.open.has(r);
   const inp=(k,v,type,extra="")=>`<input data-qu="${r}" data-k="q${r}_${k}" data-f="${k}" type="${type}" value="${esc(v)}" ${extra}>`;
@@ -248,7 +252,7 @@ function quBindRow(m,tr){
     box.querySelectorAll("[data-qpn]").forEach(b=>b.onclick=()=>{st.nat=b.dataset.qpn;reRow(r)});
     q("kind").onchange=e=>{st.kind=e.target.value;const {lines}=quLogLines(pId(r));const ln=lines.find(b=>b.id===st.line);st.amt=ln?(+gv("Benefits",FB[st.kind],ln.r)||0):0;reRow(r)};
     if(q("basis"))q("basis").onchange=e=>{st.basis=e.target.value;reRow(r)};
-    q("start").onchange=e=>{st.start=e.target.value;reRow(r)};q("ramp").onchange=e=>{st.ramp=e.target.value;reRow(r)};
+    q("start").onchange=e=>{st.start=e.target.value;reRow(r)};if(q("ramp"))q("ramp").onchange=e=>{st.ramp=e.target.value;reRow(r)};
     const R=q("rng");const grow=v=>{if(v>+R.max){const nm=quRngMax(v*2);R.max=nm}};
     R.oninput=()=>{st.amt=+R.value;q("amt").value=st.amt};R.onchange=()=>keepFocus("rng");
     q("amt").oninput=()=>{st.amt=Math.max(0,+q("amt").value||0);grow(st.amt);R.value=st.amt};q("amt").onchange=()=>keepFocus("amt");

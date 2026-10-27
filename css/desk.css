@@ -459,3 +459,8 @@ details.qcols summary{cursor:pointer;display:inline-block;padding:3px 10px;borde
 .gsttb{margin-top:-4px}
 /* r33 — Summary card grows with the table so the white background covers every column */
 .qwrap.qsimple{width:max-content;min-width:100%;overflow:visible;box-sizing:border-box}
+/* r34 — click PLAN / ACTUAL opens the panel in the row */
+.qclk{cursor:pointer;border-radius:6px;padding:1px 3px;margin:-1px -3px}
+.qclk:hover{background:#EEF3FA}
+.qlhd{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;color:#1F3864;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #E3E8EF}
+.qlhd a{font-size:11px}
