@@ -378,3 +378,5 @@ body.has-unsaved nav.tabs button[data-t="Changes"]{background:#FFC000;color:#1b1
 .alverb{font-weight:600}.alverb.v-Created{color:#1E6B24}.alverb.v-Deleted{color:#B42318}.alverb.v-Updated{color:#1F4E79}.alverb.v-Changed{color:#5B3DB5}
 .alcan{cursor:pointer}.alcan:hover{background:#F5F8FC}.altw{color:#2E75B6;font-size:12px;white-space:nowrap}.alsub td{background:#FAFBFD;font-size:12.5px;padding-top:3px;padding-bottom:3px}.alfld{font-weight:600}
 .altab th:nth-child(1){width:90px}.altab th:nth-child(2){width:170px}.altab th:nth-child(3){width:80px}
+.nfdrops{display:grid;grid-template-columns:1fr 1fr;gap:8px}@media (max-width:700px){.nfdrops{grid-template-columns:1fr}}
+.nfdrops .nfdrop{font-size:12.5px;line-height:1.45}

@@ -385,6 +385,8 @@ body.has-unsaved nav.tabs button[data-t="Changes"]{background:#FFC000;color:#1b1
 .alverb{font-weight:600}.alverb.v-Created{color:#1E6B24}.alverb.v-Deleted{color:#B42318}.alverb.v-Updated{color:#1F4E79}.alverb.v-Changed{color:#5B3DB5}
 .alcan{cursor:pointer}.alcan:hover{background:#F5F8FC}.altw{color:#2E75B6;font-size:12px;white-space:nowrap}.alsub td{background:#FAFBFD;font-size:12.5px;padding-top:3px;padding-bottom:3px}.alfld{font-weight:600}
 .altab th:nth-child(1){width:90px}.altab th:nth-child(2){width:170px}.altab th:nth-child(3){width:80px}
+.nfdrops{display:grid;grid-template-columns:1fr 1fr;gap:8px}@media (max-width:700px){.nfdrops{grid-template-columns:1fr}}
+.nfdrops .nfdrop{font-size:12.5px;line-height:1.45}
 </style>
 </head>
 <body>
@@ -787,7 +789,7 @@ function choose(title,html,buttons){return new Promise(res=>{const box=$("#confi
   box.classList.add("on");box.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{box.classList.remove("on");res(b.dataset.k)})})}
 async function sha8(buf){const h=await crypto.subtle.digest("SHA-256",buf);return [...new Uint8Array(h)].slice(0,10).map(b=>b.toString(16).padStart(2,"0")).join("")}
 /* re-load the workbook from disk and re-apply a list of cell changes on top (merge) */
-async function reloadAndReapply(handle,changes){toast("Reloading the latest file and re-applying your changes…",20000);const mineE2E=e2eCollectMine(changes);
+async function reloadAndReapply(handle,changes){if(typeof smartMerge==="function"){const r=await smartMerge(handle,changes);return r}toast("Reloading the latest file and re-applying your changes…",20000);const mineE2E=e2eCollectMine(changes);
   const f=await handle.getFile();await loadWorkbook(await f.arrayBuffer(),f.name,handle,f.lastModified);
   let ok=0,skip=0;for(const c of changes){if(c.sheet===E2EF||c.sheet===E2EM)continue;const col=c.ref.replace(/\d+/g,""),row=+c.ref.replace(/[A-Z]+/g,"");try{if(S.sheets[c.sheet]&&S.sheets[c.sheet].vals){setCell(c.sheet,col,row,c.val);ok++}else skip++}catch(e){skip++}}
   if(hasE2E()&&(mineE2E.length||changes.some(c=>c.sheet===E2EM))){const r=await e2eReapply(mineE2E);ok+=r.ok;skip+=r.skip}
@@ -810,16 +812,17 @@ async function save(asCopy){
   const n=S.changes.length;const savedChanges=S.changes.slice();
   if(!asCopy&&S.handle&&S.handle.createWritable&&!S._forcePick){
     try{const cur=await S.handle.getFile();
-      if(S.lastMod&&cur.lastModified!==S.lastMod){
-        const k=await choose("The file changed after you opened it",`<p><b>${esc(S.fileName)}</b> on disk is newer than the version you opened (saved ${new Date(cur.lastModified).toLocaleString()}). Someone else, Excel AutoSave or OneDrive sync updated it.</p>
-          <ul style="margin:6px 0 0 18px;font-size:13px"><li><b>Merge (recommended)</b> — reload the newer file and re-apply your ${n} change(s) on top, then save. Other people's edits are kept; if you both changed the same process flow you choose whose diagram to keep.</li><li><b>Overwrite</b> — replace the newer file with your version (their edits are lost).</li></ul>`,
-          [["cancel","Cancel"],["over","Overwrite","danger"],["merge","Merge my changes & save","primary"]]);
-        if(k==="cancel")return;
-        if(k==="merge"){const r=await reloadAndReapply(S.handle,savedChanges);render();toast(`Reloaded the newer file and re-applied ${r.ok} change(s)${r.skip?` (${r.skip} skipped)`:""}`,5000)}}
+      let mr=null;
+      if(S.lastMod&&cur.lastModified!==S.lastMod){mr=await smartMerge(S.handle,savedChanges);if(mr.cancelled){render();toast("Save cancelled — your changes are still here (merged into the newer file, not saved yet)",6000);return}render()}
       const blob=await buildBlob();const buf=await blob.arrayBuffer();const hash=await sha8(buf);
-      S.lastMod=await writeHandle(S.handle,blob);
-      S.saved={handle:S.handle,hash,blob,changes:savedChanges,name:S.fileName,at:Date.now(),warned:false};
-      finishSave(`Saved ${n} change(s) into ${S.fileName}. Checking that it stays saved…`);watchSaved();return}
+      try{S.lastMod=await writeHandle(S.handle,blob)}
+      catch(we){/* the file changed between reading and writing (someone saved, or OneDrive synced) → merge once more and retry */
+        if(we.name!=="InvalidStateError"&&!/state had changed|modified/i.test(we.message||""))throw we;
+        mr=await smartMerge(S.handle,S.changes.length?S.changes.slice():savedChanges);if(mr.cancelled){render();return}render();
+        const b2=await buildBlob();S.lastMod=await writeHandle(S.handle,b2);S.saved={handle:S.handle,hash:await sha8(await b2.arrayBuffer()),blob:b2,changes:savedChanges,name:S.fileName,at:Date.now(),warned:false};
+        finishSave(mergeMsg(mr)+". Saved.");watchSaved();return}
+      S.saved={handle:S.handle,hash,blob,changes:savedChanges,name:S.fileName,at:Date.now(),warned:false};S._openedAt=Date.now();
+      finishSave(mr?mergeMsg(mr)+". Saved.":`Saved ${n} change(s) into ${S.fileName}. Checking that it stays saved…`);watchSaved();return}
     catch(err){if(err.name==="AbortError")return;console.error(err);toast("Could not write to the original file ("+err.message+"). Choose where to save instead.",6000)}
   }
   S._forcePick=false;
@@ -845,6 +848,10 @@ function watchSaved(){const sv=S.saved;if(!sv)return;clearTimeout(watchSaved._t)
 async function checkSaved(){const sv=S.saved;if(!sv||!sv.handle)return "none";
   try{const f=await sv.handle.getFile();const h=await sha8(await f.arrayBuffer());
     if(h===sv.hash){setSaveState(Date.now()-sv.at>60000?"ok":"checking");return "ok"}
+    if(!S.changes.length&&f.lastModified>sv.at-2000){/* newer save by someone else? fine if it still holds my changes */
+      const keepAcc=typeof ACC!=="undefined"?ACC:null,keepView=view;await loadWorkbook(await f.arrayBuffer(),f.name,sv.handle,f.lastModified);if(keepAcc&&typeof ACC!=="undefined"){ACC=keepAcc;if(typeof paintAcc==="function")paintAcc()}view=keepView;
+      const last={};for(const c of sv.changes)last[c.sheet+"!"+c.ref]=c;const kept=Object.values(last).filter(c=>S.sheets[c.sheet]&&S.sheets[c.sheet].vals&&c.sheet!=="Activity_Log").every(c=>String(gv(c.sheet,c.ref.replace(/\d+/g,""),+c.ref.replace(/[A-Z]+/g,""))??"")===String(c.val??""));
+      if(kept){S.saved=null;setSaveState("ok");if(typeof E2E_CACHE!=="undefined")E2E_CACHE=null;render();toast("Someone else saved after you — your changes are in their version too",5000);return "ok"}}
     setSaveState("reverted");if(!sv.warned){sv.warned=true;revertDialog(f)}return "reverted"}catch(e){console.warn(e);return "error"}}
 function setSaveState(st){const el=$("#saveState");if(!el)return;const t={checking:"⟳ verifying save…",ok:"✓ saved & verified",reverted:"⚠ file was replaced — click"}[st]||"";el.textContent=t;el.className="savestate "+st;el.onclick=st==="reverted"?()=>revertDialog():null}
 async function revertDialog(f){const sv=S.saved;if(!sv)return;f=f||await sv.handle.getFile().catch(()=>null);
@@ -883,7 +890,7 @@ async function openFile(){
 $("#filePick").addEventListener("change",async e=>{const f=e.target.files[0];if(f)await ingest(await f.arrayBuffer(),f.name,null,f.lastModified);e.target.value=""});
 async function ingest(buf,name,handle,lastMod){
   if(S.changes.length&&!confirm("You have unsaved changes. Discard them and open another file?"))return;
-  try{toast("Reading workbook…",20000);await loadWorkbook(buf,name,handle,lastMod);$("#fileName").textContent=name+(handle?" · saves in place":" · saves as download");
+  try{toast("Reading workbook…",20000);await loadWorkbook(buf,name,handle,lastMod);S._openedAt=Date.now();$("#fileName").textContent=name+(handle?" · saves in place":" · saves as download");
     if(typeof accessGate==="function"){toast("",1);if(!(await accessGate()))return}
     $("#tabs").classList.remove("hidden");updateBadge();toast("Workbook loaded",1500);if(handle&&typeof rememberWorkbook==="function")rememberWorkbook(handle);if(typeof paintConn==="function")paintConn();view=view||"Dashboard";render();tickToday(false)}
   catch(e){console.error(e);toast("Could not open: "+e.message,7000)}
@@ -1102,6 +1109,114 @@ async function spSetupDialog() {
   if (k === "save") { const cid = (document.getElementById("gCid") || {}).value, ten = (document.getElementById("gTen") || {}).value; gSetCfg({ clientId: (cid || "").trim(), tenant: (ten || "").trim() || "organizations" }); toast("Saved"); if (!S.zip) render(); }
 }
 document.addEventListener("input", e => { if (e.target && (e.target.id === "gCid" || e.target.id === "gTen")) e.target.setAttribute("value", e.target.value); });
+
+/* 03d-merge.js — many people, one workbook: merge instead of overwrite.
+   When the file on disk / SharePoint is newer than the copy you opened (someone else saved), Save:
+     1. reloads the newer file,
+     2. re-applies YOUR changes cell by cell — a cell only you changed is simply written; a cell the other person
+        also changed to something else is a conflict (you pick: mine / theirs),
+     3. puts the rows YOU added (new projects, tasks, benefits, RAIDD, actuals, users) into free rows, so two people adding at the
+        same time never overwrite each other, and gives your new items a fresh ID if the other person took the same number,
+     4. then saves. No question is asked unless there is a real conflict.
+   While you work, the Desk also checks the file every minute: with nothing unsaved it quietly loads the newer version;
+   with unsaved changes it tells you someone saved and that your Save will merge. */
+"use strict";
+const MERGE_SHEETS = { Projects: { key: () => KEY.Projects, id: () => FP.lock }, Activities: { key: () => KEY.Activities, id: () => FA.lock }, Benefits: { key: () => KEY.Benefits, id: () => FB.lock },
+  RAIDD: { key: () => KEY.RAIDD, id: () => FD.id }, Realisation: { key: () => KEY.Realisation, id: () => null }, Users: { key: () => "B", id: () => null } };
+const sameV = (a, b) => String(a ?? "") === String(b ?? "");
+
+/* who saved since I opened the file (from the Activity log of the newer file) */
+function mergeWho(since) {
+  if (typeof logRows !== "function" || !hasLog()) return [];
+  const p = x => String(x).padStart(2, "0"), d = new Date(since || 0), s0 = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+  const me = (typeof curUser === "function" ? curUser() : "") || "";
+  return [...new Set(logRows().filter(r => String(gv(LOG_SHEET, "A", r)) >= s0).map(r => String(gv(LOG_SHEET, "B", r) || "")).filter(w => w && w !== me))];
+}
+
+async function smartMerge(handle, changes) {
+  toast("Someone else saved — merging your changes into the newer file…", 20000);
+  const keepAcc = typeof ACC !== "undefined" ? ACC : null, openedAt = S._openedAt || S.lastMod || 0;
+  const mineE2E = typeof e2eCollectMine === "function" ? e2eCollectMine(changes) : [];
+  /* 1. my net change per cell (first old value → last new value) */
+  const net = new Map(); for (const c of changes) { if (c.sheet === E2EF || c.sheet === E2EM || (typeof LOG_SHEET !== "undefined" && c.sheet === LOG_SHEET)) continue; const k = c.sheet + "!" + c.ref; if (!net.has(k)) net.set(k, { sheet: c.sheet, ref: c.ref, orig: c.old, val: c.val }); else net.get(k).val = c.val; }
+  /* 2. which rows did I create? (their key / ID cell was empty when I opened the file) */
+  const newRows = {}; for (const x of net.values()) { const M = MERGE_SHEETS[x.sheet]; if (!M) continue; const col = x.ref.replace(/\d+/g, ""), r = +x.ref.replace(/[A-Z]+/g, "");
+    if ((col === M.key() || col === M.id()) && sameV(x.orig, "") && !sameV(x.val, "")) (newRows[x.sheet] = newRows[x.sheet] || new Set()).add(r); }
+  const oldIds = {}; for (const sh in newRows) { const M = MERGE_SHEETS[sh]; if (!M.id()) continue; for (const r of newRows[sh]) oldIds[sh + "!" + r] = String(gv(sh, M.id(), r) || ""); }
+  /* 3. reload the newer file (keep who is signed in) */
+  const f = await handle.getFile(); await loadWorkbook(await f.arrayBuffer(), f.name, handle, f.lastModified);
+  if (keepAcc && typeof ACC !== "undefined") { ACC = keepAcc; if (typeof paintAcc === "function") paintAcc(); }
+  const who = mergeWho(openedAt);
+  /* 4. place my new rows: same row if it is still empty, else the next free row */
+  const rowMap = {}; S.newRows = S.newRows || {};
+  for (const sh in newRows) { const M = MERGE_SHEETS[sh]; if (!S.sheets[sh]) continue; S.newRows[sh] = S.newRows[sh] || new Set();
+    const empty = r => sameV(gv(sh, M.key(), r), "") && (!M.id() || sameV(gv(sh, M.id(), r), "")) && !S.newRows[sh].has(r);
+    for (const r of [...newRows[sh]].sort((a, b) => a - b)) { let t = r;
+      if (!empty(r)) { t = null; if (sh === "Users") { let x = 2; while (!empty(x)) x++; t = x; } else { const c = CFG[sh]; for (let x = c.first; x <= c.last; x++) if (empty(x)) { t = x; break; } } }
+      if (t == null) continue; rowMap[sh + "!" + r] = t; S.newRows[sh].add(t); } }
+  /* 5. apply my cells */
+  let ok = 0, skip = 0, moved = 0; const conflicts = [];
+  for (const x of net.values()) { if (!S.sheets[x.sheet] || !S.sheets[x.sheet].vals) { skip++; continue; }
+    const col = x.ref.replace(/\d+/g, ""), r0 = +x.ref.replace(/[A-Z]+/g, ""), nr = rowMap[x.sheet + "!" + r0];
+    try {
+      if (nr != null) { if (nr !== r0) moved++; setCell(x.sheet, col, nr, x.val); ok++; continue; }
+      if (newRows[x.sheet] && newRows[x.sheet].has(r0)) { skip++; continue; }   // a new row with no free place left
+      const disk = gv(x.sheet, col, r0);
+      if (sameV(disk, x.orig)) { setCell(x.sheet, col, r0, x.val); ok++; }      // only I changed it
+      else if (sameV(disk, x.val)) ok++;                                         // we both made the same change
+      else conflicts.push({ ...x, col, row: r0, disk });                         // both changed it differently
+    } catch (e) { skip++; }
+  }
+  /* 6. my new items took an ID someone else also used → give them the next free number and fix references */
+  let renum = 0;
+  const reId = (sh, r, gen, refs) => { const M = MERGE_SHEETS[sh]; const idc = M.id(); if (!idc) return; const cur = String(gv(sh, idc, r) || ""); if (!cur) return;
+    const dup = _rowsOf0Safe(sh).some(x => x !== r && String(gv(sh, idc, x) || "") === cur); if (!dup) return;
+    const nid = gen(r); if (!nid || nid === cur) return; setCell(sh, idc, r, nid); renum++;
+    for (const [rs, rc] of refs) for (const x of _rowsOf0Safe(rs)) { const v = String(gv(rs, rc, x) || ""); if (v === cur) setCell(rs, rc, x, nid); else if (rs === "Activities" && rc === FA.lock && v.startsWith(cur + "-")) setCell(rs, rc, x, nid + v.slice(cur.length)); } };
+  for (const sh of ["Projects", "Benefits", "Activities"]) for (const r of (newRows[sh] ? [...newRows[sh]].map(r => rowMap[sh + "!" + r]).filter(x => x != null) : []))
+    try { if (sh === "Projects") reId(sh, r, genProjectId, [["Activities", FA.pid], ["Benefits", FB.pid], ["RAIDD", FD.pid], ["Realisation", FR.pid], ["Activities", FA.lock]]);
+      else if (sh === "Benefits") reId(sh, r, genBenefitId, [["Realisation", FR.bid], ["Benefit_Plan", "B"]]);
+      else reId(sh, r, genTaskId, [["RAIDD", FD.tid]]); } catch (e) { console.warn("re-id", e); }
+  /* 7. conflicts: one dialog, pick per cell */
+  if (conflicts.length) {
+    const label = c => { let rec = ""; try { rec = c.sheet === "Users" ? String(gv("Users", "B", c.row) || "") : rowProject(c.sheet, c.row) || ""; } catch (e) { } const colH = ((CFG[c.sheet] ? CFG[c.sheet].cols : []).find(y => y.col === c.col) || {}).h || c.col; return [rec, colH]; };
+    const fv = (c, v) => { if (c.sheet === "Users" && c.col === "C") return v ? "••••" : "—"; const col = (CFG[c.sheet] ? CFG[c.sheet].cols : []).find(y => y.col === c.col); const t = col && col.type === "date" ? fmtDate(v) : col && col.type === "pct" ? fmtPct(v) : v; return String(t ?? "") || "—"; };
+    const k = await choose(`${conflicts.length} change${conflicts.length > 1 ? "s" : ""} clash with ${who.length ? esc(who.join(", ")) : "someone else"}'s save`,
+      `<p class="muted" style="margin-top:0">You and the other person changed the same field to different values. Choose which value to keep for each — everything else was merged automatically.</p>
+       <div class="tablewrap" style="max-height:340px"><table class="data"><tr><th>Record</th><th>Field</th><th>Theirs (saved)</th><th>Mine</th></tr>
+       ${conflicts.map((c, i) => { const [rec, h] = label(c); return `<tr><td><span class="clip">${esc(rec || c.sheet + " row " + c.row)}</span></td><td>${esc(h)}</td>
+         <td><label style="display:flex;gap:6px"><input type="radio" name="cf${i}" value="theirs"> ${esc(fv(c, c.disk))}</label></td><td><label style="display:flex;gap:6px"><input type="radio" name="cf${i}" value="mine" checked> <b>${esc(fv(c, c.val))}</b></label></td></tr>`; }).join("")}</table></div>
+       <p style="margin:8px 0 0"><button type="button" class="btn small" id="cfAllT">All theirs</button> <button type="button" class="btn small" id="cfAllM">All mine</button></p>`,
+      [["cancel", "Cancel save"], ["ok", "Merge & save", "primary"]]);
+    if (k === "cancel") { conflicts.forEach(c => { try { setCell(c.sheet, c.col, c.row, c.val); } catch (e) { } }); updateBadge(); return { ok, skip, conflicts: conflicts.length, cancelled: true, who }; }
+    conflicts.forEach((c, i) => { const v = (document.querySelector(`input[name="cf${i}"]:checked`) || {}).value; if (v !== "theirs") { try { setCell(c.sheet, c.col, c.row, c.val); ok++; } catch (e) { skip++; } } });
+  }
+  if (hasE2E() && (mineE2E.length || changes.some(c => c.sheet === E2EM))) { const r = await e2eReapply(mineE2E); ok += r.ok; skip += r.skip; }
+  S._openedAt = Date.now(); updateBadge();
+  return { ok, skip, conflicts: conflicts.length, moved, renum, who };
+}
+function _rowsOf0Safe(sh) { return typeof _rowsOf0 === "function" ? _rowsOf0(sh) : rowsOf(sh); }
+document.addEventListener("click", e => { const t = e.target; if (!t || (t.id !== "cfAllT" && t.id !== "cfAllM")) return; const v = t.id === "cfAllT" ? "theirs" : "mine"; document.querySelectorAll(`#confirm input[type=radio][value="${v}"]`).forEach(x => x.checked = true); });
+function mergeMsg(r) { return `Merged with ${r.who && r.who.length ? r.who.join(", ") + "'s" : "the newer"} save — ${r.ok} of your change(s) applied${r.moved ? `, ${r.moved} moved to a free row` : ""}${r.renum ? `, ${r.renum} new ID(s) renumbered` : ""}${r.conflicts ? `, ${r.conflicts} clash(es) resolved` : ""}${r.skip ? ` (${r.skip} skipped)` : ""}`; }
+
+/* ---- keep up with other people while the Desk is open ---- */
+let PEEK_T = 0, PEEK_WARNED = 0;
+async function peekNewer() {
+  if (!S.zip || !S.handle || document.hidden || PEEK_BUSY) return; let f;
+  try { PEEK_BUSY = true; f = await S.handle.getFile(); } catch (e) { PEEK_BUSY = false; return; }
+  try {
+    if (!S.lastMod || f.lastModified === S.lastMod) return;
+    if (S.saved && S.saved.at && f.lastModified <= S.lastMod) return;
+    if (!S.changes.length) {   // nothing of mine to lose → load the newer file quietly
+      const keepAcc = typeof ACC !== "undefined" ? ACC : null, keepView = view, since = S._openedAt || S.lastMod;
+      await loadWorkbook(await f.arrayBuffer(), f.name, S.handle, f.lastModified); if (keepAcc && typeof ACC !== "undefined") { ACC = keepAcc; if (typeof paintAcc === "function") paintAcc(); }
+      const who = mergeWho(since); S._openedAt = Date.now(); view = keepView; if (typeof E2E_CACHE !== "undefined") E2E_CACHE = null; render();
+      toast(`Updated with ${who.length ? who.join(", ") + "'s" : "the latest"} changes`, 4000);
+    } else if (PEEK_WARNED !== f.lastModified) { PEEK_WARNED = f.lastModified; toast("Someone else saved the workbook — your Save will merge your changes into theirs", 7000); }
+  } catch (e) { console.warn("peek", e); } finally { PEEK_BUSY = false; }
+}
+let PEEK_BUSY = false;
+setInterval(peekNewer, 60000); document.addEventListener("visibilitychange", () => { if (!document.hidden) setTimeout(peekNewer, 800); });
 
 /* ---------------- views ---------------- */
 let view=null;const UI={q:{},f:{},cf:{},sort:{},sel:null,gantt:{open:new Set(),proj:"",proc:"",level:"tasks",zoom:3}};
@@ -3623,7 +3738,8 @@ function e2eFlowForm(f){const areas=uniqOrder([...(hasMD()?mdList("L_Proc"):list
    <label>Owner<input id="efOwner" value="${esc(f?f.owner:"")}"></label><label>Notes<input id="efNotes" value="${esc(f?f.notes:"")}"></label></div>`}
 async function e2eNewFlow(){let IMP=null;
   const p=choose("New E2E process flow",e2eFlowForm(null)+`<div class="nfimp"><div class="nfh"><b>Start from Excel / AI (optional)</b><span class="muted">or leave empty for blank lanes</span></div>
-    <div class="nfdrop" id="nfDrop" tabindex="0" role="button" aria-label="Drop or choose an Excel file"><b>Drop the .xlsx here</b> or <u>choose a file</u> · or paste the table below<input type="file" id="nfFile" accept=".xlsx,.csv,.txt" hidden></div>
+    <div class="nfdrops"><div class="nfdrop" id="nfDrop" tabindex="0" role="button" aria-label="Drop or choose an Excel file"><b>📊 Excel table</b><br>Drop the .xlsx here or <u>choose a file</u> · or paste the table below<input type="file" id="nfFile" accept=".xlsx,.csv,.txt" hidden></div>
+    <div class="nfdrop" id="nfDropP" tabindex="0" role="button" aria-label="Drop or choose a PowerPoint file"><b>📽 PowerPoint diagram</b><br>Drop a .pptx swimlane here or <u>choose a file</u> — boxes, lanes, colours and arrows are read directly (no AI)<input type="file" id="nfFileP" accept=".pptx" hidden></div></div>
     <div class="nfver"><span>Version</span><label><input type="radio" name="nfVer" value="auto" checked> Auto-detect</label><label><input type="radio" name="nfVer" value="AS-IS"> AS-IS</label><label><input type="radio" name="nfVer" value="TO-BE"> TO-BE</label><label title="Rows with only PAGE BREAK start a new page; otherwise the whole flow is one picture"><input type="checkbox" id="nfPages"> Split at PAGE BREAK rows</label></div>
     <textarea id="nfPaste" rows="3" placeholder="…or paste the table copied from Excel or from the AI answer (Markdown / tab separated)"></textarea>
     <div class="nfres" id="nfRes"></div>
@@ -3644,7 +3760,12 @@ async function e2eNewFlow(){let IMP=null;
   const take=sheets=>{if(!sheets.length){IMP={res:{},warn:["No table found — row 1 must hold the lane names"]};show();return}IMP=e2eImportFromGrids(sheets,nm()||"Imported flow",verPick(),{pages:!!(box.querySelector("#nfPages")||{}).checked});IMP.sheets=sheets;show()};
   const verPick=()=>(box.querySelector('input[name="nfVer"]:checked')||{}).value||"auto";
   box.querySelectorAll('input[name="nfVer"],#nfPages').forEach(r=>r.onchange=()=>{if(IMP&&IMP.sheets)take(IMP.sheets)});
-  const file=async f=>{try{if(/\.xlsx$/i.test(f.name))take(await readXlsxGrids(await f.arrayBuffer()));else take(textGrids(await f.text()));if(!nm())box.querySelector("#efName").value=f.name.replace(/\.[^.]+$/,"").replace(/[_-]+/g," ")}catch(e){IMP={res:{},warn:["Could not read "+f.name+": "+e.message]};show()}};
+  const file=async f=>{try{if(/\.pptx$/i.test(f.name)){await pptx(f);return}if(/\.xlsx$/i.test(f.name))take(await readXlsxGrids(await f.arrayBuffer()));else take(textGrids(await f.text()));if(!nm())box.querySelector("#efName").value=f.name.replace(/\.[^.]+$/,"").replace(/[_-]+/g," ")}catch(e){IMP={res:{},warn:["Could not read "+f.name+": "+e.message]};show()}};
+  const pptx=async f=>{try{if(!/\.pptx$/i.test(f.name)){IMP={res:{},warn:["Choose a .pptx file (PowerPoint 2007 or newer)"]};show();return}
+      const r=await pptxToFlows(await f.arrayBuffer(),nm()||f.name.replace(/\.[^.]+$/,"").replace(/[_-]+/g," "));IMP={...r,pptx:true};if(!nm())box.querySelector("#efName").value=f.name.replace(/\.[^.]+$/,"").replace(/[_-]+/g," ");
+      if(!Object.keys(r.res).length)IMP.warn.unshift("No swimlane found in this PowerPoint");show()}catch(e){console.error(e);IMP={res:{},warn:["Could not read "+f.name+": "+e.message]};show()}};
+  {const dp=box.querySelector("#nfDropP"),fp=box.querySelector("#nfFileP");dp.onclick=()=>fp.click();dp.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();fp.click()}};fp.onchange=()=>{if(fp.files[0])pptx(fp.files[0])};
+    dp.ondragover=e=>{e.preventDefault();dp.classList.add("over")};dp.ondragleave=()=>dp.classList.remove("over");dp.ondrop=e=>{e.preventDefault();dp.classList.remove("over");const f=e.dataTransfer.files[0];if(f)pptx(f)}}
   const dz=box.querySelector("#nfDrop"),fi=box.querySelector("#nfFile");
   dz.onclick=()=>fi.click();dz.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();fi.click()}};fi.onchange=()=>{if(fi.files[0])file(fi.files[0])};
   dz.ondragover=e=>{e.preventDefault();dz.classList.add("over")};dz.ondragleave=()=>dz.classList.remove("over");dz.ondrop=e=>{e.preventDefault();dz.classList.remove("over");const f=e.dataTransfer.files[0];if(f)file(f)};
@@ -3654,7 +3775,8 @@ async function e2eNewFlow(){let IMP=null;
   const k=await p;if(k!=="ok")return;
   const name=$("#efName").value.trim(),area=$("#efArea").value.trim();if(!name){toast("Give the flow a name");return}
   const id=e2eNewId(area);const f={id,name,area,owner:$("#efOwner").value.trim(),notes:$("#efNotes").value.trim(),v:{}};
-  const vp=(document.querySelector('input[name="nfVer"]:checked')||{}).value||"auto";const pgs=!!(document.getElementById("nfPages")||{}).checked;if(IMP&&IMP.sheets){IMP=e2eImportFromGrids(IMP.sheets,name,vp,{pages:pgs})}/* rebuild with the final name */
+  const vp=(document.querySelector('input[name="nfVer"]:checked')||{}).value||"auto";const pgs=!!(document.getElementById("nfPages")||{}).checked;if(IMP&&IMP.sheets){IMP=e2eImportFromGrids(IMP.sheets,name,vp,{pages:pgs})}
+  if(IMP&&IMP.pptx){for(const v of Object.keys(IMP.res)){const d=IMP.res[v].doc;d.title=name;d.name=name+" "+v}if(vp!=="auto"&&Object.keys(IMP.res).length===1){const only=Object.keys(IMP.res)[0];if(only!==vp){IMP.res[vp]=IMP.res[only];IMP.res[vp].doc.tag=vp;delete IMP.res[only]}}}/* rebuild with the final name */
   const vers=IMP?VERS.filter(v=>IMP.res[v]):[];
   if(vers.length){for(const v of vers){if(!e2eWriteDoc(e2eFlow(id)||f,v,IMP.res[v].doc))return;E2E_CACHE=null}}
   else{const doc={id:"d"+Date.now(),name:name+" AS-IS",title:name,tag:"AS-IS",ori:"v",flow:700,head:46,lanes:["Requester","Team A","Team B","System"].map((n,i)=>({id:"L"+i,name:n,sub:"",size:220})),secs:[],shapes:[],links:[]};if(!e2eWriteDoc(f,"AS-IS",doc))return}
@@ -4179,6 +4301,167 @@ async function e2ePptx(pages, name) {
   changed["ppt/presentation.xml"] = S8(pres); changed["ppt/_rels/presentation.xml.rels"] = S8(prs); changed["[Content_Types].xml"] = S8(ct);
   const blob = await writeZip(list, changed);
   download(new Blob([blob], { type: "application/vnd.openxmlformats-officedocument.presentationml.presentation" }), (name || "E2E flow") + ".pptx");
+}
+
+/* 14d-e2e-pptx-import.js — turn a PowerPoint swimlane slide into an E2E flow, without AI.
+   Reads the slide's shapes directly:
+     lanes   = tall rectangles (lane bodies) + the coloured header rectangle / text at their top
+     boxes   = rectangles, rounded rectangles, diamonds (decision), ovals / terminators (start · end), document, cylinder
+     text    = the shape's own text, or a text box lying on top of it
+     arrows  = real connectors (glued to boxes), or drawn lines / elbows — followed from the arrow head back to the box it starts at
+     labels  = small text near an arrow ("Yes", "ไม่ใช่"…)
+     legend  = small coloured swatch + text above the lanes · title = text above the lanes
+   Slide title with "TO-BE" → TO-BE version, otherwise AS-IS; several slides of the same version become Page 1, 2 … */
+"use strict";
+async function pptxToFlows(buf, name) {
+  const list = readZip(buf); const by = {}; list.forEach(e => by[e.name] = e);
+  const P = x => parser.parseFromString(x, "application/xml");
+  const A = "http://schemas.openxmlformats.org/drawingml/2006/main", PN = "http://schemas.openxmlformats.org/presentationml/2006/main", RN = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+  const pres = P(await entryText(by["ppt/presentation.xml"])), prels = P(await entryText(by["ppt/_rels/presentation.xml.rels"]));
+  const relT = {}; for (const r of prels.getElementsByTagName("Relationship")) relT[r.getAttribute("Id")] = r.getAttribute("Target");
+  const slides = [...pres.getElementsByTagNameNS(PN, "sldId")].map(s => "ppt/" + relT[s.getAttributeNS(RN, "id") || s.getAttribute("r:id")].replace(/^\//, "").replace(/^ppt\//, "")).filter(n => by[n]);
+  const warn = [], perVer = { "AS-IS": [], "TO-BE": [] };
+  for (const [si, sn] of slides.entries()) {
+    const d = P(await entryText(by[sn])); const res = slideToPage(d, A, warn, si + 1);
+    if (!res) { warn.push(`Slide ${si + 1}: no boxes found — skipped`); continue; }
+    const ver = /to[\s_-]?be|future|new process/i.test(res.title) ? "TO-BE" : "AS-IS"; perVer[ver].push(res);
+  }
+  const out = {};
+  for (const ver of ["AS-IS", "TO-BE"]) { const pages = perVer[ver]; if (!pages.length) continue;
+    const base = pages[0]; const title = (base.title || name || "Imported flow").replace(/\[[^\]]*\]/g, "").replace(/\b(as[\s-]?is|to[\s-]?be)\b/ig, "").replace(/\s{2,}/g, " ").trim() || name;
+    const lanes = base.lanes; const shapes = [], links = [];
+    pages.forEach((p, i) => { const pid = "p" + (i + 1); p.shapes.forEach(s => shapes.push({ ...s, id: "q" + (i + 1) + s.id, ...(pages.length > 1 ? { pg: pid } : {}) })); p.links.forEach(l => links.push({ ...l, id: "q" + (i + 1) + l.id, from: "q" + (i + 1) + l.from, to: "q" + (i + 1) + l.to })); });
+    const doc = { id: "d" + Date.now() + ver.length, name: (name || title) + " " + ver, title: name || title, tag: ver, ori: "v", flow: base.flow, head: 46, lanes, secs: [], shapes, links,
+      ...(base.legend.length ? { legend: base.legend } : {}), ...(pages.length > 1 ? { pages: pages.map((p, i) => ({ id: "p" + (i + 1), name: "Page " + (i + 1), flow: p.flow })) } : {}) };
+    out[ver] = { doc, warn: [], stats: { pages: pages.length, lanes: lanes.length, boxes: shapes.length, links: links.length, styled: shapes.filter(s => s.fill).length, newLanes: 0 } };
+  }
+  return { res: out, warn, how: Object.fromEntries(Object.keys(out).map(v => [v, `PowerPoint → ${v} (${perVer[v].length} slide${perVer[v].length > 1 ? "s" : ""})`])) };
+}
+
+function slideToPage(d, A, warn, sno) {
+  const E = 12700;   // EMU per point
+  const items = [];   // flattened shapes with absolute geometry (points)
+  const kids = (n, tag, ns) => [...n.children].filter(c => c.localName === tag && (!ns || c.namespaceURI === ns));
+  const one = (n, tag) => n ? [...n.getElementsByTagNameNS("*", tag)][0] : null;
+  const xf0 = { ox: 0, oy: 0, sx: 1, sy: 1 };
+  const walk = (node, T) => { for (const c of node.children) {
+    if (c.localName === "grpSp") { const x = one(one(c, "grpSpPr"), "xfrm"); let t = T;
+      if (x) { const g = (tag, a) => { const e = kids(x, tag)[0]; return e ? +e.getAttribute(a) : 0; }; const ox = g("off", "x"), oy = g("off", "y"), cx = g("ext", "cx"), cy = g("ext", "cy"), chx = g("chOff", "x"), chy = g("chOff", "y"), chcx = g("chExt", "cx") || cx, chcy = g("chExt", "cy") || cy;
+        const sx = cx / (chcx || 1), sy = cy / (chcy || 1); t = { ox: T.ox + T.sx * (ox - chx * sx), oy: T.oy + T.sy * (oy - chy * sy), sx: T.sx * sx, sy: T.sy * sy }; }
+      walk(c, t); continue; }
+    if (c.localName === "sp" || c.localName === "cxnSp") items.push(readShape(c, T));
+    else if (c.localName === "spTree") walk(c, T);
+  } };
+  const readShape = (n, T) => {
+    const spPr = kids(n, "spPr")[0]; const x = spPr && kids(spPr, "xfrm", A)[0]; const nv = n.firstElementChild; const cNvPr = nv && one(nv, "cNvPr");
+    let X = 0, Y = 0, W = 0, H = 0, fh = false, fv = false;
+    if (x) { const off = kids(x, "off", A)[0], ext = kids(x, "ext", A)[0]; X = +(off && off.getAttribute("x") || 0); Y = +(off && off.getAttribute("y") || 0); W = +(ext && ext.getAttribute("cx") || 0); H = +(ext && ext.getAttribute("cy") || 0); fh = x.getAttribute("flipH") === "1"; fv = x.getAttribute("flipV") === "1"; }
+    X = (T.ox + T.sx * X) / E; Y = (T.oy + T.sy * Y) / E; W = T.sx * W / E; H = T.sy * H / E;
+    const geom = spPr && one(spPr, "prstGeom"); const prst = geom ? geom.getAttribute("prst") : (spPr && one(spPr, "custGeom") ? "cust" : "");
+    const fillEl = spPr ? kids(spPr, "solidFill", A)[0] : null, noFill = spPr ? kids(spPr, "noFill", A).length > 0 : false;
+    const clr = el => { if (!el) return null; const s = one(el, "srgbClr"); if (s) return "#" + s.getAttribute("val").toUpperCase(); const sc = one(el, "schemeClr"); return sc ? "scheme:" + sc.getAttribute("val") : null; };
+    const ln = spPr ? kids(spPr, "ln", A)[0] : null; const lnNo = ln ? kids(ln, "noFill", A).length > 0 : false; const lnClr = ln ? clr(kids(ln, "solidFill", A)[0]) : null;
+    const styleLn = !ln && one(n, "lnRef") && +one(n, "lnRef").getAttribute("idx") > 0;   /* outline from the theme style */
+    const txBox = !!(nv && one(nv, "cNvSpPr") && one(nv, "cNvSpPr").getAttribute("txBox") === "1");
+    const head = ln && kids(ln, "headEnd", A)[0], tail = ln && kids(ln, "tailEnd", A)[0]; const arrowHead = !!(head && head.getAttribute("type") && head.getAttribute("type") !== "none"), arrowTail = !!(tail && tail.getAttribute("type") && tail.getAttribute("type") !== "none");
+    const tx = kids(n, "txBody")[0]; const paras = tx ? [...tx.getElementsByTagNameNS(A, "p")].map(p => [...p.getElementsByTagNameNS(A, "t")].map(t => t.textContent).join("")) : [];
+    let text = paras.map(s => s.replace(/\s+$/, "")).filter((s, i, a) => s.trim() || (i > 0 && i < a.length - 1)).join("\n").trim();
+    const rPr = tx && one(tx, "rPr"); const tcol = rPr ? clr(kids(rPr, "solidFill", A)[0]) : null; const sz = rPr && rPr.getAttribute("sz") ? +rPr.getAttribute("sz") / 100 : null; const bold = rPr && rPr.getAttribute("b") === "1";
+    const st = n.localName === "cxnSp" ? one(n, "stCxn") : null, en = n.localName === "cxnSp" ? one(n, "endCxn") : null;
+    return { id: cNvPr ? cNvPr.getAttribute("id") : "", nm: cNvPr ? cNvPr.getAttribute("name") || "" : "", X, Y, W, H, fh, fv, prst, fill: noFill ? null : clr(fillEl) || (!fillEl && !noFill && one(n, "fillRef") && +one(n, "fillRef").getAttribute("idx") > 0 ? "scheme:style" : null), hasFill: (!!fillEl && !noFill) || (!fillEl && !noFill && !txBox && !!one(n, "fillRef") && +one(n, "fillRef").getAttribute("idx") > 0), line: lnNo ? null : lnClr, hasLine: !txBox && ((!!ln && !lnNo && !!lnClr) || styleLn), txBox,
+      arrowHead, arrowTail, text, tcol, sz, bold, cxn: n.localName === "cxnSp", st: st ? st.getAttribute("id") : null, en: en ? en.getAttribute("id") : null };
+  };
+  const tree = one(d.documentElement, "spTree"); if (!tree) return null; walk(tree, xf0);
+  const isLine = s => s.cxn || /^(line|straightConnector1|bentConnector\d|curvedConnector\d)$/.test(s.prst) || (s.prst === "" && (s.W < 1.5 || s.H < 1.5) && !s.text);
+  const lines = items.filter(isLine), shapesAll = items.filter(s => !isLine(s));
+  if (!shapesAll.length) return null;
+  const maxY = Math.max(...shapesAll.map(s => s.Y + s.H)), minY = Math.min(...shapesAll.map(s => s.Y));
+  const inside = (p, q, tol = 0) => p.X >= q.X - tol && p.Y >= q.Y - tol && p.X + p.W <= q.X + q.W + tol && p.Y + p.H <= q.Y + q.H + tol;
+  const ctr = s => ({ x: s.X + s.W / 2, y: s.Y + s.H / 2 });
+  const isFilledish = s => s.hasFill || s.hasLine;
+  /* lanes: tall rectangles, side by side */
+  let laneBodies = shapesAll.filter(s => /^(rect|)$/.test(s.prst) && isFilledish(s) && s.H > (maxY - minY) * 0.45 && s.W > 40).sort((a, b) => a.X - b.X);
+  laneBodies = laneBodies.filter((s, i, a) => !a.some((o, j) => j !== i && Math.abs(o.X - s.X) < 3 && Math.abs(o.W - s.W) < 3 && j < i));
+  const used = new Set(laneBodies);
+  const lanesTop = laneBodies.length ? Math.min(...laneBodies.map(s => s.Y)) : minY;
+  const lanes = laneBodies.map(b => { const hdr = shapesAll.filter(s => !used.has(s) && Math.abs(s.X - b.X) < 4 && Math.abs(s.W - b.W) < 6 && s.Y >= b.Y - 4 && s.Y < b.Y + 25 && s.H < 90);
+    hdr.forEach(h => used.add(h)); const hFill = hdr.find(h => h.hasFill && h.fill && !/^#FFFFFF$/i.test(h.fill) && !h.fill.startsWith("scheme"));
+    const hTxt = hdr.map(h => h.text).filter(Boolean).join("\n") || b.text || ""; const [nm, ...sub] = hTxt.split("\n");
+    return { body: b, name: nm.trim(), sub: sub.join("\n").trim(), hcolor: hFill ? hFill.fill : null, hh: hdr.length ? Math.max(...hdr.map(h => h.Y + h.H)) - b.Y : 0 }; });
+  const hdrBottom = lanes.length ? lanesTop + Math.max(...lanes.map(l => l.hh), 0) : minY;
+  /* candidates: anything else */
+  const rest = shapesAll.filter(s => !used.has(s));
+  const textOnlySet = new Set(rest.filter(s => s.text && !s.hasLine && !s.hasFill));   /* text boxes without outline / fill = overlays or labels */
+  const boxes0 = rest.filter(s => !textOnlySet.has(s) && (s.hasFill || s.hasLine) && s.W >= 18 && s.H >= 12);
+  /* legend: small swatches above the lanes, with a text to the right */
+  const legend = []; const above = s => s.Y + s.H <= lanesTop + 2;
+  for (const sw of boxes0.filter(s => above(s) && s.W < 40 && s.H < 30)) { const t = [...textOnlySet].concat(rest.filter(s => s.text)).filter(o => o !== sw && above(o) && o.X >= sw.X + sw.W - 2 && o.X < sw.X + sw.W + 30 && Math.abs(ctr(o).y - ctr(sw).y) < 12).sort((a, b) => a.X - b.X)[0];
+    if (t) { legend.push({ fill: sw.fill && !sw.fill.startsWith("scheme") ? sw.fill : "#FFFFFF", stroke: sw.line && !sw.line.startsWith("scheme") ? sw.line : "#7F8C8D", text: t.text.split("\n")[0] }); used.add(sw); used.add(t); textOnlySet.delete(t); } }
+  /* title: biggest text above the lanes */
+  const titleCand = rest.filter(s => s.text && above(s) && !used.has(s)).sort((a, b) => (b.sz || 0) - (a.sz || 0) || a.Y - b.Y)[0]; const title = titleCand ? titleCand.text.split("\n")[0] : "";
+  if (titleCand) used.add(titleCand);
+  /* boxes inside the lanes area; attach overlay texts */
+  const boxes = boxes0.filter(s => !used.has(s) && (!lanes.length || s.Y >= hdrBottom - 4));
+  const kindOf = s => /diamond|flowChartDecision/.test(s.prst) ? "decision" : /ellipse|flowChartTerminator|flowChartAlternateProcess/.test(s.prst) ? "rounded" : /flowChartDocument|flowChartMultidocument/.test(s.prst) ? "document" : /can|flowChartMagneticDisk/.test(s.prst) ? "database" : /roundRect/.test(s.prst) ? "process" : "process";
+  // drop boxes that are just a text overlay on another box (same area, smaller/equal, with text) — keep the outer one
+  const bx = []; for (const s of boxes.sort((a, b) => b.W * b.H - a.W * a.H)) { const host = bx.find(o => inside(s, o, 3) && (s.text || !s.hasLine)); if (host) { if (s.text && !host.text) host.text = s.text, host.tcol = host.tcol || s.tcol; continue; } bx.push({ ...s }); }
+  const labels = [];
+  for (const t of rest.filter(s => s.text && !used.has(s) && !boxes0.includes(s) || textOnlySet.has(s))) { if (used.has(t)) continue;
+    const host = bx.filter(b => { const c = ctr(t); return c.x >= b.X - 2 && c.x <= b.X + b.W + 2 && c.y >= b.Y - 2 && c.y <= b.Y + b.H + 2; }).sort((a, b) => a.W * a.H - b.W * b.H)[0];
+    if (host) { host.text = host.text ? host.text + "\n" + t.text : t.text; host.tcol = host.tcol || t.tcol; } else if (!lanes.length || t.Y >= hdrBottom - 4) labels.push(t); }
+  if (!bx.length) return null;
+  /* geometry → studio coordinates */
+  const k = 1.33, L0 = lanes.length ? lanes[0].body.X : Math.min(...bx.map(b => b.X)) - 20, FS = 92, top = lanes.length ? hdrBottom : Math.min(...bx.map(b => b.Y)) - 20;
+  const outLanes = lanes.length ? lanes.map((l, i) => ({ id: "L" + i, name: l.name || "Lane " + (i + 1), sub: l.sub, size: Math.round(l.body.W * k), ...(l.hcolor ? { hcolor: l.hcolor } : {}) }))
+    : [{ id: "L0", name: "Process", sub: "", size: Math.round((Math.max(...bx.map(b => b.X + b.W)) - L0 + 20) * k) }];
+  const shapes = bx.map((b, i) => { const kind = kindOf(b); const term = kind === "rounded";
+    const fill = b.fill && !b.fill.startsWith("scheme") ? b.fill : null, line = b.line && !b.line.startsWith("scheme") ? b.line : null, tcol = b.tcol && !b.tcol.startsWith("scheme") ? b.tcol : null;
+    const txt = String(b.text || "").split("\n").map(s => s.replace(/^\s*[•·▪●]\s*/, "- ")).join("\n");
+    return { id: "s" + i, src: b, type: kind, x: Math.round((b.X - L0) * k), y: Math.round((b.Y - top) * k) + FS + 8, w: Math.max(40, Math.round(b.W * k)), h: Math.max(24, Math.round(b.H * k)), text: txt,
+      ...(fill ? { fill } : term ? { fill: "#1F3864" } : {}), ...(line ? { stroke: line } : fill ? { stroke: fill } : {}), ...(tcol && !/^#(000000|1B2631|111827)$/i.test(tcol) ? { color: tcol } : (term && (!fill || lum(fill) < 110)) ? { color: "#FFFFFF" } : {}) }; });
+  function lum(h) { const [r, g, b] = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)); return 0.299 * r + 0.587 * g + 0.114 * b; }
+  const near = (p, b, t = 7) => p.x >= b.X - t && p.x <= b.X + b.W + t && p.y >= b.Y - t && p.y <= b.Y + b.H + t;
+  const boxAt = p => { const c = shapes.filter(s => near(p, s.src)); return c.sort((a, b) => a.src.W * a.src.H - b.src.W * b.src.H)[0] || null; };
+  /* arrows */
+  const links = []; const add = (a, b, label) => { if (!a || !b || a === b) return; const id = "k" + a.id + "_" + b.id; if (links.some(l => l.id === id)) return; links.push({ id, from: a.id, to: b.id, label: label || "", auto: true }); };
+  const byPid = {}; items.forEach(s => { if (s.id) byPid[s.id] = s; });
+  const shapeOfItem = it => it && shapes.find(s => s.src === it || inside(it, s.src, 3) || (s.src.X <= ctr(it).x && ctr(it).x <= s.src.X + s.src.W && s.src.Y <= ctr(it).y && ctr(it).y <= s.src.Y + s.src.H));
+  const segs = [];
+  for (const l of lines) {
+    if (l.cxn && l.st && l.en) { const a = shapeOfItem(byPid[l.st]), b = shapeOfItem(byPid[l.en]); if (a && b) { const fwd = !(l.arrowHead && !l.arrowTail); add(fwd ? a : b, fwd ? b : a, ""); l._done = true; continue; } }
+    const p0 = { x: l.X + (l.fh ? l.W : 0), y: l.Y + (l.fv ? l.H : 0) }, p1 = { x: l.X + (l.fh ? 0 : l.W), y: l.Y + (l.fv ? 0 : l.H) };
+    segs.push({ a: p0, b: p1, tipA: l.arrowHead, tipB: l.arrowTail, l });
+  }
+  const T = 3.5, same = (p, q) => Math.abs(p.x - q.x) <= T && Math.abs(p.y - q.y) <= T;
+  const onSeg = (p, s) => { const minx = Math.min(s.a.x, s.b.x) - T, maxx = Math.max(s.a.x, s.b.x) + T, miny = Math.min(s.a.y, s.b.y) - T, maxy = Math.max(s.a.y, s.b.y) + T; if (p.x < minx || p.x > maxx || p.y < miny || p.y > maxy) return false;
+    const dx = s.b.x - s.a.x, dy = s.b.y - s.a.y, L = Math.hypot(dx, dy) || 1; return Math.abs((p.x - s.a.x) * dy - (p.y - s.a.y) * dx) / L <= T; };
+  const tips = []; segs.forEach(s => { if (s.tipB) tips.push({ s, p: s.b }); if (s.tipA) tips.push({ s, p: s.a }); });
+  const isTip = p => tips.some(t => same(t.p, p));
+  const segPath = {};   // link id → set of segments
+  for (const t of tips) {
+    const tgt = boxAt(t.p); if (!tgt) continue;
+    const seen = new Set([t.s]), q = [t.s], srcs = new Set();
+    while (q.length) { const s = q.shift();
+      for (const p of [s.a, s.b]) { if (p === t.p && s === t.s) continue;
+        if (!(isTip(p) && !(s === t.s))) { const b = boxAt(p); if (b && b !== tgt && !isTip(p)) srcs.add(b); }
+        if (isTip(p) && s !== t.s) continue;
+        for (const o of segs) if (!seen.has(o) && (same(o.a, p) || same(o.b, p) || onSeg(p, o) || onSeg(o.a, s) || onSeg(o.b, s))) { seen.add(o); q.push(o); } } }
+    for (const sb of srcs) { add(sb, tgt, ""); const id = "k" + sb.id + "_" + tgt.id; segPath[id] = new Set([...(segPath[id] || []), ...seen]); }
+  }
+  /* labels → nearest arrow segment → that arrow */
+  const dist = (p, s) => { const dx = s.b.x - s.a.x, dy = s.b.y - s.a.y, L2 = dx * dx + dy * dy || 1; let u = ((p.x - s.a.x) * dx + (p.y - s.a.y) * dy) / L2; u = Math.max(0, Math.min(1, u)); return Math.hypot(p.x - (s.a.x + u * dx), p.y - (s.a.y + u * dy)); };
+  /* each label goes to the closest arrow that has no label yet (two labels at a fork → one per branch) */
+  const lbl = labels.map(lb => ({ c: ctr(lb), txt: lb.text.split("\n")[0].trim() })).filter(x => x.txt && x.txt.length <= 40);
+  const dOf = (c, L) => { let bd = Infinity; const ss = segPath[L.id]; if (ss) for (const s of ss) { const own = !segs.some(o => o !== s && false); bd = Math.min(bd, dist(c, s)); }
+    if (bd === Infinity) { const a = shapes.find(s => s.id === L.from), b = shapes.find(s => s.id === L.to); bd = dist(c, { a: ctr(a.src), b: ctr(b.src) }); } return bd; };
+  /* prefer the arrow whose END is near the label (branch labels sit next to the branch, not the shared trunk) */
+  const endD = (c, L) => { const b = shapes.find(s => s.id === L.to); const t = tips.filter(t => near(t.p, b.src)).map(t => Math.hypot(t.p.x - c.x, t.p.y - c.y)); return t.length ? Math.min(...t) : 1e9; };
+  const pairs = []; for (const x of lbl) for (const L of links) { const d0 = dOf(x.c, L); if (d0 < 45) pairs.push({ x, L, d: d0 + endD(x.c, L) * 0.15 }); }
+  pairs.sort((a, b) => a.d - b.d); const doneX = new Set();
+  for (const p of pairs) { if (doneX.has(p.x) || p.L.label) continue; p.L.label = p.x.txt; doneX.add(p.x); }
+  const flow = Math.max(500, Math.round(((lanes.length ? Math.max(...lanes.map(l => l.body.Y + l.body.H)) : maxY) - top) * k) + 20);
+  shapes.forEach(s => delete s.src);
+  return { title, lanes: outLanes, shapes, links, legend, flow };
 }
 
 /* ---------------- wire up ---------------- */

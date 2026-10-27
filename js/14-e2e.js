@@ -275,7 +275,8 @@ function e2eFlowForm(f){const areas=uniqOrder([...(hasMD()?mdList("L_Proc"):list
    <label>Owner<input id="efOwner" value="${esc(f?f.owner:"")}"></label><label>Notes<input id="efNotes" value="${esc(f?f.notes:"")}"></label></div>`}
 async function e2eNewFlow(){let IMP=null;
   const p=choose("New E2E process flow",e2eFlowForm(null)+`<div class="nfimp"><div class="nfh"><b>Start from Excel / AI (optional)</b><span class="muted">or leave empty for blank lanes</span></div>
-    <div class="nfdrop" id="nfDrop" tabindex="0" role="button" aria-label="Drop or choose an Excel file"><b>Drop the .xlsx here</b> or <u>choose a file</u> · or paste the table below<input type="file" id="nfFile" accept=".xlsx,.csv,.txt" hidden></div>
+    <div class="nfdrops"><div class="nfdrop" id="nfDrop" tabindex="0" role="button" aria-label="Drop or choose an Excel file"><b>📊 Excel table</b><br>Drop the .xlsx here or <u>choose a file</u> · or paste the table below<input type="file" id="nfFile" accept=".xlsx,.csv,.txt" hidden></div>
+    <div class="nfdrop" id="nfDropP" tabindex="0" role="button" aria-label="Drop or choose a PowerPoint file"><b>📽 PowerPoint diagram</b><br>Drop a .pptx swimlane here or <u>choose a file</u> — boxes, lanes, colours and arrows are read directly (no AI)<input type="file" id="nfFileP" accept=".pptx" hidden></div></div>
     <div class="nfver"><span>Version</span><label><input type="radio" name="nfVer" value="auto" checked> Auto-detect</label><label><input type="radio" name="nfVer" value="AS-IS"> AS-IS</label><label><input type="radio" name="nfVer" value="TO-BE"> TO-BE</label><label title="Rows with only PAGE BREAK start a new page; otherwise the whole flow is one picture"><input type="checkbox" id="nfPages"> Split at PAGE BREAK rows</label></div>
     <textarea id="nfPaste" rows="3" placeholder="…or paste the table copied from Excel or from the AI answer (Markdown / tab separated)"></textarea>
     <div class="nfres" id="nfRes"></div>
@@ -296,7 +297,12 @@ async function e2eNewFlow(){let IMP=null;
   const take=sheets=>{if(!sheets.length){IMP={res:{},warn:["No table found — row 1 must hold the lane names"]};show();return}IMP=e2eImportFromGrids(sheets,nm()||"Imported flow",verPick(),{pages:!!(box.querySelector("#nfPages")||{}).checked});IMP.sheets=sheets;show()};
   const verPick=()=>(box.querySelector('input[name="nfVer"]:checked')||{}).value||"auto";
   box.querySelectorAll('input[name="nfVer"],#nfPages').forEach(r=>r.onchange=()=>{if(IMP&&IMP.sheets)take(IMP.sheets)});
-  const file=async f=>{try{if(/\.xlsx$/i.test(f.name))take(await readXlsxGrids(await f.arrayBuffer()));else take(textGrids(await f.text()));if(!nm())box.querySelector("#efName").value=f.name.replace(/\.[^.]+$/,"").replace(/[_-]+/g," ")}catch(e){IMP={res:{},warn:["Could not read "+f.name+": "+e.message]};show()}};
+  const file=async f=>{try{if(/\.pptx$/i.test(f.name)){await pptx(f);return}if(/\.xlsx$/i.test(f.name))take(await readXlsxGrids(await f.arrayBuffer()));else take(textGrids(await f.text()));if(!nm())box.querySelector("#efName").value=f.name.replace(/\.[^.]+$/,"").replace(/[_-]+/g," ")}catch(e){IMP={res:{},warn:["Could not read "+f.name+": "+e.message]};show()}};
+  const pptx=async f=>{try{if(!/\.pptx$/i.test(f.name)){IMP={res:{},warn:["Choose a .pptx file (PowerPoint 2007 or newer)"]};show();return}
+      const r=await pptxToFlows(await f.arrayBuffer(),nm()||f.name.replace(/\.[^.]+$/,"").replace(/[_-]+/g," "));IMP={...r,pptx:true};if(!nm())box.querySelector("#efName").value=f.name.replace(/\.[^.]+$/,"").replace(/[_-]+/g," ");
+      if(!Object.keys(r.res).length)IMP.warn.unshift("No swimlane found in this PowerPoint");show()}catch(e){console.error(e);IMP={res:{},warn:["Could not read "+f.name+": "+e.message]};show()}};
+  {const dp=box.querySelector("#nfDropP"),fp=box.querySelector("#nfFileP");dp.onclick=()=>fp.click();dp.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();fp.click()}};fp.onchange=()=>{if(fp.files[0])pptx(fp.files[0])};
+    dp.ondragover=e=>{e.preventDefault();dp.classList.add("over")};dp.ondragleave=()=>dp.classList.remove("over");dp.ondrop=e=>{e.preventDefault();dp.classList.remove("over");const f=e.dataTransfer.files[0];if(f)pptx(f)}}
   const dz=box.querySelector("#nfDrop"),fi=box.querySelector("#nfFile");
   dz.onclick=()=>fi.click();dz.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();fi.click()}};fi.onchange=()=>{if(fi.files[0])file(fi.files[0])};
   dz.ondragover=e=>{e.preventDefault();dz.classList.add("over")};dz.ondragleave=()=>dz.classList.remove("over");dz.ondrop=e=>{e.preventDefault();dz.classList.remove("over");const f=e.dataTransfer.files[0];if(f)file(f)};
@@ -306,7 +312,8 @@ async function e2eNewFlow(){let IMP=null;
   const k=await p;if(k!=="ok")return;
   const name=$("#efName").value.trim(),area=$("#efArea").value.trim();if(!name){toast("Give the flow a name");return}
   const id=e2eNewId(area);const f={id,name,area,owner:$("#efOwner").value.trim(),notes:$("#efNotes").value.trim(),v:{}};
-  const vp=(document.querySelector('input[name="nfVer"]:checked')||{}).value||"auto";const pgs=!!(document.getElementById("nfPages")||{}).checked;if(IMP&&IMP.sheets){IMP=e2eImportFromGrids(IMP.sheets,name,vp,{pages:pgs})}/* rebuild with the final name */
+  const vp=(document.querySelector('input[name="nfVer"]:checked')||{}).value||"auto";const pgs=!!(document.getElementById("nfPages")||{}).checked;if(IMP&&IMP.sheets){IMP=e2eImportFromGrids(IMP.sheets,name,vp,{pages:pgs})}
+  if(IMP&&IMP.pptx){for(const v of Object.keys(IMP.res)){const d=IMP.res[v].doc;d.title=name;d.name=name+" "+v}if(vp!=="auto"&&Object.keys(IMP.res).length===1){const only=Object.keys(IMP.res)[0];if(only!==vp){IMP.res[vp]=IMP.res[only];IMP.res[vp].doc.tag=vp;delete IMP.res[only]}}}/* rebuild with the final name */
   const vers=IMP?VERS.filter(v=>IMP.res[v]):[];
   if(vers.length){for(const v of vers){if(!e2eWriteDoc(e2eFlow(id)||f,v,IMP.res[v].doc))return;E2E_CACHE=null}}
   else{const doc={id:"d"+Date.now(),name:name+" AS-IS",title:name,tag:"AS-IS",ori:"v",flow:700,head:46,lanes:["Requester","Team A","Team B","System"].map((n,i)=>({id:"L"+i,name:n,sub:"",size:220})),secs:[],shapes:[],links:[]};if(!e2eWriteDoc(f,"AS-IS",doc))return}

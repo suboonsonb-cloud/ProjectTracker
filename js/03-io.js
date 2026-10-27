@@ -54,7 +54,7 @@ function choose(title,html,buttons){return new Promise(res=>{const box=$("#confi
   box.classList.add("on");box.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{box.classList.remove("on");res(b.dataset.k)})})}
 async function sha8(buf){const h=await crypto.subtle.digest("SHA-256",buf);return [...new Uint8Array(h)].slice(0,10).map(b=>b.toString(16).padStart(2,"0")).join("")}
 /* re-load the workbook from disk and re-apply a list of cell changes on top (merge) */
-async function reloadAndReapply(handle,changes){toast("Reloading the latest file and re-applying your changes…",20000);const mineE2E=e2eCollectMine(changes);
+async function reloadAndReapply(handle,changes){if(typeof smartMerge==="function"){const r=await smartMerge(handle,changes);return r}toast("Reloading the latest file and re-applying your changes…",20000);const mineE2E=e2eCollectMine(changes);
   const f=await handle.getFile();await loadWorkbook(await f.arrayBuffer(),f.name,handle,f.lastModified);
   let ok=0,skip=0;for(const c of changes){if(c.sheet===E2EF||c.sheet===E2EM)continue;const col=c.ref.replace(/\d+/g,""),row=+c.ref.replace(/[A-Z]+/g,"");try{if(S.sheets[c.sheet]&&S.sheets[c.sheet].vals){setCell(c.sheet,col,row,c.val);ok++}else skip++}catch(e){skip++}}
   if(hasE2E()&&(mineE2E.length||changes.some(c=>c.sheet===E2EM))){const r=await e2eReapply(mineE2E);ok+=r.ok;skip+=r.skip}
@@ -77,16 +77,17 @@ async function save(asCopy){
   const n=S.changes.length;const savedChanges=S.changes.slice();
   if(!asCopy&&S.handle&&S.handle.createWritable&&!S._forcePick){
     try{const cur=await S.handle.getFile();
-      if(S.lastMod&&cur.lastModified!==S.lastMod){
-        const k=await choose("The file changed after you opened it",`<p><b>${esc(S.fileName)}</b> on disk is newer than the version you opened (saved ${new Date(cur.lastModified).toLocaleString()}). Someone else, Excel AutoSave or OneDrive sync updated it.</p>
-          <ul style="margin:6px 0 0 18px;font-size:13px"><li><b>Merge (recommended)</b> — reload the newer file and re-apply your ${n} change(s) on top, then save. Other people's edits are kept; if you both changed the same process flow you choose whose diagram to keep.</li><li><b>Overwrite</b> — replace the newer file with your version (their edits are lost).</li></ul>`,
-          [["cancel","Cancel"],["over","Overwrite","danger"],["merge","Merge my changes & save","primary"]]);
-        if(k==="cancel")return;
-        if(k==="merge"){const r=await reloadAndReapply(S.handle,savedChanges);render();toast(`Reloaded the newer file and re-applied ${r.ok} change(s)${r.skip?` (${r.skip} skipped)`:""}`,5000)}}
+      let mr=null;
+      if(S.lastMod&&cur.lastModified!==S.lastMod){mr=await smartMerge(S.handle,savedChanges);if(mr.cancelled){render();toast("Save cancelled — your changes are still here (merged into the newer file, not saved yet)",6000);return}render()}
       const blob=await buildBlob();const buf=await blob.arrayBuffer();const hash=await sha8(buf);
-      S.lastMod=await writeHandle(S.handle,blob);
-      S.saved={handle:S.handle,hash,blob,changes:savedChanges,name:S.fileName,at:Date.now(),warned:false};
-      finishSave(`Saved ${n} change(s) into ${S.fileName}. Checking that it stays saved…`);watchSaved();return}
+      try{S.lastMod=await writeHandle(S.handle,blob)}
+      catch(we){/* the file changed between reading and writing (someone saved, or OneDrive synced) → merge once more and retry */
+        if(we.name!=="InvalidStateError"&&!/state had changed|modified/i.test(we.message||""))throw we;
+        mr=await smartMerge(S.handle,S.changes.length?S.changes.slice():savedChanges);if(mr.cancelled){render();return}render();
+        const b2=await buildBlob();S.lastMod=await writeHandle(S.handle,b2);S.saved={handle:S.handle,hash:await sha8(await b2.arrayBuffer()),blob:b2,changes:savedChanges,name:S.fileName,at:Date.now(),warned:false};
+        finishSave(mergeMsg(mr)+". Saved.");watchSaved();return}
+      S.saved={handle:S.handle,hash,blob,changes:savedChanges,name:S.fileName,at:Date.now(),warned:false};S._openedAt=Date.now();
+      finishSave(mr?mergeMsg(mr)+". Saved.":`Saved ${n} change(s) into ${S.fileName}. Checking that it stays saved…`);watchSaved();return}
     catch(err){if(err.name==="AbortError")return;console.error(err);toast("Could not write to the original file ("+err.message+"). Choose where to save instead.",6000)}
   }
   S._forcePick=false;
@@ -112,6 +113,10 @@ function watchSaved(){const sv=S.saved;if(!sv)return;clearTimeout(watchSaved._t)
 async function checkSaved(){const sv=S.saved;if(!sv||!sv.handle)return "none";
   try{const f=await sv.handle.getFile();const h=await sha8(await f.arrayBuffer());
     if(h===sv.hash){setSaveState(Date.now()-sv.at>60000?"ok":"checking");return "ok"}
+    if(!S.changes.length&&f.lastModified>sv.at-2000){/* newer save by someone else? fine if it still holds my changes */
+      const keepAcc=typeof ACC!=="undefined"?ACC:null,keepView=view;await loadWorkbook(await f.arrayBuffer(),f.name,sv.handle,f.lastModified);if(keepAcc&&typeof ACC!=="undefined"){ACC=keepAcc;if(typeof paintAcc==="function")paintAcc()}view=keepView;
+      const last={};for(const c of sv.changes)last[c.sheet+"!"+c.ref]=c;const kept=Object.values(last).filter(c=>S.sheets[c.sheet]&&S.sheets[c.sheet].vals&&c.sheet!=="Activity_Log").every(c=>String(gv(c.sheet,c.ref.replace(/\d+/g,""),+c.ref.replace(/[A-Z]+/g,""))??"")===String(c.val??""));
+      if(kept){S.saved=null;setSaveState("ok");if(typeof E2E_CACHE!=="undefined")E2E_CACHE=null;render();toast("Someone else saved after you — your changes are in their version too",5000);return "ok"}}
     setSaveState("reverted");if(!sv.warned){sv.warned=true;revertDialog(f)}return "reverted"}catch(e){console.warn(e);return "error"}}
 function setSaveState(st){const el=$("#saveState");if(!el)return;const t={checking:"⟳ verifying save…",ok:"✓ saved & verified",reverted:"⚠ file was replaced — click"}[st]||"";el.textContent=t;el.className="savestate "+st;el.onclick=st==="reverted"?()=>revertDialog():null}
 async function revertDialog(f){const sv=S.saved;if(!sv)return;f=f||await sv.handle.getFile().catch(()=>null);
@@ -150,7 +155,7 @@ async function openFile(){
 $("#filePick").addEventListener("change",async e=>{const f=e.target.files[0];if(f)await ingest(await f.arrayBuffer(),f.name,null,f.lastModified);e.target.value=""});
 async function ingest(buf,name,handle,lastMod){
   if(S.changes.length&&!confirm("You have unsaved changes. Discard them and open another file?"))return;
-  try{toast("Reading workbook…",20000);await loadWorkbook(buf,name,handle,lastMod);$("#fileName").textContent=name+(handle?" · saves in place":" · saves as download");
+  try{toast("Reading workbook…",20000);await loadWorkbook(buf,name,handle,lastMod);S._openedAt=Date.now();$("#fileName").textContent=name+(handle?" · saves in place":" · saves as download");
     if(typeof accessGate==="function"){toast("",1);if(!(await accessGate()))return}
     $("#tabs").classList.remove("hidden");updateBadge();toast("Workbook loaded",1500);if(handle&&typeof rememberWorkbook==="function")rememberWorkbook(handle);if(typeof paintConn==="function")paintConn();view=view||"Dashboard";render();tickToday(false)}
   catch(e){console.error(e);toast("Could not open: "+e.message,7000)}
