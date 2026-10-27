@@ -450,3 +450,7 @@ details.qcols summary{cursor:pointer;display:inline-block;padding:3px 10px;borde
 .g-row.gd4,.g-row.gd5{background:#FAFBFD}
 .g-row.gr.gd0{background:#DAE3EF}.g-row.gr.gd1{background:#E6ECF4}.g-row.gr.gd2{background:#EFF3F8}.g-row.gr.gd3{background:#F6F8FB}.g-row.gr.gd4,.g-row.gr.gd5{background:#fff}
 .g-row.ghl{background:#FFF1D9}
+/* r31 — late start bar + late tag */
+.g-late{position:absolute;top:3px;height:16px;border-radius:3px 0 0 3px;background:#C62828;opacity:.92;overflow:hidden;color:#fff;font-size:10px;font-weight:700;line-height:16px;padding-left:4px;white-space:nowrap}
+.g-late.t{top:4px;height:14px;line-height:14px}
+.g-latetag{position:absolute;top:3px;font-size:10px;font-weight:700;color:#fff;background:#C62828;border-radius:8px;padding:1px 6px;white-space:nowrap;pointer-events:auto}

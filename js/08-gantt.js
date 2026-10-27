@@ -74,6 +74,10 @@ function vGantt0(m){
       ${l.lvl===0?gPpl(l.wsl,"Workstream leader")+gPpl(l.lead,"Project lead"):l.lvl===2?'<span class="g-ppl"></span>'+gPpl(l.pic,"Task PIC"):'<span class="g-ppl"></span><span class="g-ppl"></span>'}<span class="g-meta">${l.lvl!==1?Math.round(l.pct*100)+"%":""}</span></div>`)).join("");
   const right=lines.map((l,ri)=>{let h="";if(l.d.ps&&l.d.pe){const bw=Math.max(2,X(l.d.pe+1)-X(l.d.ps));h+=`<div class="g-base" style="left:${X(l.d.ps)}px;width:${bw}px" title="Plan (baseline) ${fmtDate(l.d.ps)} → ${fmtDate(l.d.pe)}">${bw>=30?"Plan":""}</div>`}
     if(l.d.s&&l.d.e){const x0=X(l.d.s),w=Math.max(3,X(l.d.e+1)-x0);
+      /* started late: solid red from the plan start up to where the bar now starts (the delay so far) */
+      if(l.d.ps&&l.d.s>l.d.ps&&l.d.ps<=TODAY){const lx=X(l.d.ps),lw=Math.max(2,x0-lx);const dd=l.d.s-l.d.ps;h+=`<div class="g-late${l.lvl===2?" t":""}" style="left:${lx}px;width:${lw}px" title="Late start: planned ${fmtDate(l.d.ps)}, now ${fmtDate(l.d.s)} (+${dd}d)">${lw>=58?`<span>late +${dd}d</span>`:""}</div>`}
+      /* tag after the bar: how many days the end is behind the plan */
+      if(l.d.pe&&l.d.e>l.d.pe&&!l.none){const sl=l.d.e-l.d.pe;h+=`<span class="g-latetag" style="left:${X(l.d.e+1)+4+(l.rp?54:0)}px" title="Forecast end ${fmtDate(l.d.e)} vs plan end ${fmtDate(l.d.pe)}">⚠ +${sl}d</span>`}
       if(l.lvl<2){const SEV={"Cancelled":0,"Done":1,"Not started":2,"On time":3,"On-Hold":4,"At risk of delay":5,"Late":6};
         const segs=(l.segs||[]).filter(t=>t.s&&t.e).sort((a,b)=>(SEV[a.fc]??3)-(SEV[b.fc]??3));
         const inner=segs.map(t=>{const sx=Math.max(0,X(t.s)-x0),sw=Math.max(2,Math.min(w,X(t.e+1)-x0)-sx);return `<div class="g-seg" style="left:${sx}px;width:${sw}px;background:${FCB[t.fc]||FCB["On time"]}" title="${esc(t.name)}: ${fmtDate(t.s)} → ${fmtDate(t.e)} · ${esc(t.status)} · ${esc(FCL[t.fc]||"")}"></div>`}).join("");
