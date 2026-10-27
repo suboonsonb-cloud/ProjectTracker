@@ -128,8 +128,9 @@ function quPlanHtml(r){const pid=pId(r);const st=UI.qu.plan&&UI.qu.plan[r];if(!s
   const thb=st.kind!=="trh";const mx=quRngMax(Math.max(st.amt,n(FB[st.kind]))*2);const rate=g(FB.rate)===""?(+setting("S_Rate")||0):n(FB.rate);
   const gm=thb?st.amt/((st.nat!=="One-off"&&st.basis==="Annual")?12:1):st.amt*rate;const yr=st.nat==="One-off"?gm:gm*12;
   return `<div class="qlog qplan" data-qplan="${r}">
-    <div class="qlhd"><b>✎ Benefit plan</b><a href="#" data-qben="${r}" class="muted">full plan ›</a></div>
+    <div class="qlhd"><b><span class="vtag plan">PLAN</span> Benefit plan</b><a href="#" data-qben="${r}" class="muted">full plan ›</a></div>
     ${lines.length>1?`<label class="qlrow"><span>Line</span><select data-qpf="line">${lines.map(b=>`<option value="${esc(b.id)}" ${b.id===ln.id?"selected":""}>${esc(b.id)} · ${esc(String(b.desc||"").slice(0,28))}</option>`).join("")}</select></label>`:""}
+    ${(()=>{const {BS}=quLogLines(pid);const ms=BS.months;return quMiniChart(ln,ms,ms.reduce((k,mm,i)=>mm.s<=TODAY?i:k,0))})()}
     <div class="qlseg" role="radiogroup" aria-label="Recurring or one-off"><button type="button" data-qpn="Recurring" class="${st.nat!=="One-off"?"on":""}">Recurring</button><button type="button" data-qpn="One-off" class="${st.nat==="One-off"?"on":""}">One-off</button></div>
     <label class="qlrow"><span>Driver</span><select data-qpf="kind">${QPK.map(([k,t])=>`<option value="${k}" ${k===st.kind?"selected":""}>${t}</option>`).join("")}</select></label>
     <div class="qlamt"><input type="range" data-qpf="rng" min="0" max="${mx}" step="${thb?(mx>20000?500:100):0.5}" value="${st.amt}" aria-label="Plan amount"><input type="number" data-qpf="amt" min="0" step="any" value="${st.amt}" aria-label="Plan amount"><span class="muted">${thb?(st.nat==="One-off"?"THB total":`<select data-qpf="basis" class="mini"><option ${st.basis!=="Annual"?"selected":""}>Monthly</option><option ${st.basis==="Annual"?"selected":""}>Annual</option></select>`):"hrs/m"}</span><button type="button" class="btn small" data-qpx2 title="Make the bar go higher">×2</button></div>
@@ -150,24 +151,42 @@ function quColsHtml(){const p=UI.quCols||quColPref();return QCOLS.map(([k,t])=>`
 function quColsBind(root,after){root.querySelectorAll("[data-qcol]").forEach(c=>c.onchange=()=>{quColSet(c.dataset.qcol,!c.checked);after()})}
 function quRngMax(v){v=Math.max(1000,+v||0);const p=Math.pow(10,Math.floor(Math.log10(v))-1);return Math.ceil(v/p)*p}
 function quLogLines(pid){const BS=benefitSeries();return {BS,lines:BS.list.filter(b=>b.pid===pid&&!b.drop)}}
+/* small plan-vs-actual chart for one benefit line: past 12 months + next 6, plan = light bars, actual = green bars */
+function quMiniChart(ln,ms,cur){if(!ln)return "";const a=Math.max(0,cur-11),b=Math.min(ms.length-1,cur+6);const idx=[];for(let i=a;i<=b;i++)idx.push(i);
+  const P=idx.map(i=>+ln.plan[i]||0),A=idx.map(i=>+ln.act[i]||0);const mx=Math.max(1,...P,...A);const W=268,H=74,pad=12,bw=(W-4)/idx.length;
+  const y=v=>H-pad-(v/mx)*(H-pad-6);const sumP=P.slice(0,cur-a+1).reduce((x,v)=>x+v,0),sumA=A.slice(0,cur-a+1).reduce((x,v)=>x+v,0);
+  const bars=idx.map((i,k)=>{const x=2+k*bw;return `<rect x="${x+1}" y="${y(P[k])}" width="${Math.max(1,bw-2)}" height="${H-pad-y(P[k])}" fill="#C7D7EE"><title>${ms[i].h} plan ${fmtNum(P[k])}</title></rect>${A[k]?`<rect x="${x+bw*0.25}" y="${y(A[k])}" width="${Math.max(1,bw*0.5)}" height="${H-pad-y(A[k])}" fill="#1F7A3D"><title>${ms[i].h} actual ${fmtNum(A[k])}</title></rect>`:""}`}).join("");
+  const tx=2+(cur-a+1)*bw;const lab=k=>`<text x="${2+k*bw+bw/2}" y="${H-1}" font-size="8" text-anchor="middle" fill="#889">${esc(ms[idx[k]].h.slice(0,3))}</text>`;
+  return `<div class="qmini"><div class="qminih"><span><i class="pl"></i>plan</span><span><i class="ac"></i>actual</span><span style="flex:1"></span><span class="muted">last 12 m: <b>${fmtShort(sumA)}</b> of ${fmtShort(sumP)}${sumP?` · <b class="${sumA/sumP>=.9?"good":sumA/sumP>=.6?"mid":"bad"}">${Math.round(sumA/sumP*100)}%</b>`:""}</span></div>
+    <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" aria-label="Plan vs actual by month">${bars}<line x1="${tx}" x2="${tx}" y1="2" y2="${H-pad}" stroke="#C62828" stroke-width="1" stroke-dasharray="2 2"/>${lab(0)}${lab(cur-a)}${idx.length-1>cur-a?lab(idx.length-1):""}</svg></div>`}
 function quLogHtml(r){const pid=pId(r);const st=UI.qu.log&&UI.qu.log[r];if(!st)return "";const {BS,lines}=quLogLines(pid);if(!lines.length)return "";
   const ln=lines.find(b=>b.id===st.line)||lines[0];st.line=ln.id;const ms=BS.months;const cur=ms.reduce((k,mm,i)=>mm.s<=TODAY?i:k,0);
-  const from=Math.max(0,cur-17);if(st.mi==null||st.mi>cur)st.mi=cur;const mi=st.mi;
+  const from=Math.max(0,cur-17);if(st.mi==null||st.mi>cur)st.mi=cur;const mi=st.mi;if(st.to==null||st.to<mi||st.to>cur)st.to=cur;
   const planM=+ln.plan[mi]||0,actM=+ln.act[mi]||0,refPlan=ln.one?Math.max(...ln.plan):Math.max(planM,...ln.plan.slice(0,cur+1));
   const amt=st.amt!=null?st.amt:(actM||Math.round(planM));const top=Math.max(refPlan,...ln.plan.map(v=>+v||0),amt,actM,...ln.act.map(v=>+v||0));const mx=quRngMax(top*2);
-  const nMon=st.type==="mon"?cur-mi+1:1;
+  const T=st.type||"one";const nMon=T==="mon"?st.to-mi+1:1;
+  const opt=(sel,lo,hi)=>ms.slice(lo,hi+1).map((mm,j)=>`<option value="${lo+j}" ${lo+j===sel?"selected":""}>${mm.h}</option>`).reverse().join("");
+  /* month-by-month grid: from the benefit start (or 12 months back) up to this month */
+  const smi=ln.sm?ms.findIndex(mm=>mm.s>=ln.sm):-1;const g0=Math.max(from,Math.min(cur-11,smi>=0?smi:cur-11)),gi=[];for(let i=Math.max(0,g0);i<=cur;i++)gi.push(i);st.g=st.g||{};
+  const body=T==="grid"?`<div class="qlgrid"><div class="qlgh"><span>Month</span><span>Plan</span><span>Actual THB</span></div>${gi.slice().reverse().map(i=>`<label class="qlgr"><span>${ms[i].h}</span><span class="muted">${fmtShort(+ln.plan[i]||0)}</span><input type="number" min="0" step="any" data-qlg="${i}" value="${st.g[i]!=null?st.g[i]:(+ln.act[i]||"")}" placeholder="0"></label>`).join("")}</div>`
+   :`<label class="qlrow"><span>${T==="mon"?"From":"Month"}</span><select data-ql="mi">${opt(mi,from,cur)}</select>${T==="mon"?`<span>to</span><select data-ql="to">${opt(st.to,mi,cur)}</select>`:""}</label>
+    ${T==="mon"?`<div class="muted" style="font-size:11px;margin:-2px 0 4px">${nMon} month${nMon>1?"s":""} × the same amount</div>`:""}
+    <div class="qlamt"><input type="range" data-ql="rng" min="0" max="${mx}" step="${mx>20000?500:100}" value="${amt}" aria-label="Actual THB${T==="mon"?" per month":""}"><input type="number" data-ql="amt" min="0" step="any" value="${amt}" aria-label="Actual THB"><span class="muted">THB${T==="mon"?"/m":""}</span><button type="button" class="btn small" data-qlx2 title="Make the bar go higher">×2</button></div>
+    <div class="qlvs"><span class="qlbar"><span class="pl" style="width:${Math.min(100,planM/mx*100)}%"></span><span class="ac" style="width:${Math.min(100,amt/mx*100)}%"></span></span><span class="muted">plan ${fmtShort(planM)} · now ${fmtShort(actM)}${ms[mi]?" in "+ms[mi].h:""}</span></div>`;
   return `<div class="qlog" data-qlog="${r}" data-pm="${planM}">
-    <div class="qlhd"><b>＋ Log actual</b><a href="#" data-qben="${r}" class="muted">full plan ›</a></div>
+    <div class="qlhd"><b><span class="vtag act">ACTUAL</span> Log actual</b><a href="#" data-qben="${r}" class="muted">full plan ›</a></div>
     ${lines.length>1?`<label class="qlrow"><span>Line</span><select data-ql="line">${lines.map(b=>`<option value="${esc(b.id)}" ${b.id===ln.id?"selected":""}>${esc(b.id)} · ${esc(String(b.desc||"").slice(0,28))}</option>`).join("")}</select></label>`:""}
-    <div class="qlseg" role="radiogroup" aria-label="How the actual is realised"><button type="button" data-qlt="one" class="${st.type!=="mon"?"on":""}" aria-pressed="${st.type!=="mon"}">One-off</button><button type="button" data-qlt="mon" class="${st.type==="mon"?"on":""}" aria-pressed="${st.type==="mon"}">Every month</button></div>
-    <label class="qlrow"><span>${st.type==="mon"?"From":"Month"}</span><select data-ql="mi">${ms.slice(from,cur+1).map((mm,j)=>`<option value="${from+j}" ${from+j===mi?"selected":""}>${mm.h}</option>`).reverse().join("")}</select>${st.type==="mon"?`<span class="muted">→ ${ms[cur].h} (${nMon} month${nMon>1?"s":""})</span>`:""}</label>
-    <div class="qlamt"><input type="range" data-ql="rng" min="0" max="${mx}" step="${mx>20000?500:100}" value="${amt}" aria-label="Actual THB${st.type==="mon"?" per month":""}"><input type="number" data-ql="amt" min="0" step="any" value="${amt}" aria-label="Actual THB"><span class="muted">THB${st.type==="mon"?"/m":""}</span><button type="button" class="btn small" data-qlx2 title="Make the bar go higher">×2</button></div>
-    <div class="qlvs"><span class="qlbar"><span class="pl" style="width:${Math.min(100,planM/mx*100)}%"></span><span class="ac" style="width:${Math.min(100,amt/mx*100)}%"></span></span><span class="muted">plan ${fmtShort(planM)} · now ${fmtShort(actM)}${ms[mi]?" in "+ms[mi].h:""}</span></div>
+    ${quMiniChart(ln,ms,cur)}
+    <div class="qlseg" role="radiogroup" aria-label="How to enter the actual"><button type="button" data-qlt="one" class="${T==="one"?"on":""}" aria-pressed="${T==="one"}" title="One amount for one month">One month</button><button type="button" data-qlt="mon" class="${T==="mon"?"on":""}" aria-pressed="${T==="mon"}" title="The same amount every month from … to …">Same amount</button><button type="button" data-qlt="grid" class="${T==="grid"?"on":""}" aria-pressed="${T==="grid"}" title="Type each month">Each month</button></div>
+    ${body}
     <div class="qlbtns"><button type="button" class="btn small" data-qlx="${r}">Close</button><button type="button" class="btn small primary" data-qls="${r}">Save actual${nMon>1?` × ${nMon}`:""}</button></div></div>`}
 function quLogSave(r){const pid=pId(r);const st=UI.qu.log[r];const {BS,lines}=quLogLines(pid);const ln=lines.find(b=>b.id===st.line)||lines[0];if(!ln)return 0;
-  const ms=BS.months;const cur=ms.reduce((k,mm,i)=>mm.s<=TODAY?i:k,0);const v=Math.max(0,+st.amt||0);const idx=st.type==="mon"?Array.from({length:cur-st.mi+1},(_,j)=>st.mi+j):[st.mi];
+  const ms=BS.months;const cur=ms.reduce((k,mm,i)=>mm.s<=TODAY?i:k,0);const T=st.type||"one";
+  const vals={};if(T==="grid"){for(const [i,v] of Object.entries(st.g||{}))vals[i]=v===""?"":Math.max(0,+v||0)}
+  else{const v=Math.max(0,+st.amt||0);const idx=T==="mon"?Array.from({length:Math.max(1,(st.to??cur)-st.mi+1)},(_,j)=>st.mi+j):[st.mi];idx.forEach(i=>vals[i]=v)}
+  if(!Object.keys(vals).length)return 0;
   let rr=realRow(ln.id);if(!rr){rr=firstFree("Realisation");if(!rr){toast("Realisation table is full — insert rows in Excel",5000);return 0}S.newRows.Realisation=S.newRows.Realisation||new Set();S.newRows.Realisation.add(rr);setCell("Realisation",FR.bid,rr,ln.id)}
-  let n=0;for(const i of idx){const col=ms[i].col;if(String(gv("Realisation",col,rr))!==String(v)){setCell("Realisation",col,rr,v||"");n++}}QBEN.v=null;return n}
+  let n=0;for(const [i,v] of Object.entries(vals)){const col=ms[+i].col;const nv=v||"";if(String(gv("Realisation",col,rr))!==String(nv)){setCell("Realisation",col,rr,nv);n++}}QBEN.v=null;return n}
 function quBenCell(r){const pid=pId(r);const b=pid?benAgg(pid):null;if(!b)return `${benFlag(pid)||'<span class="muted">no benefit plan</span>'}<div><a href="#" data-qben="${r}" class="qbenadd">＋ add benefit</a></div>`;
   const pct=b.ptd?b.atd/b.ptd:null;const mx=Math.max(b.ptd,b.atd,1);
   const ed=typeof canEdit!=="function"||canEdit();
@@ -264,13 +283,14 @@ function quBindRow(m,tr){
     box.querySelectorAll("[data-qlt]").forEach(b=>b.onclick=()=>{st.type=b.dataset.qlt;reRow(r)});
     const q=k=>box.querySelector(`[data-ql="${k}"]`);
     if(q("line"))q("line").onchange=e=>{st.line=e.target.value;st.amt=null;reRow(r)};
-    q("mi").onchange=e=>{st.mi=+e.target.value;st.amt=null;reRow(r)};
+    if(q("mi"))q("mi").onchange=e=>{st.mi=+e.target.value;st.amt=null;reRow(r)};if(q("to"))q("to").onchange=e=>{st.to=+e.target.value;reRow(r)};
+    box.querySelectorAll("[data-qlg]").forEach(el=>el.oninput=()=>{st.g=st.g||{};st.g[el.dataset.qlg]=el.value});
     const sync=(v,from)=>{st.amt=Math.max(0,+v||0);const R=q("rng");if(st.amt>+R.max){const nm=quRngMax(st.amt*2);R.max=nm;R.step=nm>20000?500:100;const pl=box.querySelector(".qlbar .pl");if(pl)pl.style.width=Math.min(100,(+box.dataset.pm||0)/nm*100)+"%"}if(from!=="amt")q("amt").value=st.amt;if(from!=="rng")q("rng").value=st.amt;const bar=box.querySelector(".qlbar .ac");if(bar)bar.style.width=Math.min(100,st.amt/(+q("rng").max||1)*100)+"%"};
-    q("rng").oninput=e=>sync(e.target.value,"rng");q("amt").oninput=e=>sync(e.target.value,"amt");q("amt").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();box.querySelector("[data-qls]").click()}};
-    box.querySelector("[data-qlx2]").onclick=()=>{const R=q("rng");const nm=quRngMax(+R.max*2);R.max=nm;R.step=nm>20000?500:100;sync(st.amt!=null?st.amt:R.value,"x")};
+    if(q("rng")){q("rng").oninput=e=>sync(e.target.value,"rng");q("amt").oninput=e=>sync(e.target.value,"amt");q("amt").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();box.querySelector("[data-qls]").click()}};
+    }if(box.querySelector("[data-qlx2]"))box.querySelector("[data-qlx2]").onclick=()=>{const R=q("rng");const nm=quRngMax(+R.max*2);R.max=nm;R.step=nm>20000?500:100;sync(st.amt!=null?st.amt:R.value,"x")};
     box.querySelector("[data-qlx]").onclick=()=>{delete UI.qu.log[r];reRow(r)};
     box.querySelector("[data-qls]").onclick=()=>{let n=0;try{n=quLogSave(r)}catch(e){toast(e.message,5000);return}delete UI.qu.log[r];quStamp(r);
-      toast(n?`Actual saved — ${fmtNum(st.amt)} THB${st.type==="mon"?` in ${n} month(s)`:""}. Save to database to keep it.`:"Nothing changed",4500);quAfter(m,r,!!n)}});
+      toast(n?`Actual saved — ${n} month(s) updated. Save to database to keep it.`:"Nothing changed",4500);quAfter(m,r,!!n)}});
   tr.querySelectorAll("[data-qx]").forEach(b=>b.onclick=async()=>{for(const j of [...QU_BLUR])await j.run();const r=+b.dataset.qx,F=UI.qu;if(F.open.has(r))F.open.delete(r);else F.open.add(r);const y=scrollY;vQuick($("#main"),true);window.scrollTo(0,y);const nb=document.querySelector(`[data-qx="${r}"]`);if(nb)nb.focus({preventScroll:true})})}
 function quReset(el){const r=+el.dataset.qu,f=el.dataset.f;const v={prog:Math.round(((pLive(r).comp)||0)*1000)/10,ph:gv("Projects","AJ",r),ovr:gv("Projects",FP.ovr,r),ps:isoFromSerial(gv("Projects",FP.ps,r)),pe:isoFromSerial(gv("Projects",FP.pe,r)),done:gv("Projects","AK",r),next:gv("Projects","AL",r),iss:gv("Projects","AM",r),q:gv("Projects","AI",r),wsl:gv("Projects",FP.wsl,r),lead:gv("Projects",FP.lead,r),team:gv("Projects","AB",r),init:gv("Projects",FP.init,r)}[f];el.value=v??""}
 let QU_PTR=false;const QU_PEND=new Map();const QU_BLUR=new Set();document.addEventListener("pointerdown",()=>{QU_PTR=true},true);
