@@ -23,7 +23,7 @@ async function quSet(pr,k,v,el){
     const cur=Math.round(((LIVE.proj[pId(pr)]||{}).comp||0)*1000)/1000;if(Math.abs(cur-p)<0.0005)return false;
     if(!tasksOfProject(pId(pr)).length&&(!gv("Projects",FP.ps,pr)||!gv("Projects",FP.pe,pr)))toast("No plan dates yet — add Plan start / end so the status can be calculated.",6000);
     setProjectProgress(pr,p);quStamp(pr);return true}
-  const col={ph:"AJ",ovr:FP.ovr,ps:FP.ps,pe:FP.pe,done:"AK",next:"AL",iss:"AM",q:"AI"}[k];if(!col)return false;let val=v;
+  const col={ph:"AJ",ovr:FP.ovr,ps:FP.ps,pe:FP.pe,done:"AK",next:"AL",iss:"AM",q:"AI",wsl:FP.wsl,lead:FP.lead}[k];if(!col)return false;let val=k==="wsl"||k==="lead"?String(v||"").trim():v;
   if(k==="ps"||k==="pe"){
     if(el&&el.validity&&el.validity.badInput){toast("That date is incomplete — the plan date was not changed",5000);return false}
     val=v?serialFromIso(v):"";if(val!==""&&!quYearOK(val)){toast("Please enter a year between 2000 and 2100 — not changed",5000);return false}
@@ -89,17 +89,38 @@ function benAgg(pid){const now=Date.now();if(!QBEN.v||now-QBEN.t>400){const BS=b
     for(const b of BS.list){if(b.drop)continue;const x=o[b.pid]=o[b.pid]||{rec:0,one:0,ptd:0,atd:0,p12:0,n:0};x.n++;if(b.one)x.one+=b.gross;else x.rec+=b.gross;
       ms.forEach((mm,i)=>{if(mm.s<=TODAY){x.ptd+=+b.plan[i]||0;x.atd+=+b.act[i]||0}else if(mm.s<=TODAY+366)x.p12+=+b.plan[i]||0})}
     QBEN={t:now,v:o}}return QBEN.v[pid]||null}
+/* quick "log actual" right in the row: pick one-off / every month, a month, drag the bar or type the amount */
+function quLogLines(pid){const BS=benefitSeries();return {BS,lines:BS.list.filter(b=>b.pid===pid&&!b.drop)}}
+function quLogHtml(r){const pid=pId(r);const st=UI.qu.log&&UI.qu.log[r];if(!st)return "";const {BS,lines}=quLogLines(pid);if(!lines.length)return "";
+  const ln=lines.find(b=>b.id===st.line)||lines[0];st.line=ln.id;const ms=BS.months;const cur=ms.reduce((k,mm,i)=>mm.s<=TODAY?i:k,0);
+  const from=Math.max(0,cur-17);if(st.mi==null||st.mi>cur)st.mi=cur;const mi=st.mi;
+  const planM=+ln.plan[mi]||0,actM=+ln.act[mi]||0,refPlan=ln.one?Math.max(...ln.plan):Math.max(planM,...ln.plan.slice(0,cur+1));
+  const amt=st.amt!=null?st.amt:(actM||Math.round(planM));const mx=Math.max(1000,Math.round((Math.max(refPlan,amt,actM)*2)/100)*100);
+  const nMon=st.type==="mon"?cur-mi+1:1;
+  return `<div class="qlog" data-qlog="${r}">
+    ${lines.length>1?`<label class="qlrow"><span>Line</span><select data-ql="line">${lines.map(b=>`<option value="${esc(b.id)}" ${b.id===ln.id?"selected":""}>${esc(b.id)} · ${esc(String(b.desc||"").slice(0,28))}</option>`).join("")}</select></label>`:""}
+    <div class="qlseg" role="radiogroup" aria-label="How the actual is realised"><button type="button" data-qlt="one" class="${st.type!=="mon"?"on":""}" aria-pressed="${st.type!=="mon"}">One-off</button><button type="button" data-qlt="mon" class="${st.type==="mon"?"on":""}" aria-pressed="${st.type==="mon"}">Every month</button></div>
+    <label class="qlrow"><span>${st.type==="mon"?"From":"Month"}</span><select data-ql="mi">${ms.slice(from,cur+1).map((mm,j)=>`<option value="${from+j}" ${from+j===mi?"selected":""}>${mm.h}</option>`).reverse().join("")}</select>${st.type==="mon"?`<span class="muted">→ ${ms[cur].h} (${nMon} month${nMon>1?"s":""})</span>`:""}</label>
+    <div class="qlamt"><input type="range" data-ql="rng" min="0" max="${mx}" step="${mx>20000?500:100}" value="${amt}" aria-label="Actual THB${st.type==="mon"?" per month":""}"><input type="number" data-ql="amt" min="0" step="any" value="${amt}" aria-label="Actual THB"><span class="muted">THB${st.type==="mon"?"/m":""}</span></div>
+    <div class="qlvs"><span class="qlbar"><span class="pl" style="width:${Math.min(100,planM/mx*100)}%"></span><span class="ac" style="width:${Math.min(100,amt/mx*100)}%"></span></span><span class="muted">plan ${fmtShort(planM)} · now ${fmtShort(actM)}${ms[mi]?" in "+ms[mi].h:""}</span></div>
+    <div class="qlbtns"><button type="button" class="btn small" data-qlx="${r}">Close</button><button type="button" class="btn small primary" data-qls="${r}">Save actual${nMon>1?` × ${nMon}`:""}</button></div></div>`}
+function quLogSave(r){const pid=pId(r);const st=UI.qu.log[r];const {BS,lines}=quLogLines(pid);const ln=lines.find(b=>b.id===st.line)||lines[0];if(!ln)return 0;
+  const ms=BS.months;const cur=ms.reduce((k,mm,i)=>mm.s<=TODAY?i:k,0);const v=Math.max(0,+st.amt||0);const idx=st.type==="mon"?Array.from({length:cur-st.mi+1},(_,j)=>st.mi+j):[st.mi];
+  let rr=realRow(ln.id);if(!rr){rr=firstFree("Realisation");if(!rr){toast("Realisation table is full — insert rows in Excel",5000);return 0}S.newRows.Realisation=S.newRows.Realisation||new Set();S.newRows.Realisation.add(rr);setCell("Realisation",FR.bid,rr,ln.id)}
+  let n=0;for(const i of idx){const col=ms[i].col;if(String(gv("Realisation",col,rr))!==String(v)){setCell("Realisation",col,rr,v||"");n++}}QBEN.v=null;return n}
 function quBenCell(r){const pid=pId(r);const b=pid?benAgg(pid):null;if(!b)return `${benFlag(pid)||'<span class="muted">no benefit plan</span>'}<div><a href="#" data-qben="${r}" class="qbenadd">＋ add benefit</a></div>`;
   const pct=b.ptd?b.atd/b.ptd:null;const mx=Math.max(b.ptd,b.atd,1);
   return `<a href="#" data-qben="${r}" class="qbenlink" title="Open the project's benefit plan (plan vs actual by month)"><div class="qbplan"><span class="vtag plan">PLAN</span><b>${fmtShort(b.rec)}</b><span class="muted">/yr</span>${b.one?` <span class="muted">+ ${fmtShort(b.one)} one-off</span>`:""}</div>
     <div class="qbbar" aria-hidden="true"><span class="p" style="width:${b.ptd/mx*100}%"></span><span class="a" style="width:${b.atd/mx*100}%"></span></div>
-    <div class="qbact"><span class="vtag act">ACTUAL</span>${b.ptd||b.atd?`<b>${fmtShort(b.atd)}</b> <span class="muted">of ${fmtShort(b.ptd)} to date</span> ${pct==null?"":`<b class="${pct>=.9?"good":pct>=.6?"mid":"bad"}">${Math.round(pct*100)}%</b>`}`:`<span class="muted">starts ${b.p12?"within 12 m":"later"}</span>`}</div></a>`}
+    <div class="qbact"><span class="vtag act">ACTUAL</span>${b.ptd||b.atd?`<b>${fmtShort(b.atd)}</b> <span class="muted">of ${fmtShort(b.ptd)} to date</span> ${pct==null?"":`<b class="${pct>=.9?"good":pct>=.6?"mid":"bad"}">${Math.round(pct*100)}%</b>`}`:`<span class="muted">starts ${b.p12?"within 12 m":"later"}</span>`}</div></a>
+    ${UI.qu.log&&UI.qu.log[r]?quLogHtml(r):(typeof canEdit!=="function"||canEdit()?`<button type="button" class="btn small qlogbtn" data-qlo="${r}">＋ Log actual</button>`:"")}`}
 function quRowSimple(r){const L=pLive(r);const pc=Math.round((L.comp||0)*1000)/10;const pl=quPlanned(r);const F=UI.qu;const open=F.open.has(r);
   const inp=(k,v,type,extra="")=>`<input data-qu="${r}" data-k="q${r}_${k}" data-f="${k}" type="${type}" value="${esc(v)}" ${extra}>`;
   const behind=pl!==""&&(L.comp||0)+0.005<pl;const proc=gv("Projects",FP.proc,r);
   return `<tr data-row="${r}" class="${F.edited.has(r)?"changed":""} ${open?"qopen":""}">
     <td class="qx"><button type="button" class="qxb" data-qx="${r}" aria-expanded="${open}" aria-label="${open?"Hide":"Show"} details">${open?"▾":"▸"}</button></td>
-    <td class="qn"><a href="#" data-op="${r}" title="Open the full project (tasks, benefits, risks)"><b>${esc(gv("Projects",FP.name,r)||"(no name yet)")}</b></a><div class="zid">${progChip(pId(r))}${proc?`<span class="parea">${esc(proc)}</span> `:""}${gv("Projects","AB",r)?`<span class="pteam" title="Division / team">${esc(gv("Projects","AB",r))}</span> `:""}${esc(pId(r))}${gv("Projects","Z",r)?` · old #${esc(gv("Projects","Z",r))}`:""}</div><div class="zppl">${leadLine(r)}${e2eChip(pId(r))}</div>${F.edited.has(r)?`<span class="qed">edited</span>`:""}</td>
+    <td class="qn"><a href="#" data-op="${r}" title="Open the full project (tasks, benefits, risks)"><b>${esc(gv("Projects",FP.name,r)||"(no name yet)")}</b></a><div class="zid">${progChip(pId(r))}${proc?`<span class="parea">${esc(proc)}</span> `:""}${gv("Projects","AB",r)?`<span class="pteam" title="Division / team">${esc(gv("Projects","AB",r))}</span> `:""}${esc(pId(r))}${gv("Projects","Z",r)?` · old #${esc(gv("Projects","Z",r))}`:""}</div><div class="zppl">${e2eChip(pId(r))}</div>${F.edited.has(r)?`<span class="qed">edited</span>`:""}</td>
+    <td class="qppl"><label><span title="Workstream leader">WS</span>${inp("wsl",gv("Projects",FP.wsl,r),"text",'list="quPeople" placeholder="—" aria-label="Workstream leader"')}</label><label><span title="Project lead (PIC)">Lead</span>${inp("lead",gv("Projects",FP.lead,r),"text",'list="quPeople" placeholder="—" aria-label="Project lead"')}</label>${gv("Projects","AG",r)?`<div class="qteam" title="Project team (developers / analysts)">Team: ${esc(gv("Projects","AG",r))}</div>`:""}</td>
     <td data-cell="st">${pill(pStat(r))}<div style="margin-top:4px">${raiddBtn(pId(r))}</div></td>
     <td class="num"><div class="qprog">${inp("prog",pc,"number",'min="0" max="100" step="5" inputmode="decimal" aria-label="Progress %"')}<span class="qbar"><span style="width:${Math.min(100,pc)}%"></span>${pl!==""?`<i style="left:${Math.min(100,pl*100)}%" title="planned to date"></i>`:""}</span></div>
       <div class="qbtn">${[0,25,50,75,100].map(x=>`<button type="button" class="btn small" data-qp="${r}" data-v="${x}" data-k="q${r}_b${x}">${x}</button>`).join("")}</div>
@@ -113,7 +134,7 @@ function quDetHtml(r){const ovrs=listFromName("L_POvr");const phs=uniqOrder([...
   const inp=(k,v,type,extra="")=>`<input data-qu="${r}" data-k="q${r}_${k}" data-f="${k}" type="${type}" value="${esc(v)}" ${extra}>`;
   const ta=(k,v,ph)=>`<textarea data-qu="${r}" data-k="q${r}_${k}" data-f="${k}" rows="2" placeholder="${ph}">${esc(v)}</textarea>`;
   const nE2E=typeof hasE2E==="function"&&hasE2E()?e2eLinksOf(pId(r)).filter(x=>x.ver==="TO-BE").length:0;
-  return `<tr class="qdet" data-det="${r}"><td></td><td colspan="7"><div class="qdgrid">
+  return `<tr class="qdet" data-det="${r}"><td></td><td colspan="8"><div class="qdgrid">
     <label>Target quarter${inp("q",gv("Projects","AI",r),"text",'placeholder="e.g. Q1 2027"')}</label>
     ${gv("Projects","AJ",r)?"":"<!--"}<label>Phase (legacy)<select data-qu="${r}" data-k="q${r}_ph" data-f="ph"><option value=""></option>${phs.map(x=>`<option ${x===gv("Projects","AJ",r)?"selected":""}>${esc(x)}</option>`).join("")}</select></label>${gv("Projects","AJ",r)?"":"-->"}
     <label>Status override<select data-qu="${r}" data-k="q${r}_ovr" data-f="ovr"><option value="">— (calculated)</option>${ovrs.map(x=>`<option ${x===gv("Projects",FP.ovr,r)?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
@@ -147,8 +168,20 @@ function quBindRow(m,tr){
     else{el.onblur=()=>{const v=el.value,bad=!!(el.validity&&el.validity.badInput);const job={run:()=>{if(job.done)return;job.done=true;QU_BLUR.delete(job);return commit(el,v,bad)},r:+el.dataset.qu};QU_BLUR.add(job);setTimeout(job.run,0)};el.onkeydown=e=>{if(e.key==="Enter"&&el.tagName==="INPUT"){e.preventDefault();el.blur()}if(e.key==="Escape"){quReset(el);el.blur()}}}});
   tr.querySelectorAll("[data-qp]").forEach(b=>b.onclick=async()=>{const r=+b.dataset.qp;for(const j of [...QU_BLUR])await j.run();const ok=await quSet(r,"prog",b.dataset.v);const o=QU_PEND.get(r);QU_PEND.delete(r);QU_PTR=false;quAfter(m,r,ok||(o&&o.changed),b.dataset.k)});
   tr.querySelectorAll("[data-op]").forEach(a=>a.onclick=e=>{e.preventDefault();openProject(+a.dataset.op)});
+  const reRow=r=>{const tr2=m.querySelector(`tr[data-row="${r}"]`);if(!tr2)return;const cell=tr2.querySelector("td.qben");if(cell){cell.innerHTML=quBenCell(r);quBindRow(m,tr2)}};
+  tr.querySelectorAll("[data-qlo]").forEach(b=>b.onclick=()=>{const r=+b.dataset.qlo;UI.qu.log=UI.qu.log||{};UI.qu.log[r]={type:"one"};reRow(r)});
+  tr.querySelectorAll("[data-qlog]").forEach(box=>{const r=+box.dataset.qlog,st=UI.qu.log[r];
+    box.querySelectorAll("[data-qlt]").forEach(b=>b.onclick=()=>{st.type=b.dataset.qlt;reRow(r)});
+    const q=k=>box.querySelector(`[data-ql="${k}"]`);
+    if(q("line"))q("line").onchange=e=>{st.line=e.target.value;st.amt=null;reRow(r)};
+    q("mi").onchange=e=>{st.mi=+e.target.value;st.amt=null;reRow(r)};
+    const sync=(v,from)=>{st.amt=Math.max(0,+v||0);if(from!=="amt")q("amt").value=st.amt;if(from!=="rng")q("rng").value=st.amt;const bar=box.querySelector(".qlbar .ac");if(bar)bar.style.width=Math.min(100,st.amt/(+q("rng").max||1)*100)+"%"};
+    q("rng").oninput=e=>sync(e.target.value,"rng");q("amt").oninput=e=>sync(e.target.value,"amt");q("amt").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();box.querySelector("[data-qls]").click()}};
+    box.querySelector("[data-qlx]").onclick=()=>{delete UI.qu.log[r];reRow(r)};
+    box.querySelector("[data-qls]").onclick=()=>{let n=0;try{n=quLogSave(r)}catch(e){toast(e.message,5000);return}delete UI.qu.log[r];quStamp(r);
+      toast(n?`Actual saved — ${fmtNum(st.amt)} THB${st.type==="mon"?` in ${n} month(s)`:""}. Save to database to keep it.`:"Nothing changed",4500);quAfter(m,r,!!n)}});
   tr.querySelectorAll("[data-qx]").forEach(b=>b.onclick=async()=>{for(const j of [...QU_BLUR])await j.run();const r=+b.dataset.qx,F=UI.qu;if(F.open.has(r))F.open.delete(r);else F.open.add(r);const y=scrollY;vQuick($("#main"),true);window.scrollTo(0,y);const nb=document.querySelector(`[data-qx="${r}"]`);if(nb)nb.focus({preventScroll:true})})}
-function quReset(el){const r=+el.dataset.qu,f=el.dataset.f;const v={prog:Math.round(((pLive(r).comp)||0)*1000)/10,ph:gv("Projects","AJ",r),ovr:gv("Projects",FP.ovr,r),ps:isoFromSerial(gv("Projects",FP.ps,r)),pe:isoFromSerial(gv("Projects",FP.pe,r)),done:gv("Projects","AK",r),next:gv("Projects","AL",r),iss:gv("Projects","AM",r),q:gv("Projects","AI",r)}[f];el.value=v??""}
+function quReset(el){const r=+el.dataset.qu,f=el.dataset.f;const v={prog:Math.round(((pLive(r).comp)||0)*1000)/10,ph:gv("Projects","AJ",r),ovr:gv("Projects",FP.ovr,r),ps:isoFromSerial(gv("Projects",FP.ps,r)),pe:isoFromSerial(gv("Projects",FP.pe,r)),done:gv("Projects","AK",r),next:gv("Projects","AL",r),iss:gv("Projects","AM",r),q:gv("Projects","AI",r),wsl:gv("Projects",FP.wsl,r),lead:gv("Projects",FP.lead,r)}[f];el.value=v??""}
 let QU_PTR=false;const QU_PEND=new Map();const QU_BLUR=new Set();document.addEventListener("pointerdown",()=>{QU_PTR=true},true);
 document.addEventListener("pointerup",()=>{setTimeout(()=>{QU_PTR=false;const p=[...QU_PEND];QU_PEND.clear();p.forEach(([r,o])=>quAfter(o.m,r,o.changed,o.focusKey))},40)},true);
 function quAfter(m,r,changed,focusKey){if(changed)UI.qu.edited.add(r);
@@ -195,11 +228,11 @@ function vQuick(m,simple){const F=UI.qu;F.simple=!!simple;liveCalc();const {all,
   const sts=off.size?STL.slice():STL.filter(s=>P2.some(r=>pStat(r)===s));const re=()=>{const y=scrollY;vQuick(m,simple);window.scrollTo(0,y)};
   const head=simple?projHead(true)
    :`<div class="banner inp"><b>⚡ QUICK UPDATE</b><span>Update many projects on one screen. Type a new <b>Progress %</b> (or click 0 / 25 / 50 / 75 / 100) and the project's tasks are filled stage by stage. A box is saved into the workbook when you leave it (Tab / Enter / click elsewhere); <b>Esc</b> undoes the box you are in. Each change stamps <b>Last Updated</b> = today — check them in <b>Review changes</b>, then <b>Save to database</b>.</span></div>`;
-  const thead=simple?`<tr><th class="qx"><button type="button" class="qxb" id="quAll" title="Open / close all">${F.open.size?"▾":"▸"}</button></th><th class="qn">Project</th><th>Status</th><th class="num">Progress %</th><th>Plan start → end</th><th>Benefit · plan vs actual</th><th>Next steps</th><th>Updated</th></tr>`
+  const thead=simple?`<tr><th class="qx"><button type="button" class="qxb" id="quAll" title="Open / close all">${F.open.size?"▾":"▸"}</button></th><th class="qn">Project</th><th>People</th><th>Status</th><th class="num">Progress %</th><th>Plan start → end</th><th>Benefit · plan vs actual</th><th>Next steps</th><th>Updated</th></tr>`
    :`<tr><th class="qn">Project</th><th>Status</th><th class="num">Progress %</th><th>Phase (legacy)</th><th>Override</th><th>Plan start</th><th>Plan end</th><th>Target Q</th><th>Last update — Done</th><th>Next steps</th><th>Issues / blockers</th><th>Updated</th></tr>`;
   m.innerHTML=head+quFilterBar()+`
   <div class="card tablewrap qwrap ${simple?"qsimple":""}"><table class="data qu"><thead>${thead}</thead><tbody>
-  ${rows.map(r=>quRowHtml(r)+(simple&&F.open.has(r)?quDetHtml(r):"")).join("")||`<tr><td colspan="12" class="muted">No projects match the filters</td></tr>`}</tbody></table></div>
+  ${rows.map(r=>quRowHtml(r)+(simple&&F.open.has(r)?quDetHtml(r):"")).join("")||`<tr><td colspan="12" class="muted">No projects match the filters</td></tr>`}</tbody></table></div><datalist id="quPeople">${uniq([...listFromName("L_Leader"),..._rowsOf0Safe("Projects").flatMap(x=>[gv("Projects",FP.lead,x),gv("Projects",FP.wsl,x)])].filter(Boolean)).sort().map(x=>`<option value="${esc(x)}">`).join("")}</datalist>
   <p class="muted" style="font-size:12px">The blue bar is actual progress; the thin dark mark is where the plan says the project should be today. Status follows the <b>task</b> dates — when you change plan dates you are asked whether to move the task plan too.</p>`;
   quFilterBind(m,re);m.querySelectorAll("tr[data-row],tr.qdet").forEach(tr=>quBindRow(m,tr));
   if(simple){bindPview(m);$("#quNew").onclick=newProject;

@@ -388,3 +388,13 @@ body.has-unsaved nav.tabs button[data-t="Changes"]{background:#FFC000;color:#1b1
 .g-row .gte.last{bottom:50%}
 .g-row.gf .g-name{font-size:13px;color:#1F3864}.g-row.gl .g-name{color:#1F3864;font-weight:600}
 .g-left .g-row{position:relative}
+/* Projects · Summary: people column + quick actual logging */
+.qsimple td.qppl{min-width:150px}.qppl label{display:flex;align-items:center;gap:6px;margin:2px 0}.qppl label span{font-size:10.5px;font-weight:700;color:#fff;background:#344054;border-radius:4px;padding:1px 5px;min-width:30px;text-align:center}
+.qppl input{width:110px;font:inherit;font-size:12.5px;padding:3px 6px;border:1px solid #D0D5DD;border-radius:6px;background:#FFFDF2}.qteam{font-size:11px;color:#667085;margin-top:2px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qlogbtn{margin-top:6px}
+.qlog{margin-top:6px;padding:8px;border:1px solid #D0D5DD;border-radius:8px;background:#F8FAFC;display:flex;flex-direction:column;gap:6px;font-size:12px;min-width:240px}
+.qlseg{display:inline-flex;border:1px solid #D0D5DD;border-radius:7px;overflow:hidden;align-self:flex-start}.qlseg button{border:0;background:#fff;padding:3px 10px;font:inherit;cursor:pointer}.qlseg button.on{background:#1F3864;color:#fff;font-weight:600}
+.qlrow{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.qlrow>span:first-child{font-weight:600;color:#344054;min-width:38px}.qlrow select{font:inherit;font-size:12px;max-width:190px}
+.qlamt{display:flex;align-items:center;gap:6px}.qlamt input[type=range]{flex:1;min-width:90px;accent-color:#1F7A3D}.qlamt input[type=number]{width:90px;font:inherit;padding:3px 6px;border:1px solid #D0D5DD;border-radius:6px}
+.qlvs{display:flex;align-items:center;gap:6px}.qlbar{position:relative;flex:1;height:8px;background:#EEF2F6;border-radius:4px;overflow:hidden;min-width:80px}.qlbar .pl{position:absolute;left:0;top:0;bottom:0;background:#C7D7EE}.qlbar .ac{position:absolute;left:0;top:2px;bottom:2px;background:#1F7A3D;border-radius:3px}
+.qlbtns{display:flex;justify-content:flex-end;gap:6px}
