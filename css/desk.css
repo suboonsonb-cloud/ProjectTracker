@@ -489,3 +489,16 @@ details.qcols summary{cursor:pointer;display:inline-block;padding:3px 10px;borde
 .qlhd .vtag{margin-right:4px}
 .qsimple td.qben:has(.qlog){max-width:none;min-width:300px}
 .qlseg button{font-size:11px;padding:3px 7px}
+/* r36 — an opened project (row + ▸ details) reads as one section */
+.qsimple tr.qopen>td,.qsimple tr.qdet>td{background:#EDF2F9!important}
+.qsimple tr.qopen>td.qn{background:#EDF2F9}
+.qsimple tr.qopen>td:first-child,.qsimple tr.qdet>td:first-child{box-shadow:inset 4px 0 0 #2F5597}
+.qsimple tr.qopen>td{border-top:2px solid #C9D6EA}
+.qsimple tr.qdet>td{border-bottom:2px solid #C9D6EA;padding-top:4px;padding-bottom:14px}
+.qsimple tr.qdet .qdgrid{background:#fff;border:1px solid #DDE5F0;border-radius:8px;padding:10px 12px}
+.qsimple tr.qdet .qtk{background:#fff;border:1px solid #DDE5F0;border-radius:8px;padding:8px 10px;margin-top:10px}
+.qsimple tr.qdet .qtk.flash{box-shadow:0 0 0 3px #f4b400}
+.qtkt thead th{background:#E8EEF7!important;color:#1F3864!important;font-weight:600;font-size:11.5px;border-bottom:1px solid #D3DCE9}
+.qtkt tbody tr:nth-child(even) td{background:#FAFBFD}
+.qtkt td{border-bottom:1px solid #EEF1F5}
+.qsimple tr.qdet .qtkmsg{margin-bottom:8px}
