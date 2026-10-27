@@ -23,14 +23,15 @@ async function quSet(pr,k,v,el){
     const cur=Math.round(((LIVE.proj[pId(pr)]||{}).comp||0)*1000)/1000;if(Math.abs(cur-p)<0.0005)return false;
     if(!tasksOfProject(pId(pr)).length&&(!gv("Projects",FP.ps,pr)||!gv("Projects",FP.pe,pr)))toast("No plan dates yet — add Plan start / end so the status can be calculated.",6000);
     setProjectProgress(pr,p);quStamp(pr);return true}
-  const col={ph:"AJ",ovr:FP.ovr,ps:FP.ps,pe:FP.pe,done:"AK",next:"AL",iss:"AM",q:"AI",wsl:FP.wsl,lead:FP.lead}[k];if(!col)return false;let val=k==="wsl"||k==="lead"?String(v||"").trim():v;
+  const col={ph:"AJ",ovr:FP.ovr,ps:FP.ps,pe:FP.pe,done:"AK",next:"AL",iss:"AM",q:"AI",wsl:FP.wsl,lead:FP.lead,init:FP.init,team:"AB"}[k];if(!col)return false;let val=k==="wsl"||k==="lead"||k==="team"?String(v||"").trim():v;
   if(k==="ps"||k==="pe"){
     if(el&&el.validity&&el.validity.badInput){toast("That date is incomplete — the plan date was not changed",5000);return false}
     val=v?serialFromIso(v):"";if(val!==""&&!quYearOK(val)){toast("Please enter a year between 2000 and 2100 — not changed",5000);return false}
     const ps=k==="ps"?val:(+gv("Projects",FP.ps,pr)||""),pe=k==="pe"?val:(+gv("Projects",FP.pe,pr)||"");
     if(ps!==""&&pe!==""&&pe<ps){toast("Plan end is before plan start — not changed",5000);return false}
     if(val===""&&gv("Projects",col,pr)!==""){const a=await choose("Clear this plan date?",`<p>Remove the plan ${k==="ps"?"start":"end"} of <b>${esc(gv("Projects",FP.name,pr))}</b>?</p>`,[["no","Keep it"],["yes","Clear","danger"]]);if(a!=="yes")return false}}
-  if(String(gv("Projects",col,pr))===String(val??""))return false;setCell("Projects",col,pr,val);renderTabs();
+  if(String(gv("Projects",col,pr))===String(val??""))return false;const oldId=pId(pr);setCell("Projects",col,pr,val);
+  if(k==="init"){refreshNewId("Projects",pr);cascadePid(oldId,pId(pr));if(oldId!==pId(pr))toast(`Project ID changed ${oldId} → ${pId(pr)}`,5000)}renderTabs();
   if(k==="pe"||k==="ps"){const ps=+gv("Projects",FP.ps,pr)||0,pe=+gv("Projects",FP.pe,pr)||0;const ts=tasksOfProject(pId(pr));
     if(ps&&pe&&ts.length){const undated=ts.every(t=>gv("Activities",FA.ps,t)===""&&gv("Activities",FA.pe,t)==="");
       if(undated)quRespread(pr);
@@ -149,7 +150,7 @@ function quRowSimple(r){const L=pLive(r);const pc=Math.round((L.comp||0)*1000)/1
   return `<tr data-row="${r}" class="${F.edited.has(r)?"changed":""} ${open?"qopen":""}">
     <td class="qx"><button type="button" class="qxb" data-qx="${r}" aria-expanded="${open}" aria-label="${open?"Hide":"Show"} details">${open?"▾":"▸"}</button></td>
     <td class="qtree">${e2eTreeCell(pId(r))}</td>
-    <td class="qn"><a href="#" data-op="${r}" title="Open the full project (tasks, benefits, risks)"><b>${esc(gv("Projects",FP.name,r)||"(no name yet)")}</b></a><div class="zid">${progChip(pId(r))}${proc?`<span class="parea">${esc(proc)}</span> `:""}${gv("Projects","AB",r)?`<span class="pteam" title="Division / team">${esc(gv("Projects","AB",r))}</span> `:""}${esc(pId(r))}${gv("Projects","Z",r)?` · old #${esc(gv("Projects","Z",r))}`:""}</div><div class="zppl">${e2eChip(pId(r))}</div>${F.edited.has(r)?`<span class="qed">edited</span>`:""}</td>
+    <td class="qn"><a href="#" data-op="${r}" title="Open the full project (tasks, benefits, risks)"><b>${esc(gv("Projects",FP.name,r)||"(no name yet)")}</b></a><div class="zid">${progChip(pId(r))}${proc?`<span class="parea">${esc(proc)}</span> `:""}${esc(pId(r))}${gv("Projects","Z",r)?` · old #${esc(gv("Projects","Z",r))}`:""}</div><div class="qmeta"><label title="Project type"><span>Type</span><select data-qu="${r}" data-k="q${r}_init" data-f="init" aria-label="Project type"><option value="">—</option>${uniqOrder([...listFromName("L_Init"),gv("Projects",FP.init,r)].filter(Boolean)).map(x=>`<option ${x===gv("Projects",FP.init,r)?"selected":""}>${esc(x)}</option>`).join("")}</select></label><label title="Division / team"><span>Team</span>${inp("team",gv("Projects","AB",r),"text",'list="quTeams" placeholder="—" aria-label="Division / team"')}</label></div><div class="zppl">${e2eChip(pId(r))}</div>${F.edited.has(r)?`<span class="qed">edited</span>`:""}</td>
     <td class="qppl"><label><span title="Workstream leader">WS</span>${inp("wsl",gv("Projects",FP.wsl,r),"text",'list="quPeople" placeholder="—" aria-label="Workstream leader"')}</label><label><span title="Project lead (PIC)">Lead</span>${inp("lead",gv("Projects",FP.lead,r),"text",'list="quPeople" placeholder="—" aria-label="Project lead"')}</label>${gv("Projects","AG",r)?`<div class="qteam" title="Project team (developers / analysts)">Team: ${esc(gv("Projects","AG",r))}</div>`:""}</td>
     <td data-cell="st">${quStatSel(r)}</td>
     <td class="qraidd">${raiddCell(pId(r))}</td>
@@ -224,7 +225,7 @@ function quBindRow(m,tr){
     box.querySelector("[data-qls]").onclick=()=>{let n=0;try{n=quLogSave(r)}catch(e){toast(e.message,5000);return}delete UI.qu.log[r];quStamp(r);
       toast(n?`Actual saved — ${fmtNum(st.amt)} THB${st.type==="mon"?` in ${n} month(s)`:""}. Save to database to keep it.`:"Nothing changed",4500);quAfter(m,r,!!n)}});
   tr.querySelectorAll("[data-qx]").forEach(b=>b.onclick=async()=>{for(const j of [...QU_BLUR])await j.run();const r=+b.dataset.qx,F=UI.qu;if(F.open.has(r))F.open.delete(r);else F.open.add(r);const y=scrollY;vQuick($("#main"),true);window.scrollTo(0,y);const nb=document.querySelector(`[data-qx="${r}"]`);if(nb)nb.focus({preventScroll:true})})}
-function quReset(el){const r=+el.dataset.qu,f=el.dataset.f;const v={prog:Math.round(((pLive(r).comp)||0)*1000)/10,ph:gv("Projects","AJ",r),ovr:gv("Projects",FP.ovr,r),ps:isoFromSerial(gv("Projects",FP.ps,r)),pe:isoFromSerial(gv("Projects",FP.pe,r)),done:gv("Projects","AK",r),next:gv("Projects","AL",r),iss:gv("Projects","AM",r),q:gv("Projects","AI",r),wsl:gv("Projects",FP.wsl,r),lead:gv("Projects",FP.lead,r)}[f];el.value=v??""}
+function quReset(el){const r=+el.dataset.qu,f=el.dataset.f;const v={prog:Math.round(((pLive(r).comp)||0)*1000)/10,ph:gv("Projects","AJ",r),ovr:gv("Projects",FP.ovr,r),ps:isoFromSerial(gv("Projects",FP.ps,r)),pe:isoFromSerial(gv("Projects",FP.pe,r)),done:gv("Projects","AK",r),next:gv("Projects","AL",r),iss:gv("Projects","AM",r),q:gv("Projects","AI",r),wsl:gv("Projects",FP.wsl,r),lead:gv("Projects",FP.lead,r),team:gv("Projects","AB",r),init:gv("Projects",FP.init,r)}[f];el.value=v??""}
 let QU_PTR=false;const QU_PEND=new Map();const QU_BLUR=new Set();document.addEventListener("pointerdown",()=>{QU_PTR=true},true);
 document.addEventListener("pointerup",()=>{setTimeout(()=>{QU_PTR=false;const p=[...QU_PEND];QU_PEND.clear();p.forEach(([r,o])=>quAfter(o.m,r,o.changed,o.focusKey))},40)},true);
 function quAfter(m,r,changed,focusKey){if(changed)UI.qu.edited.add(r);
@@ -275,7 +276,7 @@ function vQuick(m,simple){const F=UI.qu;F.simple=!!simple;liveCalc();const {all,
    :`<tr><th class="qn">Project</th><th>Status</th><th class="num">Progress %</th><th>Phase (legacy)</th><th>Override</th><th>Plan start</th><th>Plan end</th><th>Target Q</th><th>Last update — Done</th><th>Next steps</th><th>Issues / blockers</th><th>Updated</th></tr>`;
   m.innerHTML=head+quFilterBar()+`
   <div class="card tablewrap qwrap ${simple?"qsimple":""}"><table class="data qu"><thead>${thead}</thead><tbody>
-  ${rows.map(r=>quRowHtml(r)+(simple&&F.open.has(r)?quDetHtml(r):"")).join("")||`<tr><td colspan="12" class="muted">No projects match the filters</td></tr>`}</tbody></table></div><datalist id="quPeople">${uniq([...listFromName("L_Leader"),..._rowsOf0Safe("Projects").flatMap(x=>[gv("Projects",FP.lead,x),gv("Projects",FP.wsl,x)])].filter(Boolean)).sort().map(x=>`<option value="${esc(x)}">`).join("")}</datalist>
+  ${rows.map(r=>quRowHtml(r)+(simple&&F.open.has(r)?quDetHtml(r):"")).join("")||`<tr><td colspan="12" class="muted">No projects match the filters</td></tr>`}</tbody></table></div><datalist id="quTeams">${uniq(_rowsOf0Safe("Projects").map(r=>String(gv("Projects","AB",r)||"").trim()).filter(Boolean)).sort().map(x=>`<option value="${esc(x)}">`).join("")}</datalist><datalist id="quPeople">${uniq([...listFromName("L_Leader"),..._rowsOf0Safe("Projects").flatMap(x=>[gv("Projects",FP.lead,x),gv("Projects",FP.wsl,x)])].filter(Boolean)).sort().map(x=>`<option value="${esc(x)}">`).join("")}</datalist>
   <p class="muted" style="font-size:12px">The blue bar is actual progress; the thin dark mark is where the plan says the project should be today. Status follows the <b>task</b> dates — when you change plan dates you are asked whether to move the task plan too.</p>`;
   quFilterBind(m,re);m.querySelectorAll("tr[data-row],tr.qdet").forEach(tr=>quBindRow(m,tr));
   if(simple){bindPview(m);$("#quNew").onclick=newProject;

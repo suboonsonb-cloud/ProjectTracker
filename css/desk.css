@@ -427,3 +427,7 @@ select.qst,select.qts{font-size:12px;font-weight:600;border-radius:12px;padding:
 .qtk .late{color:#c62828;font-weight:600}
 .qtkmsg{background:#fff8e1;border:1px solid #f4d06f;border-radius:6px;padding:6px 10px;margin-bottom:6px;font-size:12px}
 .qdly{white-space:nowrap}.qdly.on{background:#fde8e8;color:#a32020;border-color:#f3b4b4}
+.qmeta{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 2px}
+.qmeta label{display:flex;align-items:center;gap:3px;font-size:11px;color:#667}
+.qmeta select,.qmeta input{font-size:11px;padding:2px 4px;height:24px;max-width:150px}
+.qmeta input{width:120px}
