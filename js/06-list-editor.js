@@ -92,7 +92,7 @@ function listView(m,sheet,opts){
   const CF=UI.cf[sheet]=UI.cf[sheet]||{};const cv=(i,r)=>String(opts.cols[i].v(r)??"");const preCF=rows;
   for(const [i,set] of Object.entries(CF))rows=rows.filter(r=>set.has(cv(i,r)));
   if(opts.order)rows=opts.order(rows);
-  const so=UI.sort[sheet];if(so&&opts.cols[so.i]){rows=[...rows].sort((a,b)=>cfCmp(cv(so.i,a),cv(so.i,b))*so.dir)}
+  const so=UI.sort[sheet];if(so&&opts.cols[so.i]){rows=[...rows].sort((a,b)=>{const x=cv(so.i,a),y=cv(so.i,b);if(x===""&&y!=="")return 1;if(y===""&&x!=="")return -1;return cfCmp(x,y)*so.dir})}
   const nCF=Object.keys(CF).length;
   const stVals=hasSt?(()=>{const u=uniq(rowsOf(sheet).map(r=>String(opts.filterVal(chipK,r))));const o=uniqOrder(["Not Started","In Progress","On Track","At Risk","Delayed","On-Hold","Completed","Cancelled",...listFromName("L_RStatus"),...listFromName("L_BStat")]);return [...o.filter(x=>u.includes(x)||stOffL.has(x)),...u.filter(x=>!o.includes(x))]})():[];
   const filters=opts.filters.filter(fl=>fl.k!==chipK||stVals.length>1||stOffL.size).map(fl=>fl.k===chipK?stChips(stVals,stOffL,v=>stBase.filter(r=>String(opts.filterVal(chipK,r))===v).length,"l"+sheet):sel("f_"+fl.k,fl.label,uniq(rowsOf(sheet).flatMap(r=>fvs(fl.k,r).map(String))),f[fl.k]||"")).join("");
@@ -163,10 +163,17 @@ function vBenefits(m){listView(m,"Benefits",{noun:"benefit line",top:hubHead("be
   cols:[{h:"Benefit ID",v:r=>bId(r)},{h:"Project",v:r=>gv("Benefits",FB.pid,r),html:r=>{const p=gv("Benefits",FB.pid,r);return p?`<a href="#" class="plink" data-openp="${esc(p)}" title="Open project workspace">${esc(p)}</a>`:""}},{h:"Description",v:r=>gv("Benefits",FB.desc,r)},{h:"Nature",v:r=>gv("Benefits",FB.nature,r)||"Recurring"},
     {h:"Hours/month",num:1,v:r=>fmtNum(gv("Benefits",FB.trh,r),1)},{h:"Value type",v:r=>benLive(r).vtype,html:r=>{const t=benLive(r).vtype;return `<span class="vtype ${t.startsWith("THB")?"vt-h":t==="Time saving only"?"vt-t":"vt-n"}">${t==="Time saving only"?"⏱ ":""}${esc(t)}</span>`}},{h:"Phasing",v:r=>gv("Benefits",FB.phase,r)==="Custom"?"Custom":"Standard"},{h:"Gross value (THB)",num:1,v:r=>fmtNum(benLive(r).gross)},
     {h:"Start",v:r=>fmtDate(gv("Benefits",FB.start,r))},{h:"Confidence",v:r=>gv("Benefits",FB.conf,r)},{h:"Status",v:r=>gv("Benefits",FB.bstat,r),html:r=>pill(gv("Benefits",FB.bstat,r))}]})}
-function vRaidd(m){if(view==="RAIDD"){view="Projects";UI.pview="raidd";renderTabs()}listView(m,"RAIDD",{noun:"RAIDD item",top:hubHead("raidd"),prefill:()=>({[FD.status]:"Open",[FD.raised]:TODAY}),
+/* last update of a RAIDD row: unsaved edit = today, else newest activity-log line for that row, else raised date */
+let RDU={t:0,m:null};
+function raiddUpd(r){const now=Date.now();if(!RDU.m||now-RDU.t>500){const m={};try{for(const x of logRows()){const c=String(gv(LOG_SHEET,"H",x)||"");if(!c.startsWith("RAIDD!"))continue;const rr=+c.replace(/^RAIDD!/,"").replace(/[A-Z]+/g,"");const w=String(gv(LOG_SHEET,"A",x)||"").slice(0,10);const sv=/^\d{4}-\d\d-\d\d$/.test(w)?serialFromIso(w):0;if(sv>(m[rr]||0))m[rr]=sv}}catch(e){}
+    for(const c of S.changes||[])if(c.sheet==="RAIDD")m[+String(c.ref).replace(/[A-Z]+/g,"")]=TODAY;RDU={t:now,m}}
+  return RDU.m[r]||(+gv("RAIDD",FD.raised,r)||"")}
+function vRaidd(m){if(view==="RAIDD"){view="Projects";UI.pview="raidd";renderTabs()}UI.sort=UI.sort||{};if(!UI.sort.RAIDD)UI.sort.RAIDD={i:0,dir:-1};listView(m,"RAIDD",{noun:"RAIDD item",top:hubHead("raidd"),prefill:()=>({[FD.status]:"Open",[FD.raised]:TODAY}),
   filters:[{k:"type",label:"Type"},{k:"status",label:"Status"},{k:"pid",label:"Project"},{k:"flow",label:"E2E flow"}],
   filterVal:(k,r)=>k==="flow"?((projE2E(gv("RAIDD",FD.pid,r)).flows[0]||{}).name||NOFLOW):gv("RAIDD",FD[k],r),
-  cols:[{h:"ID",v:r=>gv("RAIDD",FD.id,r)},{h:"Type",v:r=>gv("RAIDD",FD.type,r)},{h:"Project",v:r=>gv("RAIDD",FD.pid,r),html:r=>{const id=gv("RAIDD",FD.pid,r);const pr=id?projRowById(id):null;return `<span class="clip" title="${esc(id)}">${esc(pr?gv("Projects",FP.name,pr):id)}</span><div class="zid">${esc(id)}</div>`}},{h:"Task",v:r=>gv("RAIDD",FD.tid,r)},
+  cols:[{h:"Updated",v:r=>raiddUpd(r),html:r=>{const u=raiddUpd(r);return u?`<span class="nowrap" title="Last change (activity log), else raised date">${fmtDate(u)}</span>`:`<span class="muted" title="No change saved since the activity log started, and no raised date">—</span>`}},{h:"Type",v:r=>gv("RAIDD",FD.type,r)},{h:"Project",v:r=>gv("RAIDD",FD.pid,r),html:r=>{const id=gv("RAIDD",FD.pid,r);const pr=id?projRowById(id):null;return `<span class="clip" title="${esc(id)}">${esc(pr?gv("Projects",FP.name,pr):id)}</span><div class="zid">${esc(id)}</div>`}},
+    {h:"E2E flow",v:r=>Object.values(projE2E(gv("RAIDD",FD.pid,r)).by||{}).map(b=>b.name).join(", "),html:r=>{const b=Object.values(projE2E(gv("RAIDD",FD.pid,r)).by||{});return b.length?b.map(x=>`<div class="rdfl">⇄ ${esc(x.name)}</div>`).join(""):`<span class="muted">—</span>`}},
+    {h:"Lane",v:r=>[...new Set(Object.values(projE2E(gv("RAIDD",FD.pid,r)).by||{}).flatMap(b=>b.lanes))].join(", "),html:r=>{const l=[...new Set(Object.values(projE2E(gv("RAIDD",FD.pid,r)).by||{}).flatMap(b=>b.lanes))].filter(Boolean);return l.length?l.map(x=>`<div class="rdln">${esc(x)}</div>`).join(""):`<span class="muted">—</span>`}},{h:"Task",v:r=>gv("RAIDD",FD.tid,r)},
     {h:"Description",v:r=>gv("RAIDD",FD.desc,r)},{h:"PIC",v:r=>gv("RAIDD",FD.re,r)||gv("RAIDD",FD.pic,r)},{h:"Due",v:r=>fmtDate(gv("RAIDD",FD.due,r))},
     {h:"Status",v:r=>gv("RAIDD",FD.status,r),html:r=>pill(gv("RAIDD",FD.status,r))},{h:"Priority",v:r=>gv("RAIDD",FD.prio,r)}]})}
 

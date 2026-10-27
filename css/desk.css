@@ -441,3 +441,4 @@ details.qcols summary{cursor:pointer;display:inline-block;padding:3px 10px;borde
 .qcolck{display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer}
 .qsimple.hide-tree .qtree,.qsimple.hide-ppl .qppl,.qsimple.hide-raidd .qraidd,.qsimple.hide-ben .qben{display:none}
 .qsimple.hide-act .qbact,.qsimple.hide-act .qlogbtn,.qsimple.hide-act .qbbar .a{display:none}
+.rdfl{font-size:12px;white-space:nowrap}.rdln{font-size:11px;color:#667;white-space:nowrap}
