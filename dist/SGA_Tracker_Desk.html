@@ -2077,7 +2077,7 @@ function vGantt0(m){
       else h+=`<div class="g-bar t" style="left:${x0}px;width:${w}px;background:${FCB[lineFc(l)]}" title="${esc(l.label)}: ${fmtDate(l.d.s)} → ${fmtDate(l.d.e)} · ${esc(l.status||"")} · ${esc(FCL[lineFc(l)])}">${l.pct>0?`<div class="g-prog" style="width:${Math.min(100,l.pct*100)}%"></div>`:""}</div>`}
     if(l.lvl===0&&!l.d.s&&!l.d.ps)h+=`<button class="g-nodates" data-gop="${l.p.r}">No dates yet — open project ›</button>`;
     if(l.rp&&l.d.e)h+=`<span class="g-rpflag" style="left:${X(l.d.e+1)+4}px" title="Approved re-plan ${esc((l.rpref||[]).join(", "))}">⟳ +${l.rp}d</span>`;
-    if(l.none)h="";/* "No E2E flow mapped yet" is a bucket, not a process — no summary bar */
+    if(l.none)h="";if(l.lvl===1&&!l.kind&&g.level==="tasks")h="";/* stage rows are just headings when the tasks are shown — no subtotal bar *//* "No E2E flow mapped yet" is a bucket, not a process — no summary bar */
     return `<div class="g-row gr gd${Math.min(5,dep[ri])} ${l.kind==="f"?"gf":l.kind==="l"?"gl":""}">${h}</div>`}).join("");
   /* swimlane picture of the open flow(s); the selected project's / lane's steps are highlighted */
   const openF=GRP?FLOWS.filter(F=>g.open.has("f:"+F.f.id)):[];

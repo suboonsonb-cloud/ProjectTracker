@@ -7,7 +7,7 @@ Each update lists the files changed. After editing, run `python build.py` (→ `
 
 | File | What changed |
 |---|---|
-| `js/08-gantt.js` | Late start: **solid red bar** from the plan start to where the work now starts (today), with "late +Nd" inside when wide enough; the striped forecast continues after it. **⚠ +Nd tag** after every bar whose forecast end is past the plan end. |
+| `js/08-gantt.js` | Late start: **solid red bar** from the plan start to where the work now starts (today), with "late +Nd" inside when wide enough; the striped forecast continues after it. **⚠ +Nd tag** after every bar whose forecast end is past the plan end. Stage rows (Initiate, Requirements, Build…) have no subtotal bar when tasks are shown (still shown in “Stages” level). |
 | `css/desk.css` | `.g-late`, `.g-latetag`. |
 
 ## 2026-10-27 (r30) — Gantt layer shading
