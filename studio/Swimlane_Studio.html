@@ -843,6 +843,50 @@ function withDoc(d,fn){const keep=D,kS=UI.sel,kL=UI.selLink,kP=POP;D=d;UI.sel=ne
 function rasterize(svg,W,H,scale,type){return new Promise((res,rej)=>{const img=new Image();img.onload=()=>{const c=document.createElement("canvas");c.width=Math.round(W*scale);c.height=Math.round(H*scale);const x=c.getContext("2d");x.fillStyle="#FFFFFF";x.fillRect(0,0,c.width,c.height);x.scale(scale,scale);x.drawImage(img,0,0);
   c.toBlob(b=>b?res({blob:b,w:c.width,h:c.height}):rej(new Error("export failed")),type||"image/png",.92)};img.onerror=()=>rej(new Error("could not draw the diagram"));img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg)})}
 async function pageImage(pd,scale,type){const svg=withDoc(pd.D,exportSVG),{W,H}=withDoc(pd.D,size);const r=await rasterize(svg,W,H,scale,type);return {...r,W,H}}
+/* editable PowerPoint: the page as a list of real shapes (lanes, boxes, text, arrows) in diagram pixels — the Desk turns it into slide XML */
+function pptModel(){const {W,H}=size(),hT=headT(),M=[];const sid=new Map();let n=10;const nid=()=>++n;
+  const txt=(t,o={})=>({paras:String(t||"").split("\n").map(raw=>{let m,lvl=0,bu=null,t2=raw;
+      if((m=/^\s*[-•*▪]\s+(.*)$/.exec(raw))){bu="•";t2=m[1]}else if((m=/^\s*o\s+(.*)$/.exec(raw))){bu="◦";lvl=1;t2=m[1]}else if((m=/^\s*\[\s?\]\s*(.*)$/.exec(raw))){bu="☐";t2=m[1]}else if((m=/^\s*\[[xX✓]\]\s*(.*)$/.exec(raw))){bu="☑";t2=m[1]}
+      return {t:t2,bu,lvl}}),fs:o.fs||13,color:o.color||"#111827",bold:!!o.bold,align:o.align||"ctr",valign:o.valign||"ctr"});
+  /* title band */
+  const tw=measure(D.title||"",20,true),tagw=D.tag?measure("["+D.tag+"]",20,true)+12:0,tx=W/2-(tw+tagw)/2;
+  M.push({k:"box",id:nid(),name:"Title",x:tx-4,y:4,w:tw+8,h:TITLE_H-8,geom:"rect",fill:null,stroke:null,text:txt(D.title||"",{fs:20,bold:true})});
+  if(D.tag)M.push({k:"box",id:nid(),name:"Tag",x:tx+tw+8,y:TITLE_H/2-13,w:tagw,h:26,geom:"rect",fill:/to.?be|new/i.test(D.tag)?"#22C55E":"#FFFF00",stroke:null,text:txt("["+D.tag+"]",{fs:20,bold:true})});
+  if(D.legend&&D.legend.length){let lx=10,ly=6;const maxX=Math.max(220,tx-16);for(const it of D.legend){const t=String(it.text||""),w=measure(t,11,false)+26;if(lx+w>maxX&&lx>10){lx=10;ly+=17}if(ly>TITLE_H-15)break;
+    M.push({k:"box",id:nid(),name:"Legend",x:lx,y:ly,w:16,h:12,geom:"roundRect",fill:it.fill||"#FFFFFF",stroke:it.stroke||"#7F8C8D",sw:1.2});M.push({k:"box",id:nid(),name:"Legend text",x:lx+19,y:ly-2,w:w-16,h:16,geom:"rect",fill:null,stroke:null,text:txt(t,{fs:11,color:"#344054",align:"l"})});lx+=w+10}}
+  if(D.pages&&D.pages.length>1){const i=D.pages.findIndex(p=>p.id===D.pg);M.push({k:"box",id:nid(),name:"Page",x:W-170,y:TITLE_H/2-10,w:160,h:20,geom:"rect",fill:null,stroke:null,text:txt(`Page ${i+1} / ${D.pages.length}`,{fs:13,color:"#5E6B7D",align:"r"})})}
+  /* sections */
+  D.secs.forEach((x,k)=>{const a=secStart(k);M.push(vert()?{k:"box",id:nid(),name:"Section",x:0,y:a,w:W,h:x.size,geom:"rect",fill:k%2?"#F5F8FC":"#FFFFFF",stroke:"#9FB3C8",dash:true,text:txt(x.name,{fs:13,bold:true,color:"#1F4E79",align:"l",valign:"t"})}:{k:"box",id:nid(),name:"Section",x:a,y:TITLE_H,w:x.size,h:H-TITLE_H,geom:"rect",fill:k%2?"#F5F8FC":"#FFFFFF",stroke:"#9FB3C8",dash:true,text:txt(x.name,{fs:13,bold:true,color:"#1F4E79",valign:"t"})})});
+  /* lanes */
+  D.lanes.forEach((l,i)=>{const a=laneStart(i),sz=l.size,hc=l.hcolor||"#1F4E79";
+    if(vert()){M.push({k:"box",id:nid(),name:"Lane "+l.name,x:a,y:TITLE_H,w:sz,h:H-TITLE_H,geom:"rect",fill:null,stroke:"#9FB3C8",sw:1});
+      M.push({k:"box",id:nid(),name:"Lane header "+l.name,x:a,y:TITLE_H,w:sz,h:hT,geom:"rect",fill:hc,stroke:"#FFFFFF",sw:1,text:{...txt(l.name+(l.sub?"\n"+l.sub:""),{fs:l.name.length*11>sz-12?15:18,bold:true,color:"#FFFFFF"}),subFs:11}});
+      if(l.hl)M.push({k:"box",id:nid(),name:"New lane",x:a+3,y:TITLE_H+3,w:sz-6,h:H-TITLE_H-6,geom:"rect",fill:null,stroke:"#22A33A",sw:4})}
+    else{M.push({k:"box",id:nid(),name:"Lane "+l.name,x:0,y:a,w:W,h:sz,geom:"rect",fill:null,stroke:"#9FB3C8",sw:1});
+      M.push({k:"box",id:nid(),name:"Lane header "+l.name,x:0,y:a,w:hT+40,h:sz,geom:"rect",fill:hc,stroke:"#FFFFFF",sw:1,text:{...txt(l.name+(l.sub?"\n"+l.sub:""),{fs:15,bold:true,color:"#FFFFFF"}),subFs:11}});
+      if(l.hl)M.push({k:"box",id:nid(),name:"New lane",x:3,y:a+3,w:W-6,h:sz-6,geom:"rect",fill:null,stroke:"#22A33A",sw:4})}});
+  /* boxes (frames first, so they sit behind) */
+  const GEOM={process:"rect",rounded:"pill",decision:"diamond",document:"flowChartDocument",database:"can",note:"rect",text:"rect",frame:"rect"};
+  const shp=D.shapes.filter(x=>x.type!=="image").sort((a,b)=>(a.type==="frame"?0:1)-(b.type==="frame"?0:1));
+  const later=[];
+  for(const x of shp){const fr=x.type==="frame",tt=x.type==="text";const ch=fr||tt?"":chgOf(x);
+    let fill=tt||fr?(x.fill&&!fr?x.fill:null):(x.fill||"#FFFFFF"),stroke=tt?(x.stroke&&x.stroke!=="none"?x.stroke:null):(x.stroke||(fr?"#22A33A":"#1F2933"));if(fill==="none")fill=null;if(stroke==="none")stroke=null;
+    let sw=fr?(x.sw||3):(x.sw||1.2),dash=!!x.dash;if(ch){stroke=CHG[ch].c;sw=Math.max(sw,2.6);if(ch==="Removed"||ch==="Merged")dash=true}
+    const hasMk=/^\s*([-•*▪]|o|\[.?\])\s+/m.test(x.text||"");const id=nid();sid.set(x.id,{id,geom:GEOM[x.type]||"rect"});
+    M.push({k:"box",id,name:(x.text||x.type).split("\n")[0].slice(0,60),x:x.x,y:x.y,w:x.w,h:x.h,geom:GEOM[x.type]||"rect",fill,stroke,sw,dash,
+      text:x.text?txt(x.text,{fs:x.fs||13,color:x.color||"#111827",bold:x.bold,align:x.align==="left"||(!x.align&&(hasMk||fr))?"l":x.align==="right"?"r":"ctr",valign:(x.valign||(fr?"top":(hasMk&&!["decision","rounded"].includes(x.type)?"top":"middle")))==="top"?"t":"ctr"}):null});
+    if(ch==="New")later.push({k:"box",id:nid(),name:"NEW",x:x.x-8,y:x.y+6,w:34,h:12,geom:"rect",rot:-45,fill:"#22A33A",stroke:null,text:txt("NEW",{fs:8,bold:true,color:"#FFFFFF"})});
+    else if(ch){const t=CHG[ch].tag,w=measure(t,9,true)+8;later.push({k:"box",id:nid(),name:t,x:x.x+1,y:x.y+x.h-1,w,h:13,geom:"rect",fill:CHG[ch].c,stroke:null,text:txt(t,{fs:9,bold:true,color:"#FFFFFF"})})}
+    if(SHOWTAGS&&x.proj&&x.proj.length&&!fr&&!tt){let px=x.x+x.w,py=x.y-9;for(const pid of [...x.proj].reverse()){const P=pinfo(pid),t=P.short,w=measure(t,10,true)+12;if(px-w-3<x.x+(ch==="New"?20:0)&&px<x.x+x.w){px=x.x+x.w;py-=18}px-=w+3;
+      later.push({k:"box",id:nid(),name:"Project "+t,x:px,y:py,w,h:16,geom:"pill",fill:STCOL[P.status]||"#1F4E79",stroke:"#FFFFFF",sw:1.2,text:txt(t,{fs:10,bold:true,color:STINK(P.status)})})}}
+    if(x.hrs&&!fr&&!tt){const t=`⏱ ${Math.round(x.hrs*10)/10}h/m`,w=measure(t,9,false)+8;later.push({k:"box",id:nid(),name:"Hours",x:x.x+x.w-w-2,y:x.y+x.h-13,w,h:12,geom:"roundRect",fill:"#F2F4F7",stroke:"#D0D5DD",sw:.6,text:txt(t,{fs:9,color:"#475467"})})}}
+  /* arrows: straight ones are glued connectors (they follow the boxes when you move them in PowerPoint); bent ones are lines with the exact route */
+  const SIDE={top:0,left:1,bottom:2,right:3};
+  for(const L of D.links){const P=linkPts(L);if(!P||!P.pts||P.pts.length<2)continue;const a=sid.get(L.from),b=sid.get(L.to);
+    const glue=P.pts.length===2&&a&&b&&/^(rect|pill|diamond|roundRect)$/.test(a.geom)&&/^(rect|pill|diamond|roundRect)$/.test(b.geom)&&P.fs&&P.ts?{st:{id:a.id,idx:SIDE[P.fs]},en:{id:b.id,idx:SIDE[P.ts]}}:null;
+    M.push({k:"line",id:nid(),name:"Arrow",pts:P.pts.map(p=>({x:p.x,y:p.y})),color:L.color||"#2E75B6",w:L.w||1.6,dash:!!L.dash,end:true,start:!!L.both,glue});
+    if(L.label){const fs=L.fs_||12,tw=measure(L.label,fs,false),{lx,ly}=labelSpot(P.pts,tw,fs);later.push({k:"box",id:nid(),name:"Label",x:lx-tw/2-3,y:ly-fs-1,w:tw+6,h:fs+5,geom:"rect",fill:"#FFFFFF",stroke:null,text:txt(L.label,{fs,color:L.lcolor||"#E02424"})})}}
+  M.push(...later);return {W,H,items:M}}
 /* a small PDF writer: one page per picture (JPEG), page size = diagram size */
 async function pdfFromJpegs(pages){const enc=new TextEncoder(),parts=[],offs=[];let len=0;const add=x=>{const u=typeof x==="string"?enc.encode(x):x;parts.push(u);len+=u.length};
   const n=pages.length,obj=k=>offs[k]=len;add("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n");
@@ -856,13 +900,14 @@ async function pdfFromJpegs(pages){const enc=new TextEncoder(),parts=[],offs=[];
   add(x+`trailer\n<< /Size ${total} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`);return new Blob(parts,{type:"application/pdf"})}
 const baseName=()=>((D.title?D.title+(D.tag?" "+D.tag:""):D.name)||"swimlane").replace(/[\\/:*?"<>|\[\]]+/g,"_").replace(/\s+/g," ").trim();
 function saveAsDialog(){const pd=pageDocs(),multi=pd.length>1;
-  modal(`<h2>Save as</h2><div class="field"><label>Format</label><div class="row"><label class="chk"><input type="radio" name="saFmt" value="png" checked> PNG picture</label><label class="chk"><input type="radio" name="saFmt" value="pdf"> PDF</label>${EMBED?`<label class="chk"><input type="radio" name="saFmt" value="pptx"> PowerPoint</label>`:""}</div></div>
+  modal(`<h2>Save as</h2><div class="field"><label>Format</label><div class="row"><label class="chk"><input type="radio" name="saFmt" value="png" checked> PNG picture</label><label class="chk"><input type="radio" name="saFmt" value="pdf"> PDF</label>${EMBED?`<label class="chk"><input type="radio" name="saFmt" value="pptxe"> PowerPoint (editable shapes)</label><label class="chk"><input type="radio" name="saFmt" value="pptx"> PowerPoint (picture)</label>`:""}</div></div>
     ${multi?`<div class="field"><label>Pages</label><div class="row"><label class="chk"><input type="radio" name="saPg" value="all" checked> All ${pd.length} pages <span class="hint">(one picture / PDF page / slide per page)</span></label><label class="chk"><input type="radio" name="saPg" value="cur"> Only this page</label></div></div>`:""}
     <p class="hint">File name: <b>${esc(baseName())}${multi?" - Page n":""}</b>. The picture shows the diagram as on screen, without selection handles.</p>
     <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn" data-x="c">Cancel</button><button class="btn primary" data-x="ok">Save</button></div>`,async k=>{if(k!=="ok")return;
     const fmt=(document.querySelector('input[name="saFmt"]:checked')||{}).value||"png",all=!multi||((document.querySelector('input[name="saPg"]:checked')||{}).value||"all")==="all";
     const list=all?pd:pd.filter(p=>p.cur);const nm=p=>baseName()+(multi?" - "+(/^page\s*\d+$/i.test(p.name)?"Page "+p.n:p.name):"");
     try{toast("Preparing "+(fmt==="pdf"?"PDF":list.length+" picture"+(list.length>1?"s":""))+"…");
+      if(fmt==="pptxe"){post({type:"pptxEdit",pages:list.map(p=>withDoc(p.D,pptModel)),name:baseName()});return}
       if(fmt==="pptx"){const pages=[];for(const p of list){const r=await pageImage(p,2,"image/png");pages.push({blob:r.blob,w:r.W,h:r.H,title:nm(p)})}post({type:"pptx",pages,name:baseName()});return}
       if(fmt==="pdf"){const imgs=[];for(const p of list)imgs.push(await pageImage(p,2,"image/jpeg"));dl(await pdfFromJpegs(imgs),baseName()+(all||!multi?"":" - "+nm(list[0]).split(" - ").pop())+".pdf");toast("Saved PDF ("+imgs.length+" page"+(imgs.length>1?"s":"")+")")}
       else{for(const p of list){const r=await pageImage(p,2,"image/png");dl(r.blob,nm(p)+".png");await new Promise(z=>setTimeout(z,350))}toast("Saved "+list.length+" PNG picture"+(list.length>1?"s":""))}}

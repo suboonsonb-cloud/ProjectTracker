@@ -30,3 +30,53 @@ async function e2ePptx(pages, name) {
   const blob = await writeZip(list, changed);
   download(new Blob([blob], { type: "application/vnd.openxmlformats-officedocument.presentationml.presentation" }), (name || "E2E flow") + ".pptx");
 }
+
+/* editable PowerPoint: lanes, boxes, text and arrows as real PowerPoint shapes (one slide per diagram page) */
+async function e2ePptxEditable(models, name) {
+  const bin = Uint8Array.from(atob(PPTX_TPL), c => c.charCodeAt(0)).buffer; const list = readZip(bin); const by = {}; list.forEach(e => by[e.name] = e);
+  const enc = new TextEncoder(), P = x => parser.parseFromString(x, "application/xml"), S8 = d => enc.encode('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n' + ser.serializeToString(d).replace(/^<\?xml[^>]*>\s*/, ""));
+  const changed = {}; const addPart = (nm, bytes) => { if (!by[nm]) { const e = { name: nm, method: 0, time: 0, date: 0x21, crc: 0, csize: 0, usize: 0, data: new Uint8Array(0) }; list.push(e); by[nm] = e; } changed[nm] = bytes; };
+  const PNS = "http://schemas.openxmlformats.org/presentationml/2006/main", RNS2 = "http://schemas.openxmlformats.org/officeDocument/2006/relationships", RELNS = "http://schemas.openxmlformats.org/package/2006/relationships", CTNS = "http://schemas.openxmlformats.org/package/2006/content-types";
+  /* slide = 13.333 in wide; height follows the tallest page (PowerPoint max 56 in) */
+  const maxW = Math.max(...models.map(m => m.W)), maxH = Math.max(...models.map(m => m.H)); let SW = 12192000, k = SW / maxW; let SH = Math.round(maxH * k);
+  if (SH > 51206400) { k = 51206400 / maxH; SH = 51206400; SW = Math.round(maxW * k); }
+  const E = v => Math.round(v * k), PT = px => Math.max(100, Math.round(px * k / 12700 * 100));   // font size in 1/100 pt
+  const X = s => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const hex = c => String(c || "").replace("#", "").toUpperCase().slice(0, 6);
+  const fillX = c => c ? `<a:solidFill><a:srgbClr val="${hex(c)}"/></a:solidFill>` : "<a:noFill/>";
+  const lnX = (c, w, dash, ends) => c ? `<a:ln w="${Math.max(3175, Math.round((w || 1) * k))}">${fillX(c)}${dash ? '<a:prstDash val="dash"/>' : ""}${ends || ""}</a:ln>` : "<a:ln><a:noFill/></a:ln>";
+  const geomX = g => g === "pill" ? '<a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj" fmla="val 50000"/></a:avLst></a:prstGeom>' : g === "roundRect" ? '<a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj" fmla="val 16667"/></a:avLst></a:prstGeom>' : `<a:prstGeom prst="${g || "rect"}"><a:avLst/></a:prstGeom>`;
+  const runX = (t, sz, color, bold) => `<a:r><a:rPr lang="th-TH" sz="${sz}"${bold ? ' b="1"' : ""} dirty="0">${fillX(color)}<a:latin typeface="Arial"/><a:ea typeface="Arial"/><a:cs typeface="Tahoma"/></a:rPr><a:t>${X(t)}</a:t></a:r>`;
+  const txX = (tx, ins, small) => { if (!tx) return '<p:txBody><a:bodyPr rtlCol="0" anchor="ctr"/><a:lstStyle/><a:p><a:endParaRPr lang="en-US" dirty="0"/></a:p></p:txBody>';
+    const algn = tx.align === "l" ? "l" : tx.align === "r" ? "r" : "ctr", sz = PT(tx.fs), I = E(ins == null ? 5 : ins);
+    const ps = tx.paras.map((p, i) => { const s2 = i > 0 && tx.subFs ? PT(tx.subFs) : sz, b = tx.bold && !(i > 0 && tx.subFs);
+      const bu = p.bu ? `<a:buFont typeface="Arial"/><a:buChar char="${X(p.bu)}"/>` : "<a:buNone/>", mar = p.bu ? ` marL="${E(14 + p.lvl * 12)}" indent="${-E(10)}"` : "";
+      return `<a:p><a:pPr algn="${p.bu ? "l" : algn}"${mar}>${bu}</a:pPr>${p.t ? runX(p.t, s2, tx.color, b) : ""}<a:endParaRPr lang="en-US" sz="${s2}" dirty="0"/></a:p>`; }).join("");
+    const J = small ? 0 : I; return `<p:txBody><a:bodyPr wrap="${small ? "none" : "square"}" lIns="${J}" tIns="${J}" rIns="${J}" bIns="${J}" rtlCol="0" anchor="${tx.valign === "t" ? "t" : "ctr"}"${small ? ' anchorCtr="1"' : ""}><a:noAutofit/></a:bodyPr><a:lstStyle/>${ps}</p:txBody>`; };
+  const boxX = b => `<p:sp><p:nvSpPr><p:cNvPr id="${b.id}" name="${X(b.name || "Shape")}"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm${b.rot ? ` rot="${Math.round(b.rot * 60000)}"` : ""}><a:off x="${E(b.x)}" y="${E(b.y)}"/><a:ext cx="${Math.max(1, E(b.w))}" cy="${Math.max(1, E(b.h))}"/></a:xfrm>${geomX(b.geom)}${fillX(b.fill)}${lnX(b.stroke, b.sw, b.dash)}</p:spPr>${txX(b.text, b.geom === "diamond" ? Math.min(b.w, b.h) * .12 : 5, b.h < 22)}</p:sp>`;
+  const lineX = l => { const ends = (l.start ? '<a:headEnd type="triangle" w="med" len="med"/>' : "") + (l.end ? '<a:tailEnd type="triangle" w="med" len="med"/>' : "");
+    const p = l.pts, x0 = Math.min(...p.map(q => q.x)), y0 = Math.min(...p.map(q => q.y)), x1 = Math.max(...p.map(q => q.x)), y1 = Math.max(...p.map(q => q.y));
+    if (p.length === 2) { const a = p[0], b = p[1];
+      return `<p:cxnSp><p:nvCxnSpPr><p:cNvPr id="${l.id}" name="${X(l.name)}"/><p:cNvCxnSpPr>${l.glue ? `<a:stCxn id="${l.glue.st.id}" idx="${l.glue.st.idx}"/><a:endCxn id="${l.glue.en.id}" idx="${l.glue.en.idx}"/>` : ""}</p:cNvCxnSpPr><p:nvPr/></p:nvCxnSpPr><p:spPr><a:xfrm${b.x < a.x ? ' flipH="1"' : ""}${b.y < a.y ? ' flipV="1"' : ""}><a:off x="${E(x0)}" y="${E(y0)}"/><a:ext cx="${E(x1 - x0)}" cy="${E(y1 - y0)}"/></a:xfrm><a:prstGeom prst="straightConnector1"><a:avLst/></a:prstGeom>${lnX(l.color, l.w, l.dash, ends)}</p:spPr></p:cxnSp>`; }
+    const w = Math.max(1, E(x1 - x0)), h = Math.max(1, E(y1 - y0)); const pt = q => `<a:pt x="${E(q.x - x0)}" y="${E(q.y - y0)}"/>`;
+    return `<p:sp><p:nvSpPr><p:cNvPr id="${l.id}" name="${X(l.name)}"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="${E(x0)}" y="${E(y0)}"/><a:ext cx="${w}" cy="${h}"/></a:xfrm><a:custGeom><a:avLst/><a:gdLst/><a:ahLst/><a:cxnLst/><a:rect l="0" t="0" r="r" b="b"/><a:pathLst><a:path w="${w}" h="${h}"><a:moveTo>${pt(p[0])}</a:moveTo>${p.slice(1).map(q => `<a:lnTo>${pt(q)}</a:lnTo>`).join("")}</a:path></a:pathLst></a:custGeom><a:noFill/>${lnX(l.color, l.w, l.dash, ends)}</p:spPr><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:endParaRPr lang="en-US" dirty="0"/></a:p></p:txBody></p:sp>`; };
+  const pres = P(await entryText(by["ppt/presentation.xml"])), prs = P(await entryText(by["ppt/_rels/presentation.xml.rels"])), ct = P(await entryText(by["[Content_Types].xml"]));
+  const sz = pres.getElementsByTagNameNS(PNS, "sldSz")[0]; sz.setAttribute("cx", SW); sz.setAttribute("cy", SH); sz.removeAttribute("type");
+  let lst = pres.getElementsByTagNameNS(PNS, "sldIdLst")[0]; if (!lst) { lst = pres.createElementNS(PNS, "p:sldIdLst"); sz.parentNode.insertBefore(lst, sz); }
+  models.forEach((m, i) => { const n = i + 1, rid = "rIdS" + n;
+    /* order: lanes & boxes, then arrows (above boxes), then tags / labels (top) */
+    const boxes = m.items.filter(x => x.k === "box"), lines = m.items.filter(x => x.k === "line");
+    const firstLater = boxes.findIndex(b => /^(NEW|CHANGED|MERGED|REMOVED|Label|Hours)$/.test(b.name) || /^Project /.test(b.name));
+    const under = firstLater < 0 ? boxes : boxes.slice(0, firstLater), over = firstLater < 0 ? [] : boxes.slice(firstLater);
+    const body = under.map(boxX).join("") + lines.map(lineX).join("") + over.map(boxX).join("");
+    addPart(`ppt/slides/slide${n}.xml`, enc.encode(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="${RNS2}" xmlns:p="${PNS}"><p:cSld><p:bg><p:bgPr><a:solidFill><a:srgbClr val="FFFFFF"/></a:solidFill><a:effectLst/></p:bgPr></p:bg><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>${body}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>`));
+    addPart(`ppt/slides/_rels/slide${n}.xml.rels`, enc.encode(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="${RELNS}"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/slideLayout7.xml"/></Relationships>`));
+    const R = prs.createElementNS(RELNS, "Relationship"); R.setAttribute("Id", rid); R.setAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide"); R.setAttribute("Target", `slides/slide${n}.xml`); prs.documentElement.appendChild(R);
+    const sid = pres.createElementNS(PNS, "p:sldId"); sid.setAttribute("id", 255 + n); sid.setAttributeNS(RNS2, "r:id", rid); lst.appendChild(sid);
+    const O = ct.createElementNS(CTNS, "Override"); O.setAttribute("PartName", `/ppt/slides/slide${n}.xml`); O.setAttribute("ContentType", "application/vnd.openxmlformats-officedocument.presentationml.slide+xml"); ct.documentElement.appendChild(O); });
+  changed["ppt/presentation.xml"] = S8(pres); changed["ppt/_rels/presentation.xml.rels"] = S8(prs); changed["[Content_Types].xml"] = S8(ct);
+  const blob = await writeZip(list, changed);
+  download(new Blob([blob], { type: "application/vnd.openxmlformats-officedocument.presentationml.presentation" }), (name || "E2E flow") + ".pptx");
+}

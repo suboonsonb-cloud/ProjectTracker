@@ -195,6 +195,7 @@ window.addEventListener("message",ev=>{const m=ev.data;if(!m||m.src!=="swimlane"
   if(m.type==="openProject"){const r=projRowById(m.id);if(r)openProject(r);else toast("Project "+m.id+" is not in this workbook");return}
   if(m.type==="linkDone"){UI.e2e.link=null;e2eSidePanel();return}
   if(m.type==="download"&&m.blob){download(m.blob,m.name||"flow.png");return}
+  if(m.type==="pptxEdit"&&m.pages){e2ePptxEditable(m.pages,m.name).then(()=>toast("Saved PowerPoint with editable shapes ("+m.pages.length+" slide"+(m.pages.length>1?"s":"")+")"),e=>{console.error(e);toast("Could not make the PowerPoint: "+e.message,6000)});return}
   if(m.type==="pptx"&&m.pages){e2ePptx(m.pages,m.name).then(()=>toast("Saved PowerPoint ("+m.pages.length+" slide"+(m.pages.length>1?"s":"")+")"),e=>toast("Could not make the PowerPoint: "+e.message,6000));return}
   if(m.type==="template"){const cb=e2eTplWait;e2eTplWait=null;if(cb)cb(m.doc);return}});
 let e2eTplWait=null;
