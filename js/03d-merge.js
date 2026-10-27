@@ -95,6 +95,15 @@ async function peekNewer() {
   try {
     if (!S.lastMod || f.lastModified === S.lastMod) return;
     if (S.saved && S.saved.at && f.lastModified <= S.lastMod) return;
+    if (!S.changes.length && S.saved && S.saved.changes && S.saved.changes.length) {   // I saved earlier in this session: is my save still in the newer file?
+      const sv = S.saved, keepAcc = typeof ACC !== "undefined" ? ACC : null, keepView = view;
+      await loadWorkbook(await f.arrayBuffer(), f.name, S.handle, f.lastModified); if (keepAcc && typeof ACC !== "undefined") { ACC = keepAcc; if (typeof paintAcc === "function") paintAcc(); } view = keepView;
+      const last = {}; for (const c of sv.changes) last[c.sheet + "!" + c.ref] = c;
+      const kept = Object.values(last).filter(c => S.sheets[c.sheet] && S.sheets[c.sheet].vals && c.sheet !== "Activity_Log").every(c => String(gv(c.sheet, c.ref.replace(/\d+/g, ""), +c.ref.replace(/[A-Z]+/g, "")) ?? "") === String(c.val ?? ""));
+      if (typeof E2E_CACHE !== "undefined") E2E_CACHE = null; S._openedAt = Date.now();
+      if (kept) { S.saved = null; render(); toast("Updated with the latest changes from others", 4000); }
+      else { S.saved = sv; render(); setSaveState("reverted"); if (!sv.warned) { sv.warned = true; revertDialog(f); } }
+      return; }
     if (!S.changes.length) {   // nothing of mine to lose → load the newer file quietly
       const keepAcc = typeof ACC !== "undefined" ? ACC : null, keepView = view, since = S._openedAt || S.lastMod;
       await loadWorkbook(await f.arrayBuffer(), f.name, S.handle, f.lastModified); if (keepAcc && typeof ACC !== "undefined") { ACC = keepAcc; if (typeof paintAcc === "function") paintAcc(); }

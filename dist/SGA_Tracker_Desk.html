@@ -399,7 +399,7 @@ body.has-unsaved nav.tabs button[data-t="Changes"]{background:#FFC000;color:#1b1
   <span class="hgrp"><span class="glab">FILE</span><button class="btn ghost" id="btnOpen">Open<span class="hl2"> workbook</span>…</button><button class="btn primary" id="btnSave" disabled title="Write your changes into the Excel workbook (the database) — Ctrl+S"><span class="svico" aria-hidden="true">💾</span> <span class="svlbl">Save to database</span><span class="savecnt"></span></button><button class="btn ghost" id="btnCopy" disabled title="Save the workbook (with your changes) to a new file"><span class="hl2">Save a copy…</span><span class="hl3">Copy…</span></button></span>
   <span class="hgrp"><button class="btn ghost" id="btnSet" title="Settings — maintain dropdown lists and status / delay rules">⚙<span class="hlbl"> Settings</span></button><button class="btn ghost" id="btnHelp" title="Help">?<span class="hlbl"> Help</span></button></span>
 </header>
-<div id="envWarn"></div>
+<div id="envWarn"></div><div id="revertWarn"></div>
 <nav class="tabs hidden" id="tabs"></nav>
 <main id="main"></main>
 
@@ -853,7 +853,8 @@ async function checkSaved(){const sv=S.saved;if(!sv||!sv.handle)return "none";
       const last={};for(const c of sv.changes)last[c.sheet+"!"+c.ref]=c;const kept=Object.values(last).filter(c=>S.sheets[c.sheet]&&S.sheets[c.sheet].vals&&c.sheet!=="Activity_Log").every(c=>String(gv(c.sheet,c.ref.replace(/\d+/g,""),+c.ref.replace(/[A-Z]+/g,""))??"")===String(c.val??""));
       if(kept){S.saved=null;setSaveState("ok");if(typeof E2E_CACHE!=="undefined")E2E_CACHE=null;render();toast("Someone else saved after you — your changes are in their version too",5000);return "ok"}}
     setSaveState("reverted");if(!sv.warned){sv.warned=true;revertDialog(f)}return "reverted"}catch(e){console.warn(e);return "error"}}
-function setSaveState(st){const el=$("#saveState");if(!el)return;const t={checking:"⟳ verifying save…",ok:"✓ saved & verified",reverted:"⚠ file was replaced — click"}[st]||"";el.textContent=t;el.className="savestate "+st;el.onclick=st==="reverted"?()=>revertDialog():null}
+function setSaveState(st){const rw=$("#revertWarn");if(rw){if(st==="reverted"){const sv=S.saved;rw.innerHTML=`<div class="envbar bad"><b>⚠ Your last save was undone.</b> <span>Another program put an older copy of <b>${esc(sv?sv.name:S.fileName)}</b> back${sv?` after you saved at ${new Date(sv.at).toLocaleTimeString()}`:""} — usually <b>Excel with AutoSave</b> open on the same file, or a <b>OneDrive sync</b> conflict. Your changes are still here.</span> <button class="btn small primary" id="rvFix">Put my changes back</button></div>`;const b=rw.querySelector("#rvFix");if(b)b.onclick=()=>revertDialog()}else rw.innerHTML=""}
+  const el=$("#saveState");if(!el)return;const t={checking:"⟳ verifying save…",ok:"✓ saved & verified",reverted:"⚠ file was replaced — click"}[st]||"";el.textContent=t;el.className="savestate "+st;el.onclick=st==="reverted"?()=>revertDialog():null}
 async function revertDialog(f){const sv=S.saved;if(!sv)return;f=f||await sv.handle.getFile().catch(()=>null);
   const k=await choose("⚠ Your saved changes were replaced",`<p>The file <b>${esc(sv.name)}</b> no longer contains what this app saved at ${new Date(sv.at).toLocaleTimeString()}${f?` — it was replaced at ${new Date(f.lastModified).toLocaleTimeString()}`:""}.</p>
     <p class="muted">Usual causes: <b>Excel has the file open with AutoSave</b> (it writes its own older copy back), <b>OneDrive sync conflict</b> (cloud version kept, your copy renamed with your PC name), or the library requires <b>check-out</b>.</p>
@@ -1207,6 +1208,15 @@ async function peekNewer() {
   try {
     if (!S.lastMod || f.lastModified === S.lastMod) return;
     if (S.saved && S.saved.at && f.lastModified <= S.lastMod) return;
+    if (!S.changes.length && S.saved && S.saved.changes && S.saved.changes.length) {   // I saved earlier in this session: is my save still in the newer file?
+      const sv = S.saved, keepAcc = typeof ACC !== "undefined" ? ACC : null, keepView = view;
+      await loadWorkbook(await f.arrayBuffer(), f.name, S.handle, f.lastModified); if (keepAcc && typeof ACC !== "undefined") { ACC = keepAcc; if (typeof paintAcc === "function") paintAcc(); } view = keepView;
+      const last = {}; for (const c of sv.changes) last[c.sheet + "!" + c.ref] = c;
+      const kept = Object.values(last).filter(c => S.sheets[c.sheet] && S.sheets[c.sheet].vals && c.sheet !== "Activity_Log").every(c => String(gv(c.sheet, c.ref.replace(/\d+/g, ""), +c.ref.replace(/[A-Z]+/g, "")) ?? "") === String(c.val ?? ""));
+      if (typeof E2E_CACHE !== "undefined") E2E_CACHE = null; S._openedAt = Date.now();
+      if (kept) { S.saved = null; render(); toast("Updated with the latest changes from others", 4000); }
+      else { S.saved = sv; render(); setSaveState("reverted"); if (!sv.warned) { sv.warned = true; revertDialog(f); } }
+      return; }
     if (!S.changes.length) {   // nothing of mine to lose → load the newer file quietly
       const keepAcc = typeof ACC !== "undefined" ? ACC : null, keepView = view, since = S._openedAt || S.lastMod;
       await loadWorkbook(await f.arrayBuffer(), f.name, S.handle, f.lastModified); if (keepAcc && typeof ACC !== "undefined") { ACC = keepAcc; if (typeof paintAcc === "function") paintAcc(); }
