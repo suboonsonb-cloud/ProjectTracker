@@ -13,7 +13,7 @@ function render(){
   if(!S.zip||view!=="E2E")e2eHide();
   if(!S.zip){renderLanding();return}
   liveCalc();S._needCalc=false;
-  renderTabs();const m=$("#main");
+  renderTabs();const m=$("#main");if(view!=="Gantt")m.dataset.v="";
   if(view==="Quick"){view="Projects";UI.pview="projects";UI.plist="simple";UI.proj=null}
   if(view==="Activities"){view="Projects";UI.pview="tasks";UI.proj=null}
   if(view==="Benefits"){view="Projects";UI.pview="benefits";UI.proj=null}

@@ -3,7 +3,19 @@
 /* ---- gantt ---- */
 function gPpl(v,t,none){const a=Array.isArray(v)?v:(v?[v]:[]);let txt=a.length>2?a.slice(0,2).join(", ")+" +"+(a.length-2):a.join(", ");
   return `<span class="g-ppl" title="${esc(t)}: ${esc(a.join(", ")||"—")}${none?` · ${none} project(s) not assigned`:""}">${txt?esc(txt):'<span class="muted">—</span>'}${none&&a.length?` <span class="muted">· ${none} n/a</span>`:""}</span>`}
+/* re-drawing the Gantt (expand a project, highlight a row …) must not jump the page back to the top:
+   remember the page scroll and every inner scroll box, then put them back after the redraw */
 function vGantt(m){
+  const again=m.dataset.v==="gantt";const keep=again?{y:window.scrollY,x:window.scrollX,els:[...m.querySelectorAll("*")].filter(e=>e.scrollTop||e.scrollLeft).map(e=>({sel:scrollKey(e,m),t:e.scrollTop,l:e.scrollLeft}))}:null;
+  const h0=m.offsetHeight;if(again)m.style.minHeight=h0+"px";   /* keep the page height while it re-draws, so the browser does not scroll up */
+  vGantt0(m);m.dataset.v="gantt";
+  if(keep){const put=()=>{for(const k of keep.els){const e=k.sel&&m.querySelector(k.sel);if(e){e.scrollTop=k.t;e.scrollLeft=k.l}}if(Math.abs(window.scrollY-keep.y)>2)window.scrollTo(keep.x,keep.y)};put();
+    /* swimlane pictures in the Gantt are re-drawn in the background; hold the page height until they are back, then let go */
+    const t0=Date.now(),wait=()=>{const busy=typeof E2E_SNAPQ!=="undefined"&&Object.keys(E2E_SNAPQ).length>0;put();if(busy&&Date.now()-t0<2500){setTimeout(wait,80);return}
+      requestAnimationFrame(()=>{m.style.minHeight="";put()})};requestAnimationFrame(wait)}
+}
+function scrollKey(e,root){const p=[];for(let n=e;n&&n!==root;n=n.parentElement){if(n.id){p.unshift("#"+CSS.escape(n.id));break}const c=[...n.parentElement.children].indexOf(n)+1;p.unshift(`${n.tagName.toLowerCase()}:nth-child(${c})`)}return p.length?(p[0].startsWith("#")?"":":scope > ")+p.join(" > "):null}
+function vGantt0(m){
   const g=UI.gantt;const P=projects().filter(p=>p.id);
   const fv=(p,f)=>gv("Projects",f,p.r)||"(blank)";
   const bus=uniq(P.map(p=>fv(p,FP.bu)));const P1=P.filter(p=>!g.bu||fv(p,FP.bu)===g.bu);
