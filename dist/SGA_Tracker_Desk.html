@@ -369,6 +369,18 @@ body.role-viewer #main input:not([type=search]):not([type=checkbox]):not(.stq):n
 @media (max-width:1600px){#fileName{max-width:110px}.connchip,.accchip{padding:2px 8px;font-size:11.5px}}
 @media (max-width:1400px){#fileName{max-width:80px}}
 @media (max-width:1700px){.hl2{display:none}}
+/* Save to database: loud when there is something unsaved */
+#btnSave .savecnt{font-weight:800}
+#btnSave:disabled{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);color:rgba(255,255,255,.75);opacity:1}
+#btnSave.dirty{background:#FFC000;border-color:#FFC000;color:#1b1b1b;font-weight:700;box-shadow:0 0 0 3px rgba(255,192,0,.35);animation:svpulse 1.8s ease-in-out infinite}
+#btnSave.dirty:hover{background:#FFD24D}
+@keyframes svpulse{0%,100%{box-shadow:0 0 0 2px rgba(255,192,0,.35)}50%{box-shadow:0 0 0 7px rgba(255,192,0,.12)}}
+.badge-changes{animation:none}body.has-unsaved .badge-changes{background:#FFF4CC;color:#7A4B00;border:1px solid #FFC000}
+body.has-unsaved nav.tabs button[data-t="Changes"]{background:#FFC000;color:#1b1b1b;font-weight:700}
+@media (prefers-reduced-motion:reduce){#btnSave.dirty{animation:none}}
+.hl3{display:none}@media (max-width:1700px){.hl3{display:inline}}
+@media (max-width:1400px){.hgrp.today .glab{display:none}#fileName{max-width:70px}}
+@media (max-width:1500px){#chgBadge{display:none}}
 </style>
 </head>
 <body>
@@ -378,7 +390,7 @@ body.role-viewer #main input:not([type=search]):not([type=checkbox]):not(.stq):n
   <span class="spacer"></span>
   <span class="hgrp today" title="'Today' drives statuses, the Gantt today line and the current-month marker. It advances automatically at midnight in the chosen time zone."><span class="glab">TODAY</span><b id="todayLbl"></b><select id="tzSel" aria-label="Time zone"></select></span>
   <span id="chgBadge" class="badge-changes hidden">0 unsaved</span><span id="saveState" class="savestate"></span>
-  <span class="hgrp"><span class="glab">FILE</span><button class="btn ghost" id="btnOpen">Open<span class="hl2"> workbook</span>…</button><button class="btn primary" id="btnSave" disabled>Save<span class="hl2"> to Excel</span></button><button class="btn ghost" id="btnCopy" disabled title="Save the workbook (with your changes) to a new file"><span class="hl2">Save a </span>copy…</button></span>
+  <span class="hgrp"><span class="glab">FILE</span><button class="btn ghost" id="btnOpen">Open<span class="hl2"> workbook</span>…</button><button class="btn primary" id="btnSave" disabled title="Write your changes into the Excel workbook (the database) — Ctrl+S"><span class="svico" aria-hidden="true">💾</span> <span class="svlbl">Save to database</span><span class="savecnt"></span></button><button class="btn ghost" id="btnCopy" disabled title="Save the workbook (with your changes) to a new file"><span class="hl2">Save a copy…</span><span class="hl3">Copy…</span></button></span>
   <span class="hgrp"><button class="btn ghost" id="btnSet" title="Settings — maintain dropdown lists and status / delay rules">⚙<span class="hlbl"> Settings</span></button><button class="btn ghost" id="btnHelp" title="Help">?<span class="hlbl"> Help</span></button></span>
 </header>
 <div id="envWarn"></div>
@@ -400,7 +412,7 @@ body.role-viewer #main input:not([type=search]):not([type=checkbox]):not(.stq):n
   <ol class="steps">
     <li>In SharePoint, open the document library and click <b>Sync</b> (or "Add shortcut to My files") so the workbook appears in File Explorer through OneDrive.</li>
     <li>Open this HTML in <b>Microsoft Edge or Google Chrome</b> and click <b>Open workbook…</b>. Pick the synced file.</li>
-    <li>Make your changes and click <b>Save to Excel</b>. The file is overwritten in place, and OneDrive uploads it to SharePoint automatically.</li>
+    <li>Make your changes and click <b>Save to database</b>. The file is overwritten in place, and OneDrive uploads it to SharePoint automatically.</li>
     <li>Other browsers (Firefox, Safari) download an updated copy instead. Upload it to SharePoint with the same name to replace the old one.</li>
   </ol>
   <h2>If a save does not reach SharePoint, or "goes back" to an old version</h2>
@@ -421,7 +433,7 @@ body.role-viewer #main input:not([type=search]):not([type=checkbox]):not(.stq):n
     <li><b>⇄ E2E flows:</b> draw each end-to-end process as an <b>AS-IS (before)</b> and a <b>TO-BE (new design)</b> swimlane, and tag the steps with the projects that deliver them (drag a project from the right-hand list onto a step, or press <b>Link</b> and click the steps). Each project page lists its linked steps with <b>Open in flow</b> and <b>Link to steps…</b>. Saved to the E2E_Flows and E2E_Map sheets.</li>
     <li><b>⚡ Quick update:</b> one table of all projects — type the new <b>Progress %</b> (or click 0/25/50/75/100), pick phase or On-Hold / Cancelled, set plan dates and write Done / Next steps / Issues. Filter by CF, process area and status (tick / untick). Every change stamps Last Updated with today.</li>
     <li><b>Status filters:</b> on the Dashboard, Projects list, RAIDD and Quick update, status is a row of tick boxes — untick to hide a status, tick to show it again, <i>only</i> to show just that one, <b>All</b> to reset.</li>
-    <li><b>⇄ Sync old file:</b> open this workbook (the database), click <b>⇄ Sync old file</b> and pick the old-format <i>Project 2T Club Update</i> file. The app matches projects (Legacy ID → name), shows every difference with a verdict (Fill · Old newer · Conflict · DB newer · Ignored) and pre-ticks only safe updates. Progress and phase never go backwards; misplaced old cells are ignored; new old-file projects can be added (likely duplicates are left unticked). Apply, then Review changes → Save to Excel. A sync baseline is stored in Migration_Log (N–R) so the next sync knows which side changed.</li>
+    <li><b>⇄ Sync old file:</b> open this workbook (the database), click <b>⇄ Sync old file</b> and pick the old-format <i>Project 2T Club Update</i> file. The app matches projects (Legacy ID → name), shows every difference with a verdict (Fill · Old newer · Conflict · DB newer · Ignored) and pre-ticks only safe updates. Progress and phase never go backwards; misplaced old cells are ignored; new old-file projects can be added (likely duplicates are left unticked). Apply, then Review changes → Save to database. A sync baseline is stored in Migration_Log (N–R) so the next sync knows which side changed.</li>
     <li><b>⚙ Settings:</b> maintain the dropdown lists (Initiatives, Org structure BU · CF · Process Area, Regions, Workstream leaders, People) and the status / delay rules (slip tolerance, forecast threshold, stage weights). Dropdowns are searchable — type to filter; where “＋ new allowed” shows, typing a new value offers “＋ Add”.</li>
     <li><b>Today &amp; time zone:</b> the TODAY box in the header sets the date used for statuses, the Gantt red today line and the red current-month marker. It moves forward automatically at midnight in the chosen time zone (default Asia/Bangkok), even if the page stays open. Excel uses the same idea: set <b>Time zone (UTC offset)</b> on the Lists sheet.</li>
   </ul>
@@ -849,7 +861,10 @@ function finishSave(msg){S.changes=[];S.dirty.clear();S.newRows={};updateBadge()
 function netChanges(){const first={},last={};for(const c of S.changes){const k=c.sheet+"!"+c.ref;if(!(k in first))first[k]=c;last[k]=c}
   return Object.keys(last).map(k=>({...last[k],orig:first[k].old})).filter(c=>String(c.orig??"")!==String(c.val??""))}
 function rowProject(sheet,row){if(sheet==="Projects")return pId(row)+" · "+gv("Projects",FP.name,row);const c={Activities:FA.pid,Benefits:FB.pid,RAIDD:FD.pid}[sheet];if(!c)return "";const pid=gv(sheet,c,row);const pr=pid?projRowById(pid):null;return pid?(pid+(pr?" · "+gv("Projects",FP.name,pr):"")):""}
-function updateBadge(){const b=$("#chgBadge");const n=S.changes.length?e2eNetCount(netChanges()):0;b.textContent=(n||0)+" unsaved";b.classList.remove("hidden");b.style.visibility=n?"visible":"hidden";$("#btnSave").disabled=!n;$("#btnCopy").disabled=!S.zip}
+function updateBadge(){const b=$("#chgBadge");const n=S.changes.length?e2eNetCount(netChanges()):0;b.textContent=n?`● ${n} unsaved change${n>1?"s":""}`:"0 unsaved";b.title=n?"Not in the database yet — click Save to database":"";b.classList.remove("hidden");b.style.visibility=n?"visible":"hidden";
+  const sv=$("#btnSave");sv.disabled=!n;sv.classList.toggle("dirty",!!n);const c=sv.querySelector(".savecnt");if(c)c.textContent=n?` (${n})`:"";const l=sv.querySelector(".svico");if(l)l.textContent=n?"💾":"✓";if(sv.querySelector(".svlbl"))sv.querySelector(".svlbl").textContent=n?"Save to database":"Saved";
+  document.body.classList.toggle("has-unsaved",!!n);$("#btnCopy").disabled=!S.zip}
+document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="s"&&S.zip){e.preventDefault();if(!$("#btnSave").disabled)save(false);else toast("Nothing to save",1500)}});
 window.addEventListener("beforeunload",e=>{if(S.changes.length){e.preventDefault();e.returnValue=""}});
 
 /* ---------------- open ---------------- */
@@ -1113,7 +1128,7 @@ function renderLanding(){
   ${WB.rec?connectCardHtml():`<p><button class="btn primary" id="bigOpen">Open workbook…</button></p>${connectCardHtml()}`}${spCardHtml()}${S.env&&S.env.level==="ok"?`<p class="envok">✓ Opened from your OneDrive / SharePoint synced folder — saving will reach SharePoint.</p>`:""}</div>
   <div class="card pad" style="margin-top:16px"><h2>With SharePoint</h2><ol class="steps">
   <li>Sync the SharePoint library to your PC (Sync button in SharePoint → OneDrive).</li>
-  <li>Use Edge or Chrome, open the synced workbook here, edit, then click <b>Save to Excel</b>. The file is overwritten in place and OneDrive uploads it.</li>
+  <li>Use Edge or Chrome, open the synced workbook here, edit, then click <b>Save to database</b>. The file is overwritten in place and OneDrive uploads it.</li>
   <li>Close the workbook in Excel first. After saving, open it once in Excel so it recalculates statuses, dates and totals.</li></ol></div>
   <div class="card pad" style="margin-top:16px"><h2>Updating from the old tracker</h2><p class="muted">Open this workbook first, then use <b>⇄ Sync old file</b> (top tabs) to compare it with the old-format <i>Project 2T Club Update</i> file and bring across whatever is newer.</p></div></div>`;
   if($("#bigOpen"))$("#bigOpen").onclick=openFile;const d=$("#drop");bindConnectCard(d);bindSpCard(d);
@@ -1377,8 +1392,8 @@ function vDash(m,keepScroll){const _y=window.scrollY;setTimeout(()=>{if(keepScro
 
 /* ---- page banners (report vs input) ---- */
 function banner(kind,sheet){
-  if(kind==="report")return `<div class="banner rep"><b>REPORT · read-only</b><span>Calculated live from the 5 input sheets. Change data under <b>Update data</b>, then <b>Save to Excel</b>.</span></div>`;
-  return `<div class="banner inp"><b>INPUT · ${esc(sheet)}</b><span>Edits here are written into the ${esc(sheet)} sheet of the Excel file when you click <b>Save to Excel</b>. ${({Realisation:"Type the actual THB for each month in the grid.",RAIDD:"Use <b>Edit</b> / <b>Delete</b> on each row, or <b>+ New</b>.",Projects:"Click a row to open it, or <b>+ New</b>.",Benefits:"Click a row to open it, or <b>+ New</b>.",Activities:"Click a row to open it, or <b>+ New</b>."})[sheet]||""}</span></div>`;
+  if(kind==="report")return `<div class="banner rep"><b>REPORT · read-only</b><span>Calculated live from the 5 input sheets. Change data under <b>Update data</b>, then <b>Save to database</b>.</span></div>`;
+  return `<div class="banner inp"><b>INPUT · ${esc(sheet)}</b><span>Edits here are written into the ${esc(sheet)} sheet of the Excel file when you click <b>Save to database</b>. ${({Realisation:"Type the actual THB for each month in the grid.",RAIDD:"Use <b>Edit</b> / <b>Delete</b> on each row, or <b>+ New</b>.",Projects:"Click a row to open it, or <b>+ New</b>.",Benefits:"Click a row to open it, or <b>+ New</b>.",Activities:"Click a row to open it, or <b>+ New</b>."})[sheet]||""}</span></div>`;
 }
 
 /* ---- benefits analysis (chart panel on the Benefits page) ---- */
@@ -1486,7 +1501,7 @@ function askDelete(sheet,r){
   const lines=Object.entries(d).filter(([,v])=>v.length).map(([k,v])=>`<li>${v.length} ${k==="Activities"?"task(s)":k==="Benefits"?"benefit line(s)":k==="RAIDD"?"RAIDD item(s)":k==="Benefit_Plan"?"custom monthly plan row(s)":"realisation (actuals) row(s)"}</li>`).join("");
   const box=$("#confirm");box.querySelector(".box").innerHTML=`<h2>Delete ${sheet==="Activities"?"task":sheet==="Projects"?"project":sheet==="Benefits"?"benefit line":sheet==="RAIDD"?"RAIDD item":"actuals row"}?</h2>
    <p><b>${esc(labelOf(sheet,r))}</b></p>
-   <p class="muted">This clears the row's input cells in the ${sheet} sheet (the row becomes free for new entries). Nothing is written until you click Save to Excel, and you can still discard it on the Review changes page.</p>
+   <p class="muted">This clears the row's input cells in the ${sheet} sheet (the row becomes free for new entries). Nothing is written until you click Save to database, and you can still discard it on the Review changes page.</p>
    ${n?`<div class="warnbox">Linked records: <ul style="margin:6px 0 0 18px">${lines}</ul>
      <label style="display:flex;gap:8px;margin-top:8px"><input type="checkbox" id="casc" checked> ${sheet==="Activities"?"Also delete the linked RAIDD items (untick to keep them and just remove the task link)":"Also delete all linked records (recommended — otherwise they point to a record that no longer exists)"}</label></div>`:""}
    ${sheet==="Projects"?`<p class="note">Tip: to keep the history instead, set <b>Status Override = Cancelled</b> on the project.</p>`:""}
@@ -1495,7 +1510,7 @@ function askDelete(sheet,r){
   $("#cYes").onclick=()=>{const casc=$("#casc")?$("#casc").checked:false;
     if(casc){for(const [k,v] of Object.entries(d))for(const x of v)clearRow(k,x)}
     else if(sheet==="Activities"){for(const x of d.RAIDD)setCell("RAIDD",FD.tid,x,"")}
-    const back=sheet==="RAIDD"&&UI.rdPid;clearRow(sheet,r);box.classList.remove("on");if(back){liveCalc();renderUnder();raiddPanel(back);toast("Deleted — click Save to Excel to write it to the file",4000);return}closeEditor(true);toast("Deleted — click Save to Excel to write it to the file",4000);render()};
+    const back=sheet==="RAIDD"&&UI.rdPid;clearRow(sheet,r);box.classList.remove("on");if(back){liveCalc();renderUnder();raiddPanel(back);toast("Deleted — click Save to database to write it to the file",4000);return}closeEditor(true);toast("Deleted — click Save to database to write it to the file",4000);render()};
 }
 
 function matrix(dim,rows,keyFn,opt){
@@ -1879,14 +1894,14 @@ function vGantt(m){
 const STD_TASKS={Waterfall:["Kick-off, scope & charter","Get requirement & solution design","Develop / configure","Test & UAT","Go-live & deployment","Hypercare, hand-over & benefit tracking"],
   Agile:["Discovery & inception workshop","Build backlog & release plan","Sprint delivery (build–test)","Hardening & UAT","Release / go-live","Review, hand-over & benefit tracking"]};
 function pviewToggle(){return `<span class="seg" title="Switch between the project list, the task list, benefits and RAIDD"><button data-pv="projects" class="${!UI.pview||UI.pview==="projects"?"on":""}">▦ Projects</button><button data-pv="tasks" class="${UI.pview==="tasks"?"on":""}">☰ Tasks (activities)</button><button data-pv="benefits" class="${UI.pview==="benefits"?"on":""}">◈ Benefits</button><button data-pv="real" class="${UI.pview==="real"?"on":""}" title="Enter actuals for many benefit lines at once (also inside each project's Business benefit plan)">✓ Actuals</button><button data-pv="raidd" class="${UI.pview==="raidd"?"on":""}" title="Every RAIDD item across projects (add / edit them per project with the ⚑ button)">⚑ RAIDD</button></span>`}
-const HUB={tasks:["＋ New task","Every task of every project · click a row to edit · ▾ on a column header = filter / sort · the task Gantt is inside each project · then <b>Save to Excel</b>."],
-  benefits:["＋ New benefit line","Every benefit line · click a row to edit · plan vs actual for each line is inside its project (Business benefit plan) or under ✓ Actuals · then <b>Save to Excel</b>."],
-  real:["","Actuals for every benefit line, month by month, next to the plan · the same panel is inside each project (Business benefit plan) · then <b>Save to Excel</b>."],
-  raidd:["＋ New RAIDD item","Every RAIDD item across projects · click a row to edit · add items per project with the <b>⚑</b> button on the Projects list or project page · then <b>Save to Excel</b>."]};
+const HUB={tasks:["＋ New task","Every task of every project · click a row to edit · ▾ on a column header = filter / sort · the task Gantt is inside each project · then <b>Save to database</b>."],
+  benefits:["＋ New benefit line","Every benefit line · click a row to edit · plan vs actual for each line is inside its project (Business benefit plan) or under ✓ Actuals · then <b>Save to database</b>."],
+  real:["","Actuals for every benefit line, month by month, next to the plan · the same panel is inside each project (Business benefit plan) · then <b>Save to database</b>."],
+  raidd:["＋ New RAIDD item","Every RAIDD item across projects · click a row to edit · add items per project with the <b>⚑</b> button on the Projects list or project page · then <b>Save to database</b>."]};
 function hubHead(k){const [nb,help]=HUB[k];return `<div class="card pad ptop"><div class="ptoprow">${pviewToggle()}<span style="flex:1"></span>${nb?`<button class="btn new" id="quNew">${nb}</button>`:""}</div><p class="muted" style="margin:6px 0 0;font-size:12px">${help}</p></div>`}
 function projHead(simple){return `<div class="card pad ptop"><div class="ptoprow">${pviewToggle()}${plistToggle()}<span style="flex:1"></span><button class="btn new" id="quNew">＋ New project</button></div>
-    <p class="muted" style="margin:6px 0 0;font-size:12px">${simple?"Type progress / plan end / next steps right in the row · <b>▸</b> more fields · project name = full project with task Gantt · then <b>Save to Excel</b>."
-      :"Every column of the Projects sheet · click a row = full project with task Gantt · <b>⚑</b> = RAIDD · <b>▾</b> on a column header = filter / sort · then <b>Save to Excel</b>."}</p></div>`}
+    <p class="muted" style="margin:6px 0 0;font-size:12px">${simple?"Type progress / plan end / next steps right in the row · <b>▸</b> more fields · project name = full project with task Gantt · then <b>Save to database</b>."
+      :"Every column of the Projects sheet · click a row = full project with task Gantt · <b>⚑</b> = RAIDD · <b>▾</b> on a column header = filter / sort · then <b>Save to database</b>."}</p></div>`}
 function plistToggle(){return `<span class="pvwrap"><span class="pvlab">Project view</span><span class="seg" title="Summary = update view (important fields first, ▸ for more). Table = every column."><button data-pl="simple" class="${UI.plist!=="table"?"on":""}">Summary</button><button data-pl="table" class="${UI.plist==="table"?"on":""}">Table</button></span></span>`}
 function bindPview(m){m.querySelectorAll("[data-pv]").forEach(b=>b.onclick=()=>{UI.pview=b.dataset.pv;UI.proj=null;render()});m.querySelectorAll("[data-pl]").forEach(b=>b.onclick=()=>{UI.plist=b.dataset.pl;render()})}
 function openProject(r){UI.wsOpen=false;$("#drawer").classList.remove("on");$("#scrim").classList.remove("on");UI.sel=null;view="Projects";UI.proj=r;render();window.scrollTo(0,0)}
@@ -2022,7 +2037,7 @@ function vProjectWS(m,r){
        ${UI.wsUndo&&UI.wsUndo.r===r&&UI.wsTV!=="table"?`<button class="btn small" id="gUndo">↶ Undo last move</button>`:""}<button class="btn" id="wsStd" title="Adds one standard task per stage, dated across the standard stage windows of Plan Start → Plan End">＋ Standard task per stage</button>`:""}</div>
      ${pid?(UI.wsTV==="table"?stCards:(ts.length?wsGanttHtml(r,ts,st):`<div class="note">No tasks yet — click <b>＋ Standard task per stage</b> to create a plan from the project dates, then drag the bars to adjust.</div>`+stCards)):`<div class="note">Enter at least the <b>Project name</b> (and ideally Initiative, BU and CF) above — the Project ID is then generated and you can add stages and tasks here.</div>`}
    </div>
-   <div class="card pad pdcard" id="wsDet" style="margin-top:14px"><div class="pdhead"><h2 style="margin:0">Project details</h2><span class="muted">Changes are kept when you leave a box · blue = written to the Projects sheet on Save to Excel</span></div>
+   <div class="card pad pdcard" id="wsDet" style="margin-top:14px"><div class="pdhead"><h2 style="margin:0">Project details</h2><span class="muted">Changes are kept when you leave a box · blue = written to the Projects sheet on Save to database</span></div>
      ${projDetailsHtml(r,ins,pchg)}
      <details class="pdadv" ${UI.wsMore?"open":""} id="wsMore"><summary>Advanced — custom stage weights, IDs, legacy fields</summary>
      <div class="fgrid fg3" style="margin-top:10px">${ins.filter(c=>!PD_COLS.includes(c.col)).map(c=>fieldHtml("Projects",c,r,pchg.has(c.col))).join("")}</div></details></div>
@@ -2245,7 +2260,7 @@ function usedCount(col,v){return rowsOf("Projects").filter(r=>String(gv("Project
 function setNamed(nm,v){const n=nameRef(nm);if(n)setCell(n.sh,n.col,n.r1,v)}
 function vSettings(m){
   let tab=UI.stab||(isAdmin()?"lists":"log");if(!isAdmin()&&!["log","warn"].includes(tab))tab="log";const y=window.scrollY;
-  const head=`<div class="banner" style="background:#F3EEFC;border:1px solid #D9CCF5;color:#3B2A6B"><b>⚙ SETTINGS</b><span>Maintain the dropdown lists and the status / delay rules. Changes write to the <b>Master_Data</b> and <b>Lists</b> sheets when you click <b>Save to Excel</b>, and everything in this app recalculates straight away.</span></div>
+  const head=`<div class="banner" style="background:#F3EEFC;border:1px solid #D9CCF5;color:#3B2A6B"><b>⚙ SETTINGS</b><span>Maintain the dropdown lists and the status / delay rules. Changes write to the <b>Master_Data</b> and <b>Lists</b> sheets when you click <b>Save to database</b>, and everything in this app recalculates straight away.</span></div>
    <div class="toolbar"><span class="seg">${(isAdmin()?[["lists","Master lists"],["rules","Status & delay rules"],["today","Excel ‘today’ & time zone"],["users","👤 Users"],["log","🕘 Activity log"],["warn","⚠ Warnings"]]:[["log","🕘 Activity log"],["warn","⚠ Warnings"]]).map(([k,t])=>`<button data-st="${k}" class="${tab===k?"on":""}">${t}</button>`).join("")}</span></div>`;
   let body="";
   if(tab==="lists"){if(!hasMD()){body=`<div class="note">This workbook has no Master_Data sheet. Open the latest SGA_Reduction_Initiative_Tracker.xlsx.</div>`}else{
@@ -2338,11 +2353,11 @@ function vSettings(m){
 function vChanges(m){
   const all=netChanges();const rpK=c=>rowProject(c.sheet,+c.ref.replace(/[A-Z]+/g,""))||"(no project)";const rows=all.filter(c=>c.sheet!==E2EF&&c.sheet!==E2EM).sort((a,b)=>rpK(a).localeCompare(rpK(b))||a.sheet.localeCompare(b.sheet));const fl=e2eChangeLines(all);const mapOnly=!fl.length&&all.some(c=>c.sheet===E2EM);const tot=rows.length+fl.length+(mapOnly?1:0);
   m.innerHTML=`<div class="banner" style="background:#EAF6EC;border:1px solid #BFE3C6;color:#1E5B23"><b>SAVE</b><span>Review what will be written into the Excel file, then save. Only the listed input cells change; formulas, charts and formatting are untouched.</span></div><div class="card pad"><h2>Unsaved changes (${tot})</h2>
-  ${tot?`${fl.length||mapOnly?`<h3 style="margin:6px 0">Process flows (E2E)</h3><div class="tablewrap" style="margin-bottom:12px"><table class="data"><tr><th>Flow</th><th>Version</th><th>What changed</th></tr>${fl.map(x=>`<tr><td>${esc(x.name)}</td><td>${x.ver}</td><td>${esc(x.text)}</td></tr>`).join("")}${mapOnly?`<tr><td colspan="3">E2E_Map refreshed from the diagrams</td></tr>`:""}</table></div>`:""}${rows.length?`<h3 style="margin:6px 0">Cells</h3>`:""}<p class="muted">These changes will be written into the workbook when you click <b>Save to Excel</b>. Nothing else in the file is touched.</p>
+  ${tot?`${fl.length||mapOnly?`<h3 style="margin:6px 0">Process flows (E2E)</h3><div class="tablewrap" style="margin-bottom:12px"><table class="data"><tr><th>Flow</th><th>Version</th><th>What changed</th></tr>${fl.map(x=>`<tr><td>${esc(x.name)}</td><td>${x.ver}</td><td>${esc(x.text)}</td></tr>`).join("")}${mapOnly?`<tr><td colspan="3">E2E_Map refreshed from the diagrams</td></tr>`:""}</table></div>`:""}${rows.length?`<h3 style="margin:6px 0">Cells</h3>`:""}<p class="muted">These changes will be written into the workbook when you click <b>Save to database</b>. Nothing else in the file is touched.</p>
   <div class="tablewrap" ${rows.length?"":'hidden'}><table class="data"><tr><th>Project</th><th>Sheet</th><th>Cell</th><th>Column</th><th>Old</th><th>New</th></tr>${rows.map((c,ix)=>{const kk=rpK(c);const hd=ix===0||kk!==rpK(rows[ix-1])?`<tr class="grph"><td colspan="6"><b>${esc(kk)}</b> <span class="muted">— ${rows.filter(x=>rpK(x)===kk).length} change(s)${rows.some(x=>rpK(x)===kk&&x.sheet==="Activities"&&x.ref.replace(/\d+/g,"")===FA.act)?" · progress spread across the project's tasks by stage weight":""}</span></td></tr>`:"";const col=(CFG[c.sheet]?CFG[c.sheet].cols:[]).find(x=>x.col===c.ref.replace(/\d+/,""));
    const f=v=>{if(c.sheet==="Users"&&/^C\d/.test(c.ref))return v?"••••••":"";const x=col&&col.type==="date"?fmtDate(v):col&&col.type==="pct"?fmtPct(v):v;const t=String(x??"");return t.length>140?t.slice(0,140)+"… ("+t.length.toLocaleString()+" characters)":x};const first={old:c.orig};const rw=+c.ref.replace(/[A-Z]+/g,"");
    return hd+`<tr><td><span class="clip">${esc(rowProject(c.sheet,rw))}</span></td><td>${c.sheet}</td><td>${c.ref}</td><td>${esc(col?col.h:"")}</td><td class="muted">${esc(f(first.old))}</td><td><b>${esc(f(c.val))}</b></td></tr>`}).join("")}</table></div>
-  <p style="margin-top:12px"><button class="btn primary" id="saveNow">Save to Excel</button> <button class="btn" id="discard">Discard all changes</button></p>`:`<p class="muted">No unsaved changes.</p>`}</div>`;
+  <p style="margin-top:12px"><button class="btn primary" id="saveNow">Save to database</button> <button class="btn" id="discard">Discard all changes</button></p>`:`<p class="muted">No unsaved changes.</p>`}</div>`;
   if($("#saveNow"))$("#saveNow").onclick=()=>save(false);
   if($("#discard"))$("#discard").onclick=async()=>{if(await choose("Discard all unsaved changes?",`<p>${tot} unsaved change(s) will be lost. The file is not touched.</p>`,[["c","Keep them"],["ok","Discard all","danger"]])!=="ok")return;
     const blob=await writeZip(S.zip,{});const buf=await blob.arrayBuffer();S.changes=[];await loadWorkbook(buf,S.fileName,S.handle,S.lastMod);updateBadge();render()};
@@ -2655,7 +2670,7 @@ async function changeMyPw() {
   if (k !== "ok") return; const g = id => (document.getElementById(id) || {}).value || ""; const o = g("cpOld"), n = g("cpNew"), n2 = g("cpNew2"); const u = uGet(ACC.r);
   if (!(await pwCheck(o, u.pw))) { toast("Current password is wrong", 5000); return; }
   if (n.length < PW_MIN || n !== n2) { toast(n !== n2 ? "The new passwords don't match" : `Use at least ${PW_MIN} characters`, 5000); return; }
-  uSet(ACC.r, UC.pw, await pwHash(n)); toast("Password changed — click Save to Excel to keep it", 6000); if (view) render();
+  uSet(ACC.r, UC.pw, await pwHash(n)); toast("Password changed — click Save to database to keep it", 6000); if (view) render();
 }
 
 /* ---- Settings → 👤 Users (Admin only) ---- */
@@ -2672,7 +2687,7 @@ function vUsers() {
   if (typeof logRows === "function") for (const r of logRows()) { const w = String(gv(LOG_SHEET, "B", r) || ""), t = String(gv(LOG_SHEET, "A", r) || ""); if (!last[w] || t > last[w]) last[w] = t; }
   const pend = S.changes.some(c => c.sheet === USERS_SHEET); const plain = us.filter(u => u.pw && !isHashed(u.pw)).length;
   return `<div class="card pad stcard"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h2 style="margin:0">👤 Users &amp; sign-in</h2><span class="muted">${us.filter(u => u.active).length} active · sign-in is on · only Admins see this page</span><span style="flex:1"></span>${plain ? `<button class="btn small" id="uSecure" title="Passwords typed into the Excel sheet are plain text — replace them with hashes">🔒 Secure ${plain} password${plain > 1 ? "s" : ""}</button>` : ""}<button class="btn small new" id="uAdd">+ Add user</button></div>
-    ${pend ? `<div class="note" style="margin:10px 0 0">User changes are not saved yet — click <b>Save to Excel</b> so they apply for everyone.</div>` : ""}
+    ${pend ? `<div class="note" style="margin:10px 0 0">User changes are not saved yet — click <b>Save to database</b> so they apply for everyone.</div>` : ""}
     <div class="tablewrap" style="margin-top:10px"><table class="data sttab"><thead><tr><th>Name</th><th>Email (login)</th><th>Password</th><th>Role</th><th>BU access <span class="muted" style="font-weight:400">(blank = all)</span></th><th>Active</th><th>Last change saved</th><th>Notes</th><th></th></tr></thead><tbody>
     ${us.map(u => `<tr${u.active ? "" : ' class="muted"'}><td><input data-uf="${UC.name}" data-ur="${u.r}" value="${esc(u.name)}" style="width:140px" aria-label="Name"></td><td><input data-uf="${UC.login}" data-ur="${u.r}" value="${esc(u.login)}" style="width:230px" aria-label="Email"></td>
       <td style="white-space:nowrap">${!u.pw ? `<span class="muted">none — email only</span>` : isHashed(u.pw) ? "set" : `<span style="color:#B54708">plain text</span>`} <button class="btn small" data-upw="${u.r}">${u.pw ? "Reset" : "Set"}</button></td>
@@ -2683,7 +2698,7 @@ function vUsers() {
       <td>${ACC && ACC.r === u.r ? '<span class="usedn">you</span>' : `<button class="btn small danger" data-udel="${u.r}">Delete</button>`}</td></tr>`).join("")}</tbody></table></div>
     <datalist id="buList"><option value="All">${buChoices().map(x => `<option value="${esc(x)}">`).join("")}</datalist>
     <div class="stgrid" style="margin-top:12px">${ROLES.map(r => `<div class="kp" style="display:block"><b>${r}</b><div class="muted" style="font-size:12px">${ROLE_INFO[r]}</div></div>`).join("")}</div>
-    <p class="muted" style="font-size:12px">BU access = BU or Corporate Function names, comma separated (e.g. <i>Finance, Procurement</i>). Changes apply after <b>Save to Excel</b> and go into the Activity log. The same table is the <b>Users</b> sheet in Excel (${U_HEAD.join(" · ")}); a password typed there in plain text works — 🔒 Secure turns it into a hash. At least one active Admin is always kept. To turn sign-in off, delete the other users, then <a href="#" id="uOff">turn sign-in off</a>.</p></div>`;
+    <p class="muted" style="font-size:12px">BU access = BU or Corporate Function names, comma separated (e.g. <i>Finance, Procurement</i>). Changes apply after <b>Save to database</b> and go into the Activity log. The same table is the <b>Users</b> sheet in Excel (${U_HEAD.join(" · ")}); a password typed there in plain text works — 🔒 Secure turns it into a hash. At least one active Admin is always kept. To turn sign-in off, delete the other users, then <a href="#" id="uOff">turn sign-in off</a>.</p></div>`;
 }
 function bindUsers(m, re0) {
   const re = () => { re0(); try { renderTabs(); } catch (e) { } };
@@ -2693,7 +2708,7 @@ function bindUsers(m, re0) {
     if (!name || !login) { toast("Fill in your name and email"); return; } if (pw.length < PW_MIN || pw !== pw2) { toast(pw !== pw2 ? "Passwords don't match" : `Use at least ${PW_MIN} characters`, 5000); return; }
     await ensureUsersSheet(); const r = uFreeRow(); const h = await pwHash(pw);
     uSet(r, UC.name, name); uSet(r, UC.login, login); uSet(r, UC.pw, h); uSet(r, UC.role, "Admin"); uSet(r, UC.bu, "All"); uSet(r, UC.active, "Y"); uSet(r, UC.notes, "First Admin");
-    signInAs(uGet(r), true); if (typeof setSavedUser === "function") setSavedUser(name); re(); toast("Sign-in is on — click Save to Excel so it applies to everyone", 7000);
+    signInAs(uGet(r), true); if (typeof setSavedUser === "function") setSavedUser(name); re(); toast("Sign-in is on — click Save to database so it applies to everyone", 7000);
   };
   const adminsLeft = (exceptR, roleOverride) => allUsers().filter(u => u.active && (u.r === exceptR ? roleOverride === "Admin" : u.role === "Admin")).length;
   const set = (r, c, v) => { try { setCell(USERS_SHEET, c, r, v); return true; } catch (e) { toast(e.message); return false; } };
@@ -2709,12 +2724,12 @@ function bindUsers(m, re0) {
     const k = await choose((u.pw ? "Reset" : "Set") + " password — " + esc(u.name || u.login), `<label class="field"><span>New password (min. ${PW_MIN}) — tell the user; they can change it with 👤 → Change my password</span><input id="rpNew" type="text" value="${esc(Math.random().toString(36).slice(2, 6) + "-" + Math.random().toString(36).slice(2, 7))}"></label>`, [["c", "Cancel"], ...(u.pw ? [["clr", "Remove (email only)"]] : []), ["ok", "Set password", "primary"]]);
     const v = (document.getElementById("rpNew") || {}).value || "";
     if (k === "clr") { set(u.r, UC.pw, ""); re(); return; }
-    if (k !== "ok") return; if (v.length < PW_MIN) { toast(`Use at least ${PW_MIN} characters`); return; } set(u.r, UC.pw, await pwHash(v)); toast("Password set — Save to Excel to apply", 5000); re(); });
+    if (k !== "ok") return; if (v.length < PW_MIN) { toast(`Use at least ${PW_MIN} characters`); return; } set(u.r, UC.pw, await pwHash(v)); toast("Password set — Save to database to apply", 5000); re(); });
   m.querySelectorAll("[data-udel]").forEach(b => b.onclick = async () => { const u = uGet(+b.dataset.udel);
     if (u.role === "Admin" && u.active && adminsLeft(u.r, "x") < 1) { toast("Keep at least one active Admin"); return; }
     if (await choose("Delete user?", `<p>Remove <b>${esc(u.name || u.login)}</b> (${u.role})? Their past changes stay in the Activity log.</p>`, [["c", "Cancel"], ["ok", "Delete", "danger"]]) !== "ok") return;
     U_COLS.forEach(c => set(u.r, c, "")); re(); });
-  const sec = m.querySelector("#uSecure"); if (sec) sec.onclick = async () => { let n = 0; for (const u of allUsers()) if (u.pw && !isHashed(u.pw)) { if (set(u.r, UC.pw, await pwHash(u.pw))) n++; } toast(`${n} password(s) hashed — Save to Excel to apply`, 5000); re(); };
+  const sec = m.querySelector("#uSecure"); if (sec) sec.onclick = async () => { let n = 0; for (const u of allUsers()) if (u.pw && !isHashed(u.pw)) { if (set(u.r, UC.pw, await pwHash(u.pw))) n++; } toast(`${n} password(s) hashed — Save to database to apply`, 5000); re(); };
   const add = m.querySelector("#uAdd"); if (add) add.onclick = async () => {
     const k = await choose("Add user", `<div class="fgrid"><label class="field"><span>Name</span><input id="uaName"></label><label class="field"><span>Email (login)</span><input id="uaLogin" type="email" placeholder="name@thaiunion.com"></label>
       <label class="field"><span>Role</span><select id="uaRole">${ROLES.map(r => `<option ${r === "Editor" ? "selected" : ""}>${r}</option>`).join("")}</select></label>
@@ -2726,7 +2741,7 @@ function bindUsers(m, re0) {
     if (!login) { toast("Email is needed"); return; } if (allUsers().some(u => u.login.toLowerCase() === login.toLowerCase())) { toast("That email is already used"); return; }
     if (pw && pw.length < PW_MIN) { toast(`Use at least ${PW_MIN} characters`); return; }
     const r = uFreeRow(); set(r, UC.name, name || login); set(r, UC.login, login); if (pw) set(r, UC.pw, await pwHash(pw)); set(r, UC.role, rl); set(r, UC.bu, rl === "Admin" ? "All" : (bu || "All")); set(r, UC.active, "Y"); if (v("uaNotes")) set(r, UC.notes, v("uaNotes"));
-    re(); toast(`${name || login} added as ${rl}${rl !== "Admin" && bu ? " · " + bu : ""} — Save to Excel to apply`, 7000); };
+    re(); toast(`${name || login} added as ${rl}${rl !== "Admin" && bu ? " · " + bu : ""} — Save to database to apply`, 7000); };
   const off = m.querySelector("#uOff"); if (off) off.onclick = async e => { e.preventDefault();
     if (allUsers().length > 1) { toast("Delete the other users first", 5000); return; }
     if (await choose("Turn sign-in off?", `<p>Anyone who opens the workbook in the Desk will see and edit everything.</p>`, [["c", "Cancel"], ["ok", "Turn off", "danger"]]) !== "ok") return;
@@ -2742,7 +2757,7 @@ document.addEventListener("input", e => { if (e.target && /^(uaName|uaLogin|uaNo
        · a saved "sync baseline" (what the old file said last time) gives a true 3-way compare
        · progress / phase only move forward; misplaced or placeholder old values are ignored
        · otherwise the newer FILE wins (dates shown, can be switched)
-   - nothing is written until you tick and Apply; then Review changes → Save to Excel as usual
+   - nothing is written until you tick and Apply; then Review changes → Save to database as usual
    ===================================================================================== */
 const SY={old:null,plan:null,oldNewer:null,tab:"todo",q:"",st:"",stOff:[]};
 const SYNC_SHEET="Migration_Log",SYNC_C={key:"N",oid:"O",oname:"P",json:"Q",at:"R"},SYNC_FIRST=15,SYNC_LAST=600;
@@ -3015,7 +3030,7 @@ async function applySync(opts={}){const P=SY.plan;if(!P)return;const moved=new S
   const dated=[...moved].filter(pr=>{const ps=+gv("Projects",FP.ps,pr)||0,pe=+gv("Projects",FP.pe,pr)||0;return ps&&pe&&pe>=ps&&tasksOfProject(pId(pr)).length});
   if(dated.length){const k=opts.respread!==undefined?(opts.respread?"yes":"keep"):await choose("Move the task plans too?",`<p>Plan start / end changed on <b>${dated.length}</b> project(s): ${dated.slice(0,6).map(pr=>esc(gv("Projects",FP.name,pr))).join(", ")}${dated.length>6?"…":""}.</p><p>Status is calculated from the <b>task</b> dates. Spread their tasks over the new plan dates (standard stage windows)?</p>`,[["keep","Keep task dates"],["yes","Re-spread tasks","primary"]]);
     if(k==="yes")dated.forEach(pr=>quRespread(pr))}
-  liveCalc();const msg=`Applied ${nItems} field update(s) on ${nProj} project(s) and added ${nNew} new project(s) — ${S.changes.length-nCells} cell(s) changed. Review, then Save to Excel.`;
+  liveCalc();const msg=`Applied ${nItems} field update(s) on ${nProj} project(s) and added ${nNew} new project(s) — ${S.changes.length-nCells} cell(s) changed. Review, then Save to database.`;
   SY.lastApplied={nItems,nProj,nNew,cells:S.changes.length-nCells,baseline:bOk};SY.plan=null;SY.old=null;view="Changes";render();toast(msg+(bOk?"":" (No Migration_Log sheet — sync baseline not stored.)"),8000);return SY.lastApplied}
 
 /* ---------- UI ---------- */
@@ -3025,7 +3040,7 @@ async function pickOld(){const go=async(buf,name,lm)=>{try{toast("Reading the ol
 const KIND={fill:["Fill","#E7F5EA","#1E6B24"],update:["Old newer","#E8F0FB","#1F4E9A"],append:["Append","#E8F0FB","#1F4E9A"],conflict:["Conflict","#FFF3D6","#7A4B00"],dbnewer:["DB newer","#ECEEF1","#4B5563"],ignored:["Ignored","#F4F4F5","#6B7280"]};
 const ktag=k=>{const [t,b,c]=KIND[k]||[k,"#eee","#333"];return `<span class="pill" style="background:${b};color:${c}">${t}</span>`};
 function vSync(m){const P=SY.plan;
-  const head=`<div class="banner inp"><b>⇄ SYNC OLD FILE</b><span>Bring updates from the old-format tracker (Project 2T Club Update) into this workbook. This workbook stays the database: the old file is only read. Nothing changes until you click <b>Apply</b>; then use <b>Review changes</b> → <b>Save to Excel</b>.</span></div>`;
+  const head=`<div class="banner inp"><b>⇄ SYNC OLD FILE</b><span>Bring updates from the old-format tracker (Project 2T Club Update) into this workbook. This workbook stays the database: the old file is only read. Nothing changes until you click <b>Apply</b>; then use <b>Review changes</b> → <b>Save to database</b>.</span></div>`;
   if(!P){m.innerHTML=head+`<div class="card pad"><h2>1 · Database (new format)</h2><p>✓ <b>${esc(S.fileName)}</b> is open.</p>
     <h2 style="margin-top:14px">2 · Old-format file</h2><p class="muted">Pick the latest <b>Project_2T_Club_Update …xlsx</b>. The app finds the project sheet and its columns by header names, so moved or extra columns are fine.</p>
     <p><button class="btn primary" id="syPick">Choose old-format file…</button></p>
@@ -3075,7 +3090,7 @@ function vSync(m){const P=SY.plan;
     <div style="margin-top:12px">${body}</div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:14px;border-top:1px solid var(--line);padding-top:12px">
       <button class="btn primary" id="syApply">Apply ${sel} selected item(s) to the database</button><button class="btn" id="syRe">Reset to suggestions</button><button class="btn" id="syNone">Untick all</button><button class="btn" id="syOther">Choose another old file</button><button class="btn" id="syClose">Cancel</button>
-      <span class="muted" style="font-size:12px">After applying: Review changes → Save to Excel. The stored baseline makes the next sync a 3-way compare.</span></div></div>`;
+      <span class="muted" style="font-size:12px">After applying: Review changes → Save to database. The stored baseline makes the next sync a 3-way compare.</span></div></div>`;
   bindStChips(m,"syst",SY,()=>render());
   m.querySelectorAll("[data-syt]").forEach(b=>b.onclick=()=>{SY.tab=b.dataset.syt;render()});
   const qi=$("#syQ");qi.oninput=()=>{SY.q=qi.value;clearTimeout(vSync._t);vSync._t=setTimeout(()=>{render();const e=$("#syQ");e.focus();e.setSelectionRange(e.value.length,e.value.length)},350)};
@@ -3283,7 +3298,7 @@ function vQuick(m,simple){const F=UI.qu;F.simple=!!simple;liveCalc();const {all,
   const cfs=uniq(all.map(r=>fv(r,FP.cf)));const procs=uniq(P1.map(r=>fv(r,FP.proc)));if(F.proc&&!procs.includes(F.proc))F.proc="";
   const sts=off.size?STL.slice():STL.filter(s=>P2.some(r=>pStat(r)===s));const re=()=>{const y=scrollY;vQuick(m,simple);window.scrollTo(0,y)};
   const head=simple?projHead(true)
-   :`<div class="banner inp"><b>⚡ QUICK UPDATE</b><span>Update many projects on one screen. Type a new <b>Progress %</b> (or click 0 / 25 / 50 / 75 / 100) and the project's tasks are filled stage by stage. A box is saved into the workbook when you leave it (Tab / Enter / click elsewhere); <b>Esc</b> undoes the box you are in. Each change stamps <b>Last Updated</b> = today — check them in <b>Review changes</b>, then <b>Save to Excel</b>.</span></div>`;
+   :`<div class="banner inp"><b>⚡ QUICK UPDATE</b><span>Update many projects on one screen. Type a new <b>Progress %</b> (or click 0 / 25 / 50 / 75 / 100) and the project's tasks are filled stage by stage. A box is saved into the workbook when you leave it (Tab / Enter / click elsewhere); <b>Esc</b> undoes the box you are in. Each change stamps <b>Last Updated</b> = today — check them in <b>Review changes</b>, then <b>Save to database</b>.</span></div>`;
   const thead=simple?`<tr><th class="qx"><button type="button" class="qxb" id="quAll" title="Open / close all">${F.open.size?"▾":"▸"}</button></th><th class="qn">Project</th><th>Status</th><th class="num">Progress %</th><th>Plan start → end</th><th>Benefit · plan vs actual</th><th>Next steps</th><th>Updated</th></tr>`
    :`<tr><th class="qn">Project</th><th>Status</th><th class="num">Progress %</th><th>Phase (legacy)</th><th>Override</th><th>Plan start</th><th>Plan end</th><th>Target Q</th><th>Last update — Done</th><th>Next steps</th><th>Issues / blockers</th><th>Updated</th></tr>`;
   m.innerHTML=head+quFilterBar()+`
@@ -3504,7 +3519,7 @@ function vE2E(m){
   if(UI.e2e.home!==false||!e2eFlows().length){vE2EHome(m);return}
   const fl=e2eFlows();if(UI.e2e.flow&&!e2eFlow(UI.e2e.flow))UI.e2e.flow=null;if(!UI.e2e.flow&&fl.length)UI.e2e.flow=fl[0].id;const f=e2eFlow(UI.e2e.flow);
   const tipOff=(()=>{try{return localStorage.getItem("sga_e2e_tip")!=="1"}catch(e){return true}})();
-  const top=tipOff?`<div class="e2etipmin"><button class="btn small" id="e2eTip">ⓘ How E2E flows work</button></div>`:`<div class="banner inp"><b>⇄ E2E FLOWS</b><span>Draw each end-to-end process <b>AS-IS (before)</b> and <b>TO-BE (new design)</b>, and tag every step with the projects that deliver it. <b>Click a step box</b> to open its pop-up: search and tick the projects that deliver it, and mark it New / Changed / Removed. You can also drag a project from the project list onto a step. Links are saved to <b>E2E_Flows</b> and <b>E2E_Map</b> — then <b>Save to Excel</b>.</span><button class="btn small" id="e2eTip" style="margin-left:auto">Hide</button></div><div class="e2enarrow warnbox">Editing flows needs a wider screen (laptop). On a phone you can still see each project's linked steps on its project page.</div>`;
+  const top=tipOff?`<div class="e2etipmin"><button class="btn small" id="e2eTip">ⓘ How E2E flows work</button></div>`:`<div class="banner inp"><b>⇄ E2E FLOWS</b><span>Draw each end-to-end process <b>AS-IS (before)</b> and <b>TO-BE (new design)</b>, and tag every step with the projects that deliver it. <b>Click a step box</b> to open its pop-up: search and tick the projects that deliver it, and mark it New / Changed / Removed. You can also drag a project from the project list onto a step. Links are saved to <b>E2E_Flows</b> and <b>E2E_Map</b> — then <b>Save to database</b>.</span><button class="btn small" id="e2eTip" style="margin-left:auto">Hide</button></div><div class="e2enarrow warnbox">Editing flows needs a wider screen (laptop). On a phone you can still see each project's linked steps on its project page.</div>`;
   if(!fl.length){m.innerHTML=top+`<div class="card pad"><h2>No process flows yet</h2><p class="muted">Start from the Shared Services deck's P2P Domestic flow, or create a blank flow.</p>
     <p><button class="btn primary" id="e2eSeed">Add P2P Domestic AS-IS + TO-BE (from the SSC deck)</button> <button class="btn" id="e2eNew">＋ New blank flow</button></p></div><div id="e2eSlot" data-hidden="1"></div>`;
     e2eAttach(m.querySelector("#e2eSlot"));e2eBindTip(m);$("#e2eNew").onclick=e2eNewFlow;$("#e2eSeed").onclick=()=>e2eSeedP2P();return}
@@ -3529,7 +3544,7 @@ function vE2E(m){
   $("#e2eSel").onchange=e=>{UI.e2e.flow=e.target.value;UI.e2e.link=null;render()};
   m.querySelectorAll("[data-ver]").forEach(b=>b.onclick=()=>{UI.e2e.ver=b.dataset.ver;render()});
   $("#e2eEdit").onclick=()=>e2eEditFlow(f);$("#e2eNew").onclick=e2eNewFlow;$("#e2eHome").onclick=()=>{e2eFlush().then(()=>{UI.e2e.home=true;render();window.scrollTo(0,0)})};
-  $("#e2eHow").onclick=()=>choose("How E2E flows work",`<ul style="margin:0 0 0 18px;line-height:1.6"><li>Each flow has an <b>AS-IS (before)</b> and a <b>TO-BE (new design)</b> swimlane. In TO-BE the AS-IS picture is shown above — scroll up to compare.</li><li><b>Click a step box</b> → pop-up: tick the projects that deliver it (search by ID, name or area), set New / Changed / Removed. Click anywhere else to close.</li><li>Double-click a box to edit its text; drag boxes, lanes and arrows like in PowerPoint.</li><li>☰ Project list: drag a project onto a step, or click <b>Link</b> then click its steps.</li><li>Links are written to <b>E2E_Flows</b> / <b>E2E_Map</b> — then <b>Save to Excel</b>. Projects show their steps on the project page and in the Gantt (grouped by flow and lane).</li></ul>`,[["ok","Got it","primary"]]);
+  $("#e2eHow").onclick=()=>choose("How E2E flows work",`<ul style="margin:0 0 0 18px;line-height:1.6"><li>Each flow has an <b>AS-IS (before)</b> and a <b>TO-BE (new design)</b> swimlane. In TO-BE the AS-IS picture is shown above — scroll up to compare.</li><li><b>Click a step box</b> → pop-up: tick the projects that deliver it (search by ID, name or area), set New / Changed / Removed. Click anywhere else to close.</li><li>Double-click a box to edit its text; drag boxes, lanes and arrows like in PowerPoint.</li><li>☰ Project list: drag a project onto a step, or click <b>Link</b> then click its steps.</li><li>Links are written to <b>E2E_Flows</b> / <b>E2E_Map</b> — then <b>Save to database</b>. Projects show their steps on the project page and in the Gantt (grouped by flow and lane).</li></ul>`,[["ok","Got it","primary"]]);
 
   $("#e2eChip").onchange=e=>{const v=e.target.value;UI.e2e.tags=v!=="off";if(v!=="off")UI.e2e.chip=v;e2ePost({type:"tags",on:UI.e2e.tags,mode:UI.e2e.chip==="count"?"count":"all"});e2ePost({type:"projects",projects:e2eProjList()});e2eSidePanel()};
   m.querySelectorAll("[data-start]").forEach(b=>b.onclick=async()=>{const k=b.dataset.start;let doc=null;
@@ -3616,7 +3631,7 @@ async function e2eEditFlow(f){const k=await choose("Flow details",e2eFlowForm(f)
 async function e2eDeleteFlow(f){const links=VERS.reduce((a,v)=>a+((f.v[v]&&f.v[v].doc)?(f.v[v].doc.shapes||[]).reduce((n,sh)=>n+(sh.proj||[]).length,0):0),0);
   const k=await choose(`Delete “${esc(f.name)}”?`,`<p>This removes its AS-IS and TO-BE diagrams${links?` and ${links} step↔project link(s)`:""} from the workbook (when you save). Projects themselves are not changed.</p>`,[["c","Cancel"],["ok","Delete flow","danger"]]);if(k!=="ok")return;
   for(const v of VERS){const x=f.v[v];if(!x)continue;for(const c of [...Object.values(EF),...Array.from({length:EF_NDATA},(_,i)=>colLet(EF_DATA0+i))])eSet(E2EF,c,x.r,"")}
-  E2E_CACHE=null;UI.e2e.flow=null;UI.e2e.home=true;e2eRebuildMap();render();toast("Flow deleted — Save to Excel to keep the change")}
+  E2E_CACHE=null;UI.e2e.flow=null;UI.e2e.home=true;e2eRebuildMap();render();toast("Flow deleted — Save to database to keep the change")}
 /* seed: P2P Domestic from the SSC deck (AS-IS slide 5, TO-BE slide 6) — TO-BE steps tagged with the projects that deliver them */
 const P2P_TOBE_LINKS={t12:["SGA-PIM-FIN-SSC-002","SGA-PIM-FIN-SSC-014"],t13:["SGA-PIM-FIN-SSC-002"],t14:["SGA-AUT-FIN-SSC-048","SGA-AUT-FIN-SSC-024","SGA-AUT-FIN-SSC-018"],
   t15:["SGA-AUT-FIN-SSC-048"],t16:["SGA-AUT-FIN-SSC-048","SGA-PIM-FIN-SSC-013","SGA-AUT-FIN-SSC-016"],
@@ -3634,7 +3649,7 @@ async function e2eSeedP2P(){if(!E2E_READY){toast("The editor is still loading �
   const name="P2P Domestic — AP & Payment",id=e2eNewId("P2P");const f={id,name,area:"P2P",owner:"Paweena (Domestic PTP & OTC)",notes:"From the SSC simplification deck (slides 5-6). Project links are a first mapping — confirm with owners.",v:{}};
   asis.name=name+" AS-IS";tobe.name=name+" TO-BE";if(!e2eWriteDoc(f,"AS-IS",asis))return;const f2=e2eFlow(id);if(!e2eWriteDoc(f2,"TO-BE",tobe))return;
   for(const v of VERS){const x=e2eFlow(id).v[v];eSet(E2EF,EF.notes,x.r,f.notes)}E2E_CACHE=null;e2eRebuildMap();UI.e2e.flow=id;UI.e2e.ver="TO-BE";render();
-  toast("Added P2P Domestic AS-IS and TO-BE with "+Object.keys(P2P_TOBE_LINKS).length+" linked steps — review, then Save to Excel",6000)}
+  toast("Added P2P Domestic AS-IS and TO-BE with "+Object.keys(P2P_TOBE_LINKS).length+" linked steps — review, then Save to database",6000)}
 /* project workspace section */
 function e2eProjectSection(pid){if(!hasE2E()||!pid)return "";const L=e2eLinksOf(pid);const fl=e2eFlows();
   return `<div class="card pad" style="margin-top:14px" id="wsE2E"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px"><h2 style="margin:0">E2E process steps</h2>

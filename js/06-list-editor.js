@@ -20,7 +20,7 @@ function askDelete(sheet,r){
   const lines=Object.entries(d).filter(([,v])=>v.length).map(([k,v])=>`<li>${v.length} ${k==="Activities"?"task(s)":k==="Benefits"?"benefit line(s)":k==="RAIDD"?"RAIDD item(s)":k==="Benefit_Plan"?"custom monthly plan row(s)":"realisation (actuals) row(s)"}</li>`).join("");
   const box=$("#confirm");box.querySelector(".box").innerHTML=`<h2>Delete ${sheet==="Activities"?"task":sheet==="Projects"?"project":sheet==="Benefits"?"benefit line":sheet==="RAIDD"?"RAIDD item":"actuals row"}?</h2>
    <p><b>${esc(labelOf(sheet,r))}</b></p>
-   <p class="muted">This clears the row's input cells in the ${sheet} sheet (the row becomes free for new entries). Nothing is written until you click Save to Excel, and you can still discard it on the Review changes page.</p>
+   <p class="muted">This clears the row's input cells in the ${sheet} sheet (the row becomes free for new entries). Nothing is written until you click Save to database, and you can still discard it on the Review changes page.</p>
    ${n?`<div class="warnbox">Linked records: <ul style="margin:6px 0 0 18px">${lines}</ul>
      <label style="display:flex;gap:8px;margin-top:8px"><input type="checkbox" id="casc" checked> ${sheet==="Activities"?"Also delete the linked RAIDD items (untick to keep them and just remove the task link)":"Also delete all linked records (recommended — otherwise they point to a record that no longer exists)"}</label></div>`:""}
    ${sheet==="Projects"?`<p class="note">Tip: to keep the history instead, set <b>Status Override = Cancelled</b> on the project.</p>`:""}
@@ -29,7 +29,7 @@ function askDelete(sheet,r){
   $("#cYes").onclick=()=>{const casc=$("#casc")?$("#casc").checked:false;
     if(casc){for(const [k,v] of Object.entries(d))for(const x of v)clearRow(k,x)}
     else if(sheet==="Activities"){for(const x of d.RAIDD)setCell("RAIDD",FD.tid,x,"")}
-    const back=sheet==="RAIDD"&&UI.rdPid;clearRow(sheet,r);box.classList.remove("on");if(back){liveCalc();renderUnder();raiddPanel(back);toast("Deleted — click Save to Excel to write it to the file",4000);return}closeEditor(true);toast("Deleted — click Save to Excel to write it to the file",4000);render()};
+    const back=sheet==="RAIDD"&&UI.rdPid;clearRow(sheet,r);box.classList.remove("on");if(back){liveCalc();renderUnder();raiddPanel(back);toast("Deleted — click Save to database to write it to the file",4000);return}closeEditor(true);toast("Deleted — click Save to database to write it to the file",4000);render()};
 }
 
 function matrix(dim,rows,keyFn,opt){

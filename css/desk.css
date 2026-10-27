@@ -362,3 +362,15 @@ body.role-viewer #main input:not([type=search]):not([type=checkbox]):not(.stq):n
 @media (max-width:1600px){#fileName{max-width:110px}.connchip,.accchip{padding:2px 8px;font-size:11.5px}}
 @media (max-width:1400px){#fileName{max-width:80px}}
 @media (max-width:1700px){.hl2{display:none}}
+/* Save to database: loud when there is something unsaved */
+#btnSave .savecnt{font-weight:800}
+#btnSave:disabled{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);color:rgba(255,255,255,.75);opacity:1}
+#btnSave.dirty{background:#FFC000;border-color:#FFC000;color:#1b1b1b;font-weight:700;box-shadow:0 0 0 3px rgba(255,192,0,.35);animation:svpulse 1.8s ease-in-out infinite}
+#btnSave.dirty:hover{background:#FFD24D}
+@keyframes svpulse{0%,100%{box-shadow:0 0 0 2px rgba(255,192,0,.35)}50%{box-shadow:0 0 0 7px rgba(255,192,0,.12)}}
+.badge-changes{animation:none}body.has-unsaved .badge-changes{background:#FFF4CC;color:#7A4B00;border:1px solid #FFC000}
+body.has-unsaved nav.tabs button[data-t="Changes"]{background:#FFC000;color:#1b1b1b;font-weight:700}
+@media (prefers-reduced-motion:reduce){#btnSave.dirty{animation:none}}
+.hl3{display:none}@media (max-width:1700px){.hl3{display:inline}}
+@media (max-width:1400px){.hgrp.today .glab{display:none}#fileName{max-width:70px}}
+@media (max-width:1500px){#chgBadge{display:none}}

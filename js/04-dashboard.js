@@ -29,7 +29,7 @@ function renderLanding(){
   ${WB.rec?connectCardHtml():`<p><button class="btn primary" id="bigOpen">Open workbook…</button></p>${connectCardHtml()}`}${spCardHtml()}${S.env&&S.env.level==="ok"?`<p class="envok">✓ Opened from your OneDrive / SharePoint synced folder — saving will reach SharePoint.</p>`:""}</div>
   <div class="card pad" style="margin-top:16px"><h2>With SharePoint</h2><ol class="steps">
   <li>Sync the SharePoint library to your PC (Sync button in SharePoint → OneDrive).</li>
-  <li>Use Edge or Chrome, open the synced workbook here, edit, then click <b>Save to Excel</b>. The file is overwritten in place and OneDrive uploads it.</li>
+  <li>Use Edge or Chrome, open the synced workbook here, edit, then click <b>Save to database</b>. The file is overwritten in place and OneDrive uploads it.</li>
   <li>Close the workbook in Excel first. After saving, open it once in Excel so it recalculates statuses, dates and totals.</li></ol></div>
   <div class="card pad" style="margin-top:16px"><h2>Updating from the old tracker</h2><p class="muted">Open this workbook first, then use <b>⇄ Sync old file</b> (top tabs) to compare it with the old-format <i>Project 2T Club Update</i> file and bring across whatever is newer.</p></div></div>`;
   if($("#bigOpen"))$("#bigOpen").onclick=openFile;const d=$("#drop");bindConnectCard(d);bindSpCard(d);
@@ -293,6 +293,6 @@ function vDash(m,keepScroll){const _y=window.scrollY;setTimeout(()=>{if(keepScro
 
 /* ---- page banners (report vs input) ---- */
 function banner(kind,sheet){
-  if(kind==="report")return `<div class="banner rep"><b>REPORT · read-only</b><span>Calculated live from the 5 input sheets. Change data under <b>Update data</b>, then <b>Save to Excel</b>.</span></div>`;
-  return `<div class="banner inp"><b>INPUT · ${esc(sheet)}</b><span>Edits here are written into the ${esc(sheet)} sheet of the Excel file when you click <b>Save to Excel</b>. ${({Realisation:"Type the actual THB for each month in the grid.",RAIDD:"Use <b>Edit</b> / <b>Delete</b> on each row, or <b>+ New</b>.",Projects:"Click a row to open it, or <b>+ New</b>.",Benefits:"Click a row to open it, or <b>+ New</b>.",Activities:"Click a row to open it, or <b>+ New</b>."})[sheet]||""}</span></div>`;
+  if(kind==="report")return `<div class="banner rep"><b>REPORT · read-only</b><span>Calculated live from the 5 input sheets. Change data under <b>Update data</b>, then <b>Save to database</b>.</span></div>`;
+  return `<div class="banner inp"><b>INPUT · ${esc(sheet)}</b><span>Edits here are written into the ${esc(sheet)} sheet of the Excel file when you click <b>Save to database</b>. ${({Realisation:"Type the actual THB for each month in the grid.",RAIDD:"Use <b>Edit</b> / <b>Delete</b> on each row, or <b>+ New</b>.",Projects:"Click a row to open it, or <b>+ New</b>.",Benefits:"Click a row to open it, or <b>+ New</b>.",Activities:"Click a row to open it, or <b>+ New</b>."})[sheet]||""}</span></div>`;
 }

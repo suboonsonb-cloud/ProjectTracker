@@ -155,7 +155,7 @@ async function changeMyPw() {
   if (k !== "ok") return; const g = id => (document.getElementById(id) || {}).value || ""; const o = g("cpOld"), n = g("cpNew"), n2 = g("cpNew2"); const u = uGet(ACC.r);
   if (!(await pwCheck(o, u.pw))) { toast("Current password is wrong", 5000); return; }
   if (n.length < PW_MIN || n !== n2) { toast(n !== n2 ? "The new passwords don't match" : `Use at least ${PW_MIN} characters`, 5000); return; }
-  uSet(ACC.r, UC.pw, await pwHash(n)); toast("Password changed — click Save to Excel to keep it", 6000); if (view) render();
+  uSet(ACC.r, UC.pw, await pwHash(n)); toast("Password changed — click Save to database to keep it", 6000); if (view) render();
 }
 
 /* ---- Settings → 👤 Users (Admin only) ---- */
@@ -172,7 +172,7 @@ function vUsers() {
   if (typeof logRows === "function") for (const r of logRows()) { const w = String(gv(LOG_SHEET, "B", r) || ""), t = String(gv(LOG_SHEET, "A", r) || ""); if (!last[w] || t > last[w]) last[w] = t; }
   const pend = S.changes.some(c => c.sheet === USERS_SHEET); const plain = us.filter(u => u.pw && !isHashed(u.pw)).length;
   return `<div class="card pad stcard"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h2 style="margin:0">👤 Users &amp; sign-in</h2><span class="muted">${us.filter(u => u.active).length} active · sign-in is on · only Admins see this page</span><span style="flex:1"></span>${plain ? `<button class="btn small" id="uSecure" title="Passwords typed into the Excel sheet are plain text — replace them with hashes">🔒 Secure ${plain} password${plain > 1 ? "s" : ""}</button>` : ""}<button class="btn small new" id="uAdd">+ Add user</button></div>
-    ${pend ? `<div class="note" style="margin:10px 0 0">User changes are not saved yet — click <b>Save to Excel</b> so they apply for everyone.</div>` : ""}
+    ${pend ? `<div class="note" style="margin:10px 0 0">User changes are not saved yet — click <b>Save to database</b> so they apply for everyone.</div>` : ""}
     <div class="tablewrap" style="margin-top:10px"><table class="data sttab"><thead><tr><th>Name</th><th>Email (login)</th><th>Password</th><th>Role</th><th>BU access <span class="muted" style="font-weight:400">(blank = all)</span></th><th>Active</th><th>Last change saved</th><th>Notes</th><th></th></tr></thead><tbody>
     ${us.map(u => `<tr${u.active ? "" : ' class="muted"'}><td><input data-uf="${UC.name}" data-ur="${u.r}" value="${esc(u.name)}" style="width:140px" aria-label="Name"></td><td><input data-uf="${UC.login}" data-ur="${u.r}" value="${esc(u.login)}" style="width:230px" aria-label="Email"></td>
       <td style="white-space:nowrap">${!u.pw ? `<span class="muted">none — email only</span>` : isHashed(u.pw) ? "set" : `<span style="color:#B54708">plain text</span>`} <button class="btn small" data-upw="${u.r}">${u.pw ? "Reset" : "Set"}</button></td>
@@ -183,7 +183,7 @@ function vUsers() {
       <td>${ACC && ACC.r === u.r ? '<span class="usedn">you</span>' : `<button class="btn small danger" data-udel="${u.r}">Delete</button>`}</td></tr>`).join("")}</tbody></table></div>
     <datalist id="buList"><option value="All">${buChoices().map(x => `<option value="${esc(x)}">`).join("")}</datalist>
     <div class="stgrid" style="margin-top:12px">${ROLES.map(r => `<div class="kp" style="display:block"><b>${r}</b><div class="muted" style="font-size:12px">${ROLE_INFO[r]}</div></div>`).join("")}</div>
-    <p class="muted" style="font-size:12px">BU access = BU or Corporate Function names, comma separated (e.g. <i>Finance, Procurement</i>). Changes apply after <b>Save to Excel</b> and go into the Activity log. The same table is the <b>Users</b> sheet in Excel (${U_HEAD.join(" · ")}); a password typed there in plain text works — 🔒 Secure turns it into a hash. At least one active Admin is always kept. To turn sign-in off, delete the other users, then <a href="#" id="uOff">turn sign-in off</a>.</p></div>`;
+    <p class="muted" style="font-size:12px">BU access = BU or Corporate Function names, comma separated (e.g. <i>Finance, Procurement</i>). Changes apply after <b>Save to database</b> and go into the Activity log. The same table is the <b>Users</b> sheet in Excel (${U_HEAD.join(" · ")}); a password typed there in plain text works — 🔒 Secure turns it into a hash. At least one active Admin is always kept. To turn sign-in off, delete the other users, then <a href="#" id="uOff">turn sign-in off</a>.</p></div>`;
 }
 function bindUsers(m, re0) {
   const re = () => { re0(); try { renderTabs(); } catch (e) { } };
@@ -193,7 +193,7 @@ function bindUsers(m, re0) {
     if (!name || !login) { toast("Fill in your name and email"); return; } if (pw.length < PW_MIN || pw !== pw2) { toast(pw !== pw2 ? "Passwords don't match" : `Use at least ${PW_MIN} characters`, 5000); return; }
     await ensureUsersSheet(); const r = uFreeRow(); const h = await pwHash(pw);
     uSet(r, UC.name, name); uSet(r, UC.login, login); uSet(r, UC.pw, h); uSet(r, UC.role, "Admin"); uSet(r, UC.bu, "All"); uSet(r, UC.active, "Y"); uSet(r, UC.notes, "First Admin");
-    signInAs(uGet(r), true); if (typeof setSavedUser === "function") setSavedUser(name); re(); toast("Sign-in is on — click Save to Excel so it applies to everyone", 7000);
+    signInAs(uGet(r), true); if (typeof setSavedUser === "function") setSavedUser(name); re(); toast("Sign-in is on — click Save to database so it applies to everyone", 7000);
   };
   const adminsLeft = (exceptR, roleOverride) => allUsers().filter(u => u.active && (u.r === exceptR ? roleOverride === "Admin" : u.role === "Admin")).length;
   const set = (r, c, v) => { try { setCell(USERS_SHEET, c, r, v); return true; } catch (e) { toast(e.message); return false; } };
@@ -209,12 +209,12 @@ function bindUsers(m, re0) {
     const k = await choose((u.pw ? "Reset" : "Set") + " password — " + esc(u.name || u.login), `<label class="field"><span>New password (min. ${PW_MIN}) — tell the user; they can change it with 👤 → Change my password</span><input id="rpNew" type="text" value="${esc(Math.random().toString(36).slice(2, 6) + "-" + Math.random().toString(36).slice(2, 7))}"></label>`, [["c", "Cancel"], ...(u.pw ? [["clr", "Remove (email only)"]] : []), ["ok", "Set password", "primary"]]);
     const v = (document.getElementById("rpNew") || {}).value || "";
     if (k === "clr") { set(u.r, UC.pw, ""); re(); return; }
-    if (k !== "ok") return; if (v.length < PW_MIN) { toast(`Use at least ${PW_MIN} characters`); return; } set(u.r, UC.pw, await pwHash(v)); toast("Password set — Save to Excel to apply", 5000); re(); });
+    if (k !== "ok") return; if (v.length < PW_MIN) { toast(`Use at least ${PW_MIN} characters`); return; } set(u.r, UC.pw, await pwHash(v)); toast("Password set — Save to database to apply", 5000); re(); });
   m.querySelectorAll("[data-udel]").forEach(b => b.onclick = async () => { const u = uGet(+b.dataset.udel);
     if (u.role === "Admin" && u.active && adminsLeft(u.r, "x") < 1) { toast("Keep at least one active Admin"); return; }
     if (await choose("Delete user?", `<p>Remove <b>${esc(u.name || u.login)}</b> (${u.role})? Their past changes stay in the Activity log.</p>`, [["c", "Cancel"], ["ok", "Delete", "danger"]]) !== "ok") return;
     U_COLS.forEach(c => set(u.r, c, "")); re(); });
-  const sec = m.querySelector("#uSecure"); if (sec) sec.onclick = async () => { let n = 0; for (const u of allUsers()) if (u.pw && !isHashed(u.pw)) { if (set(u.r, UC.pw, await pwHash(u.pw))) n++; } toast(`${n} password(s) hashed — Save to Excel to apply`, 5000); re(); };
+  const sec = m.querySelector("#uSecure"); if (sec) sec.onclick = async () => { let n = 0; for (const u of allUsers()) if (u.pw && !isHashed(u.pw)) { if (set(u.r, UC.pw, await pwHash(u.pw))) n++; } toast(`${n} password(s) hashed — Save to database to apply`, 5000); re(); };
   const add = m.querySelector("#uAdd"); if (add) add.onclick = async () => {
     const k = await choose("Add user", `<div class="fgrid"><label class="field"><span>Name</span><input id="uaName"></label><label class="field"><span>Email (login)</span><input id="uaLogin" type="email" placeholder="name@thaiunion.com"></label>
       <label class="field"><span>Role</span><select id="uaRole">${ROLES.map(r => `<option ${r === "Editor" ? "selected" : ""}>${r}</option>`).join("")}</select></label>
@@ -226,7 +226,7 @@ function bindUsers(m, re0) {
     if (!login) { toast("Email is needed"); return; } if (allUsers().some(u => u.login.toLowerCase() === login.toLowerCase())) { toast("That email is already used"); return; }
     if (pw && pw.length < PW_MIN) { toast(`Use at least ${PW_MIN} characters`); return; }
     const r = uFreeRow(); set(r, UC.name, name || login); set(r, UC.login, login); if (pw) set(r, UC.pw, await pwHash(pw)); set(r, UC.role, rl); set(r, UC.bu, rl === "Admin" ? "All" : (bu || "All")); set(r, UC.active, "Y"); if (v("uaNotes")) set(r, UC.notes, v("uaNotes"));
-    re(); toast(`${name || login} added as ${rl}${rl !== "Admin" && bu ? " · " + bu : ""} — Save to Excel to apply`, 7000); };
+    re(); toast(`${name || login} added as ${rl}${rl !== "Admin" && bu ? " · " + bu : ""} — Save to database to apply`, 7000); };
   const off = m.querySelector("#uOff"); if (off) off.onclick = async e => { e.preventDefault();
     if (allUsers().length > 1) { toast("Delete the other users first", 5000); return; }
     if (await choose("Turn sign-in off?", `<p>Anyone who opens the workbook in the Desk will see and edit everything.</p>`, [["c", "Cancel"], ["ok", "Turn off", "danger"]]) !== "ok") return;

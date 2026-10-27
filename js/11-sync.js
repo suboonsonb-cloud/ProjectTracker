@@ -8,7 +8,7 @@
        · a saved "sync baseline" (what the old file said last time) gives a true 3-way compare
        · progress / phase only move forward; misplaced or placeholder old values are ignored
        · otherwise the newer FILE wins (dates shown, can be switched)
-   - nothing is written until you tick and Apply; then Review changes → Save to Excel as usual
+   - nothing is written until you tick and Apply; then Review changes → Save to database as usual
    ===================================================================================== */
 const SY={old:null,plan:null,oldNewer:null,tab:"todo",q:"",st:"",stOff:[]};
 const SYNC_SHEET="Migration_Log",SYNC_C={key:"N",oid:"O",oname:"P",json:"Q",at:"R"},SYNC_FIRST=15,SYNC_LAST=600;
@@ -281,7 +281,7 @@ async function applySync(opts={}){const P=SY.plan;if(!P)return;const moved=new S
   const dated=[...moved].filter(pr=>{const ps=+gv("Projects",FP.ps,pr)||0,pe=+gv("Projects",FP.pe,pr)||0;return ps&&pe&&pe>=ps&&tasksOfProject(pId(pr)).length});
   if(dated.length){const k=opts.respread!==undefined?(opts.respread?"yes":"keep"):await choose("Move the task plans too?",`<p>Plan start / end changed on <b>${dated.length}</b> project(s): ${dated.slice(0,6).map(pr=>esc(gv("Projects",FP.name,pr))).join(", ")}${dated.length>6?"…":""}.</p><p>Status is calculated from the <b>task</b> dates. Spread their tasks over the new plan dates (standard stage windows)?</p>`,[["keep","Keep task dates"],["yes","Re-spread tasks","primary"]]);
     if(k==="yes")dated.forEach(pr=>quRespread(pr))}
-  liveCalc();const msg=`Applied ${nItems} field update(s) on ${nProj} project(s) and added ${nNew} new project(s) — ${S.changes.length-nCells} cell(s) changed. Review, then Save to Excel.`;
+  liveCalc();const msg=`Applied ${nItems} field update(s) on ${nProj} project(s) and added ${nNew} new project(s) — ${S.changes.length-nCells} cell(s) changed. Review, then Save to database.`;
   SY.lastApplied={nItems,nProj,nNew,cells:S.changes.length-nCells,baseline:bOk};SY.plan=null;SY.old=null;view="Changes";render();toast(msg+(bOk?"":" (No Migration_Log sheet — sync baseline not stored.)"),8000);return SY.lastApplied}
 
 /* ---------- UI ---------- */
@@ -291,7 +291,7 @@ async function pickOld(){const go=async(buf,name,lm)=>{try{toast("Reading the ol
 const KIND={fill:["Fill","#E7F5EA","#1E6B24"],update:["Old newer","#E8F0FB","#1F4E9A"],append:["Append","#E8F0FB","#1F4E9A"],conflict:["Conflict","#FFF3D6","#7A4B00"],dbnewer:["DB newer","#ECEEF1","#4B5563"],ignored:["Ignored","#F4F4F5","#6B7280"]};
 const ktag=k=>{const [t,b,c]=KIND[k]||[k,"#eee","#333"];return `<span class="pill" style="background:${b};color:${c}">${t}</span>`};
 function vSync(m){const P=SY.plan;
-  const head=`<div class="banner inp"><b>⇄ SYNC OLD FILE</b><span>Bring updates from the old-format tracker (Project 2T Club Update) into this workbook. This workbook stays the database: the old file is only read. Nothing changes until you click <b>Apply</b>; then use <b>Review changes</b> → <b>Save to Excel</b>.</span></div>`;
+  const head=`<div class="banner inp"><b>⇄ SYNC OLD FILE</b><span>Bring updates from the old-format tracker (Project 2T Club Update) into this workbook. This workbook stays the database: the old file is only read. Nothing changes until you click <b>Apply</b>; then use <b>Review changes</b> → <b>Save to database</b>.</span></div>`;
   if(!P){m.innerHTML=head+`<div class="card pad"><h2>1 · Database (new format)</h2><p>✓ <b>${esc(S.fileName)}</b> is open.</p>
     <h2 style="margin-top:14px">2 · Old-format file</h2><p class="muted">Pick the latest <b>Project_2T_Club_Update …xlsx</b>. The app finds the project sheet and its columns by header names, so moved or extra columns are fine.</p>
     <p><button class="btn primary" id="syPick">Choose old-format file…</button></p>
@@ -341,7 +341,7 @@ function vSync(m){const P=SY.plan;
     <div style="margin-top:12px">${body}</div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:14px;border-top:1px solid var(--line);padding-top:12px">
       <button class="btn primary" id="syApply">Apply ${sel} selected item(s) to the database</button><button class="btn" id="syRe">Reset to suggestions</button><button class="btn" id="syNone">Untick all</button><button class="btn" id="syOther">Choose another old file</button><button class="btn" id="syClose">Cancel</button>
-      <span class="muted" style="font-size:12px">After applying: Review changes → Save to Excel. The stored baseline makes the next sync a 3-way compare.</span></div></div>`;
+      <span class="muted" style="font-size:12px">After applying: Review changes → Save to database. The stored baseline makes the next sync a 3-way compare.</span></div></div>`;
   bindStChips(m,"syst",SY,()=>render());
   m.querySelectorAll("[data-syt]").forEach(b=>b.onclick=()=>{SY.tab=b.dataset.syt;render()});
   const qi=$("#syQ");qi.oninput=()=>{SY.q=qi.value;clearTimeout(vSync._t);vSync._t=setTimeout(()=>{render();const e=$("#syQ");e.focus();e.setSelectionRange(e.value.length,e.value.length)},350)};

@@ -132,7 +132,10 @@ function finishSave(msg){S.changes=[];S.dirty.clear();S.newRows={};updateBadge()
 function netChanges(){const first={},last={};for(const c of S.changes){const k=c.sheet+"!"+c.ref;if(!(k in first))first[k]=c;last[k]=c}
   return Object.keys(last).map(k=>({...last[k],orig:first[k].old})).filter(c=>String(c.orig??"")!==String(c.val??""))}
 function rowProject(sheet,row){if(sheet==="Projects")return pId(row)+" · "+gv("Projects",FP.name,row);const c={Activities:FA.pid,Benefits:FB.pid,RAIDD:FD.pid}[sheet];if(!c)return "";const pid=gv(sheet,c,row);const pr=pid?projRowById(pid):null;return pid?(pid+(pr?" · "+gv("Projects",FP.name,pr):"")):""}
-function updateBadge(){const b=$("#chgBadge");const n=S.changes.length?e2eNetCount(netChanges()):0;b.textContent=(n||0)+" unsaved";b.classList.remove("hidden");b.style.visibility=n?"visible":"hidden";$("#btnSave").disabled=!n;$("#btnCopy").disabled=!S.zip}
+function updateBadge(){const b=$("#chgBadge");const n=S.changes.length?e2eNetCount(netChanges()):0;b.textContent=n?`● ${n} unsaved change${n>1?"s":""}`:"0 unsaved";b.title=n?"Not in the database yet — click Save to database":"";b.classList.remove("hidden");b.style.visibility=n?"visible":"hidden";
+  const sv=$("#btnSave");sv.disabled=!n;sv.classList.toggle("dirty",!!n);const c=sv.querySelector(".savecnt");if(c)c.textContent=n?` (${n})`:"";const l=sv.querySelector(".svico");if(l)l.textContent=n?"💾":"✓";if(sv.querySelector(".svlbl"))sv.querySelector(".svlbl").textContent=n?"Save to database":"Saved";
+  document.body.classList.toggle("has-unsaved",!!n);$("#btnCopy").disabled=!S.zip}
+document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="s"&&S.zip){e.preventDefault();if(!$("#btnSave").disabled)save(false);else toast("Nothing to save",1500)}});
 window.addEventListener("beforeunload",e=>{if(S.changes.length){e.preventDefault();e.returnValue=""}});
 
 /* ---------------- open ---------------- */
