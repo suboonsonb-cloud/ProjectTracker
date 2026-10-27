@@ -527,3 +527,15 @@ details.qcols summary{cursor:pointer;display:inline-block;padding:3px 10px;borde
 .e2etree .etl::before{content:"";position:absolute;left:-1px;top:50%;width:10px;border-top:1.5px solid #CFC7F7}
 .etb.par{border-color:#7A5AF8;background:#F1EDFF}
 .qrdt.urg{background:#FFE8D6;color:#B54708;font-weight:700}
+/* r44 — Tasks / Benefits / Actuals as a sub menu of Projects */
+.pvseg{overflow:visible;position:relative}
+.pvmore{position:relative;display:inline-flex}
+.pvmore>summary{list-style:none;cursor:pointer;padding:7px 9px;font-size:12px;color:var(--muted);border-left:1px solid rgba(255,255,255,.25);user-select:none}
+.pvmore>summary::-webkit-details-marker{display:none}
+.pvmore.on>summary,.pvseg button[data-pv="projects"].on+.pvmore>summary{background:var(--navy);color:#fff}
+.pvmore[open]>summary{background:#2F5597;color:#fff}
+.pvmenu{position:absolute;top:calc(100% + 4px);left:0;z-index:60;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(16,24,40,.14);padding:4px;display:flex;flex-direction:column;min-width:190px}
+.pvmenu button{text-align:left;border-radius:6px;padding:7px 10px!important;color:#344054!important;background:#fff!important;font-weight:500!important}
+.pvmenu button:hover{background:#EEF3FA!important}
+.pvmenu button.on{background:#E3EBF7!important;color:#1F3864!important;font-weight:700!important}
+.pvsub{font-weight:500;opacity:.85;font-size:12px}
