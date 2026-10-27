@@ -101,7 +101,7 @@ async function loadWorkbook(buf,name,handle,lastMod){
   }
   const need=["Projects","Activities","Benefits","Realisation","RAIDD","Lists","Plan_Calc"];
   for(const n of need){if(!sheets[n])throw new Error(`Sheet "${n}" not found — is this the SG&A tracker workbook?`)}
-  for(const n of [...need,...["Master_Data","Benefit_Plan","Migration_Log","E2E_Flows","E2E_Map"].filter(n=>sheets[n])]){
+  for(const n of [...need,...["Master_Data","Benefit_Plan","Migration_Log","E2E_Flows","E2E_Map","Activity_Log"].filter(n=>sheets[n])]){
     const doc=parser.parseFromString(await entryText(by[sheets[n].path]),"application/xml");
     const sd=doc.getElementsByTagNameNS(NS,"sheetData")[0];const rows=new Map(),cells=new Map(),vals=new Map();
     for(const row of sd.getElementsByTagNameNS(NS,"row")){
@@ -113,7 +113,7 @@ async function loadWorkbook(buf,name,handle,lastMod){
   const names={};
   for(const dn of wbDoc.getElementsByTagNameNS(NS,"definedName")){const nm=dn.getAttribute("name");if(!dn.getAttribute("localSheetId"))names[nm]=dn.textContent}
   let coreMod=0;if(by["docProps/core.xml"]){const m=(await entryText(by["docProps/core.xml"])).match(/<dcterms:modified[^>]*>([^<]+)</);if(m)coreMod=Date.parse(m[1])||0}
-  Object.assign(S,{zip:list,byName:by,sst,sheets,names,dirty:new Set(),changes:[],handle,fileName:name,lastMod,newRows:{},wbDoc,_coreMod:coreMod});try{E2E_CACHE=null}catch(e){}
+  Object.assign(S,{zip:list,byName:by,sst,sheets,names,dirty:new Set(),changes:[],handle,fileName:name,lastMod,newRows:{},wbDoc,_coreMod:coreMod,extraParts:{},_logFor:null});try{E2E_CACHE=null}catch(e){}
 }
 function cellValue(c,sst){
   const t=c.getAttribute("t");
@@ -194,3 +194,20 @@ function refreshNewId(sheet,r){
 }
 
 
+/* date boxes: while a date is being TYPED the browser fires "change" after every digit (0002 → 0020 → 2026, month 0 → 03 …).
+   Each one used to be saved and re-drew the form, so typing was impossible (dates jumped to 1900 / the old value).
+   Now a date box commits once: when it loses focus, or on Enter. Picking from the calendar still saves straight away.
+   Dates outside 1950–2100 are refused. */
+const DATE_MIN_Y=1950,DATE_MAX_Y=2100;
+function dateYearOk(v){if(!v)return true;const y=+String(v).slice(0,4);return y>=DATE_MIN_Y&&y<=DATE_MAX_Y}
+document.addEventListener("change",e=>{const el=e.target;if(!el||el.type!=="date"||el._commit)return;
+  if(el._typing){e.stopImmediatePropagation();el._pend=true;return}
+  if(!dateYearOk(el.value)){e.stopImmediatePropagation();el.value=el.defaultValue||"";toast(`Year must be between ${DATE_MIN_Y} and ${DATE_MAX_Y} — the date was not changed`,5000)}},true);
+document.addEventListener("input",e=>{const el=e.target;if(el&&el.type==="date"&&el._typing&&!el._commit){e.stopImmediatePropagation();el._pend=true}},true);
+function dateCommit(el){if(!el._pend)return;el._pend=false;
+  if(!dateYearOk(el.value)||(el.validity&&el.validity.badInput)){el.value=el.defaultValue||"";toast(`Incomplete date or year outside ${DATE_MIN_Y}–${DATE_MAX_Y} — the date was not changed`,5000);return}
+  if(el.value===(el.defaultValue||""))return;el._commit=true;try{el.dispatchEvent(new Event("input",{bubbles:true}));el.dispatchEvent(new Event("change",{bubbles:true}))}finally{el._commit=false}if(document.contains(el))el.defaultValue=el.value}
+document.addEventListener("focusout",e=>{const el=e.target;if(el&&el.type==="date"){el._typing=false;setTimeout(()=>dateCommit(el),0)}},true);
+document.addEventListener("keydown",e=>{const el=e.target;if(!el||el.type!=="date")return;if(e.key==="Enter"){e.preventDefault();el._typing=false;el.blur();return}
+  if(/^[0-9]$/.test(e.key)||e.key==="Backspace"||e.key==="Delete"||e.key==="ArrowUp"||e.key==="ArrowDown")el._typing=true},true);
+document.addEventListener("focusin",e=>{const el=e.target;if(el&&el.type==="date"&&!el.min){el.min=DATE_MIN_Y+"-01-01";el.max=DATE_MAX_Y+"-12-31"}},true);

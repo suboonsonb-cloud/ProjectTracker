@@ -32,7 +32,14 @@ const isStep=sh=>!["frame","image","text"].includes(sh.type);
    chain) start half a level before the first step they feed, and their own chain follows by level. Ties by position. */
 /* step numbers: the main path (longest arrow chain from the start) is numbered 1,2,3…; branches hang off it as sub-steps
    (12.1, 12.2 after the main step they leave from; side inputs before the main step they feed) */
-function stepNumbers(doc){const order=stepOrder(doc);if(!order.length)return [];const by=Object.fromEntries(order.map(x=>[x.id,x]));const v=(doc.ori||"v")==="v";
+/* multi-page diagrams: lay pages one after another and bridge the last step of a page to the first step of the next, so numbering runs on */
+function e2eFlat(doc){if(!doc||!doc.pages||doc.pages.length<2)return doc;const v=(doc.ori||"v")==="v";const idx=Object.fromEntries(doc.pages.map((p,i)=>[p.id,i]));const off=s=>(idx[s.pg]||0)*100000;
+  const shapes=(doc.shapes||[]).map(s=>v?{...s,y:s.y+off(s)}:{...s,x:s.x+off(s)});const links=(doc.links||[]).slice();const steps=shapes.filter(isStep);
+  const pos=(a,b)=>v?(a.y-b.y)||(a.x-b.x):(a.x-b.x)||(a.y-b.y);const hasOut=new Set(links.map(l=>l.from)),hasIn=new Set(links.map(l=>l.to));
+  for(let i=0;i<doc.pages.length-1;i++){const a=steps.filter(s=>(idx[s.pg]||0)===i),b=steps.filter(s=>(idx[s.pg]||0)===i+1);if(!a.length||!b.length)continue;
+    const e=a.filter(s=>!hasOut.has(s.id)),st=b.filter(s=>!hasIn.has(s.id));const last=(e.length?e:a).sort(pos).pop(),first=(st.length?st:b).sort(pos)[0];links.push({id:"_pg"+i,from:last.id,to:first.id})}
+  const o={...doc,shapes,links};delete o.pages;return o}
+function stepNumbers(doc){doc=e2eFlat(doc);const order=stepOrder(doc);if(!order.length)return [];const by=Object.fromEntries(order.map(x=>[x.id,x]));const v=(doc.ori||"v")==="v";
   const pos=(a,b)=>v?(a.y-b.y)||(a.x-b.x):(a.x-b.x)||(a.y-b.y);const idx=Object.fromEntries(order.map((x,i)=>[x.id,i]));
   const out={},pred={};order.forEach(x=>{out[x.id]=[];pred[x.id]=[]});
   for(const l of doc.links||[]){if(!(l.from in out)||!(l.to in out)||l.from===l.to)continue;if(idx[l.to]<=idx[l.from])continue;/* forward arrows only (by order) */out[l.from].push(l.to);pred[l.to].push(l.from)}
@@ -48,7 +55,7 @@ function stepNumbers(doc){const order=stepOrder(doc);if(!order.length)return [];
   for(const k in grp)grp[k].sort((a,b)=>(side.has(a.id)-side.has(b.id))||(idx[a.id]-idx[b.id]));/* branches first, then side inputs feeding the next step */
   const res=[];const pushSubs=k=>{const g=grp[k]||[];const w=g.length>9?100:10;g.forEach((x,j)=>res.push({sh:x,no:Math.round((Math.max(0,k+1)+(j+1)/w)*100)/100}))};
   pushSubs(-1);main.forEach((id,i)=>{res.push({sh:by[id],no:i+1});pushSubs(i)});return res}
-function stepOrder(doc){const v=(doc.ori||"v")==="v";const pos=(a,b)=>v?(a.y-b.y)||(a.x-b.x):(a.x-b.x)||(a.y-b.y);
+function stepOrder(doc){doc=e2eFlat(doc);const v=(doc.ori||"v")==="v";const pos=(a,b)=>v?(a.y-b.y)||(a.x-b.x):(a.x-b.x)||(a.y-b.y);
   const S=(doc.shapes||[]).filter(isStep);if(!S.length)return [];const ids=new Set(S.map(x=>x.id));const by=Object.fromEntries(S.map(x=>[x.id,x]));
   const out={};S.forEach(x=>out[x.id]=[]);for(const l of doc.links||[])if(ids.has(l.from)&&ids.has(l.to)&&l.from!==l.to&&!out[l.from].includes(l.to))out[l.from].push(l.to);
   for(const k in out)out[k].sort((a,b)=>pos(by[a],by[b]));
@@ -122,7 +129,8 @@ function e2eLinksOf(pid){const out=[];for(const f of e2eFlows())for(const ver of
 /* short label keeps the AUT/PIM series and the area — "SSC-004" alone is ambiguous (AUT-SSC-004 vs PIM-SSC-004) */
 /* short tag: programme-initiative-number (SIMP-AUT-062, 2T-AUT-016); the area is added only when that would be ambiguous */
 let E2E_SHORTDUP=null;
-function e2eShortBase(pid){const p=String(pid).split("-");if(p.length<5)return String(pid);
+function e2eShortBase(pid){return String(pid)}/* one code format everywhere: the full Project ID (e.g. SIMP-PIM-FIN-SSC-002) */
+function e2eShortBaseOld(pid){const p=String(pid).split("-");if(p.length<5)return String(pid);
   if(!E2E_SHORTDUP||E2E_SHORTDUP.n!==rowsOf("Projects").length){const c={};rowsOf("Projects").forEach(r=>{const q=pId(r).split("-");if(q.length>=5){const k=q[0]+"-"+q[1]+"-"+q[q.length-1];c[k]=(c[k]||0)+1}});E2E_SHORTDUP={n:rowsOf("Projects").length,c}}
   const k=p[0]+"-"+p[1]+"-"+p[p.length-1];return E2E_SHORTDUP.c[k]>1?p[0]+"-"+p[1]+"-"+p[p.length-2]+"-"+p[p.length-1]:k}
 /* seed constants were written with the old SGA- prefix: resolve to whatever programme prefix the project has now */
@@ -266,20 +274,25 @@ function e2eFlowForm(f){const areas=uniqOrder([...(hasMD()?mdList("L_Proc"):list
 async function e2eNewFlow(){let IMP=null;
   const p=choose("New E2E process flow",e2eFlowForm(null)+`<div class="nfimp"><div class="nfh"><b>Start from Excel / AI (optional)</b><span class="muted">or leave empty for blank lanes</span></div>
     <div class="nfdrop" id="nfDrop" tabindex="0" role="button" aria-label="Drop or choose an Excel file"><b>Drop the .xlsx here</b> or <u>choose a file</u> · or paste the table below<input type="file" id="nfFile" accept=".xlsx,.csv,.txt" hidden></div>
+    <div class="nfver"><span>Version</span><label><input type="radio" name="nfVer" value="auto" checked> Auto-detect</label><label><input type="radio" name="nfVer" value="AS-IS"> AS-IS</label><label><input type="radio" name="nfVer" value="TO-BE"> TO-BE</label></div>
     <textarea id="nfPaste" rows="3" placeholder="…or paste the table copied from Excel or from the AI answer (Markdown / tab separated)"></textarea>
     <div class="nfres" id="nfRes"></div>
     <details class="nfhow"><summary>Format &amp; AI prompt</summary><ol>
-      <li><b>Row 1</b> = swimlane names, one per column (left → right).</li>
-      <li><b>Rows below</b> = the process top → bottom; each filled cell = one box: <code>Type; Text; Connect to</code> (+ optional <code>; Change; Projects; Hours/month</code>).</li>
-      <li><b>Type</b> Start · End · Process · Decision · Document · System · Note. <b>Connect to</b> = cell address(es) like <code>C5 [Yes], E7 [No]</code>; empty = next filled row; <code>-</code> = none. <code>//</code> = new line in the text.</li>
-      <li>Sheet named <b>TO-BE</b> → TO-BE version; any other sheet → AS-IS. One file can hold both.</li></ol>
+      <li><b>Row 1</b> = swimlanes, one per column: <code>Lane name; Sub-title; Style</code> — Style <b>New</b> = green frame + NEW stamp (new lane), or a header colour (Navy, Blue, Green, Olive, Purple, Grey).</li>
+      <li><b>Rows below</b> = the process top → bottom; each filled cell = one box: <code>Type; Text; Connect to; Change; Projects; Hours/month; Style</code> (only Type + Text needed).</li>
+      <li><b>Type</b> Start · End · Process · Decision · Document · System · Note. <b>Connect to</b> = <code>C5 [Yes], E7 [No] red</code>; empty = next filled row; <code>-</code> = none. <code>//</code> = new line, <code>- </code> = bullet.</li>
+      <li><b>Change</b> New (green) · Changed (orange) · Merged (purple) · Removed (red). <b>Style</b> = <code>Fill Yellow, Border Red, Text Blue, Thick</code>. Excel cell fill / font colour work too (green lane header = new lane).</li>
+      <li><b>Long flow</b>: a row with only <code>PAGE BREAK</code> starts Page 2 (same lanes). In the editor use <b>+ Page</b> under the diagram.</li>
+      <li><b>Version</b> auto: sheet name TO-BE / AS-IS, else TO-BE when steps have a Change or a lane is New. One file can hold both sheets.</li></ol>
       <p><button type="button" class="btn small primary" id="nfCopy">⧉ Copy AI prompt</button> <button type="button" class="btn small" id="nfTpl">⬇ Template (.csv)</button> <span class="muted" style="font-size:12px">Paste the prompt into Copilot / ChatGPT / Claude, add your process description, then drop the Excel it makes (or paste its table) here.</span></p></details></div>`,[["c","Cancel"],["ok","Create","primary"]]);
   const box=document.querySelector("#confirm .box");const res=box.querySelector("#nfRes");
-  const show=()=>{if(!IMP){res.innerHTML="";return}const v=Object.keys(IMP.res);res.innerHTML=v.length?`<div class="nfok">✓ ${v.map(x=>`<b>${x}</b> ${IMP.res[x].stats.lanes} lanes · ${IMP.res[x].stats.boxes} boxes · ${IMP.res[x].stats.links} arrows`).join(" &nbsp;·&nbsp; ")} <button type="button" class="btn small" id="nfClr">✕ clear</button></div>`:"";
+  const show=()=>{if(!IMP){res.innerHTML="";return}const v=Object.keys(IMP.res);res.innerHTML=v.length?`<div class="nfok">✓ ${v.map(x=>{const st=IMP.res[x].stats;return `<b>${x}</b> ${st.pages>1?st.pages+" pages · ":""}${st.lanes} lanes · ${st.boxes} boxes · ${st.links} arrows${st.styled?` · ${st.styled} coloured`:""}${st.newLanes?` · ${st.newLanes} new lane${st.newLanes>1?"s":""}`:""}`}).join(" &nbsp;·&nbsp; ")} <button type="button" class="btn small" id="nfClr">✕ clear</button>${IMP.how?`<div class="muted" style="font-size:11.5px;margin-top:3px">${Object.values(IMP.how).map(esc).join(" · ")}</div>`:""}</div>`:"";
     if(IMP.warn.length)res.innerHTML+=`<div class="nfwarn">${IMP.warn.slice(0,8).map(esc).join("<br>")}${IMP.warn.length>8?`<br>… ${IMP.warn.length-8} more`:""}</div>`;
     const c=res.querySelector("#nfClr");if(c)c.onclick=()=>{IMP=null;box.querySelector("#nfPaste").value="";show()}};
   const nm=()=>(box.querySelector("#efName").value||"").trim();
-  const take=sheets=>{if(!sheets.length){IMP={res:{},warn:["No table found — row 1 must hold the lane names"]};show();return}IMP=e2eImportFromGrids(sheets,nm()||"Imported flow");IMP.sheets=sheets;show()};
+  const take=sheets=>{if(!sheets.length){IMP={res:{},warn:["No table found — row 1 must hold the lane names"]};show();return}IMP=e2eImportFromGrids(sheets,nm()||"Imported flow",verPick());IMP.sheets=sheets;show()};
+  const verPick=()=>(box.querySelector('input[name="nfVer"]:checked')||{}).value||"auto";
+  box.querySelectorAll('input[name="nfVer"]').forEach(r=>r.onchange=()=>{if(IMP&&IMP.sheets)take(IMP.sheets)});
   const file=async f=>{try{if(/\.xlsx$/i.test(f.name))take(await readXlsxGrids(await f.arrayBuffer()));else take(textGrids(await f.text()));if(!nm())box.querySelector("#efName").value=f.name.replace(/\.[^.]+$/,"").replace(/[_-]+/g," ")}catch(e){IMP={res:{},warn:["Could not read "+f.name+": "+e.message]};show()}};
   const dz=box.querySelector("#nfDrop"),fi=box.querySelector("#nfFile");
   dz.onclick=()=>fi.click();dz.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();fi.click()}};fi.onchange=()=>{if(fi.files[0])file(fi.files[0])};
@@ -290,7 +303,7 @@ async function e2eNewFlow(){let IMP=null;
   const k=await p;if(k!=="ok")return;
   const name=$("#efName").value.trim(),area=$("#efArea").value.trim();if(!name){toast("Give the flow a name");return}
   const id=e2eNewId(area);const f={id,name,area,owner:$("#efOwner").value.trim(),notes:$("#efNotes").value.trim(),v:{}};
-  if(IMP&&IMP.sheets){IMP=e2eImportFromGrids(IMP.sheets,name)}/* rebuild with the final name */
+  const vp=(document.querySelector('input[name="nfVer"]:checked')||{}).value||"auto";if(IMP&&IMP.sheets){IMP=e2eImportFromGrids(IMP.sheets,name,vp)}/* rebuild with the final name */
   const vers=IMP?VERS.filter(v=>IMP.res[v]):[];
   if(vers.length){for(const v of vers){if(!e2eWriteDoc(e2eFlow(id)||f,v,IMP.res[v].doc))return;E2E_CACHE=null}}
   else{const doc={id:"d"+Date.now(),name:name+" AS-IS",title:name,tag:"AS-IS",ori:"v",flow:700,head:46,lanes:["Requester","Team A","Team B","System"].map((n,i)=>({id:"L"+i,name:n,sub:"",size:220})),secs:[],shapes:[],links:[]};if(!e2eWriteDoc(f,"AS-IS",doc))return}

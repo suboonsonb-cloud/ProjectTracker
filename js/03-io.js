@@ -1,8 +1,9 @@
 /* 03-io.js — save, where the page was opened from, modal helper, open workbook */
 "use strict";
 /* ---------------- save ---------------- */
-async function buildBlob(){
-  const changed={};const enc=new TextEncoder();
+async function buildBlob(log=true){
+  if(log)await appendLog();
+  const changed={};const enc=new TextEncoder();for(const [p,f] of Object.entries(S.extraParts||{}))changed[p]=f();
   for(const n of S.dirty){const sh=S.sheets[n];changed[sh.path]=enc.encode('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'+ser.serializeToString(sh.doc).replace(/^<\?xml[^>]*>\s*/,""))}
   let calc=S.wbDoc.getElementsByTagNameNS(NS,"calcPr")[0];
   if(!calc){calc=S.wbDoc.createElementNS(NS,"calcPr");const dn=S.wbDoc.getElementsByTagNameNS(NS,"definedNames")[0]||S.wbDoc.getElementsByTagNameNS(NS,"sheets")[0];dn.parentNode.insertBefore(calc,dn.nextSibling)}
@@ -30,12 +31,13 @@ function envInfo(loc,framed){const proto=loc.protocol,host=(loc.hostname||"").to
   return {level:"info",kind:"other",title:"",why:""}}
 function envCheck(){let framed=false;try{framed=window.top!==window.self}catch(e){framed=true}
   const e=envInfo(location,framed);S.env=e;const box=$("#envWarn");if(!box)return e;
-  let dismissed=false;try{dismissed=sessionStorage.getItem("sga_env_dismiss")===e.kind}catch(x){}
+  let dismissed=false;try{dismissed=sessionStorage.getItem("sga_env_dismiss")===e.kind}catch(x){}if(hiddenWarns().includes(e.kind))dismissed=true;
   if((e.level==="bad"||e.level==="warn")&&!dismissed){
     box.innerHTML=`<div class="envbar ${e.level}"><b>⚠ ${e.title}.</b> <span>${e.why}</span>
-      <button class="btn small" id="envHow">How to open it correctly</button>${e.level==="warn"?`<button class="btn small" id="envX">Dismiss</button>`:""}</div>`;
-    $("#envHow").onclick=envHelp;if($("#envX"))$("#envX").onclick=()=>{try{sessionStorage.setItem("sga_env_dismiss",e.kind)}catch(x){}box.innerHTML=""};
-    if(e.level==="bad")setTimeout(envHelp,300)}
+      <button class="btn small" id="envHow">How to open it correctly</button><button class="btn small" id="envX" title="Hide until the page is opened again">Dismiss</button><button class="btn small" id="envNever" title="Show it again from Settings → Warnings">Don't show again</button></div>`;
+    $("#envHow").onclick=envHelp;$("#envX").onclick=()=>{try{sessionStorage.setItem("sga_env_dismiss",e.kind)}catch(x){}box.innerHTML=""};
+    $("#envNever").onclick=()=>{setHiddenWarns([...hiddenWarns(),e.kind]);box.innerHTML="";toast("Hidden — show it again in Settings → ⚠ Warnings",5000)};
+    if(e.level==="bad"&&!envHelp._shown){envHelp._shown=true;setTimeout(envHelp,300)}}
   else box.innerHTML="";
   return e}
 function envHelp(){const e=S.env||{};choose("Open the Tracker Desk so it can save to SharePoint",`${e.why?`<div class="warnbox" style="margin-bottom:10px">${e.why}</div>`:""}
@@ -69,6 +71,7 @@ async function saveLocationCheck(){let skip=false;try{skip=localStorage.getItem(
 async function save(asCopy){
   if(hasE2E()){await e2eFlush();clearTimeout(E2E_MAPQ);e2eRebuildMap();updateBadge()}/* commit text being typed in the flow editor + current E2E_Map */
   if(!asCopy&&!S.changes.length){toast("Nothing to save");return}
+  if(!asCopy)await ensureUser();
   if(!asCopy&&S.handle&&S.handle.createWritable){const lc=await saveLocationCheck();if(lc===false)return;if(lc==="copy"){S._forcePick=true}}
   const n=S.changes.length;const savedChanges=S.changes.slice();
   if(!asCopy&&S.handle&&S.handle.createWritable&&!S._forcePick){
@@ -86,7 +89,7 @@ async function save(asCopy){
     catch(err){if(err.name==="AbortError")return;console.error(err);toast("Could not write to the original file ("+err.message+"). Choose where to save instead.",6000)}
   }
   S._forcePick=false;
-  let blob;try{blob=await buildBlob()}catch(e){console.error(e);toast("Could not build the file: "+e.message,7000);return}
+  let blob;try{blob=await buildBlob(!asCopy)}catch(e){console.error(e);toast("Could not build the file: "+e.message,7000);return}
   if(window.showSaveFilePicker){
     try{const h=await window.showSaveFilePicker({suggestedName:asCopy?S.fileName.replace(/\.xlsx$/i,"")+" (copy).xlsx":S.fileName,types:XTYPE});
       const buf=await blob.arrayBuffer();const hash=await sha8(buf);const lm=await writeHandle(h,blob);

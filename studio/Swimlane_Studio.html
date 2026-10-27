@@ -45,6 +45,13 @@ aside.insp{border-left:1px solid var(--line);padding:12px}
 .tile{border:1px solid var(--line);border-radius:8px;background:var(--chip);padding:6px 4px;cursor:grab;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;user-select:none}
 .tile:hover{border-color:var(--sel)}.tile svg{width:46px;height:28px}
 .wrap{position:relative;overflow:auto;min-height:0;background:var(--bg)}
+.wcol{display:grid;grid-template-rows:minmax(0,1fr) auto;min-height:0;min-width:0}
+.pgbar{display:flex;align-items:center;gap:4px;padding:4px 8px;background:var(--panel);border-top:1px solid var(--line);font:13px var(--ui);overflow-x:auto;white-space:nowrap}
+.pgbar .pg{border:1px solid var(--line);background:var(--chip);border-radius:6px;padding:3px 10px;cursor:pointer;color:var(--ink);font:inherit;display:inline-flex;gap:6px;align-items:center}
+.pgbar .pg.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}.pgbar .pg .n{font-size:11px;opacity:.7}
+.pgbar .pgx{border:0;background:none;color:inherit;opacity:.75;cursor:pointer;padding:0 0 0 2px;font-size:13px}.pgbar .pgx:hover{opacity:1}
+.pgbar .pgadd{border:1px dashed var(--accent-2);background:none;color:var(--accent-2);border-radius:6px;padding:3px 10px;cursor:pointer;font:inherit}
+.pgbar .hint{color:var(--muted);font-size:12px;margin-left:8px}
 .wrap.pan{cursor:grab}.wrap.panning{cursor:grabbing}
 #cv{display:block;margin:12px auto;transform-origin:0 0}
 .hint{font-size:12px;color:var(--muted);line-height:1.45}
@@ -108,7 +115,7 @@ body.embed #brand{display:none}.embhint{display:none;font-size:12px;color:var(--
     <div class="h">Text</div>
     <p class="hint">Double-click anything on the diagram to type on it — boxes, lane headers, sections, the title, arrow labels. Or click it and just start typing. Lines starting with <span class="kbd">-</span> become bullets, <span class="kbd">[ ]</span> a check box, <span class="kbd">o</span> a sub-bullet.</p>
   </aside>
-  <div class="wrap" id="wrap"><svg id="cv" xmlns="http://www.w3.org/2000/svg"></svg></div>
+  <div class="wcol"><div class="wrap" id="wrap"><svg id="cv" xmlns="http://www.w3.org/2000/svg"></svg></div><div class="pgbar" id="pgbar" role="tablist" aria-label="Pages"></div></div>
   <aside class="insp" id="insp" aria-label="Properties"></aside>
 </div>
 </div>
@@ -136,7 +143,7 @@ let EMBED=false,PROJ=[],PMAP={},LINK=null,SHOWTAGS=true,TAGMODE="count",TAGONLY=
 const CHG={New:{c:"#22A33A",tag:"NEW"},Changed:{c:"#F08C00",tag:"CHANGED"},Merged:{c:"#7A5AF8",tag:"MERGED"},Removed:{c:"#D92D20",tag:"REMOVED"}};
 const chgOf=s=>s.chg||(s.isNew?"New":"");
 const STCOL={"Completed":"#2E7D32","On Track":"#2E75B6","In Progress":"#2E75B6","At Risk":"#F79009","Delayed":"#D92D20","On-Hold":"#6B7480","Not Started":"#5B6B80","Cancelled":"#C9D0DA"};const STINK=st=>st==="Cancelled"?"#1A2433":"#FFFFFF";
-function pinfo(id){return PMAP[id]||{id,short:String(id).split("-").slice(-2).join("-"),name:"(not in this workbook)",status:""}}
+function pinfo(id){return PMAP[id]||{id,short:String(id),name:"(not in this workbook)",status:""}}
 function post(msg){if(EMBED&&window.parent&&window.parent!==window)window.parent.postMessage({src:"swimlane",...msg},"*")}
 
 function blankDoc(name){return {id:uid(),name:name||"New swimlane",title:"Process name",tag:"AS-IS",ori:"v",flow:900,head:HEAD_MIN,
@@ -285,8 +292,20 @@ function autoRouteAll(){const key=arKey();if(AR_CACHE.key===key)return AR_CACHE.
     const c=[pts[0]];for(let k=1;k<pts.length;k++){const p0=c[c.length-1],q=pts[k];if(Math.abs(p0.x-q.x)<.5&&Math.abs(p0.y-q.y)<.5)continue;c.push(q)}
     const r=[c[0]];for(let k=1;k<c.length-1;k++){const p0=r[r.length-1],q=c[k],n=c[k+1];if((Math.abs(p0.x-q.x)<.5&&Math.abs(q.x-n.x)<.5)||(Math.abs(p0.y-q.y)<.5&&Math.abs(q.y-n.y)<.5))continue;r.push(q)}r.push(c[c.length-1]);
     routes[L.id]={pts:r,fs:sd0.sd,ts:bestT.sd}}
+  arSeparate(routes,M);
   return routes}
-function tidyArrows(){if(!D.links.length)return;begin();for(const L of D.links){L.auto=true;delete L.mx;delete L.my;delete L.fs;delete L.ts}changed()}
+/* arrows that share a channel are pulled apart: overlapping parallel middle segments each get their own track (a few px apart),
+   ordered by where they come from / go to so they don't cross each other inside the channel */
+function arSeparate(routes,M){const segs=[];
+  for(const id in routes){const P=routes[id].pts;for(let k=1;k<P.length-2;k++){const a=P[k],b=P[k+1];const v=Math.abs(a.x-b.x)<.5,h=Math.abs(a.y-b.y)<.5;if(v===h)continue;
+    const c=v?a.x:a.y,lo=v?Math.min(a.y,b.y):Math.min(a.x,b.x),hi=v?Math.max(a.y,b.y):Math.max(a.x,b.x);
+    const nb=(P[k-1][v?"x":"y"]+P[k+2][v?"x":"y"])/2-c;segs.push({P,k,v,c:Math.round(c),lo,hi,nb,id})}}
+  const groups=new Map();for(const g of segs){const key=(g.v?"v":"h")+g.c;(groups.get(key)||groups.set(key,[]).get(key)).push(g)}
+  for(const list of groups.values()){if(list.length<2)continue;list.sort((p,q)=>p.lo-q.lo);
+    let cl=[],hi=-1e9;const flush=()=>{const ids=new Set(cl.map(x=>x.id));if(ids.size>1){cl.sort((p,q)=>p.nb-q.nb||p.lo-q.lo);const n=cl.length,sp=Math.min(7,(2*M-6)/(n-1));
+        cl.forEach((g,i)=>{const off=(i-(n-1)/2)*sp;const ax=g.v?"x":"y";g.P[g.k][ax]+=off;g.P[g.k+1][ax]+=off})}cl=[]};
+    for(const g of list){if(cl.length&&g.lo>=hi-1){flush();hi=-1e9}cl.push(g);hi=Math.max(hi,g.hi)}flush()}}
+function tidyArrows(){const all=D.links.concat(...Object.values(D.store||{}).map(p=>p.links));if(!all.length)return;begin();for(const L of all){L.auto=true;delete L.mx;delete L.my;delete L.fs;delete L.ts}changed()}
 
 function linkPts(L){if(L.auto){const r=autoRouteAll()[L.id];if(r)return r}const a=D.shapes.find(s=>s.id===L.from),b=D.shapes.find(s=>s.id===L.to);if(!a||!b)return null;
   const [as,bs]=autoSides(a,b);const fs=L.fs||as,ts=L.ts||bs;const p=port(a,fs),q=port(b,ts);const st=14;
@@ -319,6 +338,7 @@ function bgSVG(forExport){const {W,H}=size();let g="";const hT=headT(),G=gut();
   const tw=measure(D.title||"",20,true),tagw=D.tag?measure("["+D.tag+"]",20,true)+12:0;const tx=W/2-(tw+tagw)/2;
   g+=`<text x="${tx}" y="${TITLE_H/2+7}" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="bold" fill="#111827" data-hit="title">${esc(D.title||"")}</text>`;
   if(D.tag){const x=tx+tw+8;g+=`<rect x="${x}" y="${TITLE_H/2-13}" width="${tagw}" height="26" fill="${/to.?be|new/i.test(D.tag)?"#22C55E":"#FFFF00"}" data-hit="title"/><text x="${x+6}" y="${TITLE_H/2+7}" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="bold" fill="#111827" data-hit="title">[${esc(D.tag)}]</text>`}
+  if(D.pages&&D.pages.length>1){const i=D.pages.findIndex(p=>p.id===D.pg);g+=`<text x="${W-14}" y="${TITLE_H/2+5}" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#5E6B7D">${esc(D.pages[i]&&!/^page\s*\d+$/i.test(D.pages[i].name)?D.pages[i].name+" · ":"")}Page ${i+1} / ${D.pages.length}</text>`}
   // sections (behind lanes)
   D.secs.forEach((s,k)=>{const a=secStart(k);const sel=UI.secSel===s.id&&!forExport;
     if(vert()){g+=`<rect x="0" y="${a}" width="${W}" height="${s.size}" fill="${k%2?"#F5F8FC":"#FFFFFF"}"/><line x1="0" y1="${a+s.size}" x2="${W}" y2="${a+s.size}" stroke="#9FB3C8" stroke-dasharray="5 4"/>`;
@@ -369,10 +389,47 @@ function overlaySVG(){let g=`<g id="ov">`;
   return g+"</g>"}
 const normRect=(a,b)=>({x:Math.min(a.x,b.x),y:Math.min(a.y,b.y),w:Math.abs(a.x-b.x),h:Math.abs(a.y-b.y)});
 
+/* ============================== pages (long flows: Page 1, Page 2 …) ==============================
+   Stored form (what the Desk / workbook keeps): every shape in D.shapes tagged s.pg, D.pages=[{id,name,flow}].
+   Working form (in the editor): D.shapes / D.links = the page on screen, other pages parked in D.store[id]={shapes,links,flow}, D.pg = page on screen.
+   One-page diagrams keep the old format (no pages). Undo snapshots hold the whole working form, so undo also returns to the right page. */
+let PGMEM={};
+function pgSplit(doc,want){const d=doc;d.shapes=d.shapes||[];d.links=d.links||[];if(d.store)return d;
+  if(!d.pages||d.pages.length<2){delete d.pages;delete d.pg;d.shapes.forEach(s=>delete s.pg);return d}
+  const ids=d.pages.map(p=>p.id),first=ids[0];const cur=ids.includes(want)?want:first;const B={};ids.forEach(id=>B[id]={shapes:[],links:[],flow:(d.pages.find(p=>p.id===id).flow)||d.flow||700});
+  const where={};for(const s of d.shapes){const id=ids.includes(s.pg)?s.pg:first;where[s.id]=id;delete s.pg;B[id].shapes.push(s)}
+  for(const L of d.links)B[where[L.from]||first].links.push(L);
+  d.pages=d.pages.map(p=>({id:p.id,name:p.name||"Page"}));d.shapes=B[cur].shapes;d.links=B[cur].links;d.flow=B[cur].flow;d.pg=cur;delete B[cur];d.store=B;return d}
+function pgJoin(D0){const o=JSON.parse(JSON.stringify(D0));if(!o.pages||o.pages.length<2){delete o.pages;delete o.store;delete o.pg;return o}
+  const sh=[],ln=[],meta=[];for(const p of o.pages){const src=p.id===o.pg?{shapes:o.shapes,links:o.links,flow:o.flow}:(o.store&&o.store[p.id])||{shapes:[],links:[],flow:700};
+    src.shapes.forEach(s=>sh.push({...s,pg:p.id}));ln.push(...src.links);meta.push({id:p.id,name:p.name,flow:src.flow})}
+  o.shapes=sh;o.links=ln;o.pages=meta;o.flow=meta[0].flow;delete o.store;delete o.pg;return o}
+function allShapes(){const a=D.shapes.slice();if(D.store)for(const k in D.store)a.push(...D.store[k].shapes);return a}
+function pageOf(id){if(D.shapes.some(s=>s.id===id))return D.pg||null;if(D.store)for(const k in D.store)if(D.store[k].shapes.some(s=>s.id===id))return k;return null}
+function goPage(pid,keepSel){if(!D.pages||pid===D.pg||!D.store||!(pid in D.store))return;if(typeof EDIT!=="undefined"&&EDIT)closeEditor(true);if(typeof closePop==="function")closePop();
+  D.store[D.pg]={shapes:D.shapes,links:D.links,flow:D.flow};const t=D.store[pid];delete D.store[pid];D.shapes=t.shapes;D.links=t.links;D.flow=t.flow;D.pg=pid;PGMEM[KEY||"_"]=pid;
+  if(!keepSel)UI.sel.clear();UI.selLink=null;UI.laneSel=null;UI.secSel=null;render();inspector();wrap.scrollTop=0}
+function addPage(){begin();if(!D.pages||D.pages.length<2){D.pages=[{id:"p1",name:"Page 1"}];D.pg="p1";D.store={}}
+  const n=D.pages.length+1;let k=n;while(D.pages.some(p=>p.id==="p"+k))k++;const id="p"+k;D.pages.push({id,name:"Page "+n});
+  D.store[D.pg]={shapes:D.shapes,links:D.links,flow:D.flow};D.shapes=[];D.links=[];D.flow=Math.max(600,Math.min(D.flow||700,900));D.pg=id;PGMEM[KEY||"_"]=id;
+  UI.sel.clear();UI.selLink=null;changed();wrap.scrollTop=0;toast(`${D.pages[D.pages.length-1].name} added — same lanes. Move boxes here with Ctrl+X → Ctrl+V.`)}
+function renamePage(pid){const p=(D.pages||[]).find(x=>x.id===pid);if(!p)return;const v=prompt("Page name:",p.name);if(v==null||!v.trim()||v.trim()===p.name)return;begin();p.name=v.trim();changed()}
+function delPage(pid){if(!D.pages||D.pages.length<2)return;const n=pid===D.pg?D.shapes.length:(D.store[pid]||{shapes:[]}).shapes.length;const p=D.pages.find(x=>x.id===pid);
+  if(n&&!confirm(`Delete “${p.name}” and its ${n} box(es)? (Ctrl+Z undoes)`))return;begin();
+  if(pid===D.pg){const i=D.pages.findIndex(x=>x.id===pid);const nb=D.pages[i+1]||D.pages[i-1];const t=D.store[nb.id];delete D.store[nb.id];D.shapes=t.shapes;D.links=t.links;D.flow=t.flow;D.pg=nb.id}else delete D.store[pid];
+  D.pages=D.pages.filter(x=>x.id!==pid);if(D.pages.length<2){delete D.pages;delete D.store;delete D.pg}UI.sel.clear();UI.selLink=null;changed()}
+function renderPgBar(){const b=document.getElementById("pgbar");if(!b)return;const pages=D.pages&&D.pages.length>1?D.pages:[{id:"_",name:"Page 1"}];const multi=pages.length>1;
+  const cnt=id=>(id===D.pg||!multi?D.shapes:(D.store&&D.store[id]?D.store[id].shapes:[])).filter(s=>s.type!=="frame").length;
+  b.innerHTML=pages.map(p=>`<span class="pg ${!multi||p.id===D.pg?"on":""}" data-pg="${p.id}" role="tab" tabindex="0" aria-selected="${!multi||p.id===D.pg}" title="Click to open · double-click to rename">${esc(p.name)} <span class="n">${cnt(p.id)}</span>${multi?`<button class="pgx" data-pgdel="${p.id}" title="Delete page" aria-label="Delete ${esc(p.name)}">×</button>`:""}</span>`).join("")+
+    `<button class="pgadd" id="pgAdd" title="Add a blank page with the same lanes — for long flows">+ Page</button><span class="hint">${multi?"Same lanes on every page · Ctrl+X / Ctrl+V moves boxes between pages":"Long flow? Add a page and continue there"}</span>`;
+  b.querySelectorAll("[data-pg]").forEach(t=>{t.onclick=e=>{if(e.target.closest("[data-pgdel]"))return;goPage(t.dataset.pg)};t.ondblclick=()=>{if(multi)renamePage(t.dataset.pg);else{addPage()}};t.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();goPage(t.dataset.pg)}}});
+  b.querySelectorAll("[data-pgdel]").forEach(x=>x.onclick=e=>{e.stopPropagation();delPage(x.dataset.pgdel)});b.querySelector("#pgAdd").onclick=addPage}
+const _renderPg=render;render=function(){_renderPg();renderPgBar()};
+
 /* ============================== persistence & history ============================== */
 function persist(){if(EMBED)return;try{localStorage.setItem(STORE,JSON.stringify(DOCS))}catch(e){}}
 /* changes go to the Desk tagged with the flow/version KEY they belong to, so a late message can never land on another version */
-let POSTQ=0;function postNow(){clearTimeout(POSTQ);POSTQ=0;post({type:"change",key:KEY,doc:JSON.parse(JSON.stringify(D))})}
+let POSTQ=0;function postNow(){clearTimeout(POSTQ);POSTQ=0;post({type:"change",key:KEY,doc:pgJoin(D)})}
 function postChange(){if(!EMBED)return;clearTimeout(POSTQ);POSTQ=setTimeout(postNow,60)}
 function flushPost(){if(EDIT)closeEditor(true);if(POSTQ)postNow()}
 function commit(){UNDO.push(JSON.stringify(curSnapshot()));if(UNDO.length>150)UNDO.shift();REDO=[]}
@@ -707,7 +764,7 @@ document.addEventListener("keydown",e=>{if(e.target.closest&&e.target.closest("i
   if(k==="Escape"&&LINK){LINK=null;renderLinkBar();post({type:"linkDone"});return}
   if(k===" "){spaceDown=true;wrap.classList.add("pan");e.preventDefault();return}
   if(c&&k.toLowerCase()==="z"){e.preventDefault();e.shiftKey?redo():undo();return}if(c&&k.toLowerCase()==="y"){e.preventDefault();redo();return}
-  if(c&&k.toLowerCase()==="d"){e.preventDefault();duplicate();return}if(c&&k.toLowerCase()==="c"){copy();return}if(c&&k.toLowerCase()==="v"){paste();return}
+  if(c&&k.toLowerCase()==="d"){e.preventDefault();duplicate();return}if(c&&k.toLowerCase()==="c"){copy();return}if(c&&k.toLowerCase()==="x"){if(UI.sel.size){copy();delSel();toast("Cut — open another page and press Ctrl+V")}return}if(c&&k.toLowerCase()==="v"){paste();return}
   if(c&&k.toLowerCase()==="a"){e.preventDefault();UI.sel=new Set(D.shapes.map(s=>s.id));render();inspector();return}
   if(k==="Delete"||k==="Backspace"){e.preventDefault();delSel();return}
   if(k==="Escape"){UI.sel.clear();UI.selLink=null;UI.laneSel=null;UI.secSel=null;render();inspector();return}
@@ -884,7 +941,7 @@ function openPop(id){const s=D.shapes.find(x=>x.id===id);if(!s||["frame","image"
     <div class="row"><button class="btn" data-pp="edit">✎ Edit text</button><button class="btn" data-pp="more">More properties</button>${EMBED?`<button class="btn" data-pp="newp" title="Create a new project in the tracker and link it to this step">＋ New project</button>`:""}</div>`;
   b.querySelectorAll("[data-pt]").forEach(r=>{const tog=()=>{toggleProj(s,r.dataset.pt);openPop(s.id)};r.onclick=tog;r.onkeydown=e=>{e.stopPropagation();if(e.key===" "||e.key==="Enter"){e.preventDefault();tog()}}});
   const qi=b.querySelector("#ppQ");qi.oninput=()=>{POPQ=qi.value;const pos=qi.selectionStart;openPop(s.id);const n=document.getElementById("ppQ");n.focus();n.setSelectionRange(pos,pos)};
-  qi.onkeydown=e=>{e.stopPropagation();if(e.key==="Escape")closePop();if(e.key==="Enter"){const f=b.querySelector("[data-pt]");if(f)f.click()}};
+  qi.onkeydown=e=>{e.stopPropagation();if(e.key==="Delete"&&!qi.value){e.preventDefault();qi.blur();delSel();return}if(e.key==="Escape")closePop();if(e.key==="Enter"){const f=b.querySelector("[data-pt]");if(f)f.click()}};
   b.querySelector("#ppArea").onchange=e=>{POPAREA=e.target.value;openPop(s.id)};b.querySelector("#ppArea").onkeydown=e=>e.stopPropagation();
   const hr=b.querySelector("#ppHrs");if(hr){hr.onkeydown=e=>{e.stopPropagation();if(e.key==="Enter")hr.blur()};hr.onchange=()=>{begin();const v=hr.value===""?null:Math.max(0,+hr.value);if(v==null)delete s.hrs;else s.hrs=v;changed();openPop(s.id)}}
   const co=b.querySelector("#ppCost");if(co){co.onkeydown=e=>{e.stopPropagation();if(e.key==="Enter")co.blur()};co.onchange=()=>{begin();const v=co.value===""?null:Math.max(0,+co.value);if(v==null)delete s.cost;else s.cost=v;changed();openPop(s.id)}}
@@ -892,33 +949,33 @@ function openPop(id){const s=D.shapes.find(x=>x.id===id);if(!s||["frame","image"
   b.querySelectorAll("[data-pp]").forEach(x=>x.onclick=()=>{const k=x.dataset.pp;if(k==="close")closePop();if(k==="edit"){closePop();openEditor(s,false)}
     if(k==="newp"){post({type:"newProject",step:s.id,name:POPQ.trim()});return}
     if(k==="more"){closePop();const m=document.querySelector(".main");if(m.classList.contains("nopanels"))document.getElementById("bPanel").click()}});
-  b.addEventListener("pointerdown",e=>e.stopPropagation());{const pl=b.querySelector(".pl");if(pl){const h=Math.max(110,Math.min(260,wrap.clientHeight-(b.offsetHeight-pl.offsetHeight)-24));pl.style.height=h+"px";pl.style.maxHeight=h+"px"}}placePop();if(fresh)setTimeout(()=>{const q=document.getElementById("ppQ");if(q&&POP===id)q.focus({preventScroll:true})},0)}
+  b.addEventListener("pointerdown",e=>e.stopPropagation());{const pl=b.querySelector(".pl");if(pl){const h=Math.max(110,Math.min(260,wrap.clientHeight-(b.offsetHeight-pl.offsetHeight)-24));pl.style.height=h+"px";pl.style.maxHeight=h+"px"}}placePop()}
 const _render0=render;render=function(){_render0();if(POP)requestAnimationFrame(placePop)};
 
 /* ============================== boot ============================== */
 function renderLinkBar(){let b=document.getElementById("linkbar");if(!LINK){if(b)b.remove();return}
-  if(!b){b=document.createElement("div");b.id="linkbar";b.className="linkbar";wrap.prepend(b)}const n=D.shapes.filter(s=>(s.proj||[]).includes(LINK.id)).length;
+  if(!b){b=document.createElement("div");b.id="linkbar";b.className="linkbar";wrap.prepend(b)}const n=allShapes().filter(s=>(s.proj||[]).includes(LINK.id)).length;
   b.innerHTML=`<span>Linking <b>${esc(LINK.short)} — ${esc(LINK.name)}</b>: click each step box this project delivers (click again to unlink). <b>${n}</b> step(s) linked.</span><button class="btn" id="lbDone">Done (Esc)</button>`;
   b.querySelector("#lbDone").onclick=()=>{LINK=null;renderLinkBar();post({type:"linkDone"})}}
 window.addEventListener("message",ev=>{const m=ev.data;if(!m||m.src!=="desk")return;
   if(m.type==="flush"){flushPost();post({type:"flushed",id:m.id});return}
   if(m.type==="init"){flushPost();if(KEY)HIST[KEY]={u:UNDO,r:REDO,js:JSON.stringify(D)};KEY=m.key||"";EMBED=true;["gDocs","gFiles"].forEach(id=>{const e=document.getElementById(id);if(e)e.hidden=true});const en=document.getElementById("eName");en.hidden=false;en.textContent=m.title||"";
-    VER=m.version||"";ASIS=m.asis||[];RATE=+m.rate||0;PROJ=m.projects||[];PMAP=Object.fromEntries(PROJ.map(p=>[p.id,p]));D=m.doc;D.links=D.links||[];D.secs=D.secs||[];D.shapes=D.shapes||[];{const h=HIST[KEY];if(h&&h.js===JSON.stringify(D)){UNDO=h.u;REDO=h.r}else{UNDO=[];REDO=[]}}UI.sel.clear();UI.selLink=null;UI.laneSel=null;UI.secSel=null;LINK=m.link||null;
+    VER=m.version||"";ASIS=m.asis||[];RATE=+m.rate||0;PROJ=m.projects||[];PMAP=Object.fromEntries(PROJ.map(p=>[p.id,p]));D=pgSplit(m.doc,PGMEM[KEY]);D.links=D.links||[];D.secs=D.secs||[];D.shapes=D.shapes||[];{const h=HIST[KEY];if(h&&h.js===JSON.stringify(D)){UNDO=h.u;REDO=h.r}else{UNDO=[];REDO=[]}}UI.sel.clear();UI.selLink=null;UI.laneSel=null;UI.secSel=null;LINK=m.link||null;
     closePop();if(!EMBED_PANEL_SET){EMBED_PANEL_SET=1;let show=false;try{show=localStorage.getItem(STORE+"_embpanel")==="1"}catch(e){}const mm=document.querySelector(".main");mm.classList.toggle("nopanels",!show);document.getElementById("bPanel").textContent=show?"Hide properties":"Show properties"}
     render();inspector();renderLinkBar();requestAnimationFrame(fitWidth);if(m.focus)setTimeout(()=>focusIds(m.focus),60);return}
   if(m.type==="projects"){PROJ=m.projects||[];PMAP=Object.fromEntries(PROJ.map(p=>[p.id,p]));render();inspector();return}
   if(m.type==="link"){LINK=m.project||null;renderLinkBar();return}
   if(m.type==="addProj"){PROJ=m.projects||PROJ;PMAP=Object.fromEntries(PROJ.map(p=>[p.id,p]));const sh=D.shapes.find(x=>x.id===m.step);if(sh)toggleProj(sh,m.id,true);if(sh)openPop(sh.id);return}
   if(m.type==="closePop"){if(typeof closePop==="function")closePop();return}
-  if(m.type==="snapshot"){const keep=D,kP=PROJ,kM=PMAP,kT=TAGONLY,kS=UI.sel,kTM=TAGMODE;let svgS="";try{UI.sel=new Set();TAGONLY=m.tagOnly?new Set(m.tagOnly):null;if(m.tagOnly)TAGMODE="all";if(m.projects){PROJ=m.projects;PMAP=Object.fromEntries(PROJ.map(p=>[p.id,p]))}D=JSON.parse(JSON.stringify(m.doc));D.links=D.links||[];D.secs=D.secs||[];D.shapes=D.shapes||[];const {W,H}=size();
+  if(m.type==="snapshot"){const keep=D,kP=PROJ,kM=PMAP,kT=TAGONLY,kS=UI.sel,kTM=TAGMODE;let svgS="";try{UI.sel=new Set();TAGONLY=m.tagOnly?new Set(m.tagOnly):null;if(m.tagOnly)TAGMODE="all";if(m.projects){PROJ=m.projects;PMAP=Object.fromEntries(PROJ.map(p=>[p.id,p]))}{const dd=JSON.parse(JSON.stringify(m.doc));let want=null;if(dd.pages&&m.tagOnly){const tg=new Set(m.tagOnly);const c={};(dd.shapes||[]).forEach(s=>{if((s.proj||[]).some(p=>tg.has(p)))c[s.pg]=(c[s.pg]||0)+1});want=Object.keys(c).sort((a,b)=>c[b]-c[a])[0]||null}D=pgSplit(dd,want)}D.links=D.links||[];D.secs=D.secs||[];D.shapes=D.shapes||[];const {W,H}=size();
       svgS=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" font-family="Arial, Helvetica, sans-serif">${diagramSVG(true)}</svg>`}catch(e){svgS=""}finally{D=keep;PROJ=kP;PMAP=kM;TAGONLY=kT;UI.sel=kS;TAGMODE=kTM}
     post({type:"snapshot",id:m.id,svg:svgS});return}
   if(m.type==="title"){const en=document.getElementById("eName");if(en)en.textContent=m.title||"";return}
-  if(m.type==="highlight"){focusIds(D.shapes.filter(s=>(s.proj||[]).includes(m.id)).map(s=>s.id),true);return}
+  if(m.type==="highlight"){let ids=D.shapes.filter(s=>(s.proj||[]).includes(m.id)).map(s=>s.id);if(!ids.length){const o=allShapes().find(s=>(s.proj||[]).includes(m.id));if(o){goPage(pageOf(o.id));ids=D.shapes.filter(s=>(s.proj||[]).includes(m.id)).map(s=>s.id)}}focusIds(ids,true);return}
   if(m.type==="focus"){focusIds(m.ids||[]);return}
   if(m.type==="tags"){SHOWTAGS=!!m.on;if(m.mode)TAGMODE=m.mode;render();return}
   if(m.type==="template"){const k=m.kind;const d=k==="p2p"?p2pTemplate():k==="p2ptobe"?p2pToBeTemplate():blankDoc("Flow");(d.links||[]).forEach(L=>{L.auto=true;delete L.mx;delete L.my;delete L.fs;delete L.ts});post({type:"template",doc:d});return}});
-function focusIds(ids,quiet){UI.sel=new Set(ids.filter(id=>D.shapes.some(s=>s.id===id)));UI.selLink=null;UI.laneSel=null;UI.secSel=null;render();inspector();
+function focusIds(ids,quiet){if(D.store&&ids.length&&!ids.some(id=>D.shapes.some(s=>s.id===id))){const pg=ids.map(pageOf).find(Boolean);if(pg)goPage(pg)}UI.sel=new Set(ids.filter(id=>D.shapes.some(s=>s.id===id)));UI.selLink=null;UI.laneSel=null;UI.secSel=null;render();inspector();
   const sh=D.shapes.filter(s=>UI.sel.has(s.id));if(!sh.length){if(!quiet)toast("Step not found in this version");return}
   const x=Math.min(...sh.map(s=>s.x)),y=Math.min(...sh.map(s=>s.y)),x2=Math.max(...sh.map(s=>s.x+s.w)),y2=Math.max(...sh.map(s=>s.y+s.h));const r=wrap.getBoundingClientRect();
   if(!quiet&&UI.zoom<.9){UI.autoFit=false;UI.zoom=clamp(Math.min(1,(r.width-40)/Math.max(1,x2-x),(r.height-40)/Math.max(1,y2-y)),UI.zoom,1);render()}
