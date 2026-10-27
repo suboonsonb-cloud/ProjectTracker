@@ -3553,7 +3553,7 @@ function quBenCell(r){const pid=pId(r);const b=pid?benAgg(pid):null;if(!b)return
   const pct=b.ptd?b.atd/b.ptd:null;const mx=Math.max(b.ptd,b.atd,1);
   const ed=typeof canEdit!=="function"||canEdit();
   return `<div class="qbenlink"><div class="qbplan${ed?" qclk":""}" ${ed?`data-qpo="${r}" title="Change the plan"`:""}><span class="vtag plan">PLAN</span><b>${fmtShort(b.rec)}</b><span class="muted">/yr</span>${b.one?` <span class="muted">+ ${fmtShort(b.one)} one-off</span>`:""}</div>
-    <div class="qbbar" aria-hidden="true"><span class="p" style="width:${b.ptd/mx*100}%"></span><span class="a" style="width:${b.atd/mx*100}%"></span></div>
+    <div class="qbbar${ed?" qclk":""}" aria-hidden="true" ${ed?`data-qpo="${r}"`:""}><span class="p" style="width:${b.ptd/mx*100}%"></span><span class="a" style="width:${b.atd/mx*100}%"></span></div>
     <div class="qbact${ed?" qclk":""}" ${ed?`data-qlo="${r}" title="Log an actual"`:""}><span class="vtag act">ACTUAL</span>${b.ptd||b.atd?`<b>${fmtShort(b.atd)}</b> <span class="muted">of ${fmtShort(b.ptd)} to date</span> ${pct==null?"":`<b class="${pct>=.9?"good":pct>=.6?"mid":"bad"}">${Math.round(pct*100)}%</b>`}`:`<span class="muted">starts ${b.p12?"within 12 m":"later"}</span>`}</div></div>
     ${UI.qu.log&&UI.qu.log[r]?quLogHtml(r):UI.qu.plan&&UI.qu.plan[r]?quPlanHtml(r):(typeof canEdit!=="function"||canEdit()?`<div class="qbtns2"><button type="button" class="btn small qplanbtn" data-qpo="${r}">✎ Plan</button><button type="button" class="btn small qlogbtn" data-qlo="${r}">＋ Log actual</button></div>`:"")}`}
 function quRowSimple(r){const L=pLive(r);const pc=Math.round((L.comp||0)*1000)/10;const pl=quPlanned(r);const F=UI.qu;const open=F.open.has(r);
