@@ -276,7 +276,7 @@ function e2eFlowForm(f){const areas=uniqOrder([...(hasMD()?mdList("L_Proc"):list
 async function e2eNewFlow(){let IMP=null;
   const p=choose("New E2E process flow",e2eFlowForm(null)+`<div class="nfimp"><div class="nfh"><b>Start from Excel / AI (optional)</b><span class="muted">or leave empty for blank lanes</span></div>
     <div class="nfdrop" id="nfDrop" tabindex="0" role="button" aria-label="Drop or choose an Excel file"><b>Drop the .xlsx here</b> or <u>choose a file</u> · or paste the table below<input type="file" id="nfFile" accept=".xlsx,.csv,.txt" hidden></div>
-    <div class="nfver"><span>Version</span><label><input type="radio" name="nfVer" value="auto" checked> Auto-detect</label><label><input type="radio" name="nfVer" value="AS-IS"> AS-IS</label><label><input type="radio" name="nfVer" value="TO-BE"> TO-BE</label></div>
+    <div class="nfver"><span>Version</span><label><input type="radio" name="nfVer" value="auto" checked> Auto-detect</label><label><input type="radio" name="nfVer" value="AS-IS"> AS-IS</label><label><input type="radio" name="nfVer" value="TO-BE"> TO-BE</label><label title="Rows with only PAGE BREAK start a new page; otherwise the whole flow is one picture"><input type="checkbox" id="nfPages"> Split at PAGE BREAK rows</label></div>
     <textarea id="nfPaste" rows="3" placeholder="…or paste the table copied from Excel or from the AI answer (Markdown / tab separated)"></textarea>
     <div class="nfres" id="nfRes"></div>
     <details class="nfhow"><summary>Format &amp; AI prompt</summary><ol>
@@ -284,7 +284,8 @@ async function e2eNewFlow(){let IMP=null;
       <li><b>Rows below</b> = the process top → bottom; each filled cell = one box: <code>Type; Text; Connect to; Change; Projects; Hours/month; Style</code> (only Type + Text needed).</li>
       <li><b>Type</b> Start · End · Process · Decision · Document · System · Note. <b>Connect to</b> = <code>C5 [Yes], E7 [No] red</code>; empty = next filled row; <code>-</code> = none. <code>//</code> = new line, <code>- </code> = bullet.</li>
       <li><b>Change</b> New (green) · Changed (orange) · Merged (purple) · Removed (red). <b>Style</b> = <code>Fill Yellow, Border Red, Text Blue, Thick</code>. Excel cell fill / font colour work too (green lane header = new lane).</li>
-      <li><b>Long flow</b>: a row with only <code>PAGE BREAK</code> starts Page 2 (same lanes). In the editor use <b>+ Page</b> under the diagram.</li>
+      <li><b>Colours</b>: one word in Style colours the box like a legend (<code>Orange</code>, <code>Purple</code>, <code>Green</code>, <code>Red</code>, <code>Blue</code>…); decisions are yellow and Start/End dark blue by default.</li>
+      <li><b>Pages</b>: the flow is one picture. Tick <b>Split at PAGE BREAK rows</b> to start Page 2 at a row with only <code>PAGE BREAK</code>; or use <b>+ Page</b> under the diagram.</li>
       <li><b>Version</b> auto: sheet name TO-BE / AS-IS, else TO-BE when steps have a Change or a lane is New. One file can hold both sheets.</li></ol>
       <p><button type="button" class="btn small primary" id="nfCopy">⧉ Copy AI prompt</button> <button type="button" class="btn small" id="nfTpl">⬇ Template (.csv)</button> <span class="muted" style="font-size:12px">Paste the prompt into Copilot / ChatGPT / Claude, add your process description, then drop the Excel it makes (or paste its table) here.</span></p></details></div>`,[["c","Cancel"],["ok","Create","primary"]]);
   const box=document.querySelector("#confirm .box");const res=box.querySelector("#nfRes");
@@ -292,9 +293,9 @@ async function e2eNewFlow(){let IMP=null;
     if(IMP.warn.length)res.innerHTML+=`<div class="nfwarn">${IMP.warn.slice(0,8).map(esc).join("<br>")}${IMP.warn.length>8?`<br>… ${IMP.warn.length-8} more`:""}</div>`;
     const c=res.querySelector("#nfClr");if(c)c.onclick=()=>{IMP=null;box.querySelector("#nfPaste").value="";show()}};
   const nm=()=>(box.querySelector("#efName").value||"").trim();
-  const take=sheets=>{if(!sheets.length){IMP={res:{},warn:["No table found — row 1 must hold the lane names"]};show();return}IMP=e2eImportFromGrids(sheets,nm()||"Imported flow",verPick());IMP.sheets=sheets;show()};
+  const take=sheets=>{if(!sheets.length){IMP={res:{},warn:["No table found — row 1 must hold the lane names"]};show();return}IMP=e2eImportFromGrids(sheets,nm()||"Imported flow",verPick(),{pages:!!(box.querySelector("#nfPages")||{}).checked});IMP.sheets=sheets;show()};
   const verPick=()=>(box.querySelector('input[name="nfVer"]:checked')||{}).value||"auto";
-  box.querySelectorAll('input[name="nfVer"]').forEach(r=>r.onchange=()=>{if(IMP&&IMP.sheets)take(IMP.sheets)});
+  box.querySelectorAll('input[name="nfVer"],#nfPages').forEach(r=>r.onchange=()=>{if(IMP&&IMP.sheets)take(IMP.sheets)});
   const file=async f=>{try{if(/\.xlsx$/i.test(f.name))take(await readXlsxGrids(await f.arrayBuffer()));else take(textGrids(await f.text()));if(!nm())box.querySelector("#efName").value=f.name.replace(/\.[^.]+$/,"").replace(/[_-]+/g," ")}catch(e){IMP={res:{},warn:["Could not read "+f.name+": "+e.message]};show()}};
   const dz=box.querySelector("#nfDrop"),fi=box.querySelector("#nfFile");
   dz.onclick=()=>fi.click();dz.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();fi.click()}};fi.onchange=()=>{if(fi.files[0])file(fi.files[0])};
@@ -305,7 +306,7 @@ async function e2eNewFlow(){let IMP=null;
   const k=await p;if(k!=="ok")return;
   const name=$("#efName").value.trim(),area=$("#efArea").value.trim();if(!name){toast("Give the flow a name");return}
   const id=e2eNewId(area);const f={id,name,area,owner:$("#efOwner").value.trim(),notes:$("#efNotes").value.trim(),v:{}};
-  const vp=(document.querySelector('input[name="nfVer"]:checked')||{}).value||"auto";if(IMP&&IMP.sheets){IMP=e2eImportFromGrids(IMP.sheets,name,vp)}/* rebuild with the final name */
+  const vp=(document.querySelector('input[name="nfVer"]:checked')||{}).value||"auto";const pgs=!!(document.getElementById("nfPages")||{}).checked;if(IMP&&IMP.sheets){IMP=e2eImportFromGrids(IMP.sheets,name,vp,{pages:pgs})}/* rebuild with the final name */
   const vers=IMP?VERS.filter(v=>IMP.res[v]):[];
   if(vers.length){for(const v of vers){if(!e2eWriteDoc(e2eFlow(id)||f,v,IMP.res[v].doc))return;E2E_CACHE=null}}
   else{const doc={id:"d"+Date.now(),name:name+" AS-IS",title:name,tag:"AS-IS",ori:"v",flow:700,head:46,lanes:["Requester","Team A","Team B","System"].map((n,i)=>({id:"L"+i,name:n,sub:"",size:220})),secs:[],shapes:[],links:[]};if(!e2eWriteDoc(f,"AS-IS",doc))return}

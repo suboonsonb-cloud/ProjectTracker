@@ -16,13 +16,18 @@
 const E2E_TYPES = { start: "rounded", end: "rounded", "start/end": "rounded", process: "process", task: "process", step: "process", decision: "decision", document: "document", doc: "document", system: "database", database: "database", data: "database", note: "note" };
 const E2E_FILL = { white: "#FFFFFF", blue: "#DDEBF7", lightblue: "#DDEBF7", green: "#E2F0D9", lightgreen: "#E2F0D9", yellow: "#FFF2CC", orange: "#FCE4D6", purple: "#EDE7F6", grey: "#F2F2F2", gray: "#F2F2F2", navy: "#1F4E79", red: "#FDE2E1", pink: "#FDE2E1", none: "none" };
 const E2E_LINE = { black: "#1F2933", blue: "#2E75B6", green: "#22A33A", red: "#E02424", orange: "#C55A11", grey: "#7F7F7F", gray: "#7F7F7F", purple: "#7A5AF8", navy: "#1F4E79", yellow: "#C9A227", white: "#FFFFFF", none: "none" };
-const E2E_HEAD = { navy: "#1F4E79", blue: "#2E75B6", green: "#375623", olive: "#7F6000", gold: "#7F6000", purple: "#7030A0", grey: "#404040", gray: "#404040" };
+const E2E_HEAD = { navy: "#1F3864", blue: "#2E75B6", green: "#1E7B45", olive: "#7F6000", gold: "#9A7B0A", yellow: "#9A7B0A", purple: "#7B3F9E", grey: "#5B6770", gray: "#5B6770", slate: "#5B6770", orange: "#C55A11", red: "#B42318", teal: "#00807A", black: "#1F2933" };
+/* a single colour word on a box = a matching pair (light fill + strong border), like a stage colour in a legend */
+const E2E_PAIR = { orange: ["#FDEBD8", "#E67E22"], purple: ["#EEE0F7", "#8E44AD"], green: ["#E2F3E6", "#27AE60"], red: ["#FBDEDE", "#C0392B"], pink: ["#FBDEDE", "#C0392B"], blue: ["#DCEBF7", "#2E75B6"], yellow: ["#FFF6CC", "#B7950B"], grey: ["#F1F3F5", "#7F8C8D"], gray: ["#F1F3F5", "#7F8C8D"], teal: ["#DDF3F1", "#00807A"], navy: ["#1F3864", "#1F3864"], white: ["#FFFFFF", "#1F2933"] };
+const E2E_TYPE_STYLE = { decision: { fill: "#FFF6CC", stroke: "#B7950B" }, start: { fill: "#1F3864", stroke: "#1F3864", color: "#FFFFFF" }, end: { fill: "#1F3864", stroke: "#1F3864", color: "#FFFFFF" }, "start/end": { fill: "#1F3864", stroke: "#1F3864", color: "#FFFFFF" }, note: { fill: "#FFF2CC", stroke: "#C9A227" } };
+const darken = (h, f = .55) => "#" + [1, 3, 5].map(i => Math.round(parseInt(h.slice(i, i + 2), 16) * f).toString(16).padStart(2, "0")).join("").toUpperCase();
 const e2eHex = (v, map) => { v = String(v || "").trim().toLowerCase().replace(/\s+/g, ""); if (/^#?[0-9a-f]{6}$/.test(v)) return "#" + v.replace("#", "").toUpperCase(); return map[v] || null; };
 function e2eStyle(txt, warn, ref) {   // "Fill Yellow, Border Red, Text Blue, Thick" → shape props
   const o = {}; for (const part of String(txt || "").split(/[,/]+/).map(x => x.trim()).filter(Boolean)) {
     const m = /^(fill|background|bg|border|line|outline|text|font)?\s*:?\s*(.+)$/i.exec(part); const k = (m[1] || "").toLowerCase(), v = m[2];
     if (/^(thick|bold border|heavy)$/i.test(part)) { o.sw = 2.5; continue; }
     if (/^bold$/i.test(part)) continue;
+    if (!k && E2E_PAIR[v.toLowerCase().trim()]) { const [f, b] = E2E_PAIR[v.toLowerCase().trim()]; o.fill = f; o.stroke = b; if (v.toLowerCase().trim() === "navy") o.color = "#FFFFFF"; continue; }
     const want = !k || k === "fill" || k === "background" || k === "bg" ? ["fill", E2E_FILL] : k === "text" || k === "font" ? ["color", E2E_LINE] : ["stroke", E2E_LINE];
     const c = e2eHex(v, want[1]); if (c) o[want[0]] = c; else warn.push(`${ref}: unknown style “${part}”`);
   }
@@ -38,7 +43,7 @@ OUTPUT
 ROW 1 = SWIMLANES (one per column, left → right in the order work passes between them)
 Each lane cell:  Lane name; Sub-title; Style
 - Sub-title (optional): short benefit or role note, e.g. "✓ Handle by one team // ✓ Increase productivity"
-- Style (optional): New = a lane that only exists in TO-BE (drawn with a green frame and a NEW stamp); and/or a header colour: Navy, Blue, Green, Olive, Purple, Grey.
+- Style (optional): New = a lane that only exists in TO-BE (green frame + NEW stamp); and/or a header colour: Navy, Blue, Green, Purple, Orange, Red, Teal, Slate, Gold.
   Example: "Document Center; ✓ Handle by one team // ✓ Increase productivity; New"
 
 ROWS 2+ = STEPS (top → bottom). Each step goes in ONE cell: the column of the lane that does it, the row of when it happens. Steps at the same time share a row; leave other cells empty.
@@ -50,7 +55,8 @@ Each step cell, fields separated by semicolons:
 - Change (TO-BE only — fill it for EVERY TO-BE step compared with AS-IS): New (green highlight + NEW tag), Changed (orange + CHANGED), Merged (purple + MERGED), Removed (red + REMOVED); empty = unchanged.
 - Projects: project codes that deliver the step, comma separated (only if I gave them)
 - Hours/month: time spent on the step per month (only if I gave it)
-- Style (optional, comma separated): Fill <colour>, Border <colour>, Text <colour>, Thick. Colours: White, Blue, Green, Yellow, Orange, Purple, Grey, Navy, Red, Black or #RRGGBB.
+- Style (optional): ONE colour word colours the whole box (light fill + matching border): Orange, Purple, Green, Red, Blue, Yellow, Teal, Grey. Use it to colour the STAGE a step belongs to (like a legend), e.g. Orange = set up payable, Purple = advance payment, Green = goods receipt, Red = QC / debit note, Blue = payment. Advanced: Fill <colour>, Border <colour>, Text <colour>, Thick.
+- Defaults (no Style needed): Decision = yellow diamond, Start / End = dark-blue pill.
 Empty middle fields keep their semicolons: "Process; Check invoice; ; New; ; ; Fill Yellow". You may stop after the last field you use.
 
 LAYOUT RULES (they keep the arrows clean)
@@ -60,14 +66,16 @@ LAYOUT RULES (they keep the arrows clean)
 4. Put a lane's consecutive steps in consecutive rows of that column; order the lanes so most arrows go to a neighbouring lane.
 5. At most 2 arrows leave a normal step; decisions have one arrow per answer.
 6. TO-BE: new teams/systems = lane Style New; mark every step's Change.
-7. Long flow (more than ~15 rows): put a row with only "PAGE BREAK" in column A to start Page 2 (same lanes). Arrows can't cross pages — the next page simply continues the flow.
+7. Every "Connect to" address must point to a FILLED cell (check the row numbers after you finish the table). Give the "No" branch of every decision a target too.
+8. Keep the whole flow on ONE page. Only if I ask for pages, put a row with only "PAGE BREAK" in column A; an arrow to the next page becomes a "continues on Page 2" marker.
+9. Put the stage colours in a legend: leave one empty column after the last lane, then a column headed "Legend" with one "Colour = meaning" per row (e.g. "Orange = set up payable from PI"). It is drawn at the top of the diagram.
 
 EXAMPLE (sheet "TO-BE"):
 | Requester | AP team; ✓ Reduce task | Automation; ✓ Auto checking; New |
 | Start; Submit invoice; C3 |  |  |
 |  |  | System; Read invoice (OCR); B4; New |
 |  | Decision; Invoice OK?; B5 [Yes], A5 [No] red; Changed |  |
-| Process; Fix and resend; C3 | Process; Post invoice // - EBS // - SAP; -; ; ; ; Fill Blue |  |
+| Process; Fix and resend; C3; ; ; ; Red | Process; Post invoice // - EBS // - SAP; -; ; ; ; Blue |  |
 
 MY PROCESS:
 <describe the process here: who does what, in which order, systems used, decisions, and what changes in the new design>`;
@@ -148,8 +156,7 @@ function e2eLaneCell(raw, fmt, warn, ref) {
     if (/^(new|highlight|hl|green-?frame)$/i.test(t)) l.hl = true;
     else { const c = e2eHex(t.replace(/^header:?/i, ""), E2E_HEAD); if (c) l.hcolor = c; else warn.push(`${ref}: unknown lane style “${t}”`); }
   }
-  if (fmt && fmt.fill) { const h = fmt.fill; const [r, g, b] = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
-    if (g > r + 25 && g > b + 15) l.hl = true; else if (!l.hcolor && (r + g + b) / 3 < 160) l.hcolor = h; }
+  if (fmt && fmt.fill && !l.hcolor) { const h = fmt.fill; const [r, g, b] = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)); l.hcolor = (0.299 * r + 0.587 * g + 0.114 * b) > 150 ? darken(h, (0.299 * r + 0.587 * g + 0.114 * b) > 200 ? .5 : .65) : h; }
   return l;
 }
 /* which version is this sheet? → [ver, reason] */
@@ -165,24 +172,32 @@ function e2eDetectVer(sheet) {
   return ["AS-IS", "no Change marks"];
 }
 /* grid → studio document (vertical lanes = columns) */
-function gridToDoc(grid, name, ver, fmt) {
+function gridToDoc(grid, name, ver, fmt, opts) {
+  opts = opts || {};
   fmt = fmt || {}; const warn = [];
-  const head = (grid[0] || []).map(s => String(s || "").trim()); let nL = head.length; while (nL && !head[nL - 1]) nL--;
+  const head = (grid[0] || []).map(s => String(s || "").trim());
+  /* lanes = row-1 cells up to the first empty one; a "Legend" column (after a gap) lists "Colour = meaning" */
+  let nL = 0; while (nL < head.length && head[nL] && !/^legend\b/i.test(head[nL])) nL++;
+  const legCol = head.findIndex(h => /^legend\b/i.test(h)); const legend = [];
+  if (legCol >= 0) for (let r = 1; r < grid.length; r++) { const v = String((grid[r] || [])[legCol] || "").trim(), v2 = String((grid[r] || [])[legCol + 1] || "").trim(); if (!v) continue;
+    const m = /^([^=:]+?)\s*[=:]\s*(.+)$/.exec(v); const col = m ? m[1] : v, lab = m ? m[2] : v2; if (!lab) continue;
+    const pair = E2E_PAIR[col.toLowerCase().trim()] || (e2eHex(col, E2E_FILL) ? [e2eHex(col, E2E_FILL), "#7F8C8D"] : null);
+    if (pair) legend.push({ fill: pair[0], stroke: pair[1], text: lab }); else warn.push(`Legend: unknown colour “${col}”`); }
   if (!nL) throw new Error("Row 1 must hold the swimlane names");
   const lanesIn = head.slice(0, nL).map((h, i) => e2eLaneCell(h, fmt[colLet(i + 1) + "1"], warn, colLet(i + 1) + "1"));
-  const cells = []; const pageOf = {}; let pg = 0; const isBreak = r => { const row = (grid[r] || []).map(x => String(x || "").trim()); const f = row.filter(Boolean);
+  const cells = []; const pageOf = {}; let pg = 0; const isBreak = r => { const row = (grid[r] || []).slice(0, nL).map(x => String(x || "").trim()); const f = row.filter(Boolean);
     return f.length === 1 && /^(?:[-=_*#\s]*)(page\s*break|new\s*page|page\s*\d+)(?:[-=_*#\s]*)$/i.test(f[0]); };
-  let seen = false; for (let r = 1; r < grid.length; r++) { if (isBreak(r)) { if (seen) { pg++; seen = false; } continue; } pageOf[r] = pg; if ((grid[r] || []).some(x => String(x || "").trim())) seen = true; }
+  let seen = false; for (let r = 1; r < grid.length; r++) { if (isBreak(r)) { if (seen && opts.pages) { pg++; seen = false; } continue; } pageOf[r] = pg; if ((grid[r] || []).some(x => String(x || "").trim())) seen = true; }
   for (let r = 1; r < grid.length; r++) if (pageOf[r] !== undefined) for (let k = 0; k < Math.max(nL, (grid[r] || []).length); k++) {
     const raw = String((grid[r] || [])[k] || "").trim(); if (!raw) continue; const ref = colLet(k + 1) + (r + 1);
-    if (k >= nL) { warn.push(`${ref} is outside the lanes — skipped`); continue; }
+    if (k >= nL) { if (legCol < 0 || k < legCol) warn.push(`${ref} is outside the lanes — skipped`); continue; }
     const f = e2eFields(raw);
     let type = (f[0] || "").toLowerCase(), text = f[1];
     if (f.length === 1 || !E2E_TYPES[type] && text === undefined) { text = f[0]; type = "process"; }   // a bare label
     if (!E2E_TYPES[type]) { warn.push(`${ref}: unknown type “${f[0]}” — used Process`); type = "process"; }
     const chg = (f[3] || "").toLowerCase().replace(/^\w/, c => c.toUpperCase());
     if (chg && !CHG_OK.includes(chg)) warn.push(`${ref}: unknown change “${f[3]}” (New, Changed, Merged, Removed)`);
-    const st = e2eStyle(f[6], warn, ref); const cf = fmt[ref];
+    const st = { ...(E2E_TYPE_STYLE[type] || {}), ...e2eStyle(f[6], warn, ref) }; const cf = fmt[ref];
     if (cf) { if (cf.fill && !st.fill) st.fill = cf.fill; if (cf.color && !st.color) st.color = cf.color; }
     const txt = String(text || "").split(/\s*\/\/\s*|\n/).map(x => x.replace(/^\s*[•·*]\s+/, "- ")).join("\n");
     cells.push({ r, k, ref, pg: pageOf[r], kind: type, type: E2E_TYPES[type], text: txt, to: f[2] || "", chg: CHG_OK.includes(chg) ? chg : "", proj: (f[4] || "").split(/[,\s]+/).filter(Boolean), hrs: f[5] !== undefined && f[5] !== "" && !isNaN(+f[5]) ? +f[5] : null, st });
@@ -192,47 +207,61 @@ function gridToDoc(grid, name, ver, fmt) {
   const DEFS = { process: [150, 44], rounded: [140, 40], decision: [130, 76], document: [150, 56], database: [130, 60], note: [150, 70] };
   const lineW = t => Math.max(...String(t).split("\n").map(x => x.length)) * 6.6 + 26;
   /* lane width = widest box in it (+ room), so boxes and vertical arrows line up in the lane centre */
-  const laneW = lanesIn.map((l, k) => { const inL = cells.filter(c => c.k === k); const need = Math.max(150, ...inL.map(c => Math.min(250, lineW(c.text)))) + 40;
-    return Math.max(150, Math.min(290, Math.round(need / 10) * 10, ), Math.round((Math.max(...String(l.name).split("\n").map(x => x.length)) * 9 + 30) / 10) * 10); });
+  const laneW = lanesIn.map((l, k) => { const inL = cells.filter(c => c.k === k); const need = Math.max(150, ...inL.map(c => Math.min(c.type === "decision" ? 290 : 250, lineW(c.text) * (c.type === "decision" ? 1.55 : 1)))) + 40;
+    return Math.max(150, Math.min(320, Math.round(need / 10) * 10), Math.round((Math.max(...String(l.name).split("\n").map(x => x.length)) * 9 + 30) / 10) * 10); });
   const laneX = []; laneW.reduce((x, w, i) => (laneX[i] = x, x + w), 0);
   const Y0 = 46 + 46 + 28; let y = Y0; const rowY = {}; let curPg = 0; const pgFlow = [];
-  for (const r of rowsUsed) { if (pageOf[r] !== curPg) { pgFlow[curPg] = Math.max(600, y - 92 + 20); curPg = pageOf[r]; y = Y0; } const inRow = cells.filter(c => c.r === r); let hMax = 0;
+  for (const r of rowsUsed) { if (pageOf[r] !== curPg) { pgFlow[curPg] = Math.max(600, y - 92 + 20 + 70); curPg = pageOf[r]; y = Y0 + 70; } const inRow = cells.filter(c => c.r === r); let hMax = 0;
     for (const c of inRow) { const [w0, h0] = DEFS[c.type] || [150, 44]; const lines = String(c.text).split("\n").length;
-      c.w = Math.min(laneW[c.k] - 30, Math.max(w0, Math.round(lineW(c.text) / 10) * 10)); c.h = Math.max(h0, 22 + lines * 15 + (c.type === "decision" ? 30 : 0)); hMax = Math.max(hMax, c.h); }
+      if (c.type === "decision") { c.w = Math.min(laneW[c.k] - 16, Math.max(170, Math.round(lineW(c.text) * 1.55 / 10) * 10)); c.h = Math.max(84, Math.round((lines * 16 + 22) * 1.75)); }
+      else { c.w = Math.min(laneW[c.k] - 30, Math.max(w0, Math.round(lineW(c.text) / 10) * 10)); c.h = Math.max(h0, 22 + lines * 15); }
+      hMax = Math.max(hMax, c.h); }
     for (const c of inRow) { c.x = Math.round(laneX[c.k] + (laneW[c.k] - c.w) / 2); c.y = Math.round(y + (hMax - c.h) / 2); }
     rowY[r] = y; y += hMax + 44; }
   const byRef = Object.fromEntries(cells.map(c => [c.ref, c])); const sid = c => "x" + c.ref;
-  const links = [];
+  const links = [], xpg = [];
   for (const c of cells) {
     if (c.to === "-" || c.to === "–") continue;
     let tg = [];
     if (c.to) for (const part of c.to.split(/,+/)) { const m = /^\s*([A-Z]{1,2})\s*(\d+)\s*(?:\[([^\]]*)\]|\(([^)]*)\))?\s*(#[0-9a-f]{6}|[a-z]+)?\s*$/i.exec(part); if (!m) { if (part.trim()) warn.push(`${c.ref}: can't read “${part.trim()}”`); continue; }
-      const t = byRef[m[1].toUpperCase() + m[2]]; if (!t) { warn.push(`${c.ref}: ${m[1].toUpperCase()}${m[2]} is empty`); continue; }
+      let t = byRef[m[1].toUpperCase() + m[2]];
+      if (!t) { const col = m[1].toUpperCase(), r0 = +m[2]; for (const d of [1, 2, 3, -1, 4, 5]) { const x = byRef[col + (r0 + d)]; if (x && x !== c) { t = x; break; } }
+        if (t) warn.push(`${c.ref}: ${col}${r0} is empty — connected to ${t.ref} (the nearest box in that column)`); else { warn.push(`${c.ref}: ${col}${r0} is empty — no arrow`); continue; } }
       const colr = m[5] ? e2eHex(m[5], E2E_LINE) : null; if (m[5] && !colr) warn.push(`${c.ref}: unknown arrow colour “${m[5]}”`); tg.push([t, m[3] || m[4] || "", colr]); }
     else if (c.kind !== "end" && c.type !== "note") { const next = rowsUsed.find(r => r > c.r); if (next !== undefined && pageOf[next] === c.pg) { const nx = cells.filter(x => x.r === next); tg = (nx.find(x => x.k === c.k) ? [nx.find(x => x.k === c.k)] : nx.length === 1 ? nx : nx.slice(0, 1)).map(t => [t, "", null]); } }
-    for (const [t, label, colr] of tg) if (t.pg !== c.pg) warn.push(`${c.ref} → ${t.ref}: on another page — no arrow (continue the flow with a box on the new page)`); else links.push({ id: "l" + c.ref + t.ref, from: sid(c), to: sid(t), label, ...(colr ? { color: colr } : {}), auto: true });   /* auto = routed around the boxes by the studio */
+    for (const [t, label, colr] of tg) if (t.pg !== c.pg) xpg.push([c, t, label, colr]); else links.push({ id: "l" + c.ref + t.ref, from: sid(c), to: sid(t), label, ...(colr ? { color: colr } : {}), auto: true });   /* auto = routed around the boxes by the studio */
   }
+  /* an arrow to another page: "▶ Page n" connector at the bottom of this page, "◀ from Page m" at the top of the next */
+  const extra = []; let xi = 0;
+  for (const [c, t, label, colr] of xpg) { xi++;
+    const a = { r: 0, k: c.k, ref: "PG" + xi + "a", pg: c.pg, kind: "process", type: "rounded", text: `▶ continues on Page ${t.pg + 1}`, st: { fill: "#FFFFFF", stroke: "#7F8C8D", color: "#475467" }, proj: [], hrs: null, chg: "" };
+    const b = { r: 0, k: t.k, ref: "PG" + xi + "b", pg: t.pg, kind: "process", type: "rounded", text: `◀ from Page ${c.pg + 1}`, st: { fill: "#FFFFFF", stroke: "#7F8C8D", color: "#475467" }, proj: [], hrs: null, chg: "" };
+    a.w = b.w = 150; a.h = b.h = 32; a.x = Math.round(laneX[c.k] + (laneW[c.k] - 150) / 2); b.x = Math.round(laneX[t.k] + (laneW[t.k] - 150) / 2);
+    a.y = (c.pg === pg ? y : (pgFlow[c.pg] + 92 - 20)) - 60; b.y = Y0 - 4;
+    extra.push(a, b); links.push({ id: "l" + c.ref + a.ref, from: sid(c), to: sid(a), label, ...(colr ? { color: colr } : {}), auto: true }, { id: "l" + b.ref + t.ref, from: sid(b), to: sid(t), auto: true }); }
+  cells.push(...extra);
   const isTo = ver === "TO-BE";
   if (!isTo && cells.some(c => c.chg)) warn.push("AS-IS: New/Changed/Merged/Removed marks are only shown on TO-BE — ignored");
   const shapes = cells.map(c => ({ id: sid(c), type: c.type, x: c.x, y: c.y, w: c.w, h: c.h, text: c.text,
-    ...(c.type === "note" ? { fill: "#FFF2CC", stroke: "#C9A227" } : {}), ...c.st,
+    ...c.st,
     ...(isTo && c.chg ? { chg: c.chg } : {}), ...(pg ? { pg: "p" + (c.pg + 1) } : {}), ...(c.proj.length ? { proj: c.proj } : {}), ...(c.hrs != null ? { hrs: c.hrs } : {}) }));
   const anyNew = isTo && (lanesIn.some(l => l.hl) || cells.some(c => c.chg === "New"));
   const doc = { id: "d" + Date.now() + ver.length, name: name + " " + ver, title: name, tag: anyNew ? "TO-BE + NEW" : ver, ori: "v", flow: Math.max(600, y - 92 + 20), head: 46,
     ...(pg ? { pages: Array.from({ length: pg + 1 }, (_, i) => ({ id: "p" + (i + 1), name: "Page " + (i + 1), flow: i === pg ? Math.max(600, y - 92 + 20) : pgFlow[i] || 700 })) } : {}),
+    ...(legend.length ? { legend } : {}),
     lanes: lanesIn.map((l, i) => ({ id: "L" + i, name: l.name || "Lane " + (i + 1), sub: l.sub || "", size: laneW[i], ...(isTo && l.hl ? { hl: true } : {}), ...(l.hcolor ? { hcolor: l.hcolor } : {}) })), secs: [], shapes, links };
   if (!isTo && lanesIn.some(l => l.hl)) warn.push("AS-IS: lane “New” highlight ignored (TO-BE only)");
   return { doc, warn, stats: { pages: pg + 1, lanes: nL, boxes: shapes.length, links: links.length, styled: shapes.filter(s => s.fill || s.stroke || s.color || s.chg).length, newLanes: doc.lanes.filter(l => l.hl).length } };
 }
 const CHG_OK = ["New", "Changed", "Merged", "Removed"];
 /* forceVer: "" / "auto" = detect per sheet */
-function e2eImportFromGrids(sheets, name, forceVer) {
+function e2eImportFromGrids(sheets, name, forceVer, opts) {
   const res = {}; const warn = []; const how = {};
   const one = sheets.length === 1;
   for (const s of sheets) {
     let [ver, why] = forceVer && forceVer !== "auto" && one ? [forceVer, "chosen"] : e2eDetectVer(s);
     if (res[ver]) { const other = ver === "AS-IS" ? "TO-BE" : "AS-IS"; if (!res[other] && !/sheet name/.test(why)) { ver = other; why = "second sheet"; } else { warn.push(`Sheet “${s.name}” skipped — ${ver} already read`); continue; } }
-    try { const g = gridToDoc(s.grid, name || "Imported flow", ver, s.fmt); res[ver] = g; how[ver] = `${s.name} → ${ver} (${why})`; g.warn.forEach(w => warn.push(`${s.name}: ${w}`)); } catch (e) { warn.push(`${s.name}: ${e.message}`); }
+    try { const g = gridToDoc(s.grid, name || "Imported flow", ver, s.fmt, opts); res[ver] = g; how[ver] = `${s.name} → ${ver} (${why})`; g.warn.forEach(w => warn.push(`${s.name}: ${w}`)); } catch (e) { warn.push(`${s.name}: ${e.message}`); }
   }
   return { res, warn, how };
 }
@@ -241,6 +270,6 @@ function e2eTemplateCsv() {
     ["Start; Submit invoice; C3", "", ""],
     ["", "", "System; Read invoice (OCR); B4; New"],
     ["", "Decision; Invoice OK?; B5 [Yes], A5 [No] red; Changed", ""],
-    ["Process; Fix and resend; C3", "Process; Post invoice // - EBS // - SAP; -; ; ; ; Fill Blue", ""]];
+    ["Process; Fix and resend; C3", "Process; Post invoice // - EBS // - SAP; -; ; ; ; Blue", ""]];
   return rows.map(r => r.map(c => /[",\n]/.test(c) ? `"${c.replace(/"/g, '""')}"` : c).join(",")).join("\r\n");
 }

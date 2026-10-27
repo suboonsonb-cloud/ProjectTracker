@@ -323,11 +323,20 @@ function linkPts(L){if(L.auto){const r=autoRouteAll()[L.id];if(r)return r}const 
   const r=[c[0]];for(let i=1;i<c.length-1;i++){const a_=r[r.length-1],b_=c[i],n=c[i+1];if((Math.abs(a_.x-b_.x)<.5&&Math.abs(b_.x-n.x)<.5)||(Math.abs(a_.y-b_.y)<.5&&Math.abs(b_.y-n.y)<.5))continue;r.push(b_)}r.push(c[c.length-1]);
   return {pts:r,fs,ts}}
 function labelPos(pts){let best=0,bi=0;for(let i=0;i<pts.length-1;i++){const l=Math.abs(pts[i+1].x-pts[i].x)+Math.abs(pts[i+1].y-pts[i].y);if(l>best){best=l;bi=i}}const a=pts[bi],b=pts[bi+1];return {x:(a.x+b.x)/2,y:(a.y+b.y)/2,horiz:Math.abs(a.y-b.y)<1}}
+/* where an arrow label goes: beside the longest free segment, never on top of a box (tries both sides, then the other segments) */
+function labelSpot(pts,tw,fs){const boxes=D.shapes.filter(s=>s.type!=="frame"&&s.type!=="text");const hit=(cx,by)=>{const x0=cx-tw/2-3,x1=cx+tw/2+3,y0=by-fs,y1=by+4;return boxes.some(b=>x1>b.x&&x0<b.x+b.w&&y1>b.y&&y0<b.y+b.h)};
+  const segs=[];for(let i=0;i<pts.length-1;i++){const a=pts[i],b=pts[i+1];segs.push({a,b,len:Math.abs(b.x-a.x)+Math.abs(b.y-a.y),h:Math.abs(a.y-b.y)<1})}
+  const order=segs.slice().sort((p,q)=>q.len-p.len);
+  for(const sg of order){if(sg.len<tw*.6+10&&!sg.h&&sg.len<30)continue;const mx=(sg.a.x+sg.b.x)/2,my=(sg.a.y+sg.b.y)/2;
+    const cands=sg.h?[[mx,my-6],[mx,my+fs+3]]:[[mx+6+tw/2,my+4],[mx-6-tw/2,my+4],[mx+6+tw/2,Math.min(sg.a.y,sg.b.y)+fs+8],[mx-6-tw/2,Math.min(sg.a.y,sg.b.y)+fs+8]];
+    for(const [cx,by] of cands)if(!hit(cx,by))return {lx:cx,ly:by}}
+  const lp=labelPos(pts);return {lx:lp.horiz?lp.x:lp.x+6+tw/2,ly:lp.horiz?lp.y-6:lp.y+4}}
+let LBLS=[];
 function linkSVG(L,selected){const P=linkPts(L);if(!P)return "";const d="M"+P.pts.map(p=>`${p.x},${p.y}`).join("L");const col=L.color||"#2E75B6";
   let g=`<g data-link="${L.id}" class="lnk"><path d="${d}" fill="none" stroke="transparent" stroke-width="12"/>`+
     `<path d="${d}" fill="none" stroke="${selected?"#F79009":col}" stroke-width="${L.w||1.6}" ${L.dash?'stroke-dasharray="6 4"':""} marker-end="url(#arr-${selected?"sel":colId(col)})" ${L.both?`marker-start="url(#arrs-${selected?"sel":colId(col)})"`:""}/>`;
-  if(L.label){const lp=labelPos(P.pts);const fs=L.fs_||12;const tw=measure(L.label,fs,false);const lx=lp.horiz?lp.x:lp.x+6+tw/2,ly=lp.horiz?lp.y-6:lp.y+4;
-    g+=`<text x="${lx}" y="${ly}" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="${fs}" fill="${L.lcolor||"#E02424"}" paint-order="stroke" stroke="#FFFFFF" stroke-width="4" stroke-linejoin="round">${esc(L.label)}</text>`}
+  if(L.label){const fs=L.fs_||12;const tw=measure(L.label,fs,false);const {lx,ly}=labelSpot(P.pts,tw,fs);
+    (LBLS||(LBLS=[])).push(`<g data-link="${L.id}" class="lnk"><text x="${lx}" y="${ly}" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="${fs}" fill="${L.lcolor||"#E02424"}" paint-order="stroke" stroke="#FFFFFF" stroke-width="4" stroke-linejoin="round">${esc(L.label)}</text></g>`)}
   return g+"</g>"}
 const colId=c=>String(c).replace(/[^a-z0-9]/gi,"");
 function markers(){const cols=new Set(["#2E75B6","#E02424","#1F2933","#22A33A","#C55A11","#7F7F7F",...D.links.map(l=>l.color||"#2E75B6")]);let m="";
@@ -339,6 +348,9 @@ function bgSVG(forExport){const {W,H}=size();let g="";const hT=headT(),G=gut();
   const tw=measure(D.title||"",20,true),tagw=D.tag?measure("["+D.tag+"]",20,true)+12:0;const tx=W/2-(tw+tagw)/2;
   g+=`<text x="${tx}" y="${TITLE_H/2+7}" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="bold" fill="#111827" data-hit="title">${esc(D.title||"")}</text>`;
   if(D.tag){const x=tx+tw+8;g+=`<rect x="${x}" y="${TITLE_H/2-13}" width="${tagw}" height="26" fill="${/to.?be|new/i.test(D.tag)?"#22C55E":"#FFFF00"}" data-hit="title"/><text x="${x+6}" y="${TITLE_H/2+7}" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="bold" fill="#111827" data-hit="title">[${esc(D.tag)}]</text>`}
+  if(D.legend&&D.legend.length){let lx=10,ly=6;const maxX=Math.max(220,tx-16);   /* legend chips at the left of the title band (from the Excel "Legend" column) */
+    for(const it of D.legend){const t=String(it.text||""),w=measure(t,11,false)+26;if(lx+w>maxX&&lx>10){lx=10;ly+=17}if(ly>TITLE_H-15)break;
+      g+=`<rect x="${lx}" y="${ly}" width="16" height="12" rx="2" fill="${esc(it.fill||"#FFFFFF")}" stroke="${esc(it.stroke||"#7F8C8D")}" stroke-width="1.2"/><text x="${lx+21}" y="${ly+10}" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#344054">${esc(t)}</text>`;lx+=w+10}}
   if(D.pages&&D.pages.length>1){const i=D.pages.findIndex(p=>p.id===D.pg);g+=`<text x="${W-14}" y="${TITLE_H/2+5}" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#5E6B7D">${esc(D.pages[i]&&!/^page\s*\d+$/i.test(D.pages[i].name)?D.pages[i].name+" · ":"")}Page ${i+1} / ${D.pages.length}</text>`}
   // sections (behind lanes)
   D.secs.forEach((s,k)=>{const a=secStart(k);const sel=UI.secSel===s.id&&!forExport;
@@ -370,7 +382,8 @@ function laneHeadTextH(l,cx,y,h){let t=`<text transform="translate(${cx},${y+h/2
   if(l.sub)t+=`<text transform="translate(${cx+16},${y+h/2}) rotate(-90)" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#FFFFFF" data-lane="${l.id}">${esc(String(l.sub).split("\n")[0])}</text>`;return t}
 function diagramSVG(forExport){const {W,H}=size();
   const frames=D.shapes.filter(s=>s.type==="frame"),rest=D.shapes.filter(s=>s.type!=="frame");
-  return `${markers()}<g>${bgSVG(forExport)}</g><g>${frames.map(shapeSVG).join("")}</g><g>${D.links.map(L=>linkSVG(L,!forExport&&UI.selLink===L.id)).join("")}</g><g>${rest.map(shapeSVG).join("")}</g><g>${D.lanes.map((l,i)=>l.hl?newStamp(vert()?laneStart(i)+3:3,vert()?TITLE_H+3:laneStart(i)+3,true):"").join("")}</g>`}
+  LBLS=[];/* arrow labels are drawn above the boxes so a box never hides them */
+  return `${markers()}<g>${bgSVG(forExport)}</g><g>${frames.map(shapeSVG).join("")}</g><g>${D.links.map(L=>linkSVG(L,!forExport&&UI.selLink===L.id)).join("")}</g><g>${rest.map(shapeSVG).join("")}</g><g>${(LBLS||[]).join("")}</g><g>${D.lanes.map((l,i)=>l.hl?newStamp(vert()?laneStart(i)+3:3,vert()?TITLE_H+3:laneStart(i)+3,true):"").join("")}</g>`}
 function render(){const {W,H}=size();svg.setAttribute("width",W*UI.zoom);svg.setAttribute("height",H*UI.zoom);svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
   svg.innerHTML=diagramSVG(false)+overlaySVG();document.getElementById("zv").textContent=Math.round(UI.zoom*100)+"%"+(UI.autoFit?" · fit":"");
   if(UI.autoFit&&W+"x"+H!==LASTWH&&!UI.mode){LASTWH=W+"x"+H;queueFit()}
