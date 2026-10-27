@@ -110,7 +110,7 @@ function loginPage(msg) {
     let last = ""; try { last = localStorage.getItem("sga_lastlogin") || ""; } catch (e) { }
     const ms = typeof gReady === "function" && gReady();
     pg.innerHTML = `<form class="lpcard" id="lpForm" autocomplete="on" novalidate>
-      <div class="lpbrand"><span class="lplogo" aria-hidden="true">SG&amp;A</span><div><h1 id="lpH">Tracker Desk</h1><p>${esc(S.fileName || "")}</p></div></div>
+      <div class="lpbrand"><span class="lplogo" aria-hidden="true">ITD</span><div><h1 id="lpH">Initiatives Tracker Desk</h1><p>${esc(S.fileName || "")}</p></div></div>
       ${msg ? `<div class="lperr" role="alert">${esc(msg)}</div>` : ""}
       <label class="lpf"><span>Email</span><input id="lpUser" name="username" type="email" autocomplete="username" required value="${esc(last)}" placeholder="name@thaiunion.com"></label>
       <label class="lpf"><span>Password</span><input id="lpPw" name="password" type="password" autocomplete="current-password" placeholder="Leave blank if you have none"></label>

@@ -24,7 +24,7 @@ function stickVars(){try{const h=document.querySelector("header.top"),n=document
 window.addEventListener("resize",stickVars);
 function renderLanding(){
   $("#main").innerHTML=`<div class="landing">
-  <div class="drop card" id="drop"><h2 style="font-size:20px">Open the SG&amp;A tracker workbook</h2>
+  <div class="drop card" id="drop"><h2 style="font-size:20px">Open the initiatives tracker workbook</h2>
   <p class="muted">Drag the <b>.xlsx</b> here or click the button. Everything stays on your computer; nothing is uploaded anywhere.</p>
   ${WB.rec?connectCardHtml():`<p><button class="btn primary" id="bigOpen">Open workbook…</button></p>${connectCardHtml()}`}${spCardHtml()}${S.env&&S.env.level==="ok"?`<p class="envok">✓ Opened from your OneDrive / SharePoint synced folder — saving will reach SharePoint.</p>`:""}</div>
   <div class="card pad" style="margin-top:16px"><h2>With SharePoint</h2><ol class="steps">

@@ -116,7 +116,7 @@ function bindSpCard(root) {
 async function spSetupDialog() {
   const c = gCfg(); const here = /^https?:$/.test(location.protocol) ? location.origin + location.pathname : "http://localhost:8765/SGA_Tracker_Desk.html";
   const k = await choose("Open from SharePoint links — setup", `<ol class="steps" style="margin:0 0 10px 18px;font-size:13px">
-      <li><b>IT, once:</b> Entra ID → App registrations → New → name "SGA Tracker Desk" → platform <b>Single-page application</b>, redirect URI <code>${esc(here)}</code> → API permissions: Microsoft Graph, delegated <b>Files.ReadWrite.All</b> (grant admin consent).</li>
+      <li><b>IT, once:</b> Entra ID → App registrations → New → name "Initiatives Tracker Desk" → platform <b>Single-page application</b>, redirect URI <code>${esc(here)}</code> → API permissions: Microsoft Graph, delegated <b>Files.ReadWrite.All</b> (grant admin consent).</li>
       <li>Paste the <b>Application (client) ID</b> below (and your tenant ID or domain).</li>
       <li>Start the Desk with <b>Start_Tracker_Desk.cmd</b> (opens it at http://localhost:8765) — or host it on a company web server and register that address instead.</li></ol>
     <label class="field"><span>Client ID</span><input id="gCid" value="${esc(c.clientId)}" placeholder="00000000-0000-0000-0000-000000000000"></label>

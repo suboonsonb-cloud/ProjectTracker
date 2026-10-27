@@ -100,7 +100,7 @@ async function loadWorkbook(buf,name,handle,lastMod){
     let tgt=relMap[rid];if(!tgt)continue;tgt=tgt.replace(/^\/?xl\//,"");sheets[nm]={path:"xl/"+tgt.replace(/^\//,"")};
   }
   const need=["Projects","Activities","Benefits","Realisation","RAIDD","Lists","Plan_Calc"];
-  for(const n of need){if(!sheets[n])throw new Error(`Sheet "${n}" not found — is this the SG&A tracker workbook?`)}
+  for(const n of need){if(!sheets[n])throw new Error(`Sheet "${n}" not found — is this the initiatives tracker workbook?`)}
   for(const n of [...need,...["Master_Data","Benefit_Plan","Migration_Log","E2E_Flows","E2E_Map","Activity_Log","Users"].filter(n=>sheets[n])]){
     const doc=parser.parseFromString(await entryText(by[sheets[n].path]),"application/xml");
     const sd=doc.getElementsByTagNameNS(NS,"sheetData")[0];const rows=new Map(),cells=new Map(),vals=new Map();

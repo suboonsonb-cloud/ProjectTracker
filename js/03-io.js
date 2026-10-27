@@ -40,7 +40,7 @@ function envCheck(){let framed=false;try{framed=window.top!==window.self}catch(e
     if(e.level==="bad"&&!envHelp._shown){envHelp._shown=true;setTimeout(envHelp,300)}}
   else box.innerHTML="";
   return e}
-function envHelp(){const e=S.env||{};choose("Open the Tracker Desk so it can save to SharePoint",`${e.why?`<div class="warnbox" style="margin-bottom:10px">${e.why}</div>`:""}
+function envHelp(){const e=S.env||{};choose("Open the Initiatives Tracker Desk so it can save to SharePoint",`${e.why?`<div class="warnbox" style="margin-bottom:10px">${e.why}</div>`:""}
   <ol class="steps" style="margin:0 0 0 18px">
    <li>In SharePoint, open the library that holds the tracker and click <b>Sync</b> (or <b>Add shortcut to My files</b>) — once per PC.</li>
    <li>Open <b>File Explorer</b> → your organisation's SharePoint / OneDrive folder → the tracker folder.</li>
@@ -102,7 +102,7 @@ async function save(asCopy){
       finishSave(`Saved ${n} change(s) into ${h.name}. From now on Save writes to this file directly.`);watchSaved();return}
     catch(err){if(err.name==="AbortError")return;console.error(err)}
   }
-  if(!asCopy&&!S._dlOk){const k=await choose("This copy cannot be saved back to SharePoint",`<p>${S.env&&S.env.level==="bad"?S.env.title+". ":""}The app can't write into the workbook from here, so <b>Save</b> will only <b>download</b> an updated copy.</p><p>To save directly: open the Tracker Desk from your OneDrive-synced folder (see <i>How to open it correctly</i>). Or download now and upload the file to SharePoint with the same name.</p>`,[["cancel","Cancel"],["how","How to open it correctly"],["dl","Download updated copy","primary"]]);
+  if(!asCopy&&!S._dlOk){const k=await choose("This copy cannot be saved back to SharePoint",`<p>${S.env&&S.env.level==="bad"?S.env.title+". ":""}The app can't write into the workbook from here, so <b>Save</b> will only <b>download</b> an updated copy.</p><p>To save directly: open the Initiatives Tracker Desk from your OneDrive-synced folder (see <i>How to open it correctly</i>). Or download now and upload the file to SharePoint with the same name.</p>`,[["cancel","Cancel"],["how","How to open it correctly"],["dl","Download updated copy","primary"]]);
     if(k==="how"){envHelp();return}if(k!=="dl")return;S._dlOk=true}
   download(blob,asCopy?S.fileName.replace(/\.xlsx$/i,"")+" (copy).xlsx":S.fileName);
   if(asCopy)toast("Copy downloaded",4000);else finishSave("Downloaded the updated workbook. Replace the file in SharePoint (same name) with it.");

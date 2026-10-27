@@ -1,4 +1,4 @@
-# SG&A Tracker Desk — source
+# Initiatives Tracker Desk — source
 
 Standard layout for development. Users still get **one file** (`dist/SGA_Tracker_Desk.html`).
 

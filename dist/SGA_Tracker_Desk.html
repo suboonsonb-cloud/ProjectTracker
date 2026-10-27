@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SG&amp;A Tracker Desk</title>
+<title>Initiatives Tracker Desk</title>
 <style>
 :root{
   --navy:#1F3864; --blue:#2E75B6; --blue-soft:#DDEBF7; --bg:#F4F6F9; --card:#FFFFFF; --ink:#1B2430; --muted:#5B6573;
@@ -391,7 +391,7 @@ body.has-unsaved nav.tabs button[data-t="Changes"]{background:#FFC000;color:#1b1
 </head>
 <body>
 <header class="top">
-  <h1>SG&amp;A Tracker Desk <span class="buildtag" title="App version — check this matches the latest file you downloaded">v26-Oct r11</span></h1>
+  <h1>Initiatives Tracker Desk <span class="buildtag" title="App version — check this matches the latest file you downloaded">v26-Oct r11</span></h1>
   <span class="file" id="fileName">No workbook loaded</span><button type="button" class="connchip hidden" id="connChip">🔗 connect</button>
   <span class="spacer"></span>
   <span class="hgrp today" title="'Today' drives statuses, the Gantt today line and the current-month marker. It advances automatically at midnight in the chosen time zone."><span class="glab">TODAY</span><b id="todayLbl"></b><select id="tzSel" aria-label="Time zone"></select></span>
@@ -413,7 +413,7 @@ body.has-unsaved nav.tabs button[data-t="Changes"]{background:#FFC000;color:#1b1
 <div class="modal" id="confirm"><div class="box"></div></div>
 <div class="modal" id="help"><div class="box">
   <h2>How this app works</h2>
-  <p>This page runs entirely in your browser. It does not connect to the internet or to any server. It opens the SG&amp;A tracker <b>.xlsx</b>, lets you edit the 5 input sheets (Projects, Activities, Benefits, Realisation, RAIDD) and writes your changes straight back into the same workbook. It only changes the input cells you edited, so formulas, tables, charts and formatting stay exactly as they were.</p>
+  <p>This page runs entirely in your browser. It does not connect to the internet or to any server. It opens the initiatives tracker <b>.xlsx</b>, lets you edit the 5 input sheets (Projects, Activities, Benefits, Realisation, RAIDD) and writes your changes straight back into the same workbook. It only changes the input cells you edited, so formulas, tables, charts and formatting stay exactly as they were.</p>
   <h2>Recommended set-up with SharePoint (no third party)</h2>
   <ol class="steps">
     <li>In SharePoint, open the document library and click <b>Sync</b> (or "Add shortcut to My files") so the workbook appears in File Explorer through OneDrive.</li>
@@ -561,7 +561,7 @@ async function loadWorkbook(buf,name,handle,lastMod){
     let tgt=relMap[rid];if(!tgt)continue;tgt=tgt.replace(/^\/?xl\//,"");sheets[nm]={path:"xl/"+tgt.replace(/^\//,"")};
   }
   const need=["Projects","Activities","Benefits","Realisation","RAIDD","Lists","Plan_Calc"];
-  for(const n of need){if(!sheets[n])throw new Error(`Sheet "${n}" not found — is this the SG&A tracker workbook?`)}
+  for(const n of need){if(!sheets[n])throw new Error(`Sheet "${n}" not found — is this the initiatives tracker workbook?`)}
   for(const n of [...need,...["Master_Data","Benefit_Plan","Migration_Log","E2E_Flows","E2E_Map","Activity_Log","Users"].filter(n=>sheets[n])]){
     const doc=parser.parseFromString(await entryText(by[sheets[n].path]),"application/xml");
     const sd=doc.getElementsByTagNameNS(NS,"sheetData")[0];const rows=new Map(),cells=new Map(),vals=new Map();
@@ -775,7 +775,7 @@ function envCheck(){let framed=false;try{framed=window.top!==window.self}catch(e
     if(e.level==="bad"&&!envHelp._shown){envHelp._shown=true;setTimeout(envHelp,300)}}
   else box.innerHTML="";
   return e}
-function envHelp(){const e=S.env||{};choose("Open the Tracker Desk so it can save to SharePoint",`${e.why?`<div class="warnbox" style="margin-bottom:10px">${e.why}</div>`:""}
+function envHelp(){const e=S.env||{};choose("Open the Initiatives Tracker Desk so it can save to SharePoint",`${e.why?`<div class="warnbox" style="margin-bottom:10px">${e.why}</div>`:""}
   <ol class="steps" style="margin:0 0 0 18px">
    <li>In SharePoint, open the library that holds the tracker and click <b>Sync</b> (or <b>Add shortcut to My files</b>) — once per PC.</li>
    <li>Open <b>File Explorer</b> → your organisation's SharePoint / OneDrive folder → the tracker folder.</li>
@@ -837,7 +837,7 @@ async function save(asCopy){
       finishSave(`Saved ${n} change(s) into ${h.name}. From now on Save writes to this file directly.`);watchSaved();return}
     catch(err){if(err.name==="AbortError")return;console.error(err)}
   }
-  if(!asCopy&&!S._dlOk){const k=await choose("This copy cannot be saved back to SharePoint",`<p>${S.env&&S.env.level==="bad"?S.env.title+". ":""}The app can't write into the workbook from here, so <b>Save</b> will only <b>download</b> an updated copy.</p><p>To save directly: open the Tracker Desk from your OneDrive-synced folder (see <i>How to open it correctly</i>). Or download now and upload the file to SharePoint with the same name.</p>`,[["cancel","Cancel"],["how","How to open it correctly"],["dl","Download updated copy","primary"]]);
+  if(!asCopy&&!S._dlOk){const k=await choose("This copy cannot be saved back to SharePoint",`<p>${S.env&&S.env.level==="bad"?S.env.title+". ":""}The app can't write into the workbook from here, so <b>Save</b> will only <b>download</b> an updated copy.</p><p>To save directly: open the Initiatives Tracker Desk from your OneDrive-synced folder (see <i>How to open it correctly</i>). Or download now and upload the file to SharePoint with the same name.</p>`,[["cancel","Cancel"],["how","How to open it correctly"],["dl","Download updated copy","primary"]]);
     if(k==="how"){envHelp();return}if(k!=="dl")return;S._dlOk=true}
   download(blob,asCopy?S.fileName.replace(/\.xlsx$/i,"")+" (copy).xlsx":S.fileName);
   if(asCopy)toast("Copy downloaded",4000);else finishSave("Downloaded the updated workbook. Replace the file in SharePoint (same name) with it.");
@@ -1101,7 +1101,7 @@ function bindSpCard(root) {
 async function spSetupDialog() {
   const c = gCfg(); const here = /^https?:$/.test(location.protocol) ? location.origin + location.pathname : "http://localhost:8765/SGA_Tracker_Desk.html";
   const k = await choose("Open from SharePoint links — setup", `<ol class="steps" style="margin:0 0 10px 18px;font-size:13px">
-      <li><b>IT, once:</b> Entra ID → App registrations → New → name "SGA Tracker Desk" → platform <b>Single-page application</b>, redirect URI <code>${esc(here)}</code> → API permissions: Microsoft Graph, delegated <b>Files.ReadWrite.All</b> (grant admin consent).</li>
+      <li><b>IT, once:</b> Entra ID → App registrations → New → name "Initiatives Tracker Desk" → platform <b>Single-page application</b>, redirect URI <code>${esc(here)}</code> → API permissions: Microsoft Graph, delegated <b>Files.ReadWrite.All</b> (grant admin consent).</li>
       <li>Paste the <b>Application (client) ID</b> below (and your tenant ID or domain).</li>
       <li>Start the Desk with <b>Start_Tracker_Desk.cmd</b> (opens it at http://localhost:8765) — or host it on a company web server and register that address instead.</li></ol>
     <label class="field"><span>Client ID</span><input id="gCid" value="${esc(c.clientId)}" placeholder="00000000-0000-0000-0000-000000000000"></label>
@@ -1252,7 +1252,7 @@ function stickVars(){try{const h=document.querySelector("header.top"),n=document
 window.addEventListener("resize",stickVars);
 function renderLanding(){
   $("#main").innerHTML=`<div class="landing">
-  <div class="drop card" id="drop"><h2 style="font-size:20px">Open the SG&amp;A tracker workbook</h2>
+  <div class="drop card" id="drop"><h2 style="font-size:20px">Open the initiatives tracker workbook</h2>
   <p class="muted">Drag the <b>.xlsx</b> here or click the button. Everything stays on your computer; nothing is uploaded anywhere.</p>
   ${WB.rec?connectCardHtml():`<p><button class="btn primary" id="bigOpen">Open workbook…</button></p>${connectCardHtml()}`}${spCardHtml()}${S.env&&S.env.level==="ok"?`<p class="envok">✓ Opened from your OneDrive / SharePoint synced folder — saving will reach SharePoint.</p>`:""}</div>
   <div class="card pad" style="margin-top:16px"><h2>With SharePoint</h2><ol class="steps">
@@ -2783,7 +2783,7 @@ function loginPage(msg) {
     let last = ""; try { last = localStorage.getItem("sga_lastlogin") || ""; } catch (e) { }
     const ms = typeof gReady === "function" && gReady();
     pg.innerHTML = `<form class="lpcard" id="lpForm" autocomplete="on" novalidate>
-      <div class="lpbrand"><span class="lplogo" aria-hidden="true">SG&amp;A</span><div><h1 id="lpH">Tracker Desk</h1><p>${esc(S.fileName || "")}</p></div></div>
+      <div class="lpbrand"><span class="lplogo" aria-hidden="true">ITD</span><div><h1 id="lpH">Initiatives Tracker Desk</h1><p>${esc(S.fileName || "")}</p></div></div>
       ${msg ? `<div class="lperr" role="alert">${esc(msg)}</div>` : ""}
       <label class="lpf"><span>Email</span><input id="lpUser" name="username" type="email" autocomplete="username" required value="${esc(last)}" placeholder="name@thaiunion.com"></label>
       <label class="lpf"><span>Password</span><input id="lpPw" name="password" type="password" autocomplete="current-password" placeholder="Leave blank if you have none"></label>
