@@ -148,7 +148,7 @@ function quPlanHtml(r){const pid=pId(r);const st=UI.qu.plan&&UI.qu.plan[r];if(!s
     ${st.nat==="One-off"?"":`<div class="qlrow" title="How many months until the full amount is reached. 0 or 1 = full amount from the first month; 3 = builds up over 3 months (⅓, ⅔, full)."><span>Full amount after</span><input type="number" data-qpf="ramp" min="0" max="36" step="1" value="${st.ramp}" placeholder="1" style="width:52px" aria-label="Months until the full amount is reached"><span class="muted">month(s) — 1 = full from the start</span></div>`}
     <div class="muted qppv">= <b>${fmtShort(yr)}</b> THB ${st.nat==="One-off"?"one-off":"/ year"}${thb?"":` (${fmtNum(st.amt)} h × ${fmtNum(rate)} THB/h × 12)`} · was ${fmtShort(ln.gross)}</div>
     <div class="qlbtns"><button type="button" class="btn small" data-qpx="${r}">Close</button><button type="button" class="btn small primary" data-qps="${r}">Save plan</button></div></div>`}
-function quPlanSave(r){const st=UI.qu.plan[r];const {lines}=quLogLines(pId(r));const ln=lines.find(b=>b.id===st.line);if(!ln)return 0;const br=ln.r;let n=0;
+function quPlanSave(r){const st=UI.qu.plan&&UI.qu.plan[r];if(!st)return 0;const {lines}=quLogLines(pId(r));const ln=lines.find(b=>b.id===st.line);if(!ln)return 0;const br=ln.r;let n=0;
   const put=(c,v)=>{if(String(gv("Benefits",c,br))!==String(v)){setCell("Benefits",c,br,v);n++}};
   put(FB[st.kind],st.amt?+st.amt:"");put(FB.nature,st.nat);if(st.kind!=="trh"&&st.nat!=="One-off")put(FB.basis,st.basis);
   put(FB.start,st.start?serialFromIso(st.start+"-01"):"");put(FB.ramp,st.ramp===""?"":Math.max(0,Math.round(+st.ramp)));return n}
@@ -190,7 +190,7 @@ function quLogHtml(r){const pid=pId(r);const st=UI.qu.log&&UI.qu.log[r];if(!st)r
     <div class="qlseg" role="radiogroup" aria-label="How to enter the actual"><button type="button" data-qlt="one" class="${T==="one"?"on":""}" aria-pressed="${T==="one"}" title="One amount for one month">One month</button><button type="button" data-qlt="mon" class="${T==="mon"?"on":""}" aria-pressed="${T==="mon"}" title="The same amount every month from … to …">Same amount</button><button type="button" data-qlt="grid" class="${T==="grid"?"on":""}" aria-pressed="${T==="grid"}" title="Type each month">Each month</button></div>
     ${body}
     <div class="qlbtns"><button type="button" class="btn small" data-qlx="${r}">Close</button><button type="button" class="btn small primary" data-qls="${r}">Save actual${nMon>1?` × ${nMon}`:""}</button></div></div>`}
-function quLogSave(r){const pid=pId(r);const st=UI.qu.log[r];const {BS,lines}=quLogLines(pid);const ln=lines.find(b=>b.id===st.line)||lines[0];if(!ln)return 0;
+function quLogSave(r){const pid=pId(r);const st=UI.qu.log&&UI.qu.log[r];if(!st)return 0;const {BS,lines}=quLogLines(pid);const ln=lines.find(b=>b.id===st.line)||lines[0];if(!ln)return 0;
   const ms=BS.months;const cur=ms.reduce((k,mm,i)=>mm.s<=TODAY?i:k,0);const T=st.type||"one";
   const vals={};if(T==="grid"){for(const [i,v] of Object.entries(st.g||{}))vals[i]=v===""?"":Math.max(0,+v||0)}
   else{const v=Math.max(0,+st.amt||0);const idx=T==="mon"?Array.from({length:Math.max(1,(st.to??cur)-st.mi+1)},(_,j)=>st.mi+j):[st.mi];idx.forEach(i=>vals[i]=v)}
@@ -287,7 +287,7 @@ function quBindRow(m,tr){
     q("amt").oninput=()=>{st.amt=Math.max(0,+q("amt").value||0);grow(st.amt);R.value=st.amt};q("amt").onchange=()=>keepFocus("amt");
     q("amt").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();st.amt=Math.max(0,+q("amt").value||0);box.querySelector("[data-qps]").click()}};
     box.querySelector("[data-qpx2]").onclick=()=>{R.max=quRngMax(+R.max*2)};
-    box.querySelector("[data-qps]").onclick=()=>{let n=0;try{n=quPlanSave(r)}catch(e){toast(e.message,5000);return}delete UI.qu.plan[r];if(n){quStamp(r);QBEN.t=0}
+    box.querySelector("[data-qps]").onclick=e=>{if(e.currentTarget.disabled||!st)return;e.currentTarget.disabled=true;UI.qu.plan=UI.qu.plan||{};UI.qu.plan[r]=st;let n=0;try{n=quPlanSave(r)}catch(e){toast(e.message,5000);return}delete UI.qu.plan[r];if(n){quStamp(r);QBEN.t=0}
       toast(n?"Benefit plan updated. Save to database to keep it.":"Nothing changed",4500);quAfter(m,r,!!n)}});
   tr.querySelectorAll("[data-qlog]").forEach(box=>{const r=+box.dataset.qlog,st=UI.qu.log[r];
     box.querySelectorAll("[data-qlt]").forEach(b=>b.onclick=()=>{st.type=b.dataset.qlt;reRow(r)});
@@ -299,7 +299,7 @@ function quBindRow(m,tr){
     if(q("rng")){q("rng").oninput=e=>sync(e.target.value,"rng");q("amt").oninput=e=>sync(e.target.value,"amt");q("amt").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();box.querySelector("[data-qls]").click()}};
     }if(box.querySelector("[data-qlx2]"))box.querySelector("[data-qlx2]").onclick=()=>{const R=q("rng");const nm=quRngMax(+R.max*2);R.max=nm;R.step=nm>20000?500:100;sync(st.amt!=null?st.amt:R.value,"x")};
     box.querySelector("[data-qlx]").onclick=()=>{delete UI.qu.log[r];reRow(r)};
-    box.querySelector("[data-qls]").onclick=()=>{let n=0;try{n=quLogSave(r)}catch(e){toast(e.message,5000);return}delete UI.qu.log[r];quStamp(r);
+    box.querySelector("[data-qls]").onclick=e=>{if(e.currentTarget.disabled||!st)return;e.currentTarget.disabled=true;UI.qu.log=UI.qu.log||{};UI.qu.log[r]=st;/* use the panel's own state even if it was reset meanwhile */let n=0;try{n=quLogSave(r)}catch(e){toast(e.message,5000);return}delete UI.qu.log[r];quStamp(r);
       toast(n?`Actual saved — ${n} month(s) updated. Save to database to keep it.`:"Nothing changed",4500);quAfter(m,r,!!n)}});
   tr.querySelectorAll("[data-qx]").forEach(b=>b.onclick=async()=>{for(const j of [...QU_BLUR])await j.run();const r=+b.dataset.qx,F=UI.qu;if(F.open.has(r))F.open.delete(r);else F.open.add(r);const y=scrollY;vQuick($("#main"),true);window.scrollTo(0,y);const nb=document.querySelector(`[data-qx="${r}"]`);if(nb)nb.focus({preventScroll:true})})}
 function quReset(el){const r=+el.dataset.qu,f=el.dataset.f;const v={prog:Math.round(((pLive(r).comp)||0)*1000)/10,ph:gv("Projects","AJ",r),ovr:gv("Projects",FP.ovr,r),ps:isoFromSerial(gv("Projects",FP.ps,r)),pe:isoFromSerial(gv("Projects",FP.pe,r)),done:gv("Projects","AK",r),next:gv("Projects","AL",r),iss:gv("Projects","AM",r),q:gv("Projects","AI",r),wsl:gv("Projects",FP.wsl,r),lead:gv("Projects",FP.lead,r),team:gv("Projects","AB",r),init:gv("Projects",FP.init,r)}[f];el.value=v??""}
