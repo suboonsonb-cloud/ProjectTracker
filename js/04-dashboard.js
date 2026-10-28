@@ -151,7 +151,7 @@ function zoomRows(P,z){
     if(z.segType==="status")rows=rows.filter(r=>pStat(r)===z.seg);
     else if(z.segType==="stage")rows=rows.filter(r=>!["Completed","Cancelled"].includes(pStat(r))&&curStage(r)===z.seg);
     else if(z.segType==="cf")rows=rows.filter(r=>z.seg==="Other"?!(z.cfKeep||[]).includes(f(r,FP.cf)):f(r,FP.cf)===z.seg);
-    else if(z.segType==="delay")rows=rows.filter(r=>z.seg==="Delayed tasks"?(pLive(r).ndel||0)>0:(pLive(r).nrisk||0)>0);
+    else if(z.segType==="delay")rows=rows.filter(r=>/^Delayed/.test(z.seg)?pStat(r)==="Delayed":pStat(r)==="At Risk");
   }
   return rows;
 }
@@ -221,12 +221,12 @@ function vDash(m,keepScroll){const _y=window.scrollY;setTimeout(()=>{if(keepScro
       series=cfs.map(cf=>({name:cf,color:cc[cf],vals:cats.map(c=>P.filter(r=>inCat(r,c)&&(cf==="Other"?!cfs.includes(gv("Projects",FP.cf,r)||"(blank)"):(gv("Projects",FP.cf,r)||"(blank)")===cf)).length)}))}
     else if(view==="value"){const cfs=foldOther(uniq(P.map(r=>gv("Projects",FP.cf,r)||"(blank)")),c=>P.filter(r=>(gv("Projects",FP.cf,r)||"(blank)")===c).length);const cc=catColors(cfs);
       series=cfs.map(cf=>({name:cf,color:cc[cf],vals:cats.map(c=>P.filter(r=>inCat(r,c)&&(cf==="Other"?!cfs.includes(gv("Projects",FP.cf,r)||"(blank)"):(gv("Projects",FP.cf,r)||"(blank)")===cf)).reduce((a,r)=>a+(+gv("Projects",FP.value,r)||0),0))}))}
-    else{const tp=r=>{const pr=projRowById(gv("Activities",FA.pid,r));return pr?dimFn(pr)||"(blank)":"(blank)"};
-      series=[{name:"Delayed tasks",color:SCOL.Delayed,vals:cats.map(c=>A.filter(r=>tStat(r)==="Delayed"&&tp(r)===c).length)},{name:"At-risk tasks",color:SCOL["At Risk"],vals:cats.map(c=>A.filter(r=>tStat(r)==="At Risk"&&tp(r)===c).length)}]}
+    else{/* projects (same status as every other chart), not tasks */
+      series=[{name:"Delayed projects",color:SCOL.Delayed,vals:cats.map(c=>P.filter(r=>inCat(r,c)&&pStat(r)==="Delayed").length)},{name:"At-risk projects",color:SCOL["At Risk"],vals:cats.map(c=>P.filter(r=>inCat(r,c)&&pStat(r)==="At Risk").length)}]}
     return stackedV(cats,series,{fmt:view==="value"?fmtShort:v=>fmtNum(v),h:250,maxLbl:12,click:true})};
   let pv=UI.dash.procView==="stage"?"status":UI.dash.procView,bv=["status","cfcount","value","delay"].includes(UI.dash.buView)?UI.dash.buView:"status";
   const orgDim=bu?FP.cf:FP.bu,orgName=bu?"Corporate Function":"BU";if(bu&&bv==="cfcount")bv="status";
-  const VIEWS=[["status","Projects by status"],["cfcount","Projects by CF"],["value","Recurring value by CF (THB)"],["delay","Delayed / at-risk tasks"]];if(pv==="stage")UI.dash.procView="status";
+  const VIEWS=[["status","Projects by status"],["cfcount","Projects by CF"],["value","Recurring value by CF (THB)"],["delay","Delayed / at-risk projects"]];if(pv==="stage")UI.dash.procView="status";
   // in-progress by current stage
   const inprog=P.filter(r=>!["Completed","Cancelled"].includes(pStat(r)));const stgAll=[...listFromName("L_StageWF"),...listFromName("L_StageAG"),"(no tasks)","All complete"];
   const stgKeys=stgAll.filter(sn=>inprog.some(r=>curStage(r)===sn));
@@ -252,7 +252,7 @@ function vDash(m,keepScroll){const _y=window.scrollY;setTimeout(()=>{if(keepScro
     ${k("Recurring value (THB / yr)",fmtShort(valRec))}${k("One-off value (THB)",fmtShort(valOne))}
     ${k("Hours saved / month",fmtNum(hrs),"≈ "+(hrs/fteh).toFixed(1)+" FTE")}
     ${k("Plan realised to date",fmtShort(pTD),"THB")}${k("Actual realised to date",fmtShort(aTD),(pTD?Math.round(aTD/pTD*100):0)+"% of plan")}
-    ${k("Delayed / at-risk tasks",`${A.filter(r=>tStat(r)==="Delayed").length} / ${A.filter(r=>tStat(r)==="At Risk").length}`)}
+    ${k("Delayed / at-risk projects",`${P.filter(r=>pStat(r)==="Delayed").length} / ${P.filter(r=>pStat(r)==="At Risk").length}`,`tasks: ${A.filter(r=>tStat(r)==="Delayed").length} delayed · ${A.filter(r=>tStat(r)==="At Risk").length} at risk`)}
     ${k("Open RAIDD items",D.filter(r=>gv("RAIDD",FD.status,r)!=="Closed"&&gv("RAIDD",FD.type,r)!=="Re-plan").length)}
     ${typeof hasE2E==="function"&&hasE2E()?k("Mapped to an E2E flow",`${(()=>{const G=e2eGroups(pids);return pids.size-G.rest.length})()} / ${pids.size}`,"projects linked to process steps"):""}
     ${k("Re-planned (approved)",`${P.filter(r=>pLive(r).rpdays>0).length} projects`,`${A.filter(r=>tLive(r).rpdays).length} tasks with a new plan`)}
