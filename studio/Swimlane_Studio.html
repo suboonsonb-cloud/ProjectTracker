@@ -340,7 +340,7 @@ function linkSVG(L,selected){const P=linkPts(L);if(!P)return "";const d="M"+P.pt
   return g+"</g>"}
 const colId=c=>String(c).replace(/[^a-z0-9]/gi,"");
 function markers(){const cols=new Set(["#2E75B6","#E02424","#1F2933","#22A33A","#C55A11","#7F7F7F",...D.links.map(l=>l.color||"#2E75B6")]);let m="";
-  const mk=(id,c,start)=>`<marker id="${id}" viewBox="0 0 10 10" refX="${start?1:9}" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10Z" fill="${c}"/></marker>`;
+  const mk=(id,c,start)=>`<marker id="${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10Z" fill="${c}"/></marker>`;
   for(const c of cols){m+=mk("arr-"+colId(c),c,false)+mk("arrs-"+colId(c),c,true)}m+=mk("arr-sel","#F79009",false)+mk("arrs-sel","#F79009",true);return `<defs>${m}</defs>`}
 function bgSVG(forExport){const {W,H}=size();let g="";const hT=headT(),G=gut();
   g+=`<rect x="0" y="0" width="${W}" height="${H}" fill="#FFFFFF"/>`;

@@ -6,7 +6,7 @@
                   Type ; Text ; Connect to ; Change ; Projects ; Hours/month ; Style      (only Type and Text are needed)
      Type       = Start | End | Process | Decision | Document | System | Note   (blank = Process)
      Text       = the box label; " // " or Alt+Enter = new line; "- " at a line start = bullet
-     Connect to = cell address(es) of the next box(es): "C5", "C5 [Yes], E7 [No]", colour after it: "E7 [No] red"; blank = next filled row; "-" = none
+     Connect to = cell address(es) of the next box(es): "C5", "C5 [Yes], E7 [No]", colour after it: "E7 [No] red"; arrow both ways: "<> E7"; blank = next filled row; "-" = none
      Change     = New | Changed | Merged | Removed  (green / orange / purple / red highlight + tag)
      Style      = "Fill Yellow, Border Red, Text Blue, Thick" — colour words or #RRGGBB
    Excel cell formatting also counts: a box cell's fill / font colour → box fill / text colour; a lane header cell's fill → header colour (green = new lane).
@@ -51,7 +51,7 @@ Each step cell, fields separated by semicolons:
   Type; Text; Connect to; Change; Projects; Hours/month; Style
 - Type: Start, End, Process, Decision, Document, System or Note
 - Text: short label (max 8 words per line). " // " = new line; start a line with "- " for a bullet, e.g. "Verify documents // - Invoice // - Receipt". Never use the | character.
-- Connect to: the cell address(es) of the next step(s), e.g. C5. Decisions: C5 [Yes], E7 [No]. Optional arrow colour after it: E7 [No] red. Empty = the next filled row below; "-" = no arrow.
+- Connect to: the cell address(es) of the next step(s), e.g. C5. Decisions: C5 [Yes], E7 [No]. Optional arrow colour after it: E7 [No] red. Arrow heads on both ends (two-way exchange): put <> in front, e.g. <> E7. Empty = the next filled row below; "-" = no arrow.
 - Change (TO-BE only — fill it for EVERY TO-BE step compared with AS-IS): New (green highlight + NEW tag), Changed (orange + CHANGED), Merged (purple + MERGED), Removed (red + REMOVED); empty = unchanged.
 - Projects: project codes that deliver the step, comma separated (only if I gave them)
 - Hours/month: time spent on the step per month (only if I gave it)
@@ -223,13 +223,13 @@ function gridToDoc(grid, name, ver, fmt, opts) {
   for (const c of cells) {
     if (c.to === "-" || c.to === "–") continue;
     let tg = [];
-    if (c.to) for (const part of c.to.split(/,+/)) { const m = /^\s*([A-Z]{1,2})\s*(\d+)\s*(?:\[([^\]]*)\]|\(([^)]*)\))?\s*(#[0-9a-f]{6}|[a-z]+)?\s*$/i.exec(part); if (!m) { if (part.trim()) warn.push(`${c.ref}: can't read “${part.trim()}”`); continue; }
+    if (c.to) for (let part of c.to.split(/,+/)) { let both = false; part = part.replace(/^\s*(<->|<>|↔)\s*|\s*(<->|<>|↔)\s*$/g, () => { both = true; return " "; }); const m = /^\s*([A-Z]{1,2})\s*(\d+)\s*(?:\[([^\]]*)\]|\(([^)]*)\))?\s*(#[0-9a-f]{6}|[a-z]+)?\s*$/i.exec(part); if (!m) { if (part.trim()) warn.push(`${c.ref}: can't read “${part.trim()}”`); continue; }
       let t = byRef[m[1].toUpperCase() + m[2]];
       if (!t) { const col = m[1].toUpperCase(), r0 = +m[2]; for (const d of [1, 2, 3, -1, 4, 5]) { const x = byRef[col + (r0 + d)]; if (x && x !== c) { t = x; break; } }
         if (t) warn.push(`${c.ref}: ${col}${r0} is empty — connected to ${t.ref} (the nearest box in that column)`); else { warn.push(`${c.ref}: ${col}${r0} is empty — no arrow`); continue; } }
-      const colr = m[5] ? e2eHex(m[5], E2E_LINE) : null; if (m[5] && !colr) warn.push(`${c.ref}: unknown arrow colour “${m[5]}”`); tg.push([t, m[3] || m[4] || "", colr]); }
+      const colr = m[5] ? e2eHex(m[5], E2E_LINE) : null; if (m[5] && !colr) warn.push(`${c.ref}: unknown arrow colour “${m[5]}”`); tg.push([t, m[3] || m[4] || "", colr, both]); }
     else if (c.kind !== "end" && c.type !== "note") { const next = rowsUsed.find(r => r > c.r); if (next !== undefined && pageOf[next] === c.pg) { const nx = cells.filter(x => x.r === next); tg = (nx.find(x => x.k === c.k) ? [nx.find(x => x.k === c.k)] : nx.length === 1 ? nx : nx.slice(0, 1)).map(t => [t, "", null]); } }
-    for (const [t, label, colr] of tg) if (t.pg !== c.pg) xpg.push([c, t, label, colr]); else links.push({ id: "l" + c.ref + t.ref, from: sid(c), to: sid(t), label, ...(colr ? { color: colr } : {}), auto: true });   /* auto = routed around the boxes by the studio */
+    for (const [t, label, colr, both] of tg) if (t.pg !== c.pg) xpg.push([c, t, label, colr]); else links.push({ id: "l" + c.ref + t.ref, from: sid(c), to: sid(t), label, ...(colr ? { color: colr } : {}), ...(both ? { both: true } : {}), auto: true });   /* auto = routed around the boxes by the studio */
   }
   /* an arrow to another page: "▶ Page n" connector at the bottom of this page, "◀ from Page m" at the top of the next */
   const extra = []; let xi = 0;
