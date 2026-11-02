@@ -31,7 +31,7 @@ async function pptxToFlows(buf, name) {
     const lanes = base.lanes; const shapes = [], links = [];
     pages.forEach((p, i) => { const pid = "p" + (i + 1); p.shapes.forEach(s => shapes.push({ ...s, id: "q" + (i + 1) + s.id, ...(pages.length > 1 ? { pg: pid } : {}) })); p.links.forEach(l => links.push({ ...l, id: "q" + (i + 1) + l.id, from: "q" + (i + 1) + l.from, to: "q" + (i + 1) + l.to })); });
     const nm = title && !/^(untitled|presentation\d*)$/i.test(title) ? title : (name || title);
-    const doc = { id: "d" + Date.now() + ver.length, name: nm + " " + ver, title: nm, tag: ver, ori: "v", flow: base.flow, head: 46, lanes, secs: [], shapes, links,
+    const doc = { id: "d" + Date.now() + ver.length, name: nm + " " + ver, title: nm, tag: ver, ori: base.ori || "v", flow: base.flow, head: 46, lanes, secs: [], shapes, links,
       ...(base.legend.length ? { legend: base.legend } : {}), ...(pages.length > 1 ? { pages: pages.map((p, i) => ({ id: "p" + (i + 1), name: "Page " + (i + 1), flow: p.flow })) } : {}) };
     out[ver] = { doc, warn: [], stats: { pages: pages.length, lanes: lanes.length, boxes: shapes.length, links: links.length, styled: shapes.filter(s => s.fill).length, newLanes: 0 } };
   }
@@ -64,13 +64,30 @@ function slideToPage(d, A, warn, sno, theme) {
         const sx = cx / (chcx || 1), sy = cy / (chcy || 1); t = { ox: T.ox + T.sx * (ox - chx * sx), oy: T.oy + T.sy * (oy - chy * sy), sx: T.sx * sx, sy: T.sy * sy }; }
       walk(c, t); continue; }
     if (c.localName === "sp" || c.localName === "cxnSp") items.push(readShape(c, T));
+    else if (c.localName === "graphicFrame") readTable(c, T);
     else if (c.localName === "spTree") walk(c, T);
   } };
+  /* a table used as the swimlane grid: header row (or first column) = lane names, each column (row) = a lane */
+  const readTable = (n, T) => { const tbl = one(n, "tbl"); if (!tbl) return; const x = kids(n, "xfrm")[0]; if (!x) return;
+    const off = kids(x, "off", A)[0], ext = kids(x, "ext", A)[0]; const X0 = (T.ox + T.sx * +off.getAttribute("x")) / E, Y0 = (T.oy + T.sy * +off.getAttribute("y")) / E;
+    const cw = [...tbl.getElementsByTagNameNS(A, "gridCol")].map(g => T.sx * +g.getAttribute("w") / E), rows = [...tbl.getElementsByTagNameNS(A, "tr")]; const rh = rows.map(r => T.sy * +r.getAttribute("h") / E);
+    if (cw.length < 1 || rows.length < 1) return; const txt = c => [...c.getElementsByTagNameNS(A, "p")].map(p => [...p.getElementsByTagNameNS(A, "t")].map(t => t.textContent).join("")).join("\n").trim();
+    const cells = rows.map(r => [...r.children].filter(c => c.localName === "tc").map(txt)); const W = cw.reduce((a, b) => a + b, 0), H = rh.reduce((a, b) => a + b, 0);
+    const fillOf = (ri, ci) => { const tc = [...rows[ri].children].filter(c => c.localName === "tc")[ci]; const pr = tc && one(tc, "tcPr"); return pr ? colorOf(kids(pr, "solidFill", A)[0]) : null; };
+    const firstRow = cells[0] || [], restEmpty = cells.slice(1).every(r => r.every(t => !t)), firstCol = cells.map(r => r[0] || ""), colRest = cells.every(r => r.slice(1).every(t => !t));
+    const base = { prst: "rect", hasFill: true, hasLine: true, fill: "#FFFFFF", line: "#BFBFBF", txBox: false, arrowHead: false, arrowTail: false, tcol: null, sz: null, bold: true, poly: null, cxn: false, fh: false, fv: false, tbl: true };
+    if (cw.length >= 2 && firstRow.filter(Boolean).length >= 2 && (restEmpty || rows.length <= 3 || cw.length >= rows.length)) { let xx = X0;
+      cw.forEach((w, i) => { items.push({ ...base, id: "", nm: "tblLane", X: xx, Y: Y0 + rh[0], W: w, H: H - rh[0], text: "" }); items.push({ ...base, id: "", nm: "tblHead", X: xx, Y: Y0, W: w, H: rh[0], text: firstRow[i] || "", fill: fillOf(0, i) || "#1F3864" }); xx += w; }); }
+    else if (rows.length >= 2 && firstCol.filter(Boolean).length >= 2) { let yy = Y0;
+      rh.forEach((h, i) => { items.push({ ...base, id: "", nm: "tblLane", X: X0 + cw[0], Y: yy, W: W - cw[0], H: h, text: "" }); items.push({ ...base, id: "", nm: "tblHead", X: X0, Y: yy, W: cw[0], H: h, text: firstCol[i] || "", fill: fillOf(i, 0) || "#1F3864" }); yy += h; }); }
+  };
   const readShape = (n, T) => {
     const spPr = kids(n, "spPr")[0]; const x = spPr && kids(spPr, "xfrm", A)[0]; const nv = n.firstElementChild; const cNvPr = nv && one(nv, "cNvPr");
     let X = 0, Y = 0, W = 0, H = 0, fh = false, fv = false;
     if (x) { const off = kids(x, "off", A)[0], ext = kids(x, "ext", A)[0]; X = +(off && off.getAttribute("x") || 0); Y = +(off && off.getAttribute("y") || 0); W = +(ext && ext.getAttribute("cx") || 0); H = +(ext && ext.getAttribute("cy") || 0); fh = x.getAttribute("flipH") === "1"; fv = x.getAttribute("flipV") === "1"; }
     X = (T.ox + T.sx * X) / E; Y = (T.oy + T.sy * Y) / E; W = T.sx * W / E; H = T.sy * H / E;
+    const rot = x ? (((+x.getAttribute("rot") || 0) / 60000) % 360 + 360) % 360 : 0;
+    const ph = nv && one(nv, "ph"); const phType = ph ? (ph.getAttribute("type") || "body") : "";
     const geom = spPr && one(spPr, "prstGeom"); const prst = geom ? geom.getAttribute("prst") : (spPr && one(spPr, "custGeom") ? "cust" : "");
     const fillEl = spPr ? kids(spPr, "solidFill", A)[0] : null, noFill = spPr ? kids(spPr, "noFill", A).length > 0 : false;
     const clr = el => colorOf(el);
@@ -93,9 +110,23 @@ function slideToPage(d, A, warn, sno, theme) {
     /* bold: most of the text is bold */
     let bc = 0, ac = 0; if (tx) for (const r of tx.getElementsByTagNameNS(A, "r")) { const t = (one(r, "t") || {}).textContent || "", rp = one(r, "rPr"); ac += t.trim().length; if (rp && rp.getAttribute("b") === "1") bc += t.trim().length; }
     return { id: cNvPr ? cNvPr.getAttribute("id") : "", nm: cNvPr ? cNvPr.getAttribute("name") || "" : "", X, Y, W, H, fh, fv, prst, fill: noFill ? null : clr(fillEl) || (!fillEl && !noFill && fillRef && +fillRef.getAttribute("idx") > 0 ? (colorOf(fillRef) || "scheme:style") : null), hasFill: (!!fillEl && !noFill) || (!fillEl && !noFill && !txBox && !!one(n, "fillRef") && +one(n, "fillRef").getAttribute("idx") > 0), line: lnNo ? null : (lnClr || styleLnClr), hasLine: !txBox && ((!!ln && !lnNo && !!lnClr) || styleLn), txBox,
-      arrowHead, arrowTail, text, tcol, sz, bold: ac ? bc / ac > 0.6 : bold, poly, cxn: n.localName === "cxnSp", st: st ? st.getAttribute("id") : null, en: en ? en.getAttribute("id") : null };
+      arrowHead, arrowTail, text, tcol, sz, bold: ac ? bc / ac > 0.6 : bold, poly, rot, phType, cxn: n.localName === "cxnSp", st: st ? st.getAttribute("id") : null, en: en ? en.getAttribute("id") : null };
   };
   const tree = one(d.documentElement, "spTree"); if (!tree) return null; walk(tree, xf0);
+  const rotP = (p, c, deg) => { const r = deg * Math.PI / 180, dx = p.x - c.x, dy = p.y - c.y; return { x: c.x + dx * Math.cos(r) - dy * Math.sin(r), y: c.y + dx * Math.sin(r) + dy * Math.cos(r) }; };
+  for (const it of items) { if (!it.rot) continue; const c = { x: it.X + it.W / 2, y: it.Y + it.H / 2 };
+    const lineLike = it.cxn || /^(line|straightConnector1|bentConnector\d|curvedConnector\d)$/.test(it.prst) || it.poly;
+    if (lineLike) { const pts = it.poly || [{ x: it.X + (it.fh ? it.W : 0), y: it.Y + (it.fv ? it.H : 0) }, { x: it.X + (it.fh ? 0 : it.W), y: it.Y + (it.fv ? 0 : it.H) }]; it.poly = pts.map(p => rotP(p, c, it.rot)); if (it.prst !== "cust") it.prst = it.prst || "line"; continue; }
+    if (Math.abs(it.rot - 90) < 20 || Math.abs(it.rot - 270) < 20) { const w = it.W; it.W = it.H; it.H = w; it.X = c.x - it.W / 2; it.Y = c.y - it.H / 2; } }
+  /* lanes drawn as rows (left → right flow)? turn the slide 90° here, read it like columns, turn the result back at the end */
+  const isLine0 = s => s.cxn || /^(line|straightConnector1|bentConnector\d|curvedConnector\d)$/.test(s.prst) || (s.prst === "" && (s.W < 1.5 || s.H < 1.5) && !s.text) || (s.prst === "cust" && s.poly && !s.text && !s.hasFill);
+  const titleHint = (() => { const big = items.filter(s => !isLine0(s) && (s.hasFill || s.hasLine) && s.W > 40 && !s.text); const y0 = big.length ? Math.min(...big.map(s => s.Y)) : Infinity;
+    const c = items.filter(s => s.text && s.Y + s.H <= y0 + 2).sort((a, b) => (/title/i.test(b.phType || "") - /title/i.test(a.phType || "")) || (b.sz || 0) - (a.sz || 0) || a.Y - b.Y)[0]; return c ? c.text.split("\n")[0] : ""; })();
+  let hz = false; { const sh0 = items.filter(s => !isLine0(s) && (s.hasFill || s.hasLine) && /^(rect|)$/.test(s.prst));
+    const xs = sh0.map(s => s.X), ys = sh0.map(s => s.Y), spanX = Math.max(...sh0.map(s => s.X + s.W), 0) - Math.min(...xs, 0), spanY = Math.max(...sh0.map(s => s.Y + s.H), 0) - Math.min(...ys, 0);
+    const tall = sh0.filter(s => s.H > spanY * 0.45 && s.W > 40 && s.H > s.W).length, wide = sh0.filter(s => s.W > spanX * 0.45 && s.H > 30 && s.W > s.H * 1.5).length;
+    hz = wide >= 2 && wide > tall; }
+  if (hz) for (const it of items) { [it.X, it.Y] = [it.Y, it.X]; [it.W, it.H] = [it.H, it.W]; [it.fh, it.fv] = [it.fv, it.fh]; if (it.poly) it.poly = it.poly.map(p => ({ ...p, x: p.y, y: p.x })); }
   const isLine = s => s.cxn || /^(line|straightConnector1|bentConnector\d|curvedConnector\d)$/.test(s.prst) || (s.prst === "" && (s.W < 1.5 || s.H < 1.5) && !s.text) || (s.prst === "cust" && s.poly && !s.text && !s.hasFill);
   const lines = items.filter(isLine), shapesAll = items.filter(s => !isLine(s));
   if (!shapesAll.length) return null;
@@ -106,9 +137,18 @@ function slideToPage(d, A, warn, sno, theme) {
   /* lanes: tall rectangles, side by side */
   let laneBodies = shapesAll.filter(s => /^(rect|)$/.test(s.prst) && isFilledish(s) && s.H > (maxY - minY) * 0.45 && s.W > 40).sort((a, b) => a.X - b.X);
   laneBodies = laneBodies.filter((s, i, a) => !a.some((o, j) => j !== i && Math.abs(o.X - s.X) < 3 && Math.abs(o.W - s.W) < 3 && j < i));
+  /* a highlight frame drawn over a lane is not a lane of its own */
+  { const ovx = (a, b) => Math.max(0, Math.min(a.X + a.W, b.X + b.W) - Math.max(a.X, b.X));
+    laneBodies = laneBodies.filter(s => !laneBodies.some(o => o !== s && ovx(s, o) > 0.6 * Math.min(s.W, o.W) && ((o.hasFill && !s.hasFill) || (o.hasFill === s.hasFill && o.W * o.H > s.W * s.H)))); }
+  /* no lane bodies drawn: a row of equal header boxes along the top → each one starts a lane down to the bottom of the diagram */
+  if (laneBodies.length < 2) { const hs = shapesAll.filter(s => s.text && (s.hasFill || s.hasLine) && /^(rect|roundRect|)$/.test(s.prst) && s.W > 40 && s.H < 70);
+    let best = []; for (const h of hs) { const row = hs.filter(o => Math.abs(o.Y - h.Y) < 4 && Math.abs(o.H - h.H) < 4).sort((a, b) => a.X - b.X);
+      const ok = row.length >= 2 && row.every((o, i) => i === 0 || o.X - (row[i - 1].X + row[i - 1].W) < 14) && row.some(o => o.hasFill && o.fill && !/^#FFFFFF$/i.test(o.fill));
+      if (ok && row.length > best.length && !shapesAll.some(o => !row.includes(o) && o.Y + o.H < h.Y - 2 && o.W > 40 && (o.hasFill || o.hasLine) && !o.text)) best = row; }
+    if (best.length >= 2) { const bot = Math.max(...items.map(s => s.Y + s.H)); laneBodies = best.map(h => ({ X: h.X, Y: h.Y + h.H, W: h.W, H: Math.max(40, bot - h.Y - h.H + 6), prst: "rect", hasFill: false, hasLine: false, text: "", synth: true })); } }
   const used = new Set(laneBodies);
   /* header = same-width shape at the top of the lane body, or sitting right on top of it */
-  const lanes = laneBodies.map(b => { const hdr = shapesAll.filter(s => !used.has(s) && Math.abs(s.X - b.X) < 6 && Math.abs(s.W - b.W) < 8 && s.H < 90 &&
+  const lanes = laneBodies.map(b => { const hdr = shapesAll.filter(s => !used.has(s) && Math.abs(s.X - b.X) < 6 && Math.abs(s.W - b.W) < 8 && s.H < Math.max(90, Math.min(140, b.H * 0.3)) &&
       ((s.Y >= b.Y - 4 && s.Y < b.Y + 25) || (s.Y + s.H <= b.Y + 6 && s.Y + s.H >= b.Y - 12)));
     hdr.forEach(h => used.add(h)); const hFill = hdr.find(h => h.hasFill && h.fill && !/^#FFFFFF$/i.test(h.fill) && !h.fill.startsWith("scheme"));
     const hTxt = hdr.map(h => h.text).filter(Boolean).join("\n") || b.text || ""; const [nm, ...sub] = hTxt.split("\n");
@@ -122,16 +162,22 @@ function slideToPage(d, A, warn, sno, theme) {
   const boxes0 = rest.filter(s => !textOnlySet.has(s) && (s.hasFill || s.hasLine) && s.W >= 18 && s.H >= 12);
   /* legend: small swatches above the lanes, with a text to the right */
   const legend = []; const above = s => s.Y + s.H <= lanesTop + 2;
-  for (const sw of boxes0.filter(s => above(s) && s.W < 40 && s.H < 30)) { const t = [...textOnlySet].concat(rest.filter(s => s.text)).filter(o => o !== sw && above(o) && o.X >= sw.X + sw.W - 2 && o.X < sw.X + sw.W + 30 && Math.abs(ctr(o).y - ctr(sw).y) < 12).sort((a, b) => a.X - b.X)[0];
+  for (const sw of hz ? [] : boxes0.filter(s => above(s) && s.W < 40 && s.H < 30)) { const t = [...textOnlySet].concat(rest.filter(s => s.text)).filter(o => o !== sw && above(o) && o.X >= sw.X + sw.W - 2 && o.X < sw.X + sw.W + 30 && Math.abs(ctr(o).y - ctr(sw).y) < 12).sort((a, b) => a.X - b.X)[0];
     if (t) { legend.push({ fill: sw.fill && !sw.fill.startsWith("scheme") ? sw.fill : "#FFFFFF", stroke: sw.line && !sw.line.startsWith("scheme") ? sw.line : "#7F8C8D", text: t.text.split("\n")[0] }); used.add(sw); used.add(t); textOnlySet.delete(t); } }
   /* title: biggest text above the lanes */
-  const titleCand = rest.filter(s => s.text && above(s) && !used.has(s)).sort((a, b) => (b.sz || 0) - (a.sz || 0) || a.Y - b.Y)[0]; const title = titleCand ? titleCand.text.split("\n")[0] : "";
+  const titleCand = rest.find(s => s.text && /title|ctrTitle/i.test(s.phType || "") && !used.has(s)) || rest.filter(s => s.text && above(s) && !used.has(s)).sort((a, b) => (b.sz || 0) - (a.sz || 0) || a.Y - b.Y)[0]; const title = titleCand ? titleCand.text.split("\n")[0] : "";
   if (titleCand) used.add(titleCand);
   /* boxes inside the lanes area; attach overlay texts */
+  const IDRE = /^[A-Z0-9]{2,}(?:-[A-Z0-9]{2,}){2,}$/, CHGRE = /^(new|changed|merged|removed)$/i;
+  const isBadge = s => { const t = String(s.text || "").trim(); return t && s.H <= 20 && (IDRE.test(t) || CHGRE.test(t)); };
+  const badges = rest.filter(s => isBadge(s) && !used.has(s)); badges.forEach(b => used.add(b));
   const boxes = boxes0.filter(s => !used.has(s) && (!lanes.length || s.Y >= hdrBottom - 4));
   const kindOf = s => /diamond|flowChartDecision/.test(s.prst) ? "decision" : /ellipse|flowChartTerminator|flowChartAlternateProcess/.test(s.prst) ? "rounded" : /flowChartDocument|flowChartMultidocument/.test(s.prst) ? "document" : /can|flowChartMagneticDisk/.test(s.prst) ? "database" : /roundRect/.test(s.prst) ? "process" : "process";
   // drop boxes that are just a text overlay on another box (same area, smaller/equal, with text) — keep the outer one
   const bx = []; for (const s of boxes.sort((a, b) => b.W * b.H - a.W * a.H)) { const host = bx.find(o => inside(s, o, 3) && (s.text || !s.hasLine)); if (host) { if (s.text && !host.text) host.text = s.text, host.tcol = host.tcol || s.tcol; continue; } bx.push({ ...s }); }
+  for (const g of badges) { const c = ctr(g); const ov = b => Math.max(0, Math.min(g.X + g.W, b.X + b.W) - Math.max(g.X, b.X)) * Math.max(0, Math.min(g.Y + g.H + 4, b.Y + b.H) - Math.max(g.Y - 4, b.Y));
+    const host = bx.filter(b => ov(b) > 0 || (c.x >= b.X - 4 && c.x <= b.X + b.W + 4 && c.y >= b.Y - 12 && c.y <= b.Y + b.H + 12)).sort((a, b) => ov(b) - ov(a))[0]; if (!host) continue; const t = g.text.trim();
+    if (IDRE.test(t)) { host.proj = host.proj || []; if (!host.proj.includes(t)) host.proj.push(t); } else host.chg = t[0].toUpperCase() + t.slice(1).toLowerCase(); }
   const labels = [];
   for (const t of rest.filter(s => s.text && !used.has(s) && !boxes0.includes(s) || textOnlySet.has(s))) { if (used.has(t)) continue;
     const host = bx.filter(b => { const c = ctr(t); return c.x >= b.X - 2 && c.x <= b.X + b.W + 2 && c.y >= b.Y - 2 && c.y <= b.Y + b.H + 2; }).sort((a, b) => a.W * a.H - b.W * b.H)[0];
@@ -144,18 +190,8 @@ function slideToPage(d, A, warn, sno, theme) {
   const shapes = bx.map((b, i) => { const kind = kindOf(b); const term = kind === "rounded";
     const fill = b.fill && !b.fill.startsWith("scheme") ? b.fill : null, line = b.line && !b.line.startsWith("scheme") ? b.line : null, tcol = b.tcol && !b.tcol.startsWith("scheme") ? b.tcol : null;
     const txt = String(b.text || "").split("\n").map(s => s.replace(/^\s*[•·▪●]\s*/, "- ")).join("\n");
-    return { id: "s" + i, src: b, type: kind, x: Math.round((b.X - L0) * k), y: Math.round((b.Y - top) * k) + FS + 8, w: Math.max(24, Math.round(b.W * k)), h: Math.max(14, Math.round(b.H * k)), text: txt, ...(b.sz ? { fs: Math.max(8, Math.min(40, Math.round(b.sz * k))) } : {}), ...(b.bold ? { bold: true } : {}),
+    return { id: "s" + i, src: b, type: kind, x: Math.round((b.X - L0) * k), y: Math.round((b.Y - top) * k) + FS + 8, w: Math.max(24, Math.round(b.W * k)), h: Math.max(14, Math.round(b.H * k)), text: txt, ...(b.proj ? { proj: b.proj } : {}), ...(b.chg ? { chg: b.chg } : {}), ...(b.sz ? { fs: Math.max(8, Math.min(40, Math.round(b.sz * k))) } : {}), ...(b.bold ? { bold: true } : {}),
       ...(fill ? { fill } : term ? { fill: "#1F3864" } : {}), ...(line ? { stroke: line } : fill ? { stroke: fill } : {}), ...(tcol && !/^#(000000|1B2631|111827)$/i.test(tcol) ? { color: tcol } : (term && (!fill || lum(fill) < 110)) ? { color: "#FFFFFF" } : {}) }; });
-  /* shrink the text until it fits its box (same wrapping as the studio: Arial, 7px padding, 1.25 line height, bullets indented 14px) */
-  const cv = (typeof document !== "undefined") ? document.createElement("canvas").getContext("2d") : null;
-  const tw = (t, fs, b) => { if (!cv) return t.length * fs * 0.55; cv.font = `${b ? "bold " : ""}${fs}px Arial, Helvetica, sans-serif`; return cv.measureText(t).width; };
-  const nLines = (sh, fs) => { const pad = sh.type === "decision" ? Math.min(sh.w, sh.h) * 0.22 : 7, inner = Math.max(20, sh.w - 2 * pad); let n = 0;
-    for (let ln of String(sh.text || "").split("\n")) { let ind = 0; const m = ln.match(/^\s*(?:[-*•]|\[[ xX]?\]|o)\s+/); if (m) { ind = 14; ln = ln.slice(m[0].length); } const av = inner - ind;
-      if (!ln.trim()) { n++; continue; } let cur = ""; for (const w of ln.split(/(\s+)/)) { const t = cur + w; if (tw(t.trimEnd(), fs, sh.bold) <= av || !cur.trim()) cur = t; else { n++; cur = w.trimStart(); } while (tw(cur.trimEnd(), fs, sh.bold) > av && cur.length > 1) { let q = cur.length - 1; while (q > 1 && tw(cur.slice(0, q), fs, sh.bold) > av) q--; n++; cur = cur.slice(q); } } n++; }
-    return { n, pad: sh.type === "decision" ? Math.min(sh.w, sh.h) * 0.22 : 7 }; };
-  for (const sh of shapes) { if (!sh.text) continue; let fs = sh.fs || 13;
-    for (; fs > 8; fs--) { const r = nLines(sh, fs); if (r.n * Math.round(fs * 1.25) + (sh.type === "decision" ? 2 * r.pad : 6) <= sh.h) break; }
-    if (fs !== (sh.fs || 13)) sh.fs = fs; }
   function lum(h) { const [r, g, b] = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)); return 0.299 * r + 0.587 * g + 0.114 * b; }
   const near = (p, b, t = 7) => p.x >= b.X - t && p.x <= b.X + b.W + t && p.y >= b.Y - t && p.y <= b.Y + b.H + t;
   const boxAt = p => { const c = shapes.filter(s => near(p, s.src)); return c.sort((a, b) => a.src.W * a.src.H - b.src.W * b.src.H)[0] || null; };
@@ -226,7 +262,7 @@ function slideToPage(d, A, warn, sno, theme) {
   /* labels → nearest arrow segment → that arrow */
   const dist = (p, s) => { const dx = s.b.x - s.a.x, dy = s.b.y - s.a.y, L2 = dx * dx + dy * dy || 1; let u = ((p.x - s.a.x) * dx + (p.y - s.a.y) * dy) / L2; u = Math.max(0, Math.min(1, u)); return Math.hypot(p.x - (s.a.x + u * dx), p.y - (s.a.y + u * dy)); };
   /* each label goes to the closest arrow that has no label yet (two labels at a fork → one per branch) */
-  const lbl = labels.map(lb => ({ c: ctr(lb), txt: lb.text.split("\n")[0].trim() })).filter(x => x.txt && x.txt.length <= 40);
+  const lbl = labels.map(lb => ({ c: ctr(lb), txt: lb.text.split("\n")[0].trim() })).filter(x => x.txt && x.txt.length <= 40 && !IDRE.test(x.txt) && !CHGRE.test(x.txt));
   const dOf = (c, L) => { let bd = Infinity; const ss = segPath[L.id]; if (ss) for (const s of ss) { const own = !segs.some(o => o !== s && false); bd = Math.min(bd, dist(c, s)); }
     if (bd === Infinity) { const a = shapes.find(s => s.id === L.from), b = shapes.find(s => s.id === L.to); bd = dist(c, { a: ctr(a.src), b: ctr(b.src) }); } return bd; };
   /* prefer the arrow whose END is near the label (branch labels sit next to the branch, not the shared trunk) */
@@ -235,6 +271,21 @@ function slideToPage(d, A, warn, sno, theme) {
   pairs.sort((a, b) => a.d - b.d); const doneX = new Set();
   for (const p of pairs) { if (doneX.has(p.x) || p.L.label) continue; p.L.label = p.x.txt; doneX.add(p.x); }
   const flow = Math.max(500, Math.round(((lanes.length ? Math.max(...lanes.map(l => l.body.Y + l.body.H)) : maxY) - top) * k) + 20);
+  /* rows-lanes slide: turn the result back (flow left → right, lanes stacked) */
+  const HT = 46;
+  if (hz) { for (const sh of shapes) { const nx = sh.y - (FS + 8) + HT + 40, ny = sh.x + 46; [sh.w, sh.h] = [sh.h, sh.w]; sh.x = nx; sh.y = ny; }
+    const SW = { top: "left", bottom: "right", left: "top", right: "bottom" };
+    for (const L of links) { if (L.fs) L.fs = SW[L.fs]; if (L.ts) L.ts = SW[L.ts]; const mx = L.mx, my = L.my; delete L.mx; delete L.my; if (mx != null) L.my = mx + 46; if (my != null) L.mx = my - (FS + 8) + HT + 40; } }
+  /* shrink the text until it fits its box (same wrapping as the studio: Arial, 7px padding, 1.25 line height, bullets indented 14px) */
+  const cv = (typeof document !== "undefined") ? document.createElement("canvas").getContext("2d") : null;
+  const tw = (t, fs, b) => { if (!cv) return t.length * fs * 0.55; cv.font = `${b ? "bold " : ""}${fs}px Arial, Helvetica, sans-serif`; return cv.measureText(t).width; };
+  const nLines = (sh, fs) => { const pad = sh.type === "decision" ? Math.min(sh.w, sh.h) * 0.22 : 7, inner = Math.max(20, sh.w - 2 * pad); let n = 0;
+    for (let ln of String(sh.text || "").split("\n")) { let ind = 0; const m = ln.match(/^\s*(?:[-*•]|\[[ xX]?\]|o)\s+/); if (m) { ind = 14; ln = ln.slice(m[0].length); } const av = inner - ind;
+      if (!ln.trim()) { n++; continue; } let cur = ""; for (const w of ln.split(/(\s+)/)) { const t = cur + w; if (tw(t.trimEnd(), fs, sh.bold) <= av || !cur.trim()) cur = t; else { n++; cur = w.trimStart(); } while (tw(cur.trimEnd(), fs, sh.bold) > av && cur.length > 1) { let q = cur.length - 1; while (q > 1 && tw(cur.slice(0, q), fs, sh.bold) > av) q--; n++; cur = cur.slice(q); } } n++; }
+    return { n, pad: sh.type === "decision" ? Math.min(sh.w, sh.h) * 0.22 : 7 }; };
+  for (const sh of shapes) { if (!sh.text) continue; let fs = sh.fs || 13;
+    for (; fs > 8; fs--) { const r = nLines(sh, fs); if (r.n * Math.round(fs * 1.25) + (sh.type === "decision" ? 2 * r.pad : 6) <= sh.h) break; }
+    if (fs !== (sh.fs || 13)) sh.fs = fs; }
   shapes.forEach(s => delete s.src);
-  return { title, lanes: outLanes, shapes, links, legend, flow };
+  return { title: hz ? (titleHint || title) : (title || titleHint), lanes: outLanes, shapes, links, legend, flow: hz ? flow + 40 : flow, ori: hz ? "h" : "v" };
 }
