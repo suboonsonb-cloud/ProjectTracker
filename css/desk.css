@@ -539,3 +539,4 @@ details.qcols summary{cursor:pointer;display:inline-block;padding:3px 10px;borde
 .pvmenu button:hover{background:#EEF3FA!important}
 .pvmenu button.on{background:#E3EBF7!important;color:#1F3864!important;font-weight:700!important}
 .pvsub{font-weight:500;opacity:.85;font-size:12px}
+.btn[hidden],button[hidden]{display:none!important}

@@ -44,12 +44,12 @@ function projInScope(r, sc) { sc = sc || scope(); if (!sc) return true; const bu
   if (!bu && !cf) return true; /* a new, not yet classified project */ return sc.includes(bu) || sc.includes(cf); }
 let SC_CACHE = { k: "" };
 const _rowsOf0 = rowsOf;
-function scopeSets() { const sc = scope(); const k = (ACC ? ACC.login + ACC.bu : "") + "|" + S.changes.length + "|" + S.fileName; if (SC_CACHE.k === k) return SC_CACHE;
+function scopeSets() { const sc = scope(); const k = (ACC ? ACC.login + ACC.bu : "") + "|" + S.changes.length + "|" + S.fileName + "|" + (S.newRows && S.newRows.Projects ? S.newRows.Projects.size : 0); if (SC_CACHE.k === k) return SC_CACHE;
   const pr = _rowsOf0("Projects").filter(r => projInScope(r, sc)); const pids = new Set(pr.map(pId)); const bids = new Set(_rowsOf0("Benefits").filter(r => pids.has(gv("Benefits", FB.pid, r))).map(r => gv("Benefits", FB.id, r)));
   return SC_CACHE = { k, pr: new Set(pr), pids, bids }; }
 rowsOf = function (sheet) {
   const a = _rowsOf0(sheet); if (!scope()) return a; const X = scopeSets();
-  if (sheet === "Projects") return a.filter(r => X.pr.has(r));
+  if (sheet === "Projects") return a.filter(r => X.pr.has(r) || (S.newRows && S.newRows.Projects && S.newRows.Projects.has(r)));
   const pc = { Activities: FA.pid, Benefits: FB.pid, RAIDD: FD.pid, Realisation: FR.pid }[sheet];
   if (pc) return a.filter(r => { const p = gv(sheet, pc, r); return !p || X.pids.has(p) || (sheet === "Realisation" && X.bids.has(gv(sheet, FR.bid, r))); });
   if (sheet === "Benefit_Plan") return a.filter(r => { const b = gv(sheet, "B", r); return !b || X.bids.has(b); });

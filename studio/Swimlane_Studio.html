@@ -92,6 +92,9 @@ body.embed #brand{display:none}.embhint{display:none;font-size:12px;color:var(--
 .pchip button{border:0;background:rgba(255,255,255,.25);color:#fff;border-radius:8px;width:18px;height:18px;line-height:16px;padding:0;cursor:pointer}
 .linkbar{position:sticky;top:0;left:0;z-index:25;display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:#FFF3D6;color:#6B4A00;border-bottom:1px solid #F2D58A;padding:7px 12px;font-size:13px}
 .linkbar b{color:#3d2a00}
+
+body.ro .pal,body.ro .insp{display:none!important}
+body.ro::after{content:"View only — changes are not saved";position:fixed;left:50%;top:6px;transform:translateX(-50%);background:#FEF3C7;color:#92400E;border:1px solid #FCD34D;border-radius:12px;padding:3px 12px;font:600 12px Arial,sans-serif;z-index:9999;pointer-events:none}
 </style>
 </head>
 <body>
@@ -443,7 +446,8 @@ const _renderPg=render;render=function(){_renderPg();renderPgBar()};
 /* ============================== persistence & history ============================== */
 function persist(){if(EMBED)return;try{localStorage.setItem(STORE,JSON.stringify(DOCS))}catch(e){}}
 /* changes go to the Desk tagged with the flow/version KEY they belong to, so a late message can never land on another version */
-let POSTQ=0;function postNow(){clearTimeout(POSTQ);POSTQ=0;post({type:"change",key:KEY,doc:pgJoin(D)})}
+let POSTQ=0;let RO=false;
+function postNow(){if(RO){clearTimeout(POSTQ);POSTQ=0;return}clearTimeout(POSTQ);POSTQ=0;post({type:"change",key:KEY,doc:pgJoin(D)})}
 function postChange(){if(!EMBED)return;clearTimeout(POSTQ);POSTQ=setTimeout(postNow,60)}
 function flushPost(){if(EDIT)closeEditor(true);if(POSTQ)postNow()}
 function commit(){UNDO.push(JSON.stringify(curSnapshot()));if(UNDO.length>150)UNDO.shift();REDO=[]}
@@ -1049,7 +1053,7 @@ function renderLinkBar(){let b=document.getElementById("linkbar");if(!LINK){if(b
   b.querySelector("#lbDone").onclick=()=>{LINK=null;renderLinkBar();post({type:"linkDone"})}}
 window.addEventListener("message",ev=>{const m=ev.data;if(!m||m.src!=="desk")return;
   if(m.type==="flush"){flushPost();post({type:"flushed",id:m.id});return}
-  if(m.type==="init"){flushPost();if(KEY)HIST[KEY]={u:UNDO,r:REDO,js:JSON.stringify(D)};KEY=m.key||"";EMBED=true;["gDocs","gFiles"].forEach(id=>{const e=document.getElementById(id);if(e)e.hidden=true});const en=document.getElementById("eName");en.hidden=false;en.textContent=m.title||"";
+  if(m.type==="init"){flushPost();RO=!!m.ro;document.body.classList.toggle("ro",RO);if(KEY)HIST[KEY]={u:UNDO,r:REDO,js:JSON.stringify(D)};KEY=m.key||"";EMBED=true;["gDocs","gFiles"].forEach(id=>{const e=document.getElementById(id);if(e)e.hidden=true});const en=document.getElementById("eName");en.hidden=false;en.textContent=m.title||"";
     VER=m.version||"";ASIS=m.asis||[];RATE=+m.rate||0;PROJ=m.projects||[];PMAP=Object.fromEntries(PROJ.map(p=>[p.id,p]));D=pgSplit(m.doc,PGMEM[KEY]);D.links=D.links||[];D.secs=D.secs||[];D.shapes=D.shapes||[];{const h=HIST[KEY];if(h&&h.js===JSON.stringify(D)){UNDO=h.u;REDO=h.r}else{UNDO=[];REDO=[]}}UI.sel.clear();UI.selLink=null;UI.laneSel=null;UI.secSel=null;LINK=m.link||null;
     closePop();if(!EMBED_PANEL_SET){EMBED_PANEL_SET=1;let show=false;try{show=localStorage.getItem(STORE+"_embpanel")==="1"}catch(e){}const mm=document.querySelector(".main");mm.classList.toggle("nopanels",!show);document.getElementById("bPanel").textContent=show?"Hide properties":"Show properties"}
     render();inspector();renderLinkBar();requestAnimationFrame(fitWidth);if(m.focus)setTimeout(()=>focusIds(m.focus),60);return}

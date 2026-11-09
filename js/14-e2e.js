@@ -13,7 +13,12 @@ UI.e2e=UI.e2e||{flow:null,ver:"TO-BE",all:false,q:"",chip:"count",tags:true,link
 const hasE2E=()=>!!(S.sheets[E2EF]&&S.sheets[E2EF].vals&&S.sheets[E2EM]&&S.sheets[E2EM].vals);
 function eSet(sh,c,r,v){if(String(gv(sh,c,r))===String(v??""))return;if(sh===E2EM&&typeof canEdit==="function"&&!canEdit())return;setCell(sh,c,r,v)}
 let E2E_CACHE=null;
-function e2eFlows(){if(E2E_CACHE)return E2E_CACHE;const out=[];if(!hasE2E())return out;const by={};
+/* BU access: a scoped user sees the flows that hold at least one of their projects, or that they own; Viewers never change a flow */
+function e2eFlowVisible(f){if(typeof scope!=="function"||!scope())return true;const X=scopeSets();const ps=new Set();for(const v of VERS){const d=f.v[v]&&f.v[v].doc;for(const p of docProjects(d))ps.add(p)}
+  if([...ps].some(p=>X.pids.has(p)))return true;const me=ACC?[ACC.name,ACC.login].map(x=>String(x||"").toLowerCase()):[];return !!f.owner&&me.includes(f.owner.toLowerCase())}
+function e2eCanEdit(f){if(typeof accessOn!=="function"||!accessOn())return true;if(!ACC||ACC.role==="Viewer")return false;return !f||e2eFlowVisible(f)}
+function e2eFlows(){const all=e2eFlowsAll();return (typeof scope==="function"&&scope())?all.filter(e2eFlowVisible):all}
+function e2eFlowsAll(){if(E2E_CACHE)return E2E_CACHE;const out=[];if(!hasE2E())return out;const by={};
   for(let r=EF_FIRST;r<=EF_LAST;r++){const id=String(gv(E2EF,EF.id,r)||"");if(!id)continue;const ver=String(gv(E2EF,EF.ver,r)||"AS-IS").toUpperCase().includes("TO")?"TO-BE":"AS-IS";
     let js="";for(let k=0;k<EF_NDATA;k++){const v=gv(E2EF,colLet(EF_DATA0+k),r);if(v===""||v==null)break;js+=String(v)}let doc=null;try{doc=js?JSON.parse(js):null}catch(e){doc=null}
     const f=by[id]||(by[id]={id,name:String(gv(E2EF,EF.name,r)||id),area:String(gv(E2EF,EF.area,r)||""),owner:String(gv(E2EF,EF.owner,r)||""),notes:String(gv(E2EF,EF.notes,r)||""),v:{}});
@@ -21,7 +26,7 @@ function e2eFlows(){if(E2E_CACHE)return E2E_CACHE;const out=[];if(!hasE2E())retu
   E2E_CACHE=out;return out}
 function e2eFlow(id){return e2eFlows().find(f=>f.id===id)||null}
 function e2eFreeRow(){for(let r=EF_FIRST;r<=EF_LAST;r++)if(gv(E2EF,EF.id,r)==="")return r;return null}
-function e2eNewId(area){const base="E2E-"+(String(area||"GEN").toUpperCase().replace(/[^A-Z0-9]+/g,"")||"GEN")+"-";const ids=e2eFlows().map(f=>f.id);let n=1;while(ids.includes(base+String(n).padStart(2,"0")))n++;return base+String(n).padStart(2,"0")}
+function e2eNewId(area){const base="E2E-"+(String(area||"GEN").toUpperCase().replace(/[^A-Z0-9]+/g,"")||"GEN")+"-";const ids=e2eFlowsAll().map(f=>f.id);let n=1;while(ids.includes(base+String(n).padStart(2,"0")))n++;return base+String(n).padStart(2,"0")}
 function docProjects(doc){const s=new Set();for(const sh of (doc&&doc.shapes)||[])for(const p of sh.proj||[])s.add(p);return [...s]}
 function laneOfShape(doc,sh){if(!doc||!doc.lanes)return "";const v=(doc.ori||"v")==="v";const hasSec=(doc.secs||[]).length>0;let a=v?(hasSec?34:0):46+(hasSec?34:0);const c=v?sh.x+sh.w/2:sh.y+sh.h/2;
   for(const l of doc.lanes){if(c<a+l.size)return l.name;a+=l.size}return doc.lanes.length?doc.lanes[doc.lanes.length-1].name:""}
@@ -107,7 +112,7 @@ function e2eFlowTotals(f){const out={asis:0,tobe:0,saved:0,cost:0,steps:0,timed:
 function e2eTimeHtml(f){const t=e2eFlowTotals(f);const n=v=>fmtNum(Math.round(v*10)/10);
   return t.asis||t.tobe?`<span class="e2etime" title="Hours per month across all steps (set in each box's pop-up). Saving counts only TO-BE steps timed on both sides.">⏱ AS-IS ${n(t.asis)} h/m → TO-BE ${n(t.tobe)} h/m${t.saved?` · <b style="color:${t.saved>0?"#1E6B24":"#B42318"}">${t.saved>0?"saves":"adds"} ${n(Math.abs(t.saved))} h/m</b>`:""}${t.cost?(t.cost>0?` ≈ ${fmtNum(t.cost)} THB/yr saved`:` ≈ ${fmtNum(-t.cost)} THB/yr extra cost`):""} <span class="muted" style="font-size:11px">(saving on ${t.matched||0} matched step${t.matched===1?"":"s"})</span></span>`:`<span class="e2etime muted" title="Click a box and enter the time spent per month">⏱ add time per step to see savings</span>`}
 function e2eRebuildMap(){if(!hasE2E())return;const rows=[];
-  for(const f of e2eFlows()){const A=f.v["AS-IS"]&&f.v["AS-IS"].doc,T=f.v["TO-BE"]&&f.v["TO-BE"].doc;
+  for(const f of e2eFlowsAll()){const A=f.v["AS-IS"]&&f.v["AS-IS"].doc,T=f.v["TO-BE"]&&f.v["TO-BE"].doc;
     const nm=(d,id)=>{const sh=d&&(d.shapes||[]).find(x=>x.id===id);return sh?stepTitle(sh)+" ("+laneOfShape(d,sh)+")":id};
     const repBy={};if(T)for(const sh of T.shapes||[])for(const a of [].concat(sh.repl||[]))(repBy[a]=repBy[a]||[]).push(sh);
     for(const ver of VERS){const d=f.v[ver]&&f.v[ver].doc;if(!d)continue;
@@ -165,7 +170,7 @@ function e2eInitFrame(){const f=e2eFlow(UI.e2e.flow);if(!f||!E2E_READY)return;co
   const asis=ad?stepOrder(ad).map(sh=>({id:sh.id,text:stepTitle(sh),hrs:sh.hrs==null||sh.hrs===""?null:+sh.hrs,share:Math.max(1,shr(sh.id))})):[];
   if(f.dup&&!f.dupWarned){f.dupWarned=1;toast("“"+f.name+"” has more than one row for "+f.dup.join(", ")+" in E2E_Flows — only the first is used",8000)}
   const key=f.id+"|"+ver;E2E_SENT={key,js:JSON.stringify(doc)};
-  e2ePost({type:"init",key,rate:+setting("S_Rate")||0,version:ver,asis,doc,projects:e2eProjList(),title:e2eTitle(f,ver),link:UI.e2e.link,focus:UI.e2e.focus});
+  e2ePost({type:"init",ro:!e2eCanEdit(f),key,rate:+setting("S_Rate")||0,version:ver,asis,doc,projects:e2eProjList(),title:e2eTitle(f,ver),link:UI.e2e.link,focus:UI.e2e.focus});
   e2ePost({type:"tags",on:UI.e2e.tags,mode:UI.e2e.chip==="count"?"count":"all"});UI.e2e.focus=null}
 const e2eTitle=(f,ver)=>`${f.name} · ${ver==="AS-IS"?"AS-IS (before)":"TO-BE (new design)"}`;
 /* bring the editor in line with the workbook: full re-init only when the flow/version or the stored diagram differs from what the editor holds */
@@ -191,6 +196,7 @@ window.addEventListener("message",ev=>{const m=ev.data;if(!m||m.src!=="swimlane"
   if(m.type==="newProject"){e2eCreateProject(m.step,m.name);return}
   if(m.type==="flushed"){const cb=E2E_FLQ[m.id];if(cb)cb();return}
   if(m.type==="change"){const [fid,kv]=String(m.key||"").split("|");const f=e2eFlow(fid||UI.e2e.flow),ver=VERS.includes(kv)?kv:UI.e2e.ver;if(!f||!m.doc)return;
+    if(!e2eCanEdit(f)){toast("View only — ask an Admin for edit access",3500);return}
     if(e2eWriteDoc(f,ver,m.doc)){if(f.id+"|"+ver===E2E_SENT.key)E2E_SENT.js=JSON.stringify(m.doc);e2eQueueMap();e2eSidePanel();updateBadge();const tb=document.getElementById("e2eTimeBox");if(tb)tb.innerHTML=e2eTimeHtml(e2eFlow(f.id))}return}
   if(m.type==="openProject"){const r=projRowById(m.id);if(r)openProject(r);else toast("Project "+m.id+" is not in this workbook");return}
   if(m.type==="linkDone"){UI.e2e.link=null;e2eSidePanel();return}
@@ -209,14 +215,14 @@ function vE2E(m){
   const tipOff=(()=>{try{return localStorage.getItem("sga_e2e_tip")!=="1"}catch(e){return true}})();
   const top=tipOff?`<div class="e2etipmin"><button class="btn small" id="e2eTip">ⓘ How E2E flows work</button></div>`:`<div class="banner inp"><b>⇄ E2E FLOWS</b><span>Draw each end-to-end process <b>AS-IS (before)</b> and <b>TO-BE (new design)</b>, and tag every step with the projects that deliver it. <b>Click a step box</b> to open its pop-up: search and tick the projects that deliver it, and mark it New / Changed / Removed. You can also drag a project from the project list onto a step. Links are saved to <b>E2E_Flows</b> and <b>E2E_Map</b> — then <b>Save to database</b>.</span><button class="btn small" id="e2eTip" style="margin-left:auto">Hide</button></div><div class="e2enarrow warnbox">Editing flows needs a wider screen (laptop). On a phone you can still see each project's linked steps on its project page.</div>`;
   if(!fl.length){m.innerHTML=top+`<div class="card pad"><h2>No process flows yet</h2><p class="muted">Start from the Shared Services deck's P2P Domestic flow, or create a blank flow.</p>
-    <p><button class="btn primary" id="e2eSeed">Add P2P Domestic AS-IS + TO-BE (from the SSC deck)</button> <button class="btn" id="e2eNew">＋ New blank flow</button></p></div><div id="e2eSlot" data-hidden="1"></div>`;
+    <p><button class="btn primary" id="e2eSeed">Add P2P Domestic AS-IS + TO-BE (from the SSC deck)</button> <button class="btn" id="e2eNew" ${e2eCanEdit()?"":"hidden"}>＋ New blank flow</button></p></div><div id="e2eSlot" data-hidden="1"></div>`;
     e2eAttach(m.querySelector("#e2eSlot"));e2eBindTip(m);$("#e2eNew").onclick=e2eNewFlow;$("#e2eSeed").onclick=()=>e2eSeedP2P();return}
   const has=v=>f.v[v]&&f.v[v].doc;const ver=UI.e2e.ver;
   const fullTop=UI.e2e.full&&fl.length?'<div class="e2enarrow warnbox">Editing flows needs a wider screen (laptop). On a phone you can still see each project\'s linked steps on its project page.</div>':top;
   const other=VERS.find(v=>v!==ver);const snap=(v,where)=>has(v)&&has(ver)?`<div class="card pad e2esnap ${where}"><div class="e2esnaph"><b>${v==="AS-IS"?"AS-IS · before":"TO-BE · new design"}</b><span class="muted">${where==="above"?"scroll up to compare — picture only":"for comparison — picture only"}</span><span style="flex:1"></span><button class="btn small" data-ver="${v}">Edit ${v}</button></div><div class="e2esnapimg" data-snap="${v}"></div></div>`:"";
   m.innerHTML=fullTop+(ver==="TO-BE"?snap("AS-IS","above"):"")+`<div class="card pad e2ebar"><button class="btn" id="e2eHome" title="All process flows — search, open, create">← All flows</button><label>Process flow <select id="e2eSel">${fl.map(x=>`<option value="${esc(x.id)}" ${x.id===f.id?"selected":""}>${esc(x.name)}${x.area?" · "+esc(x.area):""}</option>`).join("")}</select></label>
      <span class="seg" role="group" aria-label="Version">${VERS.map(v=>`<button data-ver="${v}" class="${v===ver?"on":""}">${v==="AS-IS"?"AS-IS · before":"TO-BE · new design"}${has(v)?"":" (empty)"}</button>`).join("")}</span>
-     <button class="btn ${UI.e2e.full?"":"on"}" id="e2eFull" aria-pressed="${!UI.e2e.full}" title="Project list on the right — drag projects onto steps">☰ Project list ${UI.e2e.full?"▸":"◂ hide"}</button><button class="btn" id="e2eEdit" title="Rename, process area, owner, notes · delete flow">⚙ Details</button><button class="btn" id="e2eNew" title="New process flow">＋ Flow</button>
+     <button class="btn ${UI.e2e.full?"":"on"}" id="e2eFull" aria-pressed="${!UI.e2e.full}" title="Project list on the right — drag projects onto steps">☰ Project list ${UI.e2e.full?"▸":"◂ hide"}</button><button class="btn" id="e2eEdit" title="Rename, process area, owner, notes · delete flow">⚙ Details</button><button class="btn" id="e2eNew" title="New process flow" ${e2eCanEdit()?"":"hidden"}>＋ Flow</button>
      <span id="e2eTimeBox">${e2eTimeHtml(f)}</span>${(()=>"")()}<span class="e2ekey" title="How changes vs AS-IS are marked"><i class="k new">NEW</i><i class="k chg">CHANGED</i><i class="k mrg">MERGED</i><i class="k rem">REMOVED</i><span class="muted" style="font-size:11px;margin-left:4px" title="Project tag colour = project status">tag colour = status</span></span><span style="flex:1"></span>
      <label class="muted">Tags <select id="e2eChip" aria-label="Project tags on boxes"><option value="count" ${UI.e2e.tags&&UI.e2e.chip==="count"?"selected":""}>Count (click box for IDs)</option><option value="pid" ${UI.e2e.tags&&UI.e2e.chip==="pid"?"selected":""}>Project ID</option><option value="legacy" ${UI.e2e.tags&&UI.e2e.chip==="legacy"?"selected":""}>Old tracker no.</option><option value="off" ${!UI.e2e.tags?"selected":""}>Hidden</option></select></label><button class="btn small" id="e2eHow" title="How E2E flows work">ⓘ</button></div>
    ${f.v[ver]&&f.v[ver].bad?`<div class="warnbox" style="margin:10px 0">The stored ${ver} diagram could not be read (it may have been edited in Excel). Start it again below.</div>`:""}
@@ -312,7 +318,7 @@ async function e2eNewFlow(){let IMP=null;
   box.querySelector("#nfTpl").onclick=()=>download(new Blob(["\ufeff"+e2eTemplateCsv()],{type:"text/csv"}),"E2E_flow_template.csv");
   const k=await p;if(k!=="ok")return;
   const name=$("#efName").value.trim(),area=$("#efArea").value.trim();if(!name){toast("Give the flow a name");return}
-  const id=e2eNewId(area);const f={id,name,area,owner:$("#efOwner").value.trim(),notes:$("#efNotes").value.trim(),v:{}};
+  const id=e2eNewId(area);const f={id,name,area,owner:$("#efOwner").value.trim()||(typeof scope==="function"&&scope()&&ACC?ACC.name||ACC.login:""),notes:$("#efNotes").value.trim(),v:{}};
   const vp=(document.querySelector('input[name="nfVer"]:checked')||{}).value||"auto";const pgs=!!(document.getElementById("nfPages")||{}).checked;if(IMP&&IMP.sheets){IMP=e2eImportFromGrids(IMP.sheets,name,vp,{pages:pgs})}
   if(IMP&&IMP.pptx){for(const v of Object.keys(IMP.res)){const d=IMP.res[v].doc;d.title=name;d.name=name+" "+v}if(vp!=="auto"&&Object.keys(IMP.res).length===1){const only=Object.keys(IMP.res)[0];if(only!==vp){IMP.res[vp]=IMP.res[only];IMP.res[vp].doc.tag=vp;delete IMP.res[only]}}}/* rebuild with the final name */
   const vers=IMP?VERS.filter(v=>IMP.res[v]):[];
@@ -504,7 +510,7 @@ function vE2EHome(m){e2eHide();const H=UI.e2eH;const fl=e2eFlows();const info=Ob
       <div class="fhstats"><div><span>Projects</span><b>${I.pids.size}</b>${mix(I.st)}</div><div><span>Process time h/m</span><b>${t.asis||t.tobe?`${H1(t.asis)} → ${H1(t.tobe)}`:"—"}</b><em>${t.steps?`${t.timed}/${t.steps} TO-BE steps timed`:""}</em></div><div><span>Saving THB/yr</span><b>${t.cost?fmtShort(t.cost):"—"}</b><em>${t.saved?`−${H1(t.saved)} h/m`:""}</em></div></div></article>`};
   const totP=new Set(fl.flatMap(f=>[...info[f.id].pids])).size,totC=fl.reduce((a,f)=>a+(info[f.id].t.cost||0),0);
   m.innerHTML=`<div class="card pad fhhead"><div class="fhh1"><div><h2 style="margin:0">⇄ E2E process flows</h2><p class="muted" style="margin:4px 0 0;font-size:12.5px">${fl.length} flow${fl.length===1?"":"s"} · ${totP} linked project${totP===1?"":"s"}${totC?` · process saving ${fmtShort(totC)} THB/yr`:""} · search finds flow names, areas, owners, lanes, step text and projects</p></div><span style="flex:1"></span>
-      ${fl.some(f=>/p2p/i.test(f.name+f.area))?"":`<button class="btn" id="fhSeed" title="Adds the P2P Domestic AS-IS + TO-BE from the Shared Services deck">＋ P2P example</button>`}<button class="btn new" id="fhNew">＋ New flow</button></div>
+      ${fl.some(f=>/p2p/i.test(f.name+f.area))?"":`<button class="btn" id="fhSeed" title="Adds the P2P Domestic AS-IS + TO-BE from the Shared Services deck">＋ P2P example</button>`}<button class="btn new" id="fhNew" ${e2eCanEdit()?"":"hidden"}>＋ New flow</button></div>
     <div class="fhfilt"><input type="search" id="fhQ" placeholder="Search flows, lanes, steps or projects…" value="${esc(H.q)}" aria-label="Search flows">
       <span class="fhchips" role="group" aria-label="Process area">${["",...areas].map(a=>`<button type="button" class="e2ech${H.area===a?" on":""}" data-farea="${esc(a)}">${esc(a||"All areas")} <b>${a?fl.filter(f=>(f.area||"(no area)")===a).length:fl.length}</b></button>`).join("")}</span>
       <label class="muted">Show <select id="fhState">${Object.entries(STATE).map(([k,v])=>`<option value="${k}" ${H.state===k?"selected":""}>${v}</option>`).join("")}</select></label>
