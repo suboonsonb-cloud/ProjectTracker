@@ -101,7 +101,7 @@ function wsGanttBind(m,r){const g=m.querySelector(".gwrap");if(!g)return;
     const mv=ev=>{const dd=Math.round((ev.clientX-x0)/pxPerDay);ps=ps0;pe=pe0;if(mode==="move"){ps+=dd;pe+=dd}else if(mode==="l")ps=Math.min(pe0,ps0+dd);else pe=Math.max(ps0,pe0+dd);
       const a=parseFloat(bar.dataset.l0??(bar.dataset.l0=bar.style.left)),u=bar.style.left.endsWith("%")?"%":"px";
       const k=u==="%"?(100/tr.width):1;bar.style.transform=`translateX(${(mode==="r"?0:(ps-ps0))*pxPerDay}px)`;bar.style.width=`${(pe-ps+1)*pxPerDay}px`;
-      tip.textContent=`${fmtDate(ps)} → ${fmtDate(pe)} (${pe-ps+1} days)`;tip.style.left=(ev.clientX+12)+"px";tip.style.top=(ev.clientY+14)+"px"};
+      tip.textContent=`${fmtDate(ps)} → ${fmtDate(pe)} (${pe-ps+1} days)`;tip.style.left=(ev.clientX/ZF()+12)+"px";tip.style.top=(ev.clientY/ZF()+14)+"px"};
     const up=()=>{bar.removeEventListener("pointermove",mv);bar.removeEventListener("pointerup",up);bar.removeEventListener("pointercancel",up);tip.remove();bar.classList.remove("drag");
       if(ps===ps0&&pe===pe0){wsRerender();return}try{if(ps!==ps0)setCell("Activities",FA.ps,x,ps);if(pe!==pe0)setCell("Activities",FA.pe,x,pe)}catch(err){toast(err.message,5000)}
       UI.wsUndo={r,x,ps:ps0,pe:pe0};toast(`Plan moved to ${fmtDate(ps)} → ${fmtDate(pe)} — “↶ Undo last move” in the toolbar above reverts it`,3500);setTimeout(wsRerender,0)};

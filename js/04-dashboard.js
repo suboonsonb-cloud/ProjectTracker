@@ -31,6 +31,12 @@ function renderTabs(){const nc=S.changes.length?e2eNetCount(netChanges()):0;cons
 async function saveNudge(){const n=S.changes.length?e2eNetCount(netChanges()):0;if(!n||(typeof canEdit==="function"&&!canEdit())||document.getElementById("btnSave").disabled)return true;
   const k=await choose(`💾 ${n} unsaved change${n>1?"s":""}`,`<p style="margin-top:0">Your changes are only in this browser until you <b>Save to database</b>. Save now so nobody loses them?</p>`,[["later","Not now"],["save","Save to database","primary"]]);
   if(k==="save"){try{await save(false)}catch(e){}}return true}
+/* screen size: bigger UI on big screens (Auto) or a fixed size chosen in Settings → Display */
+const UI_SCALES=[["auto","Auto"],["1","100%"],["1.15","115%"],["1.3","130%"],["1.5","150%"]];
+function uiScalePref(){try{return localStorage.getItem("itd.uiScale")||"auto"}catch(e){return "auto"}}
+function uiScaleNow(){const p=uiScalePref();if(p!=="auto")return +p||1;const w=window.innerWidth;return w>=3000?1.5:w>=2500?1.35:w>=2100?1.22:w>=1800?1.1:1}
+function applyUiScale(){const s=uiScaleNow();document.documentElement.style.zoom=s===1?"":String(s);document.documentElement.style.setProperty("--uiScale",s);requestAnimationFrame(()=>{try{stickVars()}catch(e){}})}
+applyUiScale();window.addEventListener("resize",()=>{if(uiScalePref()==="auto")applyUiScale()});
 /* top search → Projects list filtered by the text */
 (function(){const go=()=>{const el=document.getElementById("gSearch");if(!el||!S.zip)return;UI.qu=UI.qu||{};UI.qu.q=el.value.trim();UI.proj=null;view="Projects";UI.pview="projects";render()};
   document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){const el=document.getElementById("gSearch");if(el){e.preventDefault();el.focus();el.select()}}});

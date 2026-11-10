@@ -694,3 +694,6 @@ header.top .crumb{flex:1 1 auto}
 header.top .spacer{display:none}
 header.top>*:not(.crumb){flex:0 0 auto}
 .ovk .tag{white-space:nowrap}.ovk .dl{flex-wrap:wrap}
+/* r51 — use the whole width on big screens */
+main{max-width:none}
+@media (min-width:1700px){main{padding:28px 36px}}

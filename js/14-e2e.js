@@ -154,14 +154,14 @@ function e2eEnsureFrame(){if(E2E_HOST&&document.body.contains(E2E_HOST))return;E
   E2E_RO=new ResizeObserver(()=>e2ePlace());E2E_RO.observe(document.body);window.addEventListener("resize",e2ePlace)}
 function e2ePlace(){if(!E2E_HOST)return;const s=E2E_SLOT;
   if(!s||!document.body.contains(s)||view!=="E2E"||!S.zip||s.dataset.hidden==="1"){E2E_HOST.style.cssText="position:absolute;left:-10000px;top:0;width:1000px;height:640px;visibility:hidden;z-index:-1";return}
-  const r=s.getBoundingClientRect();E2E_HOST.style.cssText=`position:absolute;left:${r.left+scrollX}px;top:${r.top+scrollY}px;width:${r.width}px;height:${r.height}px;z-index:5`}
+  const z=ZF(),r=s.getBoundingClientRect();E2E_HOST.style.cssText=`position:absolute;left:${(r.left+scrollX)/z}px;top:${(r.top+scrollY)/z}px;width:${r.width/z}px;height:${r.height/z}px;z-index:5`}
 function e2eAttach(slot){e2eEnsureFrame();E2E_SLOT=slot;if(slot&&E2E_RO)E2E_RO.observe(slot);e2ePlace();requestAnimationFrame(e2ePlace)}
 /* editor height = what is left of the window under the sticky header and the flow bar (so the pop-up is never cut off) */
 let E2E_ALIGN_T=0;
 function e2eStick(){const h=document.querySelector("header.top"),n=document.querySelector("nav.tabs");return Math.max(h?h.offsetHeight:0,(n?52+n.offsetHeight:0))}
 function e2eFitSlot(scroll){const sl=document.querySelector("#e2eSlot.e2eslot"),bar=document.querySelector(".e2ebar");if(!sl||!bar||view!=="E2E")return;const st=e2eStick();
-  if(scroll){E2E_ALIGN_T=Date.now();window.scrollTo(0,Math.max(0,bar.getBoundingClientRect().top+scrollY-st-6))}
-  const gap=sl.getBoundingClientRect().top-bar.getBoundingClientRect().top;sl.style.height=Math.max(420,innerHeight-st-6-gap-10)+"px";e2ePlace()}
+  if(scroll){E2E_ALIGN_T=Date.now();window.scrollTo(0,Math.max(0,bar.getBoundingClientRect().top+scrollY-(st+6)*ZF()))}
+  const z=ZF(),gap=(sl.getBoundingClientRect().top-bar.getBoundingClientRect().top)/z;sl.style.height=Math.max(420,innerHeight/z-st-6-gap-10)+"px";e2ePlace()}
 window.addEventListener("resize",()=>{if(view==="E2E")e2eFitSlot(false)});
 function e2eHide(){E2E_SLOT=null;if(E2E_HOST)e2ePlace()}
 function e2eInitFrame(){const f=e2eFlow(UI.e2e.flow);if(!f||!E2E_READY)return;const ver=UI.e2e.ver;const cur=f.v[ver];
@@ -234,7 +234,7 @@ function vE2E(m){
   m.querySelectorAll("[data-snap]").forEach(el=>e2eSnapshot(f.v[el.dataset.snap].doc,el));
   $("#e2eFull").onclick=()=>{UI.e2e.full=!UI.e2e.full;UI.e2e.scrollBar=true;render()};
   if(UI.e2e.full||UI.e2e.scrollBar){UI.e2e.scrollBar=false;requestAnimationFrame(()=>{e2eFitSlot(true)})}else requestAnimationFrame(()=>e2eFitSlot(false))
-  if(UI.e2e.scrollTo){UI.e2e.scrollTo=false;const sl=m.querySelector("#e2eSlot.e2eslot");if(sl)requestAnimationFrame(()=>{window.scrollTo(0,Math.max(0,sl.getBoundingClientRect().top+scrollY-110));e2ePlace()})}
+  if(UI.e2e.scrollTo){UI.e2e.scrollTo=false;const sl=m.querySelector("#e2eSlot.e2eslot");if(sl)requestAnimationFrame(()=>{window.scrollTo(0,Math.max(0,sl.getBoundingClientRect().top+scrollY-110*ZF()));e2ePlace()})}
   $("#e2eSel").onchange=e=>{UI.e2e.flow=e.target.value;UI.e2e.link=null;render()};
   m.querySelectorAll("[data-ver]").forEach(b=>b.onclick=()=>{UI.e2e.ver=b.dataset.ver;render()});
   $("#e2eEdit").onclick=()=>e2eEditFlow(f);$("#e2eNew").onclick=e2eNewFlow;$("#e2eHome").onclick=()=>{e2eFlush().then(()=>{UI.e2e.home=true;render();window.scrollTo(0,0)})};

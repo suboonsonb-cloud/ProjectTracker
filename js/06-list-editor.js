@@ -125,7 +125,7 @@ function openCfPop(btn,title,vals,cnt,cur,onApply,onSort,sortDir){
     <input type="search" class="cfq" placeholder="Search values…"><label class="cfall"><input type="checkbox" data-all> (Select all)</label>
     <div class="cflist">${vals.map((v,k)=>`<label data-v="${esc(v.toLowerCase())}"><input type="checkbox" data-k="${k}" ${!cur||cur.has(v)?"checked":""}> <span>${v===""?"<i>(Blanks)</i>":esc(v)}</span><em>${cnt[v]}</em></label>`).join("")}</div>
     <div class="cfbtns"><button class="btn small" data-clear>Clear filter</button><span style="flex:1"></span><button class="btn small" data-cancel>Cancel</button><button class="btn small primary" data-ok>OK</button></div>`;
-  document.body.appendChild(pop);const r=btn.getBoundingClientRect();pop.style.top=(r.bottom+window.scrollY+4)+"px";pop.style.left=Math.max(8,Math.min(window.innerWidth-pop.offsetWidth-8,r.left+window.scrollX-8))+"px";
+  document.body.appendChild(pop);const z=ZF(),r=btn.getBoundingClientRect();pop.style.top=((r.bottom+window.scrollY)/z+4)+"px";pop.style.left=Math.max(8,Math.min(window.innerWidth/z-pop.offsetWidth-8,(r.left+window.scrollX)/z-8))+"px";
   const boxes=[...pop.querySelectorAll("[data-k]")],all=pop.querySelector("[data-all]");
   const vis=()=>boxes.filter(b=>b.closest("label").style.display!=="none");
   const sync=()=>{const v=vis();all.checked=v.length&&v.every(b=>b.checked);all.indeterminate=!all.checked&&v.some(b=>b.checked)};sync();

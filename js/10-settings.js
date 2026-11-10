@@ -55,7 +55,7 @@ function cbRender(all){const el=CB.el;if(!el)return;const cfg=COMBO[el.dataset.c
   pop.style.display="block";cbPlace();
   const h=pop.querySelector(".hi");if(h)h.scrollIntoView({block:"nearest"})}
 /* keep the list inside the window: open upwards when there is no room below; follow the box when the page scrolls */
-function cbPlace(){const el=CB.el,pop=document.getElementById("cbpop");if(!el||!pop||pop.style.display==="none")return;const b=el.getBoundingClientRect();
+function cbPlace(){const el=CB.el,pop=document.getElementById("cbpop");if(!el||!pop||pop.style.display==="none")return;const z=ZF(),b0=el.getBoundingClientRect(),b={left:b0.left/z,right:b0.right/z,top:b0.top/z,bottom:b0.bottom/z,width:b0.width/z,height:b0.height/z},innerHeight=window.innerHeight/z,innerWidth=window.innerWidth/z;
   if(b.bottom<0||b.top>innerHeight){cbClose();return}const below=innerHeight-b.bottom-10,above=b.top-10;const up=below<220&&above>below;
   const mh=Math.max(120,Math.min(340,up?above:below));Object.assign(pop.style,{left:Math.min(b.left,innerWidth-Math.max(b.width,240)-8)+"px",width:Math.max(b.width,240)+"px",maxHeight:mh+"px",top:up?"auto":(b.bottom+2)+"px",bottom:up?(innerHeight-b.top+2)+"px":"auto"})}
 window.addEventListener("scroll",()=>{if(CB.el)cbPlace()},true);window.addEventListener("resize",()=>{if(CB.el)cbPlace()});
@@ -133,7 +133,9 @@ function vSettings(m){
   else if(tab==="users"){body=vUsers()}
   else if(tab==="log"){body=vActivity()}
   else if(tab==="warn"){body=vWarnings()}
-  else if(tab==="disp"){body=`<div class="card pad"><h2>Projects → Summary: columns</h2><p class="muted" style="font-size:12px">Untick to hide a column. Saved in this browser only (each person chooses their own).</p><div class="qcolbox">${quColsHtml()}</div></div>`}
+  else if(tab==="disp"){body=`<div class="card pad" style="margin-bottom:14px"><h2>Screen size</h2><p class="muted" style="font-size:12px">Makes text, buttons and tables bigger on large screens. <b>Auto</b> grows with the screen width. Saved in this browser only.</p>
+    <div class="seg" role="radiogroup" aria-label="Screen size">${UI_SCALES.map(([k,t])=>`<button type="button" data-uis="${k}" class="${uiScalePref()===k?"on":""}" aria-pressed="${uiScalePref()===k}">${t}</button>`).join("")}</div>
+    <p class="muted" style="font-size:12px;margin-bottom:0">Now: ${Math.round(uiScaleNow()*100)}% on a ${window.innerWidth}px-wide window · you can also use the browser zoom (Ctrl + / Ctrl −).</p></div><div class="card pad"><h2>Projects → Summary: columns</h2><p class="muted" style="font-size:12px">Untick to hide a column. Saved in this browser only (each person chooses their own).</p><div class="qcolbox">${quColsHtml()}</div></div>`}
   else{const tz=setting("S_TZ"),pc=setting("S_PCTZ"),ao=setting("S_AsOf");
     body=`<div class="card pad stcard" style="max-width:820px"><h2 style="margin-top:0">Excel ‘today’ (Lists → S_Today)</h2>
       <div class="fgrid"><div class="field"><label>Report time zone (UTC offset, hours) — Bangkok = 7</label><input type="number" step="0.5" id="sTZ" value="${esc(tz)}"></div>
@@ -142,7 +144,7 @@ function vSettings(m){
       <p class="muted" style="font-size:12px">This app uses the time zone chosen in the header (TODAY box). If an as-of date is set here, the app uses it too, so both show the same statuses.</p></div>`}
   m.innerHTML=head+body;window.scrollTo(0,y);
   m.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{UI.stab=b.dataset.st;if(b.dataset.st!=="rules")UI.rulesBase=null;vSettings(m)});
-  if(tab==="users"){bindUsers(m,()=>vSettings(m));return}if(tab==="log"){bindActivity(m,()=>vSettings(m));return}if(tab==="warn"){bindWarnings(m,()=>vSettings(m));return}if(tab==="disp"){quColsBind(m,()=>toast("Saved — the Summary view uses it",2500));return}
+  if(tab==="users"){bindUsers(m,()=>vSettings(m));return}if(tab==="log"){bindActivity(m,()=>vSettings(m));return}if(tab==="warn"){bindWarnings(m,()=>vSettings(m));return}if(tab==="disp"){quColsBind(m,()=>toast("Saved — the Summary view uses it",2500));m.querySelectorAll("[data-uis]").forEach(b=>b.onclick=()=>{try{localStorage.setItem("itd.uiScale",b.dataset.uis)}catch(e){}applyUiScale();vSettings(m)});return}
   const re=()=>{liveCalc();renderTabs();vSettings(m)};
   m.querySelectorAll(".stq").forEach(el=>el.oninput=()=>{UI.stq=UI.stq||{};UI.stq[el.dataset.q]=el.value;const p=el.selectionStart;vSettings(m);const n=m.querySelector(`[data-q="${el.dataset.q}"]`);n.focus();n.setSelectionRange(p,p)});
   m.querySelectorAll("[data-md]").forEach(el=>el.onchange=()=>{const ref=el.dataset.md,c=ref.replace(/\d+/,""),r=+ref.replace(/[A-Z]+/,"");const ov=mg(c,r),nv=el.value.trim();if(nv===ov)return;

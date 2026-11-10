@@ -1,3 +1,5 @@
+/* page zoom used for big screens (Settings → Display) — convert screen px to CSS px */
+function ZF(){return parseFloat(document.documentElement.style.zoom)||1}
 /* 01-core.js — utilities, timezone-aware today, ZIP read/write, XLSX model, records */
 "use strict";
 /* ---------------- utilities ---------------- */
