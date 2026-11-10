@@ -140,7 +140,9 @@ function paintAcc() {
   if (!c) { const f = document.getElementById("connChip"); if (!f) return; c = document.createElement("button"); c.type = "button"; c.id = "accChip"; c.className = "accchip"; f.after(c); c.onclick = accMenu; }
   if (!S.zip || !accessOn()) { c.classList.add("hidden"); return; }
   const sc = ACC && ACC.role !== "Admin" && ACC.bu ? ACC.bu.join(", ") : "all BUs";
-  c.classList.remove("hidden"); c.textContent = ACC ? `👤 ${ACC.name.split(/[ .@]/)[0]}${ACC.role === "Admin" ? " ★" : ACC.role === "Viewer" ? " 👁" : ""}` : "👤 Sign in";
+  c.classList.remove("hidden");
+  if (ACC) { const ini = ACC.name.split(/[ .@]+/).filter(Boolean).slice(0, 2).map(x => x[0].toUpperCase()).join(""); c.innerHTML = `<span class="av">${esc(ini || "?")}</span><span class="who"><b>${esc(ACC.name)}</b><small>${esc(ACC.role)} · ${esc(sc)}</small></span><span class="chev">⌄</span>`; }
+  else c.innerHTML = `<span class="av">?</span><span class="who"><b>Sign in</b></span>`;
   c.title = ACC ? `${ACC.name} · ${ACC.role} · ${sc} — click for password / sign out` : "Sign in";
   const sv = document.getElementById("btnSave"); if (sv) sv.classList.toggle("hidden", r === "Viewer");
 }

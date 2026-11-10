@@ -7,17 +7,31 @@
 <link rel="stylesheet" href="css/desk.css">
 </head>
 <body>
+<aside class="side" id="side" aria-label="Main navigation">
+  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r50</span></small></span></div>
+  <div class="sglab">WORKSPACE</div>
+  <button type="button" class="wschip" id="btnOpen" title="Open the workbook (the database)"><span class="wsdot" aria-hidden="true"></span><span class="file" id="fileName">No workbook loaded</span><span class="chev" aria-hidden="true">⌄</span></button>
+  <nav class="sidenav hidden" id="tabs"></nav>
+  <div class="sglab" id="pinLab" hidden>NEEDS ATTENTION</div><div id="pins"></div>
+  <span class="sfill"></span>
+  <div class="savecard" id="saveCard">
+    <div class="sct">Your changes</div>
+    <div class="scs"><span id="chgBadge" class="badge-changes hidden">0 unsaved</span><span id="saveState" class="savestate"></span></div>
+    <button class="btn primary" id="btnSave" disabled title="Write your changes into the Excel workbook (the database) — Ctrl+S"><span class="svico" aria-hidden="true">💾</span> <span class="svlbl">Save to database</span><span class="savecnt"></span></button>
+    <button class="btn ghost" id="btnCopy" disabled title="Save the workbook (with your changes) to a new file">Save a copy…</button>
+  </div>
+  <button type="button" class="snav" id="btnSet" title="Settings — lists, rules, users, activity log"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Settings</span></button>
+  <button type="button" class="snav" id="btnHelp" title="Help"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9a3 3 0 0 1 5.6 1c0 2-3 2.5-3 4.5"/><circle cx="12" cy="17.5" r=".6" fill="currentColor"/></svg><span>Help &amp; resources</span></button>
+</aside>
 <header class="top">
-  <h1>Initiatives Tracker Desk <span class="buildtag" title="App version — check this matches the latest file you downloaded">v26-Oct r11</span></h1>
-  <span class="file" id="fileName">No workbook loaded</span><button type="button" class="connchip hidden" id="connChip">🔗 connect</button>
+  <button type="button" class="sidetog" id="sideTog" aria-label="Menu">☰</button>
+  <div class="crumb" id="crumb"><span>Workspace</span><span class="sep">/</span><b>Overview</b></div>
   <span class="spacer"></span>
+  <label class="gsearch" title="Search projects by name, ID or leader"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" id="gSearch" placeholder="Search projects…" autocomplete="off"><kbd>Ctrl K</kbd></label>
   <span class="hgrp today" title="'Today' drives statuses, the Gantt today line and the current-month marker. It advances automatically at midnight in the chosen time zone."><span class="glab">TODAY</span><b id="todayLbl"></b><select id="tzSel" aria-label="Time zone"></select></span>
-  <span id="chgBadge" class="badge-changes hidden">0 unsaved</span><span id="saveState" class="savestate"></span>
-  <span class="hgrp"><span class="glab">FILE</span><button class="btn ghost" id="btnOpen">Open<span class="hl2"> workbook</span>…</button><button class="btn primary" id="btnSave" disabled title="Write your changes into the Excel workbook (the database) — Ctrl+S"><span class="svico" aria-hidden="true">💾</span> <span class="svlbl">Save to database</span><span class="savecnt"></span></button><button class="btn ghost" id="btnCopy" disabled title="Save the workbook (with your changes) to a new file"><span class="hl2">Save a copy…</span><span class="hl3">Copy…</span></button></span>
-  <span class="hgrp"><button class="btn ghost" id="btnSet" title="Settings — maintain dropdown lists and status / delay rules">⚙<span class="hlbl"> Settings</span></button><button class="btn ghost" id="btnHelp" title="Help">?<span class="hlbl"> Help</span></button></span>
+  <button type="button" class="connchip hidden" id="connChip">🔗 connect</button>
 </header>
 <div id="envWarn"></div><div id="revertWarn"></div>
-<nav class="tabs hidden" id="tabs"></nav>
 <main id="main"></main>
 
 <div class="scrim" id="scrim"></div>

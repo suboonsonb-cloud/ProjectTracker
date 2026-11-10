@@ -6,14 +6,14 @@
 <title>Initiatives Tracker Desk</title>
 <style>
 :root{
-  --navy:#1F3864; --blue:#2E75B6; --blue-soft:#DDEBF7; --bg:#F4F6F9; --card:#FFFFFF; --ink:#1B2430; --muted:#5B6573;
-  --line:#E1E5EB; --in:#FFF9E5; --ok:#2E7D32; --ok-soft:#E3F2E5; --warn:#B26A00; --warn-soft:#FFF1D6; --bad:#B42318; --bad-soft:#FDE4E1;
+  --navy:#1E1B2E; --blue:#6E56CF; --blue-soft:#EFEBFF; --bg:#F5F5F7; --card:#FFFFFF; --ink:#1E1B2E; --muted:#6B6F80;
+  --line:#E8E8EE; --accent:#7C5CFC; --accent-d:#6447E6; --accent-soft:#F1EDFF; --side:#17141F; --side-2:#221E2E; --side-ink:#CFCBDC; --in:#FFF9E5; --ok:#2E7D32; --ok-soft:#E3F2E5; --warn:#B26A00; --warn-soft:#FFF1D6; --bad:#B42318; --bad-soft:#FDE4E1;
   --hold:#6B7280; --hold-soft:#ECEEF1; --prog:#1F4E79; --prog-soft:#DDEBF7;
-  --radius:10px; --shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.08);
+  --radius:14px; --shadow:0 1px 2px rgba(16,24,40,.04);
 }
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%}
-body{font:14px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+body{font:14px/1.45 "Inter","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg)}
 button,input,select,textarea{font:inherit;color:inherit}
 header.top{position:sticky;top:0;z-index:30;background:var(--navy);color:#fff;display:flex;align-items:center;gap:10px;padding:10px 16px;flex-wrap:wrap}
 header.top h1{font-size:16px;margin:0;font-weight:600;letter-spacing:.2px}
@@ -547,20 +547,188 @@ details.qcols summary{cursor:pointer;display:inline-block;padding:3px 10px;borde
 .pvmenu button.on{background:#E3EBF7!important;color:#1F3864!important;font-weight:700!important}
 .pvsub{font-weight:500;opacity:.85;font-size:12px}
 .btn[hidden],button[hidden]{display:none!important}
+
+/* ===================== r50 — new look: dark sidebar, light workspace, purple accent ===================== */
+:root{--sideW:232px}
+body{padding-left:var(--sideW)}
+/* sidebar */
+aside.side{position:fixed;left:0;top:0;bottom:0;width:var(--sideW);background:var(--side);color:var(--side-ink);display:flex;flex-direction:column;padding:16px 12px 12px;z-index:40;overflow-y:auto;scrollbar-width:thin}
+aside.side .brand{display:flex;align-items:center;gap:10px;padding:2px 6px 16px;color:#fff}
+aside.side .logo{width:34px;height:34px;border-radius:10px;background:var(--accent);display:grid;place-items:center;color:#fff;flex:0 0 auto}
+aside.side .bname{font-weight:700;font-size:16px;line-height:1.1;letter-spacing:-.2px}
+aside.side .bname small{display:block;font-weight:500;font-size:11px;color:#9C97AE;margin-top:2px}
+aside.side .buildtag{background:#2C2740;color:#B9B2D3;border-radius:6px;padding:0 5px;font-size:10px;margin-left:2px}
+.sglab{font-size:10.5px;font-weight:600;letter-spacing:.08em;color:#7D7891;padding:14px 8px 6px}
+.wschip{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:8px;width:100%;padding:9px 10px;border-radius:10px;background:var(--side-2);border:1px solid #2E2940;color:#fff;cursor:pointer;font-size:13px}
+.wschip:hover{border-color:#4A4362}
+.wschip .wsdot{width:18px;height:18px;border-radius:6px;background:#B7F08B;flex:0 0 auto}
+.wschip .file{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wschip .chev{color:#8F89A5}
+nav.sidenav{display:flex;flex-direction:column;gap:2px;margin-top:14px}
+nav.sidenav.hidden{display:none}
+nav.sidenav button,.snav{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border-radius:10px;color:var(--side-ink);cursor:pointer;font-size:13.5px;font-weight:500}
+nav.sidenav button:hover,.snav:hover{background:#221E2E;color:#fff}
+nav.sidenav button.on{background:#2A2538;color:#fff;box-shadow:inset 0 0 0 1px #3A3450}
+nav.sidenav button:focus-visible,.snav:focus-visible,.wschip:focus-visible,.pin:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+nav.sidenav .nl{flex:1}
+nav.sidenav .cnt{font-size:11px;color:#A39DB9;font-weight:600}
+nav.sidenav .cnt.hot{background:#F59E0B;color:#1E1B2E;border-radius:999px;padding:0 7px}
+nav.sidenav .newb{font-size:9.5px;font-weight:700;color:#B7F08B;border:1px solid #4F6B3A;background:#24301C;border-radius:5px;padding:0 5px;letter-spacing:.04em}
+.navsep{height:1px;background:#2A2538;margin:8px 6px}
+.navro{font-size:11.5px;color:#A39DB9;padding:8px 10px}
+#pins{display:flex;flex-direction:column;gap:1px}
+.pin{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:9px;padding:6px 10px;border-radius:8px;font-size:12.5px;color:#C9C4D8;cursor:pointer;min-width:0}
+.pin span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pin i{width:7px;height:7px;border-radius:2px;flex:0 0 auto}
+.pin:hover{background:#221E2E;color:#fff}.pin.more{color:#8F89A5;font-size:12px;padding-left:26px}
+.sfill{flex:1 1 auto;min-height:12px}
+.savecard{background:#221E2E;border:1px solid #2E2940;border-radius:14px;padding:12px;margin:8px 0 10px;display:flex;flex-direction:column;gap:8px}
+.savecard .sct{color:#fff;font-weight:600;font-size:13px}
+.savecard .scs{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#A39DB9}
+.savecard .scs:empty{display:none}
+.savecard .btn{justify-content:center;width:100%}
+.savecard .btn.primary{background:#C9B8FF;border-color:#C9B8FF;color:#1E1B2E;font-weight:600}
+.savecard .btn.primary:hover{background:#B9A4FF}
+.savecard .btn.ghost{background:transparent;color:#C9C4D8;border-color:#3A3450;font-size:12px;padding:5px 10px}
+.savecard .badge-changes{align-self:flex-start}
+.savecard .savestate{color:#A39DB9}
+#btnSave.dirty{background:#F59E0B!important;border-color:#F59E0B!important;color:#1E1B2E!important}
+/* top bar */
+header.top{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);color:var(--ink);border-bottom:1px solid var(--line);padding:10px 24px;gap:14px;min-height:60px}
+.crumb{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted);min-width:0;white-space:nowrap}
+.crumb b{color:var(--ink);font-weight:600;overflow:hidden;text-overflow:ellipsis}
+.crumb a{color:var(--muted);text-decoration:none}.crumb a:hover{color:var(--accent)}
+.crumb .sep{color:#C4C4CF}
+.gsearch{display:flex;align-items:center;gap:8px;background:#F2F2F5;border:1px solid transparent;border-radius:10px;padding:0 10px;height:38px;width:300px;max-width:32vw;color:#8A8D9B}
+.gsearch:focus-within{background:#fff;border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,92,252,.15)}
+.gsearch input{all:unset;flex:1;min-width:0;font-size:13.5px;color:var(--ink)}
+.gsearch kbd{font:600 10.5px/1 inherit;color:#9A9DAA;border:1px solid #DDDDE5;border-radius:5px;padding:3px 5px;background:#fff}
+header.top .hgrp.today{background:#F2F2F5;border-radius:10px;padding:4px 8px;color:var(--muted);border:0}
+header.top .hgrp.today .glab{color:#8A8D9B}
+header.top .hgrp.today b{color:var(--ink)}
+header.top .hgrp.today select{background:transparent;border:0;color:var(--muted)}
+.accchip{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:4px 6px 4px 4px;border-radius:12px;cursor:pointer;border-left:1px solid var(--line);padding-left:14px;border-radius:0}
+.accchip .av{width:34px;height:34px;border-radius:50%;background:var(--accent-soft);color:var(--accent-d);display:grid;place-items:center;font-weight:700;font-size:13px}
+.accchip .who{display:flex;flex-direction:column;line-height:1.2;max-width:180px}
+.accchip .who b{font-size:13px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.accchip .who small{font-size:11.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.accchip .chev{color:#9A9DAA}
+.connchip{background:var(--accent-soft)!important;color:var(--accent-d)!important;border:0!important}
+.sidetog{all:unset;display:none;font-size:20px;cursor:pointer;padding:4px 8px;border-radius:8px}
+@media (max-width:1100px){body{padding-left:0}aside.side{transform:translateX(-100%);transition:transform .2s;box-shadow:0 0 40px rgba(0,0,0,.3)}body.sideopen aside.side{transform:none}.sidetog{display:inline-block}.gsearch{width:200px}}
+@media (max-width:700px){.gsearch kbd,header.top .hgrp.today .glab{display:none}.accchip .who{display:none}}
+main{padding:24px 28px;max-width:1560px}
+/* components */
+.card{border-color:var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.btn{border-radius:10px;border-color:#DEDEE6;padding:7px 13px;font-weight:500}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:var(--accent-d)}
+.btn.new{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.btn.new:hover{background:var(--accent-d)}
+.btn.small{border-radius:8px}
+input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{border-radius:8px}
+input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid rgba(124,92,252,.45);outline-offset:0}
+h2{color:var(--ink);font-weight:650;letter-spacing:-.1px}
+.pill{border-radius:7px;font-weight:600}
+table.data thead th{background:#FAFAFC!important;color:#6B6F80!important;font-weight:600;font-size:12px;border-bottom:1px solid var(--line)!important;letter-spacing:.01em}
+table.data thead th *{color:inherit}
+table.data tbody td{border-bottom:1px solid #F0F0F4}
+table.data tbody tr:hover>td{background:#FBFAFE}
+.filterbar,.dfilt{border-radius:var(--radius)}
+.seg,.pvseg{border-radius:10px;overflow:hidden;border:1px solid #E2E2EA;background:#fff}
+.seg button.on,.pvseg button.on{background:#1E1B2E!important;color:#fff!important}
+.chipst,.stchip{border-radius:9px}
+a{color:var(--accent-d)}
+::selection{background:#E2DAFF}
+/* overview (dashboard) */
+.ovh{display:flex;align-items:flex-end;gap:14px;margin:4px 0 18px;flex-wrap:wrap}
+.ovh h1{font-size:28px;line-height:1.15;margin:0;letter-spacing:-.6px;color:var(--ink);font-weight:700}
+.ovh p{margin:6px 0 0;color:var(--muted)}
+.ovh .sp{flex:1}
+.ovk{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:16px}
+@media (max-width:1100px){.ovk{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ovk .card{padding:18px 20px;position:relative;min-height:122px}
+.ovk .lab{font-size:13px;color:var(--muted);font-weight:500}
+.ovk .val{font-size:34px;font-weight:700;letter-spacing:-1px;color:var(--ink);margin-top:6px;line-height:1}
+.ovk .dl{margin-top:12px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.ovk .tag{border-radius:6px;padding:2px 7px;font-weight:600;font-size:11.5px}
+.ovk .tag.up{background:#E8F7EC;color:#1E7B3A}.ovk .tag.dn{background:#FDECEC;color:#B42318}.ovk .tag.wa{background:#FFF1DC;color:#A15C00}.ovk .tag.nu{background:#F0F0F4;color:#555}
+.ovk svg.spark{position:absolute;right:18px;top:34px;width:84px;height:34px}
+.ovk2{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+.ovk2 .st{background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px 14px;display:flex;flex-direction:column;min-width:150px;flex:1}
+.ovk2 .st span{font-size:11.5px;color:var(--muted)}.ovk2 .st b{font-size:17px;color:var(--ink);letter-spacing:-.3px}.ovk2 .st small{font-size:11px;color:var(--muted)}
+.hero{background:#221E30;color:#fff;border-radius:18px;padding:26px 28px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:20px;align-items:center;margin-bottom:16px;overflow:hidden}
+@media (max-width:1000px){.hero{grid-template-columns:1fr}}
+.hero .eyebrow{display:inline-block;font-size:10.5px;font-weight:600;letter-spacing:.06em;background:#332D47;color:#C9C3DD;border-radius:6px;padding:4px 8px}
+.hero h2{color:#fff;font-size:24px;margin:12px 0 6px;letter-spacing:-.4px}
+.hero p{color:#B7B1CA;margin:0 0 18px}
+.hero .btn.hb{background:#C9B8FF;border-color:#C9B8FF;color:#1E1B2E;font-weight:600;padding:10px 16px}
+.hero .btn.hb:hover{background:#B9A4FF}
+.hero .hm{color:#9C96B2;font-size:12px;margin-left:12px}
+.hero svg{width:100%;height:auto;max-height:180px}
+.hero .hnode rect{fill:#2C2740;stroke:#3F3858}
+.hero .hnode text{fill:#fff;font-size:12px;font-weight:600}.hero .hnode text.s{fill:#9C96B2;font-size:10.5px;font-weight:400}
+.port{padding:0;overflow:hidden;margin-bottom:16px}
+.port .ph{display:flex;align-items:flex-start;gap:12px;padding:18px 20px 0}
+.port .ph h2{margin:0;font-size:17px;display:flex;align-items:center;gap:8px}
+.port .ph h2 .n{font-size:12px;background:var(--accent-soft);color:var(--accent-d);border-radius:6px;padding:1px 7px}
+.port .ph p{margin:3px 0 0;color:var(--muted);font-size:12.5px}
+.ptabs{display:flex;gap:4px;padding:10px 20px 0;border-bottom:1px solid var(--line)}
+.ptabs button{all:unset;cursor:pointer;padding:10px 12px;font-size:13px;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+.ptabs button.on{color:var(--accent-d);border-bottom-color:var(--accent);font-weight:600}
+.ptabs button:focus-visible{outline:2px solid var(--accent)}
+.ptbl{width:100%;border-collapse:collapse;font-size:13px}
+.ptbl th{text-align:left;font-size:12px;color:var(--muted);font-weight:500;padding:10px 20px;background:#FAFAFC;border-bottom:1px solid var(--line)}
+.ptbl td{padding:12px 20px;border-bottom:1px solid #F0F0F4;vertical-align:middle}
+.ptbl tr:last-child td{border-bottom:0}
+.ptbl tbody tr{cursor:pointer}.ptbl tbody tr:hover td{background:#FBFAFE}
+.ptbl .pn{display:flex;align-items:center;gap:12px;min-width:0}
+.ptbl .ic{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;font-weight:700;font-size:12px;flex:0 0 auto}
+.ptbl .pn b{display:block;font-weight:600;color:var(--ink);max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ptbl .pn small{color:var(--muted);font-size:11.5px}
+.ptbl .pb{display:flex;align-items:center;gap:10px}
+.ptbl .pb i{display:block;height:6px;border-radius:9px;background:#EEEAF9;width:110px;position:relative;overflow:hidden}
+.ptbl .pb i b{position:absolute;inset:0 auto 0 0;border-radius:9px}
+.ptbl .late{color:#B26A00;font-weight:600}
+.ptbl .vm{border:1px solid #E2E2EA;border-radius:8px;padding:5px 10px;font-size:12px;background:#fff;cursor:pointer;color:var(--ink);white-space:nowrap}
+.ptbl .vm:hover{border-color:var(--accent);color:var(--accent-d)}
+.pfoot{display:flex;justify-content:space-between;padding:12px 20px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
+.pfoot a{font-weight:600;text-decoration:none}
+.spill{display:inline-flex;align-items:center;gap:6px;border-radius:7px;padding:3px 9px;font-size:12px;font-weight:600;white-space:nowrap}
+.spill:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+header.top{flex-wrap:nowrap}
+header.top .crumb{flex:1 1 auto}
+header.top .spacer{display:none}
+header.top>*:not(.crumb){flex:0 0 auto}
+.ovk .tag{white-space:nowrap}.ovk .dl{flex-wrap:wrap}
 </style>
 </head>
 <body>
+<aside class="side" id="side" aria-label="Main navigation">
+  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r50</span></small></span></div>
+  <div class="sglab">WORKSPACE</div>
+  <button type="button" class="wschip" id="btnOpen" title="Open the workbook (the database)"><span class="wsdot" aria-hidden="true"></span><span class="file" id="fileName">No workbook loaded</span><span class="chev" aria-hidden="true">⌄</span></button>
+  <nav class="sidenav hidden" id="tabs"></nav>
+  <div class="sglab" id="pinLab" hidden>NEEDS ATTENTION</div><div id="pins"></div>
+  <span class="sfill"></span>
+  <div class="savecard" id="saveCard">
+    <div class="sct">Your changes</div>
+    <div class="scs"><span id="chgBadge" class="badge-changes hidden">0 unsaved</span><span id="saveState" class="savestate"></span></div>
+    <button class="btn primary" id="btnSave" disabled title="Write your changes into the Excel workbook (the database) — Ctrl+S"><span class="svico" aria-hidden="true">💾</span> <span class="svlbl">Save to database</span><span class="savecnt"></span></button>
+    <button class="btn ghost" id="btnCopy" disabled title="Save the workbook (with your changes) to a new file">Save a copy…</button>
+  </div>
+  <button type="button" class="snav" id="btnSet" title="Settings — lists, rules, users, activity log"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Settings</span></button>
+  <button type="button" class="snav" id="btnHelp" title="Help"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9a3 3 0 0 1 5.6 1c0 2-3 2.5-3 4.5"/><circle cx="12" cy="17.5" r=".6" fill="currentColor"/></svg><span>Help &amp; resources</span></button>
+</aside>
 <header class="top">
-  <h1>Initiatives Tracker Desk <span class="buildtag" title="App version — check this matches the latest file you downloaded">v26-Oct r11</span></h1>
-  <span class="file" id="fileName">No workbook loaded</span><button type="button" class="connchip hidden" id="connChip">🔗 connect</button>
+  <button type="button" class="sidetog" id="sideTog" aria-label="Menu">☰</button>
+  <div class="crumb" id="crumb"><span>Workspace</span><span class="sep">/</span><b>Overview</b></div>
   <span class="spacer"></span>
+  <label class="gsearch" title="Search projects by name, ID or leader"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" id="gSearch" placeholder="Search projects…" autocomplete="off"><kbd>Ctrl K</kbd></label>
   <span class="hgrp today" title="'Today' drives statuses, the Gantt today line and the current-month marker. It advances automatically at midnight in the chosen time zone."><span class="glab">TODAY</span><b id="todayLbl"></b><select id="tzSel" aria-label="Time zone"></select></span>
-  <span id="chgBadge" class="badge-changes hidden">0 unsaved</span><span id="saveState" class="savestate"></span>
-  <span class="hgrp"><span class="glab">FILE</span><button class="btn ghost" id="btnOpen">Open<span class="hl2"> workbook</span>…</button><button class="btn primary" id="btnSave" disabled title="Write your changes into the Excel workbook (the database) — Ctrl+S"><span class="svico" aria-hidden="true">💾</span> <span class="svlbl">Save to database</span><span class="savecnt"></span></button><button class="btn ghost" id="btnCopy" disabled title="Save the workbook (with your changes) to a new file"><span class="hl2">Save a copy…</span><span class="hl3">Copy…</span></button></span>
-  <span class="hgrp"><button class="btn ghost" id="btnSet" title="Settings — maintain dropdown lists and status / delay rules">⚙<span class="hlbl"> Settings</span></button><button class="btn ghost" id="btnHelp" title="Help">?<span class="hlbl"> Help</span></button></span>
+  <button type="button" class="connchip hidden" id="connChip">🔗 connect</button>
 </header>
 <div id="envWarn"></div><div id="revertWarn"></div>
-<nav class="tabs hidden" id="tabs"></nav>
 <main id="main"></main>
 
 <div class="scrim" id="scrim"></div>
@@ -1391,12 +1559,39 @@ setInterval(peekNewer, 60000); document.addEventListener("visibilitychange", () 
 /* ---------------- views ---------------- */
 let view=null;const UI={q:{},f:{},cf:{},sort:{},sel:null,gantt:{open:new Set(),proj:"",proc:"",level:"tasks",zoom:3}};
 const TABS=["Dashboard","Gantt","Projects","Activities","Benefits","Realisation","RAIDD","Changes"];
-function renderTabs(){const b=t=>`<button class="${t===view?"on":""}" data-t="${t}">${t==="Changes"?`Review changes (${S.changes.length?e2eNetCount(netChanges()):0})`:t==="Quick"?"⚡ Quick update":t==="E2E"?"⇄ E2E flows":t}</button>`;
-  $("#tabs").innerHTML=`<div class="tgrp rep"><span class="glab">REPORTS</span>${["Dashboard","Gantt"].map(b).join("")}</div>
-   <div class="tgrp inp"><span class="glab">UPDATE DATA</span>${["Projects","E2E"].map(b).join("")}</div>
-   ${typeof canEdit==="function"&&!canEdit()?`<div class="tgrp rep"><span class="glab">VIEW ONLY</span><span class="muted" style="font-size:12px;padding:0 8px">Ask an Admin for edit access</span></div>`:`<div class="tgrp inp"><span class="glab">IMPORT</span><button class="${view==="Sync"?"on":""}" data-t="Sync">⇄ Sync old file${SY.plan?" ●":""}</button></div>
-   <div class="tgrp sav"><span class="glab">SAVE</span>${b("Changes")}</div>`}`;requestAnimationFrame(stickVars);
-  $("#tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{if(b.dataset.t==="Projects"&&view==="Projects"){UI.proj=null}const ch=view!==b.dataset.t;if(b.dataset.t==="E2E"){if(view==="E2E"&&UI.e2e.home===false){e2eFlush()}UI.e2e.home=true}view=b.dataset.t;render();if(ch&&view!=="E2E")window.scrollTo(0,0)})}
+/* ---------- shell: left navigation, needs-attention pins, breadcrumb, search ---------- */
+const NAVI={Dashboard:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  Projects:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+  Gantt:'<path d="M4 6h9M7 12h11M4 18h7"/><path d="M3 3v18"/>',
+  E2E:'<rect x="3" y="3" width="6" height="6" rx="1.2"/><rect x="15" y="15" width="6" height="6" rx="1.2"/><path d="M9 6h4a2 2 0 0 1 2 2v7"/>',
+  Sync:'<path d="M4 12a8 8 0 0 1 14-5.3L20 9"/><path d="M20 4v5h-5"/><path d="M20 12a8 8 0 0 1-14 5.3L4 15"/><path d="M4 20v-5h5"/>',
+  Changes:'<path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/>'};
+const NAVL={Dashboard:"Overview",Projects:"Projects",Gantt:"Gantt timeline",E2E:"E2E flow maps",Sync:"Sync old file",Changes:"Review changes"};
+function renderTabs(){const nc=S.changes.length?e2eNetCount(netChanges()):0;const np=S.zip?rowsOf("Projects").length:0;
+  const it=t=>`<button type="button" class="${t===view?"on":""}" data-t="${t}" ${t===view?'aria-current="page"':""}><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${NAVI[t]}</svg><span class="nl">${NAVL[t]}</span>${t==="Projects"&&np?`<span class="cnt">${np}</span>`:""}${t==="E2E"?'<span class="newb">NEW</span>':""}${t==="Changes"&&nc?`<span class="cnt hot">${nc}</span>`:""}${t==="Sync"&&SY.plan?'<span class="cnt hot">●</span>':""}</button>`;
+  const ro=typeof canEdit==="function"&&!canEdit();
+  $("#tabs").innerHTML=`${["Dashboard","Projects","Gantt","E2E"].map(it).join("")}${ro?`<div class="navro">👁 View only — ask an Admin for edit access</div>`:`<div class="navsep"></div>${it("Sync")}${it("Changes")}`}`;
+  $("#tabs").querySelectorAll("button").forEach(b=>b.onclick=async()=>{if(b.dataset.t!==view&&!(await saveNudge()))return;if(b.dataset.t==="Projects"&&view==="Projects"){UI.proj=null}const ch=view!==b.dataset.t;if(b.dataset.t==="E2E"){if(view==="E2E"&&UI.e2e.home===false){e2eFlush()}UI.e2e.home=true}view=b.dataset.t;document.body.classList.remove("sideopen");render();if(ch&&view!=="E2E")window.scrollTo(0,0)});
+  /* needs attention: delayed / at-risk projects */
+  const pins=$("#pins"),pl=$("#pinLab");if(pins){const P=S.zip?rowsOf("Projects").filter(r=>["Delayed","At Risk"].includes(pStat(r))):[];
+    const top=P.sort((a,b)=>(pStat(a)==="Delayed"?0:1)-(pStat(b)==="Delayed"?0:1)).slice(0,4);pl.hidden=!top.length;
+    pins.innerHTML=top.map(r=>`<button type="button" class="pin" data-pin="${r}" title="${esc(pId(r))} · ${esc(pStat(r))}"><i style="background:${SCOL[pStat(r)]}"></i><span>${esc(gv("Projects",FP.name,r)||pId(r))}</span></button>`).join("")+(P.length>4?`<button type="button" class="pin more" data-pinall>+${P.length-4} more</button>`:"");
+    pins.querySelectorAll("[data-pin]").forEach(b=>b.onclick=()=>{document.body.classList.remove("sideopen");openProject(+b.dataset.pin)});
+    const pa=pins.querySelector("[data-pinall]");if(pa)pa.onclick=()=>{UI.dash.stOff=STL.filter(x=>!["Delayed","At Risk"].includes(x));view="Dashboard";render()}}
+  /* breadcrumb */
+  const cr=$("#crumb");if(cr){const pr=view==="Projects"&&UI.proj!=null&&UI.proj!==undefined?(gv("Projects",FP.name,UI.proj)||"New project"):"";
+    cr.innerHTML=`<span>Workspace</span><span class="sep">/</span>${pr?`<a href="#" id="crumbUp">${NAVL[view]||view}</a><span class="sep">/</span><b>${esc(pr)}</b>`:`<b>${esc(NAVL[view]||view||"")}</b>`}`;
+    const up=$("#crumbUp");if(up)up.onclick=async e=>{e.preventDefault();await saveNudge();UI.proj=null;render()}}
+  requestAnimationFrame(stickVars)}
+/* leaving a page with unsaved changes → remind to save (people forget) */
+async function saveNudge(){const n=S.changes.length?e2eNetCount(netChanges()):0;if(!n||(typeof canEdit==="function"&&!canEdit())||document.getElementById("btnSave").disabled)return true;
+  const k=await choose(`💾 ${n} unsaved change${n>1?"s":""}`,`<p style="margin-top:0">Your changes are only in this browser until you <b>Save to database</b>. Save now so nobody loses them?</p>`,[["later","Not now"],["save","Save to database","primary"]]);
+  if(k==="save"){try{await save(false)}catch(e){}}return true}
+/* top search → Projects list filtered by the text */
+(function(){const go=()=>{const el=document.getElementById("gSearch");if(!el||!S.zip)return;UI.qu=UI.qu||{};UI.qu.q=el.value.trim();UI.proj=null;view="Projects";UI.pview="projects";render()};
+  document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){const el=document.getElementById("gSearch");if(el){e.preventDefault();el.focus();el.select()}}});
+  window.addEventListener("DOMContentLoaded",()=>{const el=document.getElementById("gSearch");if(el){el.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();go()}});el.addEventListener("search",go)}
+    const t=document.getElementById("sideTog");if(t)t.onclick=()=>document.body.classList.toggle("sideopen")})})();
 function render(){
   if(!S.zip||view!=="E2E")e2eHide();
   if(!S.zip){renderLanding();return}
@@ -1582,6 +1777,78 @@ function bindStChips(m,key,state,redraw){const all=[...m.querySelectorAll(`[data
   m.querySelectorAll(`[data-stk="${key}"]`).forEach(c=>c.onchange=()=>{const v=c.dataset.st;state.stOff=c.checked?(state.stOff||[]).filter(x=>x!==v):[...(state.stOff||[]),v];redraw()});
   m.querySelectorAll(`[data-chips="${key}"] [data-only]`).forEach(b=>b.onclick=e=>{e.preventDefault();e.stopPropagation();const uni=all.every(x=>STL.includes(x))?STL:all;state.stOff=uni.filter(x=>x!==b.dataset.only);redraw()});
   const ab=m.querySelector(`[data-stall="${key}"]`);if(ab)ab.onclick=()=>{state.stOff=[];redraw()}}
+/* ---------- Overview blocks (new look) ---------- */
+function ovMonths(n){const out=[];const d=new Date(isoFromSerial(TODAY)+"T00:00:00");for(let i=n-1;i>=0;i--){const a=new Date(d.getFullYear(),d.getMonth()-i,1),b=new Date(d.getFullYear(),d.getMonth()-i+1,0);
+  const iso=x=>x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0");out.push({s:serialFromIso(iso(a)),e:serialFromIso(iso(b)),h:a.toLocaleString("en",{month:"short"})})}return out}
+function ovSpark(v,col){if(!v.length)return "";const mx=Math.max(...v),mn=Math.min(...v),W=84,H=34,rg=mx-mn||1;const pts=v.map((x,i)=>`${(i/(v.length-1||1)*W).toFixed(1)},${(H-3-(x-mn)/rg*(H-8)).toFixed(1)}`).join(" ");
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>`}
+function ovKpis(P,A,D,Bl,x){const M=ovMonths(6);const done=s=>s==="Completed"||s==="Cancelled";
+  const act=M.map(m=>P.filter(r=>{const ps=+gv("Projects",FP.ps,r)||0,L=pLive(r);if(!ps||ps>m.e)return false;if(!done(pStat(r)))return true;return (+L.fe||0)>=m.s}).length);
+  const activeNow=P.filter(r=>!done(pStat(r))).length;const dA=activeNow-act[act.length-2];
+  const comp=A.filter(t=>tStat(t)==="Completed");const cm=M.map(m=>comp.filter(t=>{const fe=+tLive(t).fe||0;return fe>=m.s&&fe<=m.e}).length);
+  const ontime=e=>{const c=comp.filter(t=>(+tLive(t).fe||0)<=e&&+tLive(t).pe);return c.length?c.filter(t=>+tLive(t).fe<=+tLive(t).pe).length/c.length*100:null};
+  const ot=M.map(m=>ontime(m.e)).map(v=>v==null?0:v);const otNow=ontime(TODAY);const dOt=otNow!=null&&ot.length>1?Math.round(otNow-ot[ot.length-2]):0;
+  const del=P.filter(r=>pStat(r)==="Delayed").length,risk=P.filter(r=>pStat(r)==="At Risk").length;
+  const openR=D.filter(r=>gv("RAIDD",FD.status,r)!=="Closed"&&gv("RAIDD",FD.type,r)!=="Re-plan").length;
+  const tag=(v,suf)=>`<span class="tag ${v>0?"up":v<0?"dn":"nu"}">${v>0?"+":""}${v}${suf||""}</span>`;
+  const card=(lab,val,dl,sp,title,go)=>`<div class="card${go?" ovgo":""}" ${go?`data-ovgo="${go}" role="button" tabindex="0"`:""} title="${esc(title)}"><div class="lab">${lab}</div><div class="val">${val}</div>${sp}<div class="dl">${dl}</div></div>`;
+  const mapped=typeof hasE2E==="function"&&hasE2E()?(()=>{const G=e2eGroups(x.pids);return x.pids.size-G.rest.length})():null;
+  return `<div class="ovk">
+    ${card("Active projects",activeNow,`${tag(dA)} vs. last month`,ovSpark(act,"#7C5CFC"),"Not completed or cancelled · trend = active in each of the last 6 months","Projects")}
+    ${card("Tasks completed",fmtNum(comp.length),`${tag(cm[cm.length-1])} this month`,ovSpark(cm,"#2E8B57"),"Completed tasks · trend = finished per month","Gantt")}
+    ${card("On-time delivery",otNow==null?"—":Math.round(otNow)+"%",otNow==null?"no completed tasks with a plan yet":`${tag(dOt,"%")} vs. last month`,ovSpark(ot,"#7C5CFC"),"Completed tasks finished on or before their plan end","Gantt")}
+    ${card("Needs attention",String(del+risk).padStart(2,"0"),`<span class="tag wa">${risk} at risk</span> ${del} delayed · across ${P.length} projects`,"","Delayed + at-risk projects","attn")}
+  </div>
+  <div class="ovk2">
+    <div class="st"><span>Recurring value</span><b>${fmtShort(x.valRec)}</b><small>THB / yr</small></div>
+    <div class="st"><span>One-off value</span><b>${fmtShort(x.valOne)}</b><small>THB</small></div>
+    <div class="st"><span>Hours saved / month</span><b>${fmtNum(x.hrs)}</b><small>≈ ${(x.hrs/x.fteh).toFixed(1)} FTE</small></div>
+    <div class="st"><span>Realised to date</span><b>${fmtShort(x.aTD)}</b><small>of ${fmtShort(x.pTD)} plan · ${x.pTD?Math.round(x.aTD/x.pTD*100):0}%</small></div>
+    <div class="st"><span>Open RAIDD items</span><b>${openR}</b><small>risks, issues, actions…</small></div>
+    ${mapped!=null?`<div class="st"><span>Mapped to E2E</span><b>${mapped} / ${x.pids.size}</b><small>projects on process steps</small></div>`:""}
+    <div class="st"><span>Re-planned</span><b>${P.filter(r=>pLive(r).rpdays>0).length}</b><small>projects with approved new dates</small></div>
+  </div>`}
+function ovHero(pids){if(typeof hasE2E!=="function"||!hasE2E())return "";const G=e2eGroups(pids);const fl=G.flows.filter(g=>g.ids.size).sort((a,b)=>b.ids.size-a.ids.size)[0]||G.flows[0];
+  const nConn=pids.size-G.rest.length;let svg="";
+  if(fl){const L=fl.lanes.filter(l=>l.ids.size).slice(0,4);const lanes=L.length>=2?L:fl.lanes.slice(0,4);
+    const worst=ids=>{const sts=[...ids].map(id=>{const r=projRowById(id);return r?pStat(r):""});return ["Delayed","At Risk","On Track","Not Started","Completed"].find(s=>sts.includes(s))||"Not Started"};
+    const node=(x,y,l)=>{const st=worst(l.ids);return `<g class="hnode"><rect x="${x}" y="${y}" width="150" height="46" rx="8"/><circle cx="${x+14}" cy="${y+17}" r="4" fill="${SCOL[st]||"#9C96B2"}"/><text x="${x+24}" y="${y+21}">${esc(String(l.name).slice(0,18))}</text><text class="s" x="${x+14}" y="${y+37}">${esc(st)} · ${l.ids.size} project${l.ids.size===1?"":"s"}</text></g>`};
+    const W=560;let parts="";
+    if(lanes.length>=4){const a=[{x:0,y:57},{x:205,y:8},{x:205,y:106},{x:410,y:57}];
+      parts=`<path d="M150 80 H178 M178 31 V129 M178 31 H205 M178 129 H205 M355 31 H383 M355 129 H383 M383 31 V129 M383 80 H410" stroke="#5A5372" fill="none"/><circle cx="178" cy="80" r="4" fill="#C9B8FF"/><circle cx="383" cy="80" r="4" fill="#C9B8FF"/>`+lanes.slice(0,4).map((l,i)=>node(a[i].x,a[i].y,l)).join("")}
+    else parts=lanes.map((l,i)=>node(i*205,57,l)).join("")+lanes.slice(1).map((_,i)=>`<path d="M${i*205+150} 80 H${(i+1)*205}" stroke="#5A5372"/>`).join("");
+    svg=`<svg viewBox="-2 0 ${W+4} 160" role="img" aria-label="${esc(fl.f.name)} lanes">${parts}</svg>`}
+  return `<div class="hero"><div><span class="eyebrow">CONNECTED WORK${fl?" · "+esc(fl.f.name).toUpperCase():""}</span><h2>Every project. The whole picture.</h2><p>See which process step each project changes, spot dependencies and what's next.</p>
+    <button class="btn hb" id="ovE2E">Open E2E flow map <span aria-hidden="true">→</span></button><span class="hm">${nConn} project${nConn===1?"":"s"} connected</span></div><div>${svg}</div></div>`}
+function ovPortfolio(P){const T=UI.dash.ptab||"all";const done=s=>s==="Completed"||s==="Cancelled";
+  const tabs=[["all","All projects",P],["active","Active",P.filter(r=>!done(pStat(r)))],["attn","Needs attention",P.filter(r=>["Delayed","At Risk"].includes(pStat(r)))],["done","Completed",P.filter(r=>pStat(r)==="Completed")],["cx","Cancelled",P.filter(r=>pStat(r)==="Cancelled")]];
+  const cur=(tabs.find(t=>t[0]===T)||tabs[0])[2];const ord={"Delayed":0,"At Risk":1,"On Track":2,"Not Started":3,"On-Hold":4,"Completed":5,"Cancelled":6};
+  const rows=cur.slice().sort((a,b)=>(ord[pStat(a)]??9)-(ord[pStat(b)]??9)||(+gv("Projects",FP.pe,a)||9e9)-(+gv("Projects",FP.pe,b)||9e9));const N=UI.dash.pAll?rows.length:Math.min(8,rows.length);
+  const PAL=[["#EFEBFF","#6447E6"],["#E6F4EA","#1E7B3A"],["#FFF1DC","#A15C00"],["#E8F0FE","#1D4FA8"],["#FDECEC","#B42318"],["#ECEFF3","#475467"]];
+  const pal=k=>{let h=0;for(const ch of String(k))h=(h*31+ch.charCodeAt(0))>>>0;return PAL[h%PAL.length]};
+  const linked=typeof projE2E==="function";
+  const tr=r=>{const st=pStat(r),L=pLive(r),pc=Math.round((L.comp||0)*100),nm=gv("Projects",FP.name,r)||"(no name)",cf=gv("Projects",FP.cf,r)||gv("Projects",FP.proc,r)||"";const [bg,fg]=pal(gv("Projects",FP.proc,r)||cf||nm);
+    const ini=String(gv("Projects",FP.proc,r)||nm).replace(/[^A-Za-z0-9ก-๙]/g,"").slice(0,2).toUpperCase()||"•";const pe=+L.fe||+gv("Projects",FP.pe,r)||0;const late=pe&&pe<TODAY&&!done(st);
+    const team=[gv("Projects",FP.lead,r),gv("Projects",FP.team,r)].filter(Boolean).join(", ")||gv("Projects",FP.wsl,r)||"—";const fl=linked?projE2E(pId(r)).flows:[];
+    return `<tr data-ovp="${r}"><td><div class="pn"><span class="ic" style="background:${bg};color:${fg}">${esc(ini)}</span><span style="min-width:0"><b>${esc(nm)}</b><small>${esc(cf)}${cf?" · ":""}${esc(pId(r))}</small></span></div></td>
+      <td><span class="spill" style="background:${SCOL[st]}1F;color:${SCOL[st]==="#BFBFBF"?"#667085":SCOL[st]}">${esc(st)}</span></td>
+      <td><div class="pb"><i><b style="width:${pc}%;background:${SCOL[st]==="#BFBFBF"?"#B9AEF2":st==="Delayed"?"#E0A15A":"#9D86F7"}"></b></i><span>${pc}%</span></div></td>
+      <td class="muted" style="max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(team)}">${esc(team)}</td>
+      <td class="${late?"late":""}">${pe?fmtDate(pe):"—"}</td>
+      <td>${fl.length?`<button class="vm" data-ovmap="${esc(fl[0].id)}" data-ovpid="${esc(pId(r))}">View map ↗</button>`:`<button class="vm" data-ovopen="${r}">Open ↗</button>`}</td></tr>`};
+  return `<div class="card port"><div class="ph"><div><h2>Project portfolio <span class="n">${P.length}</span></h2><p>Every initiative your team is delivering — click a row to open it.</p></div></div>
+    <div class="ptabs" role="tablist">${tabs.map(([k,t,a])=>`<button role="tab" aria-selected="${k===T}" class="${k===T?"on":""}" data-ptab="${k}">${t} <span class="muted">${a.length}</span></button>`).join("")}</div>
+    <div style="overflow-x:auto"><table class="ptbl"><thead><tr><th>Project name</th><th>Status</th><th>Progress</th><th>Team</th><th>Due date</th><th>Flow map</th></tr></thead><tbody>${rows.slice(0,N).map(tr).join("")||`<tr><td colspan="6" class="muted" style="text-align:center;padding:24px">No projects here.</td></tr>`}</tbody></table></div>
+    <div class="pfoot"><span>Showing ${N} of ${rows.length} projects</span>${rows.length>8?`<a href="#" id="ovAll">${UI.dash.pAll?"Show fewer":"View all projects"} →</a>`:`<a href="#" id="ovProj">Open Projects →</a>`}</div></div>`}
+function ovBind(m){const go=v=>{view=v;render();window.scrollTo(0,0)};
+  m.querySelectorAll("[data-ovgo]").forEach(c=>{const f=()=>{const k=c.dataset.ovgo;if(k==="attn"){UI.dash.ptab="attn";const p=m.querySelector(".port");if(p){vDash(m,true);setTimeout(()=>m.querySelector(".port").scrollIntoView({behavior:"smooth",block:"start"}),50)}}else go(k)};c.onclick=f;c.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();f()}}});
+  const nb=m.querySelector("#ovNew");if(nb)nb.onclick=()=>{view="Projects";UI.pview="projects";render();setTimeout(()=>{const b=document.getElementById("quNew");if(b)b.click()},30)};
+  const e2=m.querySelector("#ovE2E");if(e2)e2.onclick=()=>{UI.e2e.home=true;go("E2E")};
+  m.querySelectorAll("[data-ptab]").forEach(b=>b.onclick=()=>{UI.dash.ptab=b.dataset.ptab;UI.dash.pAll=false;vDash(m,true)});
+  m.querySelectorAll("[data-ovp]").forEach(t=>t.onclick=e=>{if(e.target.closest("button"))return;openProject(+t.dataset.ovp)});
+  m.querySelectorAll("[data-ovopen]").forEach(b=>b.onclick=()=>openProject(+b.dataset.ovopen));
+  m.querySelectorAll("[data-ovmap]").forEach(b=>b.onclick=()=>{UI.e2e.home=false;UI.e2e.flow=b.dataset.ovmap;UI.e2e.ver="TO-BE";UI.e2e.focus=b.dataset.ovpid;go("E2E")});
+  const a=m.querySelector("#ovAll");if(a)a.onclick=e=>{e.preventDefault();UI.dash.pAll=!UI.dash.pAll;vDash(m,true)};const pj=m.querySelector("#ovProj");if(pj)pj.onclick=e=>{e.preventDefault();go("Projects")}}
 function vDash(m,keepScroll){const _y=window.scrollY;setTimeout(()=>{if(keepScroll)window.scrollTo(0,_y)},0);
   const allP=rowsOf("Projects");const F=UI.dash;const fv=(r,c)=>gv("Projects",c,r)||"(blank)";
   const bus=uniq(allP.map(r=>fv(r,FP.bu)));if(F.bu&&!bus.includes(F.bu))F.bu="";const bu=F.bu;
@@ -1625,6 +1892,7 @@ function vDash(m,keepScroll){const _y=window.scrollY;setTimeout(()=>{if(keepScro
   const leadSeries=STL.map(st=>({name:st,color:SCOL[st],vals:leads.map(l=>P.filter(r=>lk(r)===l&&pStat(r)===st).length)}));
   const selOpt=(id,val,opts)=>`<select id="${id}" class="mini">${opts.map(([v,t])=>`<option value="${v}" ${v===val?"selected":""}>${t}</option>`).join("")}</select>`;
   m.innerHTML=`${banner("report")}
+  <div class="ovh"><div><h1>Your projects, at a glance.</h1><p>Keep the big picture. Move every detail forward.</p></div><span class="sp"></span>${typeof canEdit==="function"&&!canEdit()?"":`<button class="btn new" id="ovNew"><span aria-hidden="true">＋</span> New project</button>`}</div>
   <div class="filterbar card dfilt"><b>Filter dashboard</b>
    <label>BU <select id="fBU"><option value="">All</option>${bus.map(b=>`<option ${b===bu?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
    <label>CF <select id="fCF"><option value="">All${bu?" in "+esc(bu):""}</option>${cfs_.map(b=>`<option ${b===F.cf?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
@@ -1635,16 +1903,7 @@ function vDash(m,keepScroll){const _y=window.scrollY;setTimeout(()=>{if(keepScro
    ${nF?`<button class="btn small" id="clrAll">✕ Clear filters (${nF})</button>`:""}
    <span class="muted" style="margin-left:auto">${P.length} of ${allP.length} projects · ${A.length} tasks · ${Bl.length} benefit lines</span>
    <span class="muted finfo" title="Pick a BU, then a CF of that BU, then a project of that CF — or leave any on All. Status: untick a box to hide projects with that status, tick it to show them again (Only = show just that one). Type part of a name in Project to show all matching projects. These filters apply to every chart, KPI and table on the dashboard; dropdowns inside a card only change how that card is drawn.">ⓘ</span></div>
-  <div class="grid kpis">
-    ${k("Active / total projects",`${P.filter(r=>pStat(r)!=="Cancelled").length} / ${P.length}`)}
-    ${k("Recurring value (THB / yr)",fmtShort(valRec))}${k("One-off value (THB)",fmtShort(valOne))}
-    ${k("Hours saved / month",fmtNum(hrs),"≈ "+(hrs/fteh).toFixed(1)+" FTE")}
-    ${k("Plan realised to date",fmtShort(pTD),"THB")}${k("Actual realised to date",fmtShort(aTD),(pTD?Math.round(aTD/pTD*100):0)+"% of plan")}
-    ${k("Delayed / at-risk projects",`${P.filter(r=>pStat(r)==="Delayed").length} / ${P.filter(r=>pStat(r)==="At Risk").length}`,`tasks: ${A.filter(r=>tStat(r)==="Delayed").length} delayed · ${A.filter(r=>tStat(r)==="At Risk").length} at risk`)}
-    ${k("Open RAIDD items",D.filter(r=>gv("RAIDD",FD.status,r)!=="Closed"&&gv("RAIDD",FD.type,r)!=="Re-plan").length)}
-    ${typeof hasE2E==="function"&&hasE2E()?k("Mapped to an E2E flow",`${(()=>{const G=e2eGroups(pids);return pids.size-G.rest.length})()} / ${pids.size}`,"projects linked to process steps"):""}
-    ${k("Re-planned (approved)",`${P.filter(r=>pLive(r).rpdays>0).length} projects`,`${A.filter(r=>tLive(r).rpdays).length} tasks with a new plan`)}
-  </div>
+  ${ovKpis(P,A,D,Bl,{valRec,valOne,hrs,fteh,pTD,aTD,pids})}${ovHero(pids)}${ovPortfolio(P)}
   ${typeof hasE2E==="function"&&hasE2E()?`<div class="card pad dsec" style="margin-top:14px"><div class="chead"><h2>By end-to-end process</h2><span class="muted" style="font-size:12px">Click a flow to see its swimlanes (left lane first), a lane to see its projects, a project to open it · process time comes from the E2E step pop-ups</span></div>${e2eTreeHtml(pids,"dash",BS)}</div>`:""}
   <div class="grid three" style="margin-top:14px">
     <div class="card pad"><h2>All project status</h2>${donut(stCount.map(x=>({n:x.n,v:x.v,c:x.c})),{center:P.length})}</div>
@@ -1664,7 +1923,7 @@ function vDash(m,keepScroll){const _y=window.scrollY;setTimeout(()=>{if(keepScro
     <h2 style="margin-top:12px">Projects by status × process area</h2>${matrix("Process Area",P,r=>gv("Projects",FP.proc,r),{})}
     <h2 style="margin-top:12px">Delayed & at-risk projects</h2>${riskList(P)}</details>`;
   const reF=()=>{UI.dash.cell=null;UI.dash.zoom=null;vDash(m,true)};
-  $("#fBU").onchange=e=>{F.bu=e.target.value;F.cf="";F.proc="";reF()};$("#fCF").onchange=e=>{F.cf=e.target.value;F.proc="";reF()};$("#fProc").onchange=e=>{F.proc=e.target.value;F.init="";reF()};$("#fInit").onchange=e=>{F.init=e.target.value;reF()};bindStChips(m,"dst",F,reF);
+  ovBind(m);$("#fBU").onchange=e=>{F.bu=e.target.value;F.cf="";F.proc="";reF()};$("#fCF").onchange=e=>{F.cf=e.target.value;F.proc="";reF()};$("#fProc").onchange=e=>{F.proc=e.target.value;F.init="";reF()};$("#fInit").onchange=e=>{F.init=e.target.value;reF()};bindStChips(m,"dst",F,reF);
   $("#fQ").addEventListener("change",e=>{F.q=e.target.value.trim();reF()});
   if($("#clrAll"))$("#clrAll").onclick=()=>{F.bu=F.cf=F.proc=F.init=F.q="";F.stOff=[];reF()};
   $("#procView").onchange=e=>{UI.dash.procView=e.target.value;vDash(m,true)};$("#buView").onchange=e=>{UI.dash.buView=e.target.value;vDash(m,true)};
@@ -3014,7 +3273,9 @@ function paintAcc() {
   if (!c) { const f = document.getElementById("connChip"); if (!f) return; c = document.createElement("button"); c.type = "button"; c.id = "accChip"; c.className = "accchip"; f.after(c); c.onclick = accMenu; }
   if (!S.zip || !accessOn()) { c.classList.add("hidden"); return; }
   const sc = ACC && ACC.role !== "Admin" && ACC.bu ? ACC.bu.join(", ") : "all BUs";
-  c.classList.remove("hidden"); c.textContent = ACC ? `👤 ${ACC.name.split(/[ .@]/)[0]}${ACC.role === "Admin" ? " ★" : ACC.role === "Viewer" ? " 👁" : ""}` : "👤 Sign in";
+  c.classList.remove("hidden");
+  if (ACC) { const ini = ACC.name.split(/[ .@]+/).filter(Boolean).slice(0, 2).map(x => x[0].toUpperCase()).join(""); c.innerHTML = `<span class="av">${esc(ini || "?")}</span><span class="who"><b>${esc(ACC.name)}</b><small>${esc(ACC.role)} · ${esc(sc)}</small></span><span class="chev">⌄</span>`; }
+  else c.innerHTML = `<span class="av">?</span><span class="who"><b>Sign in</b></span>`;
   c.title = ACC ? `${ACC.name} · ${ACC.role} · ${sc} — click for password / sign out` : "Sign in";
   const sv = document.getElementById("btnSave"); if (sv) sv.classList.toggle("hidden", r === "Viewer");
 }
