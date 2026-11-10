@@ -793,3 +793,7 @@ main{max-width:none}
 #pdw details.pdsec{border:0;border-bottom:1px solid #EFEFF3;border-radius:0;padding:0;margin:0;background:none;box-shadow:none}
 #pdw details.pdsec>summary{padding:18px 0}
 .pdprog .pin input{width:64px}
+/* r53 — pop-ups opened from the Project details panel sit on top of it */
+body.pdon .scrim{z-index:62}
+body.pdon .drawer{z-index:63}
+.toast{z-index:90}

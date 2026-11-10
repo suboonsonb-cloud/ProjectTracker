@@ -53,7 +53,7 @@ function pdOpen(r){UI.qu.pd=r;document.querySelectorAll("tr[data-prow]").forEach
 function pdClose(silent){UI.qu.pd=null;const w=document.getElementById("pdw"),s=document.getElementById("pdscrim");if(w)w.remove();if(s)s.remove();document.body.classList.remove("pdon");if(!silent)document.querySelectorAll("tr[data-prow].sel").forEach(t=>t.classList.remove("sel"))}
 function pdRender(fresh){const r=UI.qu.pd;if(r==null)return;liveCalc();let w=document.getElementById("pdw");const keep=w?w.querySelector(".pdbody").scrollTop:0;
   const ae=document.activeElement,k=ae&&ae.dataset?ae.dataset.k:null;const sel=ae&&ae.selectionStart!=null?[ae.selectionStart,ae.selectionEnd]:null;
-  if(!w){const s=document.createElement("div");s.id="pdscrim";s.onclick=()=>pdClose();document.body.appendChild(s);w=document.createElement("aside");w.id="pdw";w.setAttribute("role","dialog");w.setAttribute("aria-label","Project details");document.body.appendChild(w);document.body.classList.add("pdon")}
+  if(!w){const s=document.createElement("div");s.id="pdscrim";s.onclick=()=>{if(!$("#drawer").classList.contains("on"))pdClose()};document.body.appendChild(s);w=document.createElement("aside");w.id="pdw";w.setAttribute("role","dialog");w.setAttribute("aria-label","Project details");document.body.appendChild(w);document.body.classList.add("pdon")}
   w.dataset.row=r;w.innerHTML=pdHtml(r);pdBind(w,r);const b=w.querySelector(".pdbody");if(!fresh)b.scrollTop=keep;
   if(k){const el=w.querySelector(`[data-k="${k}"]`);if(el){el.focus({preventScroll:true});if(sel&&el.setSelectionRange)try{el.setSelectionRange(sel[0],sel[1])}catch(e){}}}else if(fresh){const c=w.querySelector(".pdx");if(c)c.focus({preventScroll:true})}}
 function pdHtml(r){const pid=pId(r),st=pStat(r),L=pLive(r),pc=(L.comp||0)*100,pl=quPlanned(r),pe=+gv("Projects",FP.pe,r)||0,ps=+gv("Projects",FP.ps,r)||0,fe=+L.fe||0;
@@ -85,13 +85,14 @@ function pdHtml(r){const pid=pId(r),st=pStat(r),L=pLive(r),pc=(L.comp||0)*100,pl
   </div>
   <div class="pdfoot"><nav class="pdnav" aria-label="Step through projects"><button type="button" data-pdgo="${ix-1}" ${ix<=0?"disabled":""} aria-label="Previous project">‹</button><span>${ix>=0?ix+1:"–"} / ${cur.length}</span><button type="button" data-pdgo="${ix+1}" ${ix<0||ix>=cur.length-1?"disabled":""} aria-label="Next project">›</button></nav><span class="sp"></span><button type="button" class="btn primary" data-pdfull>Open full project ›</button></div>`}
 function pdBind(w,r){const pid=pId(r);w.querySelector(".pdx").onclick=()=>pdClose();
-  w.onkeydown=e=>{if(e.key==="Escape"&&!/^(INPUT|TEXTAREA|SELECT)$/.test((e.target||{}).tagName||"")){e.preventDefault();pdClose()}};
+  w.onkeydown=e=>{if(e.key==="Escape"&&!$("#drawer").classList.contains("on")&&!/^(INPUT|TEXTAREA|SELECT)$/.test((e.target||{}).tagName||"")){e.preventDefault();pdClose()}};
   w.querySelectorAll("details.pdsec").forEach(d=>d.ontoggle=()=>{UI.qu.pdOpen=UI.qu.pdOpen||new Set();if(d.open)UI.qu.pdOpen.add(d.dataset.sec);else UI.qu.pdOpen.delete(d.dataset.sec)});
   quBindRow(document,w);
   w.querySelectorAll("[data-pdst]").forEach(el=>el.onchange=async()=>{const [kind,val]=el.value.split(/:(.*)/);if(!kind)return;const ov=gv("Projects",FP.ovr,r);let ok=false;
     if(kind==="ovr")ok=await quSet(r,"ovr",val);else if(ov)ok=await quSet(r,"ovr","");if(ok){liveCalc();UI.qu.edited.add(r)}
     UI.qu.pdOpen=UI.qu.pdOpen||new Set();UI.qu.pdOpen.add("tasks");UI.qu.tkMsg=r;UI.qu.tkWant=kind==="calc"?val:"";pdRender();const t=document.querySelector('#pdw [data-sec="tasks"]');if(t)t.scrollIntoView({block:"start",behavior:"smooth"});pdListRow(r)});
   w.querySelectorAll("[data-rd]").forEach(b=>b.onclick=()=>raiddPanel(b.dataset.rd));
+  /* the details panel has its own Escape; let the RAIDD / edit drawer on top close first */
   w.querySelectorAll("[data-pdmap]").forEach(b=>b.onclick=()=>{pdClose();UI.e2e.home=false;UI.e2e.flow=b.dataset.pdmap;UI.e2e.ver="TO-BE";UI.e2e.focus=pid;view="E2E";render()});
   w.querySelectorAll("[data-pdfull]").forEach(b=>b.onclick=()=>{pdClose();openProject(r)});
   w.querySelectorAll("[data-pdgo]").forEach(b=>b.onclick=()=>{const {cur}=plFiltered();const n=cur[+b.dataset.pdgo];if(n!=null){const pg=Math.floor(+b.dataset.pdgo/PL_PAGE)+1;if(pg!==UI.qu.pg){UI.qu.pg=pg;UI.qu.pd=n;vPList($("#main"))}else pdOpen(n)}})}
