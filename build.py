@@ -23,8 +23,9 @@ open(P("js", "13-studio-embed.js"), "w", encoding="utf-8").write(emb)
 index = read(P("index.html"))
 css_files = re.findall(r'<link rel="stylesheet" href="(css/[^"]+)">', index)
 js_files = re.findall(r'<script src="(js/[^"]+)"></script>', index)
-css = "\n".join(read(P(f)) for f in css_files)
-js = '"use strict";\n' + "\n".join(re.sub(r'^/\*[^\n]*\*/\n"use strict";\n', "", read(P(f)), count=1) for f in js_files)
+strip = lambda f: f.split("?")[0]
+css = "\n".join(read(P(strip(f))) for f in css_files)
+js = '"use strict";\n' + "\n".join(re.sub(r'^/\*[^\n]*\*/\n"use strict";\n', "", read(P(strip(f))), count=1) for f in js_files)
 
 def assemble(css, js):
     out = index
