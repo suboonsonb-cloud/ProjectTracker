@@ -271,7 +271,7 @@ function quBindRow(m,tr){
     if(open.length){raiddPanel(pid);return}
     addNew("RAIDD",()=>({[FD.type]:"Issue",[FD.pid]:pid,[FD.tid]:tid,[FD.status]:"Open",[FD.raised]:TODAY,[FD.desc]:"Delay — reason: "}));toast("Write why it is late and the new Due date (when it will be done) — the task forecast moves to that date.",7000)});
   tr.querySelectorAll("[data-qts]").forEach(el=>el.onchange=()=>{const t=+el.dataset.qts,r=+el.dataset.r;try{setCell("Activities",FA.ovr,t,el.value)}catch(e){toast(e.message,5000);return}quStamp(r);liveCalc();UI.qu.edited.add(r);const y=scrollY;vQuick($("#main"),true);window.scrollTo(0,y)});
-  const reRow=r=>{const tr2=m.querySelector(`tr[data-row="${r}"]`);if(!tr2)return;const cell=tr2.querySelector("td.qben");if(cell){cell.innerHTML=quBenCell(r);quBindRow(m,tr2)}};
+  const reRow=r=>{const tr2=m.querySelector(`tr[data-row="${r}"]`);if(!tr2){if(UI.qu.pd===r&&document.getElementById("pdw"))pdRender();return}const cell=tr2.querySelector("td.qben");if(cell){cell.innerHTML=quBenCell(r);quBindRow(m,tr2)}};
   tr.querySelectorAll("[data-qlo]").forEach(b=>b.onclick=()=>{const r=+b.dataset.qlo;UI.qu.log=UI.qu.log||{};UI.qu.log[r]={type:"one"};if(UI.qu.plan)delete UI.qu.plan[r];reRow(r)});
   tr.querySelectorAll("[data-qpo]").forEach(b=>b.onclick=()=>{const r=+b.dataset.qpo;UI.qu.plan=UI.qu.plan||{};UI.qu.plan[r]={};if(UI.qu.log)delete UI.qu.log[r];reRow(r)});
   tr.querySelectorAll("[data-qplan]").forEach(box=>{const r=+box.dataset.qplan,st=UI.qu.plan[r];const q=k=>box.querySelector(`[data-qpf="${k}"]`);
@@ -306,6 +306,7 @@ function quReset(el){const r=+el.dataset.qu,f=el.dataset.f;const v={prog:Math.ro
 let QU_PTR=false;const QU_PEND=new Map();const QU_BLUR=new Set();document.addEventListener("pointerdown",()=>{QU_PTR=true},true);
 document.addEventListener("pointerup",()=>{setTimeout(()=>{QU_PTR=false;const p=[...QU_PEND];QU_PEND.clear();p.forEach(([r,o])=>quAfter(o.m,r,o.changed,o.focusKey))},40)},true);
 function quAfter(m,r,changed,focusKey){if(changed)UI.qu.edited.add(r);
+  if(UI.qu.pd===r&&document.getElementById("pdw")&&!(m.querySelector&&m.querySelector(`tr[data-row="${r}"]`))){if(QU_PTR){const o=QU_PEND.get(r);QU_PEND.set(r,{m,changed:changed||(o&&o.changed),focusKey:focusKey||(o&&o.focusKey)});return}liveCalc();pdRender();pdListRow(r);renderTabs();return}
   // a button in this row may be mid-click: replacing the row now would swallow that click → wait for the click to finish
   if(QU_PTR){const o=QU_PEND.get(r);QU_PEND.set(r,{m,changed:changed||(o&&o.changed),focusKey:focusKey||(o&&o.focusKey)});return}
   liveCalc();
@@ -354,7 +355,7 @@ function quFilterBar(){const F=UI.qu;const {all,P1,P2,P2a,P2b,off}=quRows();cons
 function quFilterBind(m,re){const F=UI.qu;const qi=$("#quQ");qi.oninput=()=>{F.q=qi.value;clearTimeout(quFilterBind._t);quFilterBind._t=setTimeout(()=>{re();const e2=$("#quQ");if(e2){e2.focus();e2.setSelectionRange(e2.value.length,e2.value.length)}},300)};
   $("#quCF").onchange=e=>{F.cf=e.target.value;F.proc="";F.team="";re()};$("#quProc").onchange=e=>{F.proc=e.target.value;F.team="";re()};$("#quTeam").onchange=e=>{F.team=e.target.value;re()};if($("#quRd"))$("#quRd").onchange=e=>{F.rd=e.target.value;re()};e2eBarBind(m,re);$("#quChg").onchange=e=>{F.chg=e.target.checked;re()};
   bindStChips(m,"qst",F,re)}
-function vQuick(m,simple){const F=UI.qu;F.simple=!!simple;liveCalc();const {all,P1,P2,P2a,P2b,rows,off}=quRows();const EO=e2eFilterOpts(P2b);const lanes=laneOpts(F.flow);if(F.lane&&!lanes.includes(F.lane))F.lane="";const fv=(r,c)=>gv("Projects",c,r)||"(blank)";
+function vQuick(m,simple){if(simple&&UI.plist!=="simple"&&UI.plist!=="table")return vPList(m);const F=UI.qu;F.simple=!!simple;liveCalc();const {all,P1,P2,P2a,P2b,rows,off}=quRows();const EO=e2eFilterOpts(P2b);const lanes=laneOpts(F.flow);if(F.lane&&!lanes.includes(F.lane))F.lane="";const fv=(r,c)=>gv("Projects",c,r)||"(blank)";
   const cfs=uniq(all.map(r=>fv(r,FP.cf)));const procs=uniq(P1.map(r=>fv(r,FP.proc)));if(F.proc&&!procs.includes(F.proc))F.proc="";
   const sts=off.size?STL.slice():STL.filter(s=>P2.some(r=>pStat(r)===s));const re=()=>{const y=scrollY;vQuick(m,simple);window.scrollTo(0,y)};
   const head=simple?projHead(true)
