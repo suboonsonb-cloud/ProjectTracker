@@ -125,6 +125,7 @@ function vGantt0(m){
   const gsz=(fid,dir)=>{g.swz=g.swz||{};const Z=[0.5,0.75,1,1.25,1.5,2,2.5,3];let z=g.swz[fid]||1;if(dir==="0")z=1;else{let i=Z.findIndex(x=>x>=z-1e-9);if(i<0)i=Z.length-1;i=Math.max(0,Math.min(Z.length-1,i+(dir==="+"?1:-1)));z=Z[i]}g.swz[fid]=z;
     const el=m.querySelector(`[data-gsnap="${CSS.escape(fid)}"]`);if(el){const fx=el.scrollLeft/Math.max(1,el.scrollWidth),fy=el.scrollTop/Math.max(1,el.scrollHeight);el.style.setProperty("--gsz",z);el.scrollLeft=fx*el.scrollWidth;el.scrollTop=fy*el.scrollHeight;const v=el.parentElement.querySelector(".gzv");if(v)v.textContent=Math.round(z*100)+"%"}};
   m.querySelectorAll("[data-gsz]").forEach(b=>b.onclick=()=>gsz(b.dataset.f,b.dataset.gsz));
+  m.querySelectorAll(".gswimimg").forEach(el=>{gswimFit(el);new MutationObserver(()=>gswimFit(el)).observe(el,{childList:true});el.addEventListener("mouseup",()=>{if(el._h&&Math.abs(el.offsetHeight-el._h)>4)el.dataset.manual="1"})});
   m.querySelectorAll("[data-gsnap]").forEach(el=>el.addEventListener("wheel",e=>{if(!(e.ctrlKey||e.metaKey))return;e.preventDefault();gsz(el.dataset.gsnap,e.deltaY<0?"+":"-")},{passive:false}));
   if(openF.length){e2eEnsureFrame();openF.forEach(F=>{const el=m.querySelector(`[data-gsnap="${CSS.escape(F.f.id)}"]`);if(!el)return;
     const hl=g.hl||"";let ids=[];if(String(hl).includes("|")){const ln=String(hl).split("|").pop();ids=(F.doc.shapes||[]).filter(sh=>(sh.proj||[]).length&&laneOfShape(F.doc,sh)===ln).map(sh=>sh.id)}
@@ -134,3 +135,9 @@ function vGantt0(m){
   if(TODAY>=min&&TODAY<=max&&!g._scrolled){gr.scrollLeft=Math.max(0,X(TODAY)-gr.clientWidth/3);g._scrolled=true}
 }
 
+
+/* swimlane box above the Gantt: as tall as the flow needs at full width (max ¾ of the window), so the whole flow shows big */
+function gswimFit(el){const sv=el.querySelector("svg");if(!sv||el.dataset.manual)return;const vb=(sv.getAttribute("viewBox")||"").split(/[ ,]+/).map(Number);
+  let w=vb[2],h=vb[3];if(!(w>0&&h>0)){w=+sv.getAttribute("width")||0;h=+sv.getAttribute("height")||0}if(!(w>0&&h>0))return;
+  const want=Math.round(Math.min(el.clientWidth*h/w+6,innerHeight/ZF()*0.75));if(Math.abs(el.offsetHeight-want)>3){el.style.height=Math.max(240,want)+"px"}el._h=el.offsetHeight}
+window.addEventListener("resize",()=>document.querySelectorAll(".gswimimg").forEach(gswimFit));

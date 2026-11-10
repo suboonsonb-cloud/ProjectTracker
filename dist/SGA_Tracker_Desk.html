@@ -812,7 +812,7 @@ body.pdon .drawer{z-index:63}
 </head>
 <body>
 <aside class="side" id="side" aria-label="Main navigation">
-  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r54</span></small></span></div>
+  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r55</span></small></span></div>
   <div class="sglab">WORKSPACE</div>
   <button type="button" class="wschip" id="btnOpen" title="Open the workbook (the database)"><span class="wsdot" aria-hidden="true"></span><span class="file" id="fileName">No workbook loaded</span><span class="chev" aria-hidden="true">⌄</span></button>
   <nav class="sidenav hidden" id="tabs"></nav>
@@ -2583,6 +2583,7 @@ function vGantt0(m){
   const gsz=(fid,dir)=>{g.swz=g.swz||{};const Z=[0.5,0.75,1,1.25,1.5,2,2.5,3];let z=g.swz[fid]||1;if(dir==="0")z=1;else{let i=Z.findIndex(x=>x>=z-1e-9);if(i<0)i=Z.length-1;i=Math.max(0,Math.min(Z.length-1,i+(dir==="+"?1:-1)));z=Z[i]}g.swz[fid]=z;
     const el=m.querySelector(`[data-gsnap="${CSS.escape(fid)}"]`);if(el){const fx=el.scrollLeft/Math.max(1,el.scrollWidth),fy=el.scrollTop/Math.max(1,el.scrollHeight);el.style.setProperty("--gsz",z);el.scrollLeft=fx*el.scrollWidth;el.scrollTop=fy*el.scrollHeight;const v=el.parentElement.querySelector(".gzv");if(v)v.textContent=Math.round(z*100)+"%"}};
   m.querySelectorAll("[data-gsz]").forEach(b=>b.onclick=()=>gsz(b.dataset.f,b.dataset.gsz));
+  m.querySelectorAll(".gswimimg").forEach(el=>{gswimFit(el);new MutationObserver(()=>gswimFit(el)).observe(el,{childList:true});el.addEventListener("mouseup",()=>{if(el._h&&Math.abs(el.offsetHeight-el._h)>4)el.dataset.manual="1"})});
   m.querySelectorAll("[data-gsnap]").forEach(el=>el.addEventListener("wheel",e=>{if(!(e.ctrlKey||e.metaKey))return;e.preventDefault();gsz(el.dataset.gsnap,e.deltaY<0?"+":"-")},{passive:false}));
   if(openF.length){e2eEnsureFrame();openF.forEach(F=>{const el=m.querySelector(`[data-gsnap="${CSS.escape(F.f.id)}"]`);if(!el)return;
     const hl=g.hl||"";let ids=[];if(String(hl).includes("|")){const ln=String(hl).split("|").pop();ids=(F.doc.shapes||[]).filter(sh=>(sh.proj||[]).length&&laneOfShape(F.doc,sh)===ln).map(sh=>sh.id)}
@@ -2592,6 +2593,12 @@ function vGantt0(m){
   if(TODAY>=min&&TODAY<=max&&!g._scrolled){gr.scrollLeft=Math.max(0,X(TODAY)-gr.clientWidth/3);g._scrolled=true}
 }
 
+
+/* swimlane box above the Gantt: as tall as the flow needs at full width (max ¾ of the window), so the whole flow shows big */
+function gswimFit(el){const sv=el.querySelector("svg");if(!sv||el.dataset.manual)return;const vb=(sv.getAttribute("viewBox")||"").split(/[ ,]+/).map(Number);
+  let w=vb[2],h=vb[3];if(!(w>0&&h>0)){w=+sv.getAttribute("width")||0;h=+sv.getAttribute("height")||0}if(!(w>0&&h>0))return;
+  const want=Math.round(Math.min(el.clientWidth*h/w+6,innerHeight/ZF()*0.75));if(Math.abs(el.offsetHeight-want)>3){el.style.height=Math.max(240,want)+"px"}el._h=el.offsetHeight}
+window.addEventListener("resize",()=>document.querySelectorAll(".gswimimg").forEach(gswimFit));
 
 /* ---------------- Projects hub: project list ⇄ task list, and the project workspace ---------------- */
 const STD_TASKS={Waterfall:["Kick-off, scope & charter","Get requirement & solution design","Develop / configure","Test & UAT","Go-live & deployment","Hypercare, hand-over & benefit tracking"],
