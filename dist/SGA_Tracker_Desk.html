@@ -808,11 +808,121 @@ body.pdon .drawer{z-index:63}
 .gswimimg{height:420px;max-height:none;overflow:auto;text-align:center;background:#fff}
 .gswimimg svg{height:calc(100% * var(--gsz,1))!important;width:auto!important;min-width:0!important;max-width:none!important;display:inline-block}
 .gswimimg[style*="--gsz:1;"] svg,.gswimimg[style$="--gsz:1"] svg{max-width:100%!important}
+
+/* ===== r56 — Gantt timeline redesign (lavender theme) ===== */
+.gx-top{margin-bottom:14px}
+.gx-nav{display:inline-flex;align-items:center;background:#fff;border:1px solid #E4E0F5;border-radius:12px;box-shadow:0 1px 2px rgba(16,24,40,.05);overflow:hidden}
+.gx-nav button{border:0;background:transparent;font:inherit;cursor:pointer;color:var(--ink);padding:8px 12px;font-size:15px;line-height:1}
+.gx-nav button:hover{background:var(--accent-soft);color:var(--accent-d)}
+.gx-nav .lbl{font-size:13px;font-weight:600;padding:8px 10px;border-left:1px solid #EEEBF8;border-right:1px solid #EEEBF8;white-space:nowrap}
+.gx-swbtn{display:inline-flex;align-items:center;gap:7px;background:var(--accent)!important;color:#fff!important;border:0!important;border-radius:12px!important;padding:9px 16px!important;font-weight:600;box-shadow:0 4px 12px rgba(124,92,252,.28)}
+.gx-swbtn:hover{background:var(--accent-d)!important}.gx-swbtn.on{background:#fff!important;color:var(--accent-d)!important;box-shadow:inset 0 0 0 1.5px var(--accent)}
+.gx-swbtn svg,.gx-more svg,.gx-search svg{width:16px;height:16px;flex:none}
+.gx-tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 14px!important;margin-bottom:14px;border:1px solid #E4E0F5!important;background:linear-gradient(180deg,#FFFFFF 0%,#FBFAFF 100%)!important;box-shadow:0 6px 18px rgba(124,92,252,.08)!important;border-radius:16px!important;position:relative}
+.gx-tools .sp,.gx-ch .sp,.gx-swh .sp{flex:1}
+.gx-search{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #DCD6F2;border-radius:10px;padding:0 10px;min-width:260px;flex:0 1 320px;color:#8A84A3;height:36px;box-sizing:border-box}
+.gx-search:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,92,252,.15)}
+.gx-search input{border:0;outline:0;background:transparent;font:inherit;font-size:13px;flex:1;min-width:0;color:var(--ink)}
+.gx-sel,.gx-morep select{height:36px;border:1px solid #DCD6F2!important;border-radius:10px!important;padding:0 30px 0 12px!important;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='%237C5CFC' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 10px center/14px!important;-webkit-appearance:none;appearance:none;font:inherit;font-size:13px;color:var(--ink);cursor:pointer}
+.gx-sel:hover,.gx-morep select:hover{border-color:#B9AEF0!important}.gx-sel.act{border-color:var(--accent)!important;background-color:var(--accent-soft)!important;color:var(--accent-d);font-weight:600}
+.gx-more{display:inline-flex;align-items:center;gap:7px;height:36px;border-radius:10px!important;border:1px solid #DCD6F2!important;background:#fff!important;color:var(--ink)!important;padding:0 12px!important}
+.gx-more.on,.gx-more.act{border-color:var(--accent)!important;background:var(--accent-soft)!important;color:var(--accent-d)!important;font-weight:600}
+.gx-more b{background:var(--accent);color:#fff;border-radius:999px;font-size:11px;min-width:18px;height:18px;display:inline-grid;place-items:center;padding:0 5px;box-sizing:border-box}
+.gx-chk{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--ink);cursor:pointer;user-select:none}.gx-chk input{accent-color:var(--accent);width:15px;height:15px;margin:0}
+.gx-count{font-size:12px;color:var(--muted)}
+.gx-unit button{padding:7px 14px!important}.gx-unit button.on{background:var(--accent)!important}
+.gx-morep{flex-basis:100%;display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;padding:12px;margin-top:2px;background:#F7F5FF;border:1px dashed #D9D1FA;border-radius:12px}
+.gx-morep label{display:flex;flex-direction:column;gap:4px;font-size:11px;font-weight:600;color:#6E6893;text-transform:uppercase;letter-spacing:.3px}.gx-morep select{min-width:150px;text-transform:none;letter-spacing:0;font-weight:400}
+.gx-link{border:0;background:none;color:var(--accent-d);font:inherit;font-size:13px;font-weight:600;cursor:pointer;padding:4px 2px}.gx-link:hover{text-decoration:underline}
+/* schedule card */
+.gx-card{padding:0!important;overflow:hidden;border-radius:16px!important;border:1px solid #E9E6F5!important}
+.gx-ch{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:12px 16px;border-bottom:1px solid #EEEBF8}.gx-ch>b{font-size:15px;color:var(--ink)}
+.gx-leg{display:inline-flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--muted);align-items:center}.gx-leg>span{display:inline-flex;align-items:center;gap:5px}
+.gx-leg i{display:inline-block;width:18px;height:9px;border-radius:5px}.gx-leg i.s{background:#DCD3FF}.gx-leg i.p{background:var(--accent)}.gx-leg i.c{background:#34A853}.gx-leg i.r{background:#F6C26B}.gx-leg i.l{background:#F3A39D}.gx-leg i.b{height:3px;background:#9E97B8}
+.gx-ch .btn.small{border-radius:9px;border-color:#E2DDF5;background:#fff}.gx-ch .btn.small:hover{background:var(--accent-soft);color:var(--accent-d)}
+.gantt.gx{border:0;border-radius:0}
+.gx .g-head{background:#FAF9FE;height:46px;border-bottom:1px solid #EEEBF8}
+.gx-lhd{display:flex;align-items:flex-end;padding:0 10px 8px;font-size:11.5px;font-weight:700;color:#6E6893;text-transform:uppercase;letter-spacing:.3px;gap:6px;box-sizing:border-box}
+.gx-lhd .g-ppl,.gx-lhd .g-meta{color:#6E6893;font-size:11.5px}
+.gx .g-ppl{width:110px}.gx .g-meta{width:44px}
+.gx-mhd{position:sticky;top:0;z-index:3}
+.gx-m{position:absolute;top:0;height:100%;border-left:1px solid #EEEBF8;box-sizing:border-box;padding:8px 8px 0;font-size:12px;color:#6E6893;white-space:nowrap;overflow:hidden}
+.gx-m b{font-weight:600;color:#3F3A57}.gx-m small{font-size:10.5px;color:#9A95B2}
+.gx-m.cur{background:#EFEAFF}.gx-m.cur b{color:var(--accent-d)}
+.gx-mhd.wk .gx-m{padding-top:5px}.gx-wk{position:absolute;bottom:4px;font-size:10px;color:#A39EBB;transform:translateX(2px)}
+.gx-grid{position:absolute;top:46px;bottom:0;left:0;right:0;pointer-events:none;z-index:0}
+.gx-vl{position:absolute;top:0;bottom:0;border-left:1px solid #F0EEF8}.gx-vw{position:absolute;top:0;bottom:0;border-left:1px dashed #F5F3FB}
+.gx-cur{position:absolute;top:0;bottom:0;background:rgba(124,92,252,.06)}
+.gx-today{background:var(--accent)!important;width:2px!important;z-index:2}.gx-today::before{content:"";position:absolute;top:40px;left:-4px;width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px #fff}
+.gx .g-right .g-row{background:transparent!important;position:relative;z-index:1;overflow:hidden;border-bottom-color:#F4F2FA}
+.gx .g-right .g-row.ghl{background:rgba(247,144,9,.08)!important}
+.gx .g-left .g-row{border-bottom-color:#F4F2FA}
+.gx .g-row.gd0{background:#F4F1FF}.gx .g-row.gd1{background:#F9F7FF}.gx .g-row.gd2,.gx .g-row.gd3,.gx .g-row.gd4,.gx .g-row.gd5{background:#fff}
+.gx .g-row.gf .g-name{font-size:13px;color:var(--ink);font-weight:700}.gx .g-row.gl .g-name{color:#3F3A57;font-weight:600}
+.gx .g-left .g-row.p{font-weight:600;background:#fff}.gx .g-left .g-row.gd0.p{background:#F4F1FF}.gx .g-left .g-row.gd1.p{background:#F9F7FF}
+.gx .g-row.ghl{background:#FFF4E5!important;box-shadow:inset 3px 0 0 #F79009}
+.gx .g-row .gtv,.gx .g-row .gte{border-left-color:#E2DCF7}.gx .g-row .gte::after{border-top-color:#E2DCF7}
+.gx-chev{width:18px;height:18px;display:inline-grid;place-items:center;border-radius:6px;color:#8A84A3;flex:none}.gx-chev svg{width:14px;height:14px;transition:transform .15s}
+.gx-chev.open svg{transform:rotate(90deg)}.gx-chev[data-gk]:hover,.gx-chev[data-p]:hover{background:var(--accent-soft);color:var(--accent-d)}
+.gx-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-right:7px;vertical-align:1px}.gx-dot.none{background:#C9C4DC}
+.gx-lane{display:inline-block;width:10px;height:8px;border-radius:2px;border:1.5px solid #A895F7;margin-right:7px;vertical-align:0}
+.gx-n{display:inline-block;font-size:10.5px;font-weight:600;color:var(--accent-d);background:var(--accent-soft);border-radius:999px;padding:0 6px;margin-left:4px}
+.gx-id{font-size:11px;font-weight:600;color:#8A84A3}
+.gx-done{font-weight:600;color:#3F3A57}.gx-done.ok{color:#1E8E3E}
+.gx-none{padding:18px;color:var(--muted);font-size:13px}
+/* bars */
+.gx-bar{position:absolute;top:12px;height:14px;border-radius:7px;background:#DCD3FF;overflow:hidden;z-index:1}
+.gx-bar>i{position:absolute;left:0;top:0;bottom:0;background:var(--accent);border-radius:7px 0 0 7px}
+.gx-bar.f{height:16px;top:11px;background:#CFC3FF}.gx-bar.f>i{background:var(--accent-d)}
+.gx-bar.s,.gx-bar.t{height:10px;top:14px;border-radius:5px}
+.gx-bar.done{background:#34A853}.gx-bar.risk{background:#FBE2B5}.gx-bar.risk>i{background:#E89A1C}
+.gx-bar.lateb{background:#F9CFCB}.gx-bar.lateb>i{background:#D9473C}.gx-bar.hold{background:#E4E3EA}.gx-bar.hold>i{background:#8D8AA0}
+.gx-late{position:absolute;top:15px;height:8px;border-radius:4px 0 0 4px;background:repeating-linear-gradient(135deg,#F6B8B2 0 3px,#FDE7E5 3px 6px);z-index:1}
+.gx-late.s,.gx-late.t{top:16px;height:6px}
+.gx-base{position:absolute;top:30px;height:3px;border-radius:2px;background:#9E97B8;opacity:.75;z-index:1}
+.gx-pill{position:absolute;top:11px;font-style:normal;font-size:10.5px;font-weight:700;color:#C4320A;background:#FEECEA;border:1px solid #F9C8C2;border-radius:999px;padding:0 7px;line-height:15px;white-space:nowrap;z-index:2}
+.gx-leg .gx-pill{position:static}
+.gx-rp{top:11px!important;font-size:10.5px}
+/* swimlane card */
+.gx-swc{border-radius:16px!important;border:1px solid #E4E0F5!important;padding:16px!important;margin-bottom:14px;box-shadow:0 6px 18px rgba(124,92,252,.07)!important}
+.gx-swh{display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;margin-bottom:12px}.gx-swh h3{margin:0;font-size:16px;color:var(--ink)}.gx-swh p{margin:3px 0 0;font-size:12.5px;color:var(--muted)}
+.gx-selchip{display:inline-flex;align-items:center;gap:6px;background:var(--accent-soft);color:var(--accent-d);border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:600}
+.gx-selchip button{border:0;background:transparent;color:inherit;cursor:pointer;font-size:14px;line-height:1;padding:0 2px}
+.gx-badge{font-size:11px;font-weight:700;letter-spacing:.4px;color:#fff;background:var(--navy);border-radius:6px;padding:3px 8px}
+.gx-lanes{display:grid;grid-template-columns:repeat(var(--n),minmax(170px,1fr));gap:10px;overflow-x:auto;padding-bottom:4px}
+.gx-lc{background:#FAF9FE;border:1px solid #EEEBF8;border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.gx-lc.on{border-color:var(--accent);background:#F5F2FF}
+.gx-lh{font-size:12px;font-weight:700;color:#3F3A57;padding:4px 6px 6px;border-bottom:1px solid #EEEBF8;cursor:pointer;text-align:center}.gx-lh:hover{color:var(--accent-d)}
+.gx-step{display:flex;flex-direction:column;gap:3px;text-align:left;border:1px solid #E6E3F0;background:#fff;border-radius:10px;padding:8px 10px;font:inherit;cursor:pointer;color:var(--ink);transition:box-shadow .15s,border-color .15s}
+.gx-step b{font-size:12px;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.gx-step span{font-size:10.5px;font-weight:600;color:#8A84A3}
+.gx-step.np{cursor:default;color:#6E6893}.gx-step.np b{font-weight:500}
+.gx-step:not(.np):hover{border-color:#B9AEF0;box-shadow:0 2px 8px rgba(124,92,252,.15)}
+.gx-step.hit{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 4px 12px rgba(124,92,252,.3)}.gx-step.hit span{color:#E6DEFF}
+.gx-empty{font-size:11.5px;text-align:center;padding:6px}
+.gx-foot{margin:10px 2px 0;font-size:12px;color:var(--muted)}
+.gx-full{margin-top:12px;border-top:1px solid #EEEBF8;padding-top:10px}
+@media (max-width:900px){.gx-search{min-width:0;flex:1 1 100%}.gx .g-ppl{display:none}}
+
+/* ===== r56 — dashboard filter bar: stand out, same lavender theme ===== */
+.dfilt{background:linear-gradient(180deg,#FFFFFF 0%,#F8F6FF 100%)!important;border:1px solid #DCD3FF!important;border-left:4px solid var(--accent)!important;box-shadow:0 8px 22px rgba(124,92,252,.14)!important;padding:10px 16px!important;gap:10px 14px!important;border-radius:16px!important}
+.dfilt>b{display:inline-flex;align-items:center;gap:7px;color:var(--accent-d);font-size:13.5px;background:var(--accent-soft);border-radius:999px;padding:5px 12px 5px 10px}
+.dfilt>b::before{content:"";width:14px;height:14px;background:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M3 5h14M6 10h8M8.5 15h3' stroke='%236447E6' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")}
+.dfilt label{font-weight:600;color:#6E6893!important}
+.dfilt select,.dfilt .combo input{height:34px;border:1px solid #DCD6F2!important;border-radius:10px!important;background-color:#fff;font-weight:400;color:var(--ink);box-sizing:border-box}
+.dfilt select{padding:0 30px 0 10px!important;-webkit-appearance:none;appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='%237C5CFC' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 9px center/14px!important}
+.dfilt select:hover,.dfilt .combo input:hover{border-color:#B9AEF0!important}
+.dfilt select:focus,.dfilt .combo input:focus{outline:0;border-color:var(--accent)!important;box-shadow:0 0 0 3px rgba(124,92,252,.15)}
+.dfilt select:has(option:checked:not([value=""])){border-color:var(--accent)!important;background-color:var(--accent-soft)!important;color:var(--accent-d);font-weight:600}
+.dfilt .stc{border-color:#E2DDF5;padding:4px 5px 4px 9px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.dfilt .stc:not(.off){border-color:color-mix(in srgb,var(--c) 45%,#fff);background:color-mix(in srgb,var(--c) 8%,#fff)}
+.dfilt .stc b.only{color:var(--accent-d);border-color:#D9D1FA}.dfilt .stc:hover b.only{background:var(--accent-soft)}
+.dfilt [data-stall]{border-radius:999px;border-color:#D9D1FA;color:var(--accent-d);font-weight:600}
 </style>
 </head>
 <body>
 <aside class="side" id="side" aria-label="Main navigation">
-  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r55</span></small></span></div>
+  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r56</span></small></span></div>
   <div class="sglab">WORKSPACE</div>
   <button type="button" class="wschip" id="btnOpen" title="Open the workbook (the database)"><span class="wsdot" aria-hidden="true"></span><span class="file" id="fileName">No workbook loaded</span><span class="chev" aria-hidden="true">⌄</span></button>
   <nav class="sidenav hidden" id="tabs"></nav>
@@ -2481,11 +2591,14 @@ function vGantt0(m){
   const procs=uniq(P2.map(p=>fv(p,FP.proc)));if(g.proc&&!procs.includes(g.proc))g.proc="";const P2b=P2.filter(p=>!g.proc||fv(p,FP.proc)===g.proc);
   const teams=uniq(P2b.map(p=>fv(p,"AB")));if(g.team&&!teams.includes(g.team))g.team="";const P2c=P2b.filter(p=>!g.team||fv(p,"AB")===g.team);
   const inits=uniq(P2c.map(p=>fv(p,FP.init)));if(g.init&&!inits.includes(g.init))g.init="";const P2d=P2c.filter(p=>!g.init||fv(p,FP.init)===g.init);
-  g.stOff=Array.isArray(g.stOff)?g.stOff:[];const off=new Set(g.stOff);const sts=off.size?STL.slice():STL.filter(st=>P2d.some(p=>pStat(p.r)===st));
-  const P3=P2d.filter(p=>!off.has(pStat(p.r)));
-  /* project box: an exact ID shows that project, any other text filters by ID / name */
+  /* status: one pick from the dropdown (All = every status) */
+  const stCount=st=>P2d.filter(p=>pStat(p.r)===st).length;if(g.st&&!STL.includes(g.st))g.st="";
+  const P3=P2d.filter(p=>!g.st||pStat(p.r)===g.st);
+  /* E2E map of every flow ▸ lane ▸ project (before filters) — used for grouping, lane search and the swimlane card */
+  const MAP=gFlowMap();const pNames={};MAP.forEach(F=>F.lanes.forEach(L=>L.ids.forEach(pid=>{(pNames[pid]=pNames[pid]||[]).push(F.f.name,L.name)})));
+  /* search box: an exact ID shows that project; other text matches project ID / name, or the flow / lane it sits in */
   const qq=String(g.q||"").trim();const exact=qq&&P3.find(p=>p.id===qq);const ql=qq.toLowerCase();
-  let PR=P3.filter(p=>!qq||(exact?p.id===qq:(p.id+" "+gv("Projects",FP.name,p.r)).toLowerCase().includes(ql)));
+  let PR=P3.filter(p=>!qq||(exact?p.id===qq:(p.id+" "+gv("Projects",FP.name,p.r)+" "+(pNames[p.id]||[]).join(" ")).toLowerCase().includes(ql)));
   if(g.hideDone)PR=PR.filter(p=>!["Completed","Cancelled"].includes(pStat(p.r)));
   const tasksBy={};rowsOf("Activities").forEach(r=>{const pid=gv("Activities",FA.pid,r);(tasksBy[pid]=tasksBy[pid]||[]).push(r)});
   const chg=changedRows("Activities");
@@ -2500,98 +2613,156 @@ function vGantt0(m){
         if(g.level==="tasks")for(const r of rs)lines.push({lvl:2,ind,pic:gv("Activities",FA.pic,r),fc:tLive(r).fc,label:gv("Activities",FA.task,r),id:tId(r),rp:tLive(r).rpdays||0,rpref:tLive(r).rpref,d:tDates(r),status:tStat(r),pct:tLive(r).eact??(+gv("Activities",FA.act,r)||0),pending:chg.has(r)})}}};
   /* group rows: E2E flow ▸ swimlane (left lane first) ▸ project — or a flat project list */
   const agg=(label,kind,key,ps,ind)=>{const ds=ps.map(pDates);const mn=a=>{const v=a.filter(Boolean);return v.length?Math.min(...v):0},mx=a=>{const v=a.filter(Boolean);return v.length?Math.max(...v):0};
-    const fcOf=p=>{const st=pStat(p.r);return st==="Completed"?"Done":st==="Delayed"?"Late":st==="On-Hold"||st==="Cancelled"?st:st==="At Risk"?"At risk of delay":"On time"};
-    return {lvl:-1,kind,key,ind,label,id:"",d:{s:mn(ds.map(x=>x.s)),e:mx(ds.map(x=>x.e)),ps:mn(ds.map(x=>x.ps)),pe:mx(ds.map(x=>x.pe))},segs:ps.map(p=>({...pDates(p),fc:fcOf(p),status:pStat(p.r),name:p.name})),status:"",pct:ps.length?ps.reduce((a,p)=>a+(pLive(p.r).comp||0),0)/ps.length:0,n:ps.length,wsl:uniq(ps.map(p=>gv("Projects",FP.wsl,p.r)).filter(Boolean)),wslNone:ps.filter(p=>!gv("Projects",FP.wsl,p.r)).length,lead:uniq(ps.map(p=>gv("Projects",FP.lead,p.r)).filter(Boolean)),leadNone:ps.filter(p=>!gv("Projects",FP.lead,p.r)).length}};
-  const GRP=g.grp!=="flat"&&typeof hasE2E==="function"&&hasE2E();let FLOWS=[];
-  const noE2E=g.grp!=="flat"&&!(typeof hasE2E==="function"&&hasE2E());
-  if(GRP){const inPR=new Set(PR.map(p=>p.id));const used=new Set();
-    for(const f of e2eFlows()){const doc=(f.v["TO-BE"]&&f.v["TO-BE"].doc)||(f.v["AS-IS"]&&f.v["AS-IS"].doc);if(!doc)continue;
-      const lanes=(doc.lanes||[]).map(l=>({name:l.name,ids:new Set()}));
-      for(const ver of ["TO-BE","AS-IS"]){const dd=f.v[ver]&&f.v[ver].doc;if(!dd)continue;for(const sh of dd.shapes||[])for(const pid of sh.proj||[]){if(!inPR.has(pid))continue;const ln=laneOfShape(dd,sh);let L=lanes.find(x=>x.name===ln);if(!L){L={name:ln,ids:new Set()};lanes.push(L)}if(ver==="TO-BE"||![...lanes].some(x=>x.ids.has(pid)))L.ids.add(pid)}}
-      const pids=new Set(lanes.flatMap(l=>[...l.ids]));if(!pids.size)continue;pids.forEach(x=>used.add(x));FLOWS.push({f,doc,lanes:lanes.filter(l=>l.ids.size),pids})}
+    return {lvl:-1,kind,key,ind,label,id:"",d:{s:mn(ds.map(x=>x.s)),e:mx(ds.map(x=>x.e)),ps:mn(ds.map(x=>x.ps)),pe:mx(ds.map(x=>x.pe))},segs:[],status:ps.length&&ps.every(p=>pStat(p.r)==="Completed")?"Completed":"",pct:ps.length?ps.reduce((a,p)=>a+(pLive(p.r).comp||0),0)/ps.length:0,n:ps.length,wsl:uniq(ps.map(p=>gv("Projects",FP.wsl,p.r)).filter(Boolean)),wslNone:ps.filter(p=>!gv("Projects",FP.wsl,p.r)).length,lead:uniq(ps.map(p=>gv("Projects",FP.lead,p.r)).filter(Boolean)),leadNone:ps.filter(p=>!gv("Projects",FP.lead,p.r)).length}};
+  const hasMap=typeof hasE2E==="function"&&hasE2E();const GRP=g.grp!=="flat"&&hasMap;const noE2E=g.grp!=="flat"&&!hasMap;
+  const inPR=new Set(PR.map(p=>p.id));
+  const FLOWS=MAP.map(F=>{const lanes=F.lanes.map(L=>({name:L.name,ids:new Set([...L.ids].filter(x=>inPR.has(x)))})).filter(L=>L.ids.size);return {...F,lanes,pids:new Set(lanes.flatMap(L=>[...L.ids]))}}).filter(F=>F.pids.size);
+  if(GRP){const used=new Set();FLOWS.forEach(F=>F.pids.forEach(x=>used.add(x)));
     for(const F of FLOWS){const fk="f:"+F.f.id;const ps=PR.filter(p=>F.pids.has(p.id));lines.push({...agg(F.f.name,"f",fk,ps,0),meta:`${ps.length} project(s) · E2E flow`});
       if(g.open.has(fk))for(const L of F.lanes){const lk=fk+"|"+L.name;const lp=PR.filter(p=>L.ids.has(p.id));lines.push({...agg(L.name,"l",lk,lp,1),meta:"swimlane"});
         if(g.open.has(lk))lp.forEach(p=>pushP(p,2))}}
     const rest=PR.filter(p=>!used.has(p.id));if(rest.length){const nk="f:none";lines.push({...agg("No E2E flow mapped yet","f",nk,rest,0),none:true});if(g.open.has(nk))rest.forEach(p=>pushP(p,1))}}
   else for(const p of PR)pushP(p,0);
-  const all=lines.flatMap(l=>[l.d.s,l.d.e,l.d.ps,l.d.pe]).filter(x=>x>0&&isFinite(x));
-  let min=all.length?Math.min(...all):TODAY-90,max=all.length?Math.max(...all):TODAY+180;min=Math.min(min,TODAY-30);max=Math.max(max,TODAY+183);
-  const d0=serialToDate(min);min=dateToSerial(new Date(Date.UTC(d0.getUTCFullYear(),d0.getUTCMonth(),1)));const d1=serialToDate(max);max=dateToSerial(new Date(Date.UTC(d1.getUTCFullYear(),d1.getUTCMonth()+1,1)));
-  const px=[0.6,1,1.6,2.6,4][g.zoom-1]||1.6;const W=Math.max(600,(max-min)*px);const X=s=>(s-min)*px;
-  const HT=(c,bg)=>`repeating-linear-gradient(135deg,${c} 0 3px,${bg} 3px 6.5px)`;
-  /* same language as the project-page Gantt: solid = work (green done / pale green on time / amber at risk), red hatch = delay, white outline = plan */
-  const FCB={"Done":"#2E7D32","Late":HT("#D92D20","#FDA29B"),"On time":"#A6D5AA","At risk of delay":"#F5B544","Not started":"#CFE8D1","On-Hold":"#475467","Cancelled":"#E1E5EA"};
-  const FCL={"Done":"Completed","Late":"Delayed","On time":"Forecast on time","At risk of delay":"Forecast at risk of delay","Not started":"Not started","On-Hold":"On hold","Cancelled":"Cancelled"};
-  const lineFc=l=>{if(l.fc)return l.fc;const st=l.status,fs=(l.segs||[]).map(t=>t.fc);if(st==="Completed")return "Done";if(st==="Delayed")return "Late";if(st==="On-Hold"||st==="Cancelled")return st;if(st==="At Risk"||fs.includes("At risk of delay"))return "At risk of delay";return "On time"};
-  let monthsHtml="";for(let d=serialToDate(min);dateToSerial(d)<max;d=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+1,1))){const s=dateToSerial(d);
-    monthsHtml+=`<div class="g-month" style="left:${X(s)}px">${MON[d.getUTCMonth()]} ${String(d.getUTCFullYear()).slice(2)}</div>`}
-  /* tree guides (├ └ │) so the breakdown flow ▸ lane ▸ project ▸ stage ▸ task reads like a structure */
+  /* ---- time window: 12 months, moved with ‹ › ; Month = fits the card, Week = wider and scrolls ---- */
+  const mStart=s=>{const d=serialToDate(s);return dateToSerial(new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),1)))};
+  const addM=(s,n)=>{const d=serialToDate(s);return dateToSerial(new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+n,1)))};
+  if(!g.win)g.win=addM(mStart(TODAY),-3);
+  const min=g.win,max=addM(min,12);const wk=g.unit==="week";
+  const LW=innerWidth/ZF()<1280?380:470;const avail=Math.max(600,Math.floor((m.clientWidth||1200)-LW-36));
+  const px=wk?5:avail/(max-min);const W=wk?Math.round((max-min)*px):avail;const X=s=>(s-min)*px;
+  const fmtM=s=>{const d=serialToDate(s);return MON[d.getUTCMonth()]+" "+d.getUTCFullYear()};
+  const curM=mStart(TODAY);
+  let monthsHtml="",gridHtml="";for(let s=min;s<max;s=addM(s,1)){const d=serialToDate(s),e=addM(s,1),cur=s===curM;
+    monthsHtml+=`<div class="gx-m${cur?" cur":""}" style="left:${X(s)}px;width:${X(e)-X(s)}px"><b>${MON[d.getUTCMonth()]}</b>${d.getUTCMonth()===0||s===min?` <small>${d.getUTCFullYear()}</small>`:""}</div>`;
+    gridHtml+=`<i class="gx-vl" style="left:${X(s)}px"></i>`+(cur?`<i class="gx-cur" style="left:${X(s)}px;width:${X(e)-X(s)}px"></i>`:"")}
+  if(wk){/* week ticks (Mondays) under the month names */
+    let s=min;while(serialToDate(s).getUTCDay()!==1)s++;for(;s<max;s+=7){const d=serialToDate(s);monthsHtml+=`<span class="gx-wk" style="left:${X(s)}px">${d.getUTCDate()}</span>`;gridHtml+=`<i class="gx-vw" style="left:${X(s)}px"></i>`}}
+  /* tree guides (├ └ │), light, so the breakdown flow ▸ lane ▸ project ▸ stage ▸ task reads like a structure */
   const dep=lines.map(l=>l.kind?(l.ind||0):(l.ind||0)+l.lvl);const nxt=new Array(lines.length).fill(false);{const seen=[];for(let i=lines.length-1;i>=0;i--){const d=dep[i];nxt[i]=!!seen[d];seen[d]=true;seen.length=d+1}}
   const guides=[];{const anc=[];lines.forEach((l,i)=>{const d=dep[i];let h="";if(d>0){for(let k=1;k<d;k++)if(anc[k])h+=`<i class="gtv" style="left:${8+(k-1)*16+6}px"></i>`;h+=`<i class="gte${nxt[i]?"":" last"}" style="left:${8+(d-1)*16+6}px"></i>`}anc[d]=nxt[i];anc.length=d+1;guides.push(h)})}
-  let gi=-1;const left=lines.map(l=>(gi++,l.kind?`<div class="g-row gd${Math.min(5,dep[gi])} ${l.kind==="f"?"gf":"gl"} ${g.hl===l.key?"ghl":""}" style="padding-left:${8+(l.ind||0)*16}px">${guides[gi]}<span class="g-caret" data-gk="${esc(l.key)}">${g.open.has(l.key)?"▾":"▸"}</span>
-      <span class="g-name" title="${esc(l.label)}">${l.kind==="f"?(l.none?"○ ":"⇄ "):"▭ "}${esc(l.label)} <span class="muted" style="font-weight:400">(${l.n})</span></span>${gPpl(l.wsl,"Workstream leader(s)",l.wslNone)}${gPpl(l.lead,"Project leads",l.leadNone)}<span class="g-meta">${Math.round(l.pct*100)}%</span></div>`
-    :`<div class="g-row gd${Math.min(5,dep[gi])} ${l.lvl===0?"p":l.lvl===1?"s":""} ${l.lvl===0&&GRP&&g.hl===l.id?"ghl":""}" style="padding-left:${8+((l.ind||0)+l.lvl)*16}px" ${l.lvl===0&&GRP?`data-ghp="${esc(l.id)}"`:""}>${guides[gi]}
-      ${l.lvl===0?`<span class="g-caret" data-p="${esc(l.id)}">${g.level==="projects"?"":g.open.has(l.id)?"▾":"▸"}</span>`:""}
-      <span class="g-name" title="${esc(l.id+" "+l.label+(l.meta?" | "+l.meta:""))}">${l.lvl===2?`<span class="muted">${esc(l.id.split("-").pop())}</span> `:""}${esc(l.label)}${l.lvl===0&&l.team?` <span class="pteam">${esc(l.team)}</span>`:""}${l.pending?' <span class="badge-changes" style="font-size:10px;padding:0 6px">edited</span>':""}${l.rp&&l.lvl!==1?rpTag(l.rp,l.rpref):""}</span>
-      ${l.lvl===0?gPpl(l.wsl,"Workstream leader")+gPpl(l.lead,"Project lead"):l.lvl===2?'<span class="g-ppl"></span>'+gPpl(l.pic,"Task PIC"):'<span class="g-ppl"></span><span class="g-ppl"></span>'}<span class="g-meta">${l.lvl!==1?Math.round(l.pct*100)+"%":""}</span></div>`)).join("");
-  const right=lines.map((l,ri)=>{let h="";if(l.d.ps&&l.d.pe){const bw=Math.max(2,X(l.d.pe+1)-X(l.d.ps));h+=`<div class="g-base" style="left:${X(l.d.ps)}px;width:${bw}px" title="Plan (baseline) ${fmtDate(l.d.ps)} → ${fmtDate(l.d.pe)}">${bw>=30?"Plan":""}</div>`}
-    if(l.d.s&&l.d.e){const x0=X(l.d.s),w=Math.max(3,X(l.d.e+1)-x0);
-      /* started late: solid red from the plan start up to where the bar now starts (the delay so far) */
-      if(l.d.ps&&l.d.s>l.d.ps&&l.d.ps<=TODAY){const lx=X(l.d.ps),lw=Math.max(2,x0-lx);const dd=l.d.s-l.d.ps;h+=`<div class="g-late${l.lvl===2?" t":""}" style="left:${lx}px;width:${lw}px" title="Late start: planned ${fmtDate(l.d.ps)}, now ${fmtDate(l.d.s)} (+${dd}d)">${lw>=58?`<span>late +${dd}d</span>`:""}</div>`}
-      /* tag after the bar: how many days the end is behind the plan */
-      if(l.d.pe&&l.d.e>l.d.pe&&!l.none){const sl=l.d.e-l.d.pe;h+=`<span class="g-latetag" style="left:${X(l.d.e+1)+4+(l.rp?54:0)}px" title="Forecast end ${fmtDate(l.d.e)} vs plan end ${fmtDate(l.d.pe)}">⚠ +${sl}d</span>`}
-      if(l.lvl<2){const SEV={"Cancelled":0,"Done":1,"Not started":2,"On time":3,"On-Hold":4,"At risk of delay":5,"Late":6};
-        const segs=(l.segs||[]).filter(t=>t.s&&t.e).sort((a,b)=>(SEV[a.fc]??3)-(SEV[b.fc]??3));
-        const inner=segs.map(t=>{const sx=Math.max(0,X(t.s)-x0),sw=Math.max(2,Math.min(w,X(t.e+1)-x0)-sx);return `<div class="g-seg" style="left:${sx}px;width:${sw}px;background:${FCB[t.fc]||FCB["On time"]}" title="${esc(t.name)}: ${fmtDate(t.s)} → ${fmtDate(t.e)} · ${esc(t.status)} · ${esc(FCL[t.fc]||"")}"></div>`}).join("");
-        h+=`<div class="g-bar" style="left:${x0}px;width:${w}px;background:${l.kind==="f"?"#C9D3E0":l.lvl===0?"#D3DAE3":"#E1E6ED"};box-shadow:inset 0 0 0 ${l.kind==="f"?"2px #1F3864":l.lvl===0?"1.5px #1F3864":"1px #8497B0"};height:${l.kind==="f"?18:l.lvl===0?16:14}px;top:${l.kind==="f"?2:l.lvl===0?3:4}px" title="${esc(l.label)}: ${fmtDate(l.d.s)} → ${fmtDate(l.d.e)}${l.status?" · "+esc(l.status):""}">${inner}</div>`}
-      else h+=`<div class="g-bar t" style="left:${x0}px;width:${w}px;background:${FCB[lineFc(l)]}" title="${esc(l.label)}: ${fmtDate(l.d.s)} → ${fmtDate(l.d.e)} · ${esc(l.status||"")} · ${esc(FCL[lineFc(l)])}">${l.pct>0?`<div class="g-prog" style="width:${Math.min(100,l.pct*100)}%"></div>`:""}</div>`}
+  const CHEV=`<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const chev=(attr,open)=>`<span class="g-caret gx-chev${open?" open":""}" ${attr}>${CHEV}</span>`;
+  const doneTxt=l=>`<span class="g-meta gx-done${l.status==="Completed"?" ok":""}">${Math.round((l.pct||0)*100)}%</span>`;
+  let gi=-1;const left=lines.map(l=>(gi++,l.kind?`<div class="g-row gd${Math.min(5,dep[gi])} ${l.kind==="f"?"gf":"gl"} ${g.hl===l.key?"ghl":""}" style="padding-left:${8+(l.ind||0)*16}px">${guides[gi]}${chev(`data-gk="${esc(l.key)}"`,g.open.has(l.key))}
+      <span class="g-name" title="${esc(l.label)}">${l.kind==="f"?(l.none?'<i class="gx-dot none"></i>':'<i class="gx-dot"></i>'):'<i class="gx-lane"></i>'}${esc(l.label)} <span class="gx-n">${l.n}</span></span>${gPpl(l.wsl,"Workstream leader(s)",l.wslNone)}${doneTxt(l)}</div>`
+    :`<div class="g-row gd${Math.min(5,dep[gi])} ${l.lvl===0?"p":l.lvl===1?"s":"t"} ${l.lvl===0&&g.hl===l.id?"ghl":""}" style="padding-left:${8+((l.ind||0)+l.lvl)*16}px" ${l.lvl===0?`data-ghp="${esc(l.id)}"`:""}>${guides[gi]}
+      ${l.lvl===0?(g.level==="projects"?'<span class="g-caret gx-chev"></span>':chev(`data-p="${esc(l.id)}"`,g.open.has(l.id))):""}
+      <span class="g-name" title="${esc(l.id+" "+l.label+(l.meta?" | "+l.meta:""))}">${l.lvl===0?`<span class="gx-id">${esc(l.id)}</span> `:l.lvl===2?`<span class="gx-id">${esc(l.id.split("-").pop())}</span> `:""}${esc(l.label)}${l.lvl===0&&l.team?` <span class="pteam">${esc(l.team)}</span>`:""}${l.pending?' <span class="badge-changes" style="font-size:10px;padding:0 6px">edited</span>':""}${l.rp&&l.lvl!==1?rpTag(l.rp,l.rpref):""}</span>
+      ${l.lvl===0?gPpl(l.wsl,"Workstream leader · project lead: "+(l.lead||"—")):l.lvl===2?gPpl(l.pic,"Task PIC"):'<span class="g-ppl"></span>'}${l.lvl!==1?doneTxt(l):'<span class="g-meta"></span>'}</div>`)).join("");
+  const lineFc=l=>{if(l.fc)return l.fc;const st=l.status,fs=(l.segs||[]).map(t=>t.fc);if(st==="Completed")return "Done";if(st==="Delayed")return "Late";if(st==="On-Hold"||st==="Cancelled")return st;if(st==="At Risk"||fs.includes("At risk of delay"))return "At risk of delay";return "On time"};
+  const right=lines.map((l,ri)=>{let h="";const lv=l.kind?(l.kind==="f"?"f":"l"):["p","s","t"][l.lvl];
+    if(g.base&&l.d.ps&&l.d.pe){const bw=Math.max(2,X(l.d.pe+1)-X(l.d.ps));h+=`<div class="gx-base" style="left:${X(l.d.ps)}px;width:${bw}px" title="Baseline (original plan) ${fmtDate(l.d.ps)} → ${fmtDate(l.d.pe)}"></div>`}
+    if(l.d.s&&l.d.e){const x0=X(l.d.s),w=Math.max(4,X(l.d.e+1)-x0);
+      /* started late: soft red from the plan start up to where the bar now starts */
+      if(l.d.ps&&l.d.s>l.d.ps&&l.d.ps<=TODAY&&!l.none){const lx=X(l.d.ps),lw=Math.max(2,x0-lx);h+=`<div class="gx-late ${lv}" style="left:${lx}px;width:${lw}px" title="Late start: planned ${fmtDate(l.d.ps)}, now ${fmtDate(l.d.s)} (+${l.d.s-l.d.ps}d)"></div>`}
+      const fc=l.kind?"":lineFc(l);const cls=l.status==="Completed"||fc==="Done"?"done":fc==="On-Hold"||fc==="Cancelled"?"hold":fc==="At risk of delay"?"risk":fc==="Late"?"lateb":"";
+      const pc=Math.max(0,Math.min(100,(l.pct||0)*100));
+      h+=`<div class="gx-bar ${lv} ${cls}" style="left:${x0}px;width:${w}px" title="${esc(l.label)}: ${fmtDate(l.d.s)} → ${fmtDate(l.d.e)}${l.status?" · "+esc(l.status):""} · ${Math.round(pc)}% done${l.d.pe?" · plan end "+fmtDate(l.d.pe):""}">${cls!=="done"&&pc>0?`<i style="width:${pc}%"></i>`:""}</div>`;
+      let tx=X(l.d.e+1)+6;
+      if(l.d.pe&&l.d.e>l.d.pe&&!l.none&&l.status!=="Completed"){const sl=l.d.e-l.d.pe;h+=`<span class="gx-pill" style="left:${Math.min(tx,W-58)}px" title="Forecast end ${fmtDate(l.d.e)} vs plan end ${fmtDate(l.d.pe)}">+${sl}d</span>`;tx+=50}
+      if(l.rp)h+=`<span class="g-rpflag gx-rp" style="left:${Math.min(tx,W-60)}px" title="Approved re-plan ${esc((l.rpref||[]).join(", "))}">⟳ +${l.rp}d</span>`}
     if(l.lvl===0&&!l.d.s&&!l.d.ps)h+=`<button class="g-nodates" data-gop="${l.p.r}">No dates yet — open project ›</button>`;
-    if(l.rp&&l.d.e)h+=`<span class="g-rpflag" style="left:${X(l.d.e+1)+4}px" title="Approved re-plan ${esc((l.rpref||[]).join(", "))}">⟳ +${l.rp}d</span>`;
-    if(l.none)h="";if(l.lvl===1&&!l.kind&&g.level==="tasks")h="";/* stage rows are just headings when the tasks are shown — no subtotal bar *//* "No E2E flow mapped yet" is a bucket, not a process — no summary bar */
-    return `<div class="g-row gr gd${Math.min(5,dep[ri])} ${l.kind==="f"?"gf":l.kind==="l"?"gl":""}">${h}</div>`}).join("");
-  /* swimlane picture of the open flow(s); the selected project's / lane's steps are highlighted */
-  const openF=GRP?FLOWS.filter(F=>g.open.has("f:"+F.f.id)):[];
-  const swim=openF.map(F=>`<div class="card pad gswim"><div class="e2esnaph"><b>⇄ ${esc(F.f.name)}</b><span class="muted">TO-BE swimlane — ${g.hl&&!String(g.hl).startsWith("f:")?"highlighted: "+esc(String(g.hl).includes("|")?String(g.hl).split("|").pop()+" lane":(projects().find(p=>p.id===g.hl)||{}).name||g.hl):"click a lane or a project in the Gantt to highlight its steps"}</span><span style="flex:1"></span><span class="gzbtns" role="group" aria-label="Zoom the swimlane"><button class="btn small" data-gsz="-" data-f="${esc(F.f.id)}" title="Zoom out">−</button><span class="gzv">${Math.round(((g.swz||{})[F.f.id]||1)*100)}%</span><button class="btn small" data-gsz="+" data-f="${esc(F.f.id)}" title="Zoom in">＋</button><button class="btn small" data-gsz="0" data-f="${esc(F.f.id)}" title="Fit to width">Fit</button></span><button class="btn small" data-gopenflow="${esc(F.f.id)}">Open in E2E flows ›</button></div>
-     <div class="e2esnapimg gswimimg" data-gsnap="${esc(F.f.id)}" style="--gsz:${(g.swz||{})[F.f.id]||1}" title="Ctrl + scroll to zoom"></div></div>`).join("");
-  m.innerHTML=`${banner("report")}<div class="toolbar">${sel("gb","BU",bus,g.bu)}${sel("gf","CF",cfs,g.cf)}${sel("gc","Process",procs,g.proc)}${sel("gt","Team",teams,g.team||"")}${sel("gi","Project type",inits,g.init||"")}<label class="gq">Project <span style="width:260px;display:inline-block">${comboHtml("gQ",g.q||"",[{v:"",t:`All projects (${P3.length})`},...P3.map(p=>({v:p.id,t:p.id+" — "+gv("Projects",FP.name,p.r)}))],{strict:false})}</span></label>
-    <span class="seg" title="Group the Gantt"><button data-ggrp="e2e" class="${g.grp!=="flat"?"on":""}">By E2E flow</button><button data-ggrp="flat" class="${g.grp==="flat"?"on":""}">Projects</button></span>
-    <select id="gl"><option value="projects" ${g.level==="projects"?"selected":""}>Projects only</option><option value="stages" ${g.level==="stages"?"selected":""}>+ Stages</option><option value="tasks" ${g.level==="tasks"?"selected":""}>+ Stages + Tasks</option></select>
-    <label class="muted" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="gh" ${g.hideDone?"checked":""}> Hide completed/cancelled</label>
-    <button class="btn small" id="gx">Expand all</button><button class="btn small" id="gcoll">Collapse all</button>
-    <span class="glegend2">${[["Done","Completed"],["On time","On time / remaining"],["At risk of delay","At risk"],["Late","Delayed"],["On-Hold","On hold"]].map(([k,l])=>`<span><i style="background:${FCB[k]}"></i>${l}</span>`).join("")}<span><i class="pl"></i>Plan (lower bar)</span><span><i class="td"></i>Today</span></span>
-    <span style="flex:1"></span><span class="nowrapg"><span class="muted">Zoom</span><input type="range" id="gz" min="1" max="5" value="${g.zoom}"></span></div>
-    <div class="toolbar gsttb">${stChips(sts,off,b=>P2d.filter(p=>pStat(p.r)===b).length,"gst")}<span style="flex:1"></span><span class="muted" style="font-size:12px">${PR.length} of ${P.length} projects</span></div>
-    ${noE2E?`<div class="warnbox" style="margin-bottom:10px">Grouping by E2E flow needs the E2E_Flows sheet — open <b>SGA_Reduction_Initiative_Tracker_17.xlsx</b> (this workbook is an older version).</div>`:""}${swim}<div class="gantt"><div class="g-left"><div class="g-head" style="display:flex;align-items:flex-end;padding:6px 8px;font-weight:700;font-size:12px;color:var(--navy)"><span class="g-name">${GRP?"E2E flow ▸ Lane ▸ Project ▸ Task":"Project ▸ Stage ▸ Task"}</span><span class="g-ppl" title="Workstream leader">WS leader</span><span class="g-ppl" title="Project lead (project rows) · PIC (task rows)">Lead / PIC</span><span class="g-meta">% done</span></div><div id="gL">${left}</div></div>
-    <div class="g-right" id="gR"><div class="g-canvas" style="width:${W}px"><div class="g-head" style="position:sticky">${monthsHtml}</div>${right}
-    ${TODAY>=min&&TODAY<=max?`<div class="g-today" style="left:${X(TODAY)}px" title="Today"></div>`:""}</div></div></div>
-
-    <details class="muted" style="font-size:12px;margin-top:8px"><summary>ⓘ How the bars are calculated</summary><p class="muted" style="font-size:12px">Top bar = live forecast (same rules as the Excel workbook: RAIDD blocks, late-start and overdue shifts, approved re-plans). Bottom bar = original plan. <b>Hatched</b> = work still to come, coloured by prediction: <b>amber</b> when the task is already At Risk (slip, overdue RAIDD, late start) or its % done trails the share of plan time elapsed by more than ${Math.round((()=>{const v=setting("S_PredTol");return v===""?0.15:+v})()*100)} points (Lists → S_PredTol); otherwise <b>green</b>. Not-started (future) tasks are hatched too: amber when an earlier stage of the same project is forecast to finish after its own plan end and after this task should start. Project and stage bars are coloured section by section from their tasks. Hover any section for detail.</p></details>`;
+    if(l.none)h="";if(l.lvl===1&&!l.kind&&g.level==="tasks")h="";/* stage rows are headings when tasks show; "No E2E flow" is a bucket — no bar */
+    return `<div class="g-row gr gd${Math.min(5,dep[ri])} ${l.kind==="f"?"gf":l.kind==="l"?"gl":""}${l.lvl===0&&g.hl===l.id?" ghl":""}">${h}</div>`}).join("");
+  /* ---- swimlane card: lanes as columns, step cards; the ones linked to the selection are highlighted ---- */
+  const hl=String(g.hl||"");const hlFlow=hl.startsWith("f:")?hl.slice(2).split("|")[0]:"";
+  const flowOf=pid=>MAP.find(F=>F.lanes.some(L=>L.ids.has(pid)));
+  let SF=null;if(g.swimOn&&MAP.length){SF=(hlFlow&&MAP.find(F=>F.f.id===hlFlow))||(hl&&!hl.startsWith("f:")&&flowOf(hl))||MAP.find(F=>F.f.id===g.swF)||FLOWS[0]||MAP[0];g.swF=SF.f.id}
+  let swim="";
+  if(g.swimOn&&!SF)swim=`<div class="card gx-swc"><div class="muted" style="padding:6px 2px">No E2E flow is mapped yet — draw one under <b>E2E flows</b> and link steps to projects.</div></div>`;
+  if(SF){const doc=e2eFlat(SF.doc);const steps=stepOrder(SF.doc);const lanes=(doc.lanes||[]).map(L=>({name:L.name,steps:[]}));
+    for(const sh of steps){const ln=laneOfShape(doc,sh);let L=lanes.find(x=>x.name===ln);if(!L){L={name:ln||"(no lane)",steps:[]};lanes.push(L)}L.steps.push(sh)}
+    let selLane="",selPid="";if(hl.includes("|")&&hlFlow===SF.f.id)selLane=hl.split("|").pop();else if(hl&&!hl.startsWith("f:"))selPid=hl;
+    const hit=sh=>{const pj=sh.proj||[];if(!pj.length)return false;if(selLane)return laneOfShape(doc,sh)===selLane;if(selPid)return pj.includes(selPid);return pj.some(x=>inPR.has(x))};
+    const nHit=steps.filter(hit).length;
+    const chip=selLane?`${esc(selLane)} · ${new Set(steps.filter(hit).flatMap(sh=>sh.proj||[])).size} linked project(s)`:selPid?`${esc(selPid)} · ${nHit} linked step(s)`:`Filtered projects · ${nHit} linked step(s)`;
+    swim=`<div class="card gx-swc"><div class="gx-swh"><div><h3>${esc(SF.f.name)}</h3><p>Mapped process steps · simplified overview</p></div><span class="sp"></span>
+      ${MAP.length>1?`<select id="gswf" class="gx-sel" title="Flow to show">${MAP.map(F=>`<option value="${esc(F.f.id)}" ${F===SF?"selected":""}>${esc(F.f.name)}</option>`).join("")}</select>`:""}
+      <span class="gx-selchip">${chip}${selLane||selPid?` <button data-gclr title="Clear the selection">×</button>`:""}</span>
+      <button class="gx-link" id="gswfull">${g.swFull?"Hide full flow":"Show full flow"}</button><span class="gx-badge">${SF.ver}</span>
+      <button class="btn small" data-gopenflow="${esc(SF.f.id)}">Open in E2E flows ›</button></div>
+      <div class="gx-lanes" style="--n:${Math.max(1,lanes.length)}">${lanes.map(L=>`<div class="gx-lc${selLane===L.name?" on":""}"><div class="gx-lh" data-glane="${esc(L.name)}" title="Highlight this lane">${esc(L.name)}</div>${L.steps.map(sh=>{const pj=sh.proj||[];return `<button class="gx-step${hit(sh)?" hit":""}${pj.length?"":" np"}" ${pj.length?`data-gstep="${esc(pj[0])}" data-glane2="${esc(L.name)}"`:""} title="${esc(stepTitle(sh))}${pj.length?"\nProjects: "+esc(pj.join(", ")):""}"><b>${esc(stepTitle(sh))}</b>${pj.length?`<span>${pj.map(esc).join(" · ")}</span>`:""}</button>`}).join("")||'<span class="muted gx-empty">No steps</span>'}</div>`).join("")}</div>
+      <p class="gx-foot">Highlighted cards are linked to your selection. Other steps stay visible for context. Click a card to find its project in the schedule.</p>
+      ${g.swFull?`<div class="gx-full"><div class="e2esnaph"><span class="muted">Full ${SF.ver} swimlane</span><span style="flex:1"></span><span class="gzbtns" role="group" aria-label="Zoom the swimlane"><button class="btn small" data-gsz="-" data-f="${esc(SF.f.id)}" title="Zoom out">−</button><span class="gzv">${Math.round(((g.swz||{})[SF.f.id]||1)*100)}%</span><button class="btn small" data-gsz="+" data-f="${esc(SF.f.id)}" title="Zoom in">＋</button><button class="btn small" data-gsz="0" data-f="${esc(SF.f.id)}" title="Fit to width">Fit</button></span></div>
+        <div class="e2esnapimg gswimimg" data-gsnap="${esc(SF.f.id)}" style="--gsz:${(g.swz||{})[SF.f.id]||1}" title="Ctrl + scroll to zoom"></div></div>`:""}</div>`}
+  const nMore=[g.bu,g.cf,g.proc,g.team,g.init].filter(Boolean).length+(g.level!=="tasks"?1:0);
+  const IC={search:`<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m13.2 13.2 3.6 3.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`,
+    filt:`<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M6 10h8M8.5 15h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`,
+    lanes:`<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7.5 3.5v13M12.5 3.5v13" stroke="currentColor" stroke-width="1.6"/></svg>`};
+  m.innerHTML=`${banner("report")}
+  <div class="ovh gx-top"><div><h1>Gantt timeline</h1><p>See the schedule. Keep the process in view.</p></div><span class="sp"></span>
+    <div class="gx-nav" role="group" aria-label="Time window"><button data-gwin="-3" title="3 months earlier">‹</button><button class="lbl" data-gwin="0" title="Back to the window around today">${fmtM(min)} – ${fmtM(addM(max,-1))}</button><button data-gwin="3" title="3 months later">›</button></div>
+    <button class="btn gx-swbtn${g.swimOn?" on":""}" id="gsw">${IC.lanes}${g.swimOn?"Hide swimlane":"Show swimlane"}</button></div>
+  <div class="card gx-tools">
+    <label class="gx-search">${IC.search}<input id="gQ" type="search" placeholder="Search projects or lanes" value="${esc(g.q||"")}" autocomplete="off"></label>
+    <select id="ggrp" class="gx-sel" title="Group the rows"><option value="e2e" ${g.grp!=="flat"?"selected":""}>By E2E flow</option><option value="flat" ${g.grp==="flat"?"selected":""}>By project</option></select>
+    <select id="gst" class="gx-sel${g.st?" act":""}" title="Status"><option value="">Status: All</option>${STL.map(st=>`<option value="${esc(st)}" ${g.st===st?"selected":""}>${esc(st)} (${stCount(st)})</option>`).join("")}</select>
+    <button class="btn gx-more${g.more?" on":""}${nMore?" act":""}" id="gmore" aria-expanded="${!!g.more}">${IC.filt}More filters${nMore?`<b>${nMore}</b>`:""}</button>
+    <label class="gx-chk"><input type="checkbox" id="gh" ${g.hideDone?"checked":""}> Hide completed</label>
+    <span class="sp"></span><span class="gx-count">${PR.length} of ${P.length} projects</span>
+    <span class="seg gx-unit"><button data-gunit="month" class="${wk?"":"on"}">Month</button><button data-gunit="week" class="${wk?"on":""}">Week</button></span>
+    ${g.more?`<div class="gx-morep">${[["gb","BU",bus,g.bu],["gf","CF",cfs,g.cf],["gc","Process",procs,g.proc],["gt","Team",teams,g.team||""],["gi","Project type",inits,g.init||""]].map(([id,lb,o,v])=>`<label>${lb}${sel(id,lb,o,v)}</label>`).join("")}
+      <label>Detail<select id="gl"><option value="projects" ${g.level==="projects"?"selected":""}>Projects only</option><option value="stages" ${g.level==="stages"?"selected":""}>+ Stages</option><option value="tasks" ${g.level==="tasks"?"selected":""}>+ Stages + Tasks</option></select></label>
+      ${nMore?'<button class="gx-link" id="gclear">Clear filters</button>':""}</div>`:""}
+  </div>
+  ${noE2E?`<div class="warnbox" style="margin-bottom:10px">Grouping by E2E flow needs the E2E_Flows sheet — open <b>SGA_Reduction_Initiative_Tracker_17.xlsx</b> (this workbook is an older version).</div>`:""}${swim}
+  <div class="card gx-card"><div class="gx-ch"><b>Schedule</b>
+    <span class="gx-leg"><span><i class="s"></i>Scheduled</span><span><i class="p"></i>Done so far</span><span><i class="c"></i>Completed</span><span><i class="r"></i>At risk</span><span><i class="l"></i>Delayed</span><span><em class="gx-pill">+5d</em>Behind plan</span>${g.base?'<span><i class="b"></i>Baseline</span>':""}</span><span class="sp"></span>
+    <label class="gx-chk"><input type="checkbox" id="gbase" ${g.base?"checked":""}> Show baseline</label>
+    <button class="btn small" id="gx">Expand all</button><button class="btn small" id="gcoll">Collapse all</button><button class="btn small" id="gtoday">Today</button></div>
+  <div class="gantt gx" style="grid-template-columns:${LW}px 1fr"><div class="g-left"><div class="g-head gx-lhd"><span class="g-name">${GRP?"Flow / lane / project":"Project / stage / task"}</span><span class="g-ppl" title="Workstream leader (task rows: PIC)">WS leader</span><span class="g-meta">Done</span></div><div id="gL">${left||'<div class="gx-none">No projects match these filters.</div>'}</div></div>
+    <div class="g-right" id="gR"><div class="g-canvas" style="width:${W}px"><div class="g-head gx-mhd${wk?" wk":""}">${monthsHtml}</div><div class="gx-grid">${gridHtml}</div>${right}
+    ${TODAY>=min&&TODAY<max?`<div class="g-today gx-today" style="left:${X(TODAY)}px" title="Today ${fmtDate(TODAY)}"></div>`:""}</div></div></div></div>
+  <details class="muted" style="font-size:12px;margin-top:8px"><summary>ⓘ How the bars are calculated</summary><p class="muted" style="font-size:12px">Bar = live forecast (same rules as the Excel workbook: RAIDD blocks, late-start and overdue shifts, approved re-plans); the darker part is % done. <b>Green</b> = completed, <b>amber</b> = at risk (slip, overdue RAIDD, late start, or % done trails plan time by more than ${Math.round((()=>{const v=setting("S_PredTol");return v===""?0.15:+v})()*100)} points), <b>red</b> = delayed. The pale red strip before a bar = late start. <b>+Nd</b> = forecast end is N days after the plan end. Tick <b>Show baseline</b> to see the original plan as a thin line under each bar.</p></details>`;
   const gl=$("#gL"),gr=$("#gR");gr.onscroll=()=>{gl.style.transform=`translateY(${-gr.scrollTop}px)`};
   gl.parentElement.addEventListener("wheel",e=>{if(!e.deltaY)return;e.preventDefault();gr.scrollTop+=e.deltaY},{passive:false});
-  gr.style.maxHeight="calc(100vh - 290px)";gl.parentElement.style.maxHeight="calc(100vh - 290px)";
-  $("#gQ").addEventListener("change",e=>{g.q=e.target.value.trim();if(g.q&&PR.some(p=>p.id===g.q)||projects().some(p=>p.id===g.q))g.open.add(g.q);vGantt(m)});
-  const giS=m.querySelector("#gi");if(giS)giS.onchange=e=>{g.init=e.target.value;vGantt(m)};bindStChips(m,"gst",g,()=>vGantt(m));$("#gc").onchange=e=>{g.proc=e.target.value;vGantt(m)};$("#gb").onchange=e=>{g.bu=e.target.value;g.cf="";g.proc="";g.proj="";vGantt(m)};$("#gf").onchange=e=>{g.cf=e.target.value;g.proc="";g.proj="";vGantt(m)};
-  $("#gl").onchange=e=>{g.level=e.target.value;vGantt(m)};$("#gz").oninput=e=>{g.zoom=+e.target.value;vGantt(m)};$("#gh").onchange=e=>{g.hideDone=e.target.checked;vGantt(m)};
-  $("#gx").onclick=()=>{PR.forEach(p=>g.open.add(p.id));if(GRP){FLOWS.forEach(F=>{g.open.add("f:"+F.f.id);F.lanes.forEach(L=>g.open.add("f:"+F.f.id+"|"+L.name))});g.open.add("f:none")}if(g.level==="projects")g.level="tasks";vGantt(m)};$("#gcoll").onclick=()=>{g.open.clear();vGantt(m)};
-  m.querySelectorAll(".g-caret[data-p]").forEach(c=>c.onclick=e=>{e.stopPropagation();const id=c.dataset.p;g.open.has(id)?g.open.delete(id):g.open.add(id);if(g.level==="projects"&&g.open.has(id))g.level="tasks";vGantt(m)});
-  m.querySelectorAll("[data-ggrp]").forEach(b=>b.onclick=()=>{g.grp=b.dataset.ggrp;vGantt(m)});
+  gr.style.maxHeight="calc(100vh - 300px)";gl.parentElement.style.maxHeight="calc(100vh - 300px)";
+  const R=()=>vGantt(m);g._m=m;
+  /* search: redraw while typing (short pause), keep the cursor in the box */
+  const q=$("#gQ");q.oninput=()=>{clearTimeout(g._qt);g._qt=setTimeout(()=>{g.q=q.value.trim();const pos=q.selectionStart;R();const n=$("#gQ");if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(e){}}},280)};
+  q.onkeydown=e=>{if(e.key==="Enter"){clearTimeout(g._qt);g.q=q.value.trim();if(g.q&&projects().some(p=>p.id===g.q))g.open.add(g.q);R()}};
+  $("#ggrp").onchange=e=>{g.grp=e.target.value;R()};$("#gst").onchange=e=>{g.st=e.target.value;R()};
+  $("#gmore").onclick=()=>{g.more=!g.more;R()};$("#gh").onchange=e=>{g.hideDone=e.target.checked;R()};$("#gbase").onchange=e=>{g.base=e.target.checked;R()};
+  m.querySelectorAll("[data-gunit]").forEach(b=>b.onclick=()=>{g.unit=b.dataset.gunit;g._scrolled=false;R()});
+  m.querySelectorAll("[data-gwin]").forEach(b=>b.onclick=()=>{const n=+b.dataset.gwin;g.win=n?addM(g.win,n):addM(curM,-3);g._scrolled=!!n;if(n)gr.scrollLeft=0;R()});
+  $("#gsw").onclick=()=>{g.swimOn=!g.swimOn;R()};
+  const on=(id,f)=>{const el=m.querySelector("#"+id);if(el)el.onchange=f};
+  on("gb",e=>{g.bu=e.target.value;g.cf="";g.proc="";R()});on("gf",e=>{g.cf=e.target.value;g.proc="";R()});on("gc",e=>{g.proc=e.target.value;R()});on("gt",e=>{g.team=e.target.value;R()});on("gi",e=>{g.init=e.target.value;R()});on("gl",e=>{g.level=e.target.value;R()});
+  const gcl=m.querySelector("#gclear");if(gcl)gcl.onclick=()=>{g.bu=g.cf=g.proc=g.team=g.init="";g.level="tasks";R()};
+  $("#gx").onclick=()=>{PR.forEach(p=>g.open.add(p.id));if(GRP){FLOWS.forEach(F=>{g.open.add("f:"+F.f.id);F.lanes.forEach(L=>g.open.add("f:"+F.f.id+"|"+L.name))});g.open.add("f:none")}if(g.level==="projects")g.level="tasks";R()};$("#gcoll").onclick=()=>{g.open.clear();R()};
+  $("#gtoday").onclick=()=>{if(!(TODAY>=min&&TODAY<max))g.win=addM(curM,-3);g._scrolled=false;R()};
+  m.querySelectorAll(".g-caret[data-p]").forEach(c=>c.onclick=e=>{e.stopPropagation();const id=c.dataset.p;g.open.has(id)?g.open.delete(id):g.open.add(id);if(g.level==="projects"&&g.open.has(id))g.level="tasks";R()});
   m.querySelectorAll("[data-gop]").forEach(b=>b.onclick=e=>{e.stopPropagation();openProject(+b.dataset.gop)});
-  const gt=m.querySelector("#gt");if(gt)gt.onchange=e=>{g.team=e.target.value;vGantt(m)};
-  m.querySelectorAll("[data-gk]").forEach(c=>c.parentElement.onclick=()=>{const k=c.dataset.gk;if(g.open.has(k)){g.open.delete(k);if(g.hl===k||String(g.hl||"").startsWith(k))g.hl=null}else{g.open.add(k);g.hl=k}vGantt(m)});
-  m.querySelectorAll("[data-ghp]").forEach(r=>r.onclick=e=>{if(e.target.closest(".g-caret"))return;g.hl=g.hl===r.dataset.ghp?null:r.dataset.ghp;vGantt(m)});
+  m.querySelectorAll("[data-gk]").forEach(c=>c.parentElement.onclick=()=>{const k=c.dataset.gk;if(g.open.has(k)){g.open.delete(k);if(g.hl===k||String(g.hl||"").startsWith(k))g.hl=null}else{g.open.add(k);g.hl=k}R()});
+  m.querySelectorAll("[data-ghp]").forEach(r=>r.onclick=e=>{if(e.target.closest(".g-caret"))return;g.hl=g.hl===r.dataset.ghp?null:r.dataset.ghp;R()});
   m.querySelectorAll("[data-gopenflow]").forEach(b=>b.onclick=()=>{UI.e2e.home=false;UI.e2e.flow=b.dataset.gopenflow;UI.e2e.ver="TO-BE";view="E2E";render()});
+  /* swimlane card */
+  const swf=m.querySelector("#gswf");if(swf)swf.onchange=e=>{g.swF=e.target.value;if(String(g.hl||"").startsWith("f:")||g.hl)g.hl=null;R()};
+  const sfl=m.querySelector("#gswfull");if(sfl)sfl.onclick=()=>{g.swFull=!g.swFull;R()};
+  m.querySelectorAll("[data-gclr]").forEach(b=>b.onclick=()=>{g.hl=null;R()});
+  m.querySelectorAll("[data-glane]").forEach(h=>h.onclick=()=>{const k="f:"+g.swF+"|"+h.dataset.glane;g.hl=g.hl===k?null:k;if(g.hl){g.open.add("f:"+g.swF);g.open.add(k)}R()});
+  m.querySelectorAll("[data-gstep]").forEach(b=>b.onclick=()=>{const pid=b.dataset.gstep;if(g.hl===pid){g.hl=null;R();return}g.hl=pid;
+    if(g.grp!=="flat"){g.open.add("f:"+g.swF);g.open.add("f:"+g.swF+"|"+b.dataset.glane2)}g._scrollTo=pid;R()});
+  if(g._scrollTo){const row=gl.querySelector(`[data-ghp="${CSS.escape(g._scrollTo)}"]`);g._scrollTo=null;if(row){gr.scrollTop=Math.max(0,row.offsetTop-80);row.parentElement&&gr.dispatchEvent(new Event("scroll"));m.querySelector(".gx-card").scrollIntoView({block:"nearest",behavior:"smooth"})}}
   const gsz=(fid,dir)=>{g.swz=g.swz||{};const Z=[0.5,0.75,1,1.25,1.5,2,2.5,3];let z=g.swz[fid]||1;if(dir==="0")z=1;else{let i=Z.findIndex(x=>x>=z-1e-9);if(i<0)i=Z.length-1;i=Math.max(0,Math.min(Z.length-1,i+(dir==="+"?1:-1)));z=Z[i]}g.swz[fid]=z;
-    const el=m.querySelector(`[data-gsnap="${CSS.escape(fid)}"]`);if(el){const fx=el.scrollLeft/Math.max(1,el.scrollWidth),fy=el.scrollTop/Math.max(1,el.scrollHeight);el.style.setProperty("--gsz",z);el.scrollLeft=fx*el.scrollWidth;el.scrollTop=fy*el.scrollHeight;const v=el.parentElement.querySelector(".gzv");if(v)v.textContent=Math.round(z*100)+"%"}};
+    const el=m.querySelector(`[data-gsnap="${CSS.escape(fid)}"]`);if(el){const fx=el.scrollLeft/Math.max(1,el.scrollWidth),fy=el.scrollTop/Math.max(1,el.scrollHeight);el.style.setProperty("--gsz",z);el.scrollLeft=fx*el.scrollWidth;el.scrollTop=fy*el.scrollHeight;const v=el.parentElement.parentElement.querySelector(".gzv");if(v)v.textContent=Math.round(z*100)+"%"}};
   m.querySelectorAll("[data-gsz]").forEach(b=>b.onclick=()=>gsz(b.dataset.f,b.dataset.gsz));
   m.querySelectorAll(".gswimimg").forEach(el=>{gswimFit(el);new MutationObserver(()=>gswimFit(el)).observe(el,{childList:true});el.addEventListener("mouseup",()=>{if(el._h&&Math.abs(el.offsetHeight-el._h)>4)el.dataset.manual="1"})});
   m.querySelectorAll("[data-gsnap]").forEach(el=>el.addEventListener("wheel",e=>{if(!(e.ctrlKey||e.metaKey))return;e.preventDefault();gsz(el.dataset.gsnap,e.deltaY<0?"+":"-")},{passive:false}));
-  if(openF.length){e2eEnsureFrame();openF.forEach(F=>{const el=m.querySelector(`[data-gsnap="${CSS.escape(F.f.id)}"]`);if(!el)return;
-    const hl=g.hl||"";let ids=[];if(String(hl).includes("|")){const ln=String(hl).split("|").pop();ids=(F.doc.shapes||[]).filter(sh=>(sh.proj||[]).length&&laneOfShape(F.doc,sh)===ln).map(sh=>sh.id)}
-    else if(hl&&!String(hl).startsWith("f:"))ids=(F.doc.shapes||[]).filter(sh=>(sh.proj||[]).includes(hl)).map(sh=>sh.id);
-    else ids=[];/* nothing selected: plain picture with count chips */
-    el.dataset.hl=ids.join(",");e2eSnapshot(F.doc,el)})}
-  if(TODAY>=min&&TODAY<=max&&!g._scrolled){gr.scrollLeft=Math.max(0,X(TODAY)-gr.clientWidth/3);g._scrolled=true}
+  if(SF&&g.swFull){const el=m.querySelector(`[data-gsnap="${CSS.escape(SF.f.id)}"]`);if(el){e2eEnsureFrame();
+    const doc=SF.doc;let ids=[];if(hl.includes("|")&&hlFlow===SF.f.id){const ln=hl.split("|").pop();ids=(doc.shapes||[]).filter(sh=>(sh.proj||[]).length&&laneOfShape(doc,sh)===ln).map(sh=>sh.id)}
+    else if(hl&&!hl.startsWith("f:"))ids=(doc.shapes||[]).filter(sh=>(sh.proj||[]).includes(hl)).map(sh=>sh.id);
+    el.dataset.hl=ids.join(",");e2eSnapshot(doc,el)}}
+  if(wk&&TODAY>=min&&TODAY<max&&!g._scrolled){gr.scrollLeft=Math.max(0,X(TODAY)-gr.clientWidth/3);g._scrolled=true}
 }
+/* every E2E flow with its lanes and the projects linked to steps in each lane (TO-BE first, AS-IS fills gaps) */
+function gFlowMap(){if(!(typeof hasE2E==="function"&&hasE2E()))return [];const out=[];
+  for(const f of e2eFlows()){const tb=f.v["TO-BE"]&&f.v["TO-BE"].doc,doc=tb||(f.v["AS-IS"]&&f.v["AS-IS"].doc);if(!doc)continue;
+    const lanes=(doc.lanes||[]).map(l=>({name:l.name,ids:new Set()}));const seen=new Set();
+    for(const ver of ["TO-BE","AS-IS"]){const dd=f.v[ver]&&f.v[ver].doc;if(!dd)continue;for(const sh of dd.shapes||[])for(const pid of sh.proj||[]){if(ver==="AS-IS"&&seen.has(pid))continue;const ln=laneOfShape(dd,sh);let L=lanes.find(x=>x.name===ln);if(!L){L={name:ln,ids:new Set()};lanes.push(L)}L.ids.add(pid);if(ver==="TO-BE")seen.add(pid)}}
+    out.push({f,doc,ver:tb?"TO-BE":"AS-IS",lanes})}return out}
+/* Month view fits the card: redraw when the window changes size */
+window.addEventListener("resize",()=>{const g=UI.gantt;if(!g||!g._m||!document.body.contains(g._m)||!g._m.querySelector(".gx"))return;clearTimeout(g._rt);g._rt=setTimeout(()=>{if(g.unit!=="week")vGantt(g._m)},200)});
 
 
 /* swimlane box above the Gantt: as tall as the flow needs at full width (max ¾ of the window), so the whole flow shows big */
