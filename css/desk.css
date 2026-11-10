@@ -797,3 +797,7 @@ main{max-width:none}
 body.pdon .scrim{z-index:62}
 body.pdon .drawer{z-index:63}
 .toast{z-index:90}
+/* r54 — Gantt: the swimlane fits whole in its box (Fit = 100%), zoom in to read details */
+.gswimimg{height:420px;max-height:none;overflow:auto;text-align:center;background:#fff}
+.gswimimg svg{height:calc(100% * var(--gsz,1))!important;width:auto!important;min-width:0!important;max-width:none!important;display:inline-block}
+.gswimimg[style*="--gsz:1;"] svg,.gswimimg[style$="--gsz:1"] svg{max-width:100%!important}
