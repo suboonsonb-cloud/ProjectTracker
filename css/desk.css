@@ -1243,3 +1243,18 @@ select.msnative{display:none!important}
 .msl{max-height:300px;overflow:auto;display:flex;flex-direction:column}
 .msi{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:7px;font-size:13px;cursor:pointer}.msi:hover{background:#F6F3FF}.msi input{accent-color:var(--accent);width:15px;height:15px;margin:0}
 .msf{display:flex;justify-content:flex-end;gap:6px;padding-top:6px;border-top:1px solid #EEEBF8}
+/* r81 — draft flows (grey) on Overview */
+.ovdrafts{margin:6px 0 12px}
+.ovdh{display:flex;align-items:baseline;gap:10px;margin:4px 2px 8px}.ovdh b{font-size:13px;color:#6B6880}.ovdh .muted{font-size:12px}
+.ovflow.ovdraft{background:#F6F6F8!important;border:1px dashed #CFCDD8!important;box-shadow:none!important}
+.ovdraft .ovfh{background:transparent;cursor:default;grid-template-columns:22px 44px minmax(200px,1.6fr) auto auto 1fr 1fr auto}
+.ovdraft .ovfh:hover{background:transparent}
+.ovdraft .nm b{color:#5F5C70}.ovdraft .nm small{color:#8E8BA0}
+.ovficon.dr{background:linear-gradient(135deg,#B9B6C6,#8F8BA3);box-shadow:none}
+.ovfst.dr{background:#E7E6EC;color:#5F5C70}
+.ovdtodo{display:flex;flex-wrap:wrap;gap:4px}.ovdtodo span{font-size:11px;color:#6B6880;background:#ECEBF0;border-radius:6px;padding:2px 7px;white-space:nowrap}
+.ovdraft .ovstrip{background:transparent;border-top:1px dashed #DAD8E2}
+.ovnode.dr{background:#FAFAFB;border-color:#DAD8E2;color:#6B6880;cursor:default}.ovnode.dr:hover{transform:none;box-shadow:none}.ovnode.dr i{background:#B9B6C6;box-shadow:none}.ovnode.dr b{background:#ECEBF0;color:#6B6880}
+.ovdraft .ovarr{color:#CFCDD8}
+.ovdraft .ovlink{color:#5F5C70}
+.ovunm .ovunmb{color:#fff!important}.ovunm.open .ovunmb{color:var(--accent-d)!important}

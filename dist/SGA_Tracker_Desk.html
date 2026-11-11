@@ -1250,11 +1250,26 @@ select.msnative{display:none!important}
 .msl{max-height:300px;overflow:auto;display:flex;flex-direction:column}
 .msi{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:7px;font-size:13px;cursor:pointer}.msi:hover{background:#F6F3FF}.msi input{accent-color:var(--accent);width:15px;height:15px;margin:0}
 .msf{display:flex;justify-content:flex-end;gap:6px;padding-top:6px;border-top:1px solid #EEEBF8}
+/* r81 — draft flows (grey) on Overview */
+.ovdrafts{margin:6px 0 12px}
+.ovdh{display:flex;align-items:baseline;gap:10px;margin:4px 2px 8px}.ovdh b{font-size:13px;color:#6B6880}.ovdh .muted{font-size:12px}
+.ovflow.ovdraft{background:#F6F6F8!important;border:1px dashed #CFCDD8!important;box-shadow:none!important}
+.ovdraft .ovfh{background:transparent;cursor:default;grid-template-columns:22px 44px minmax(200px,1.6fr) auto auto 1fr 1fr auto}
+.ovdraft .ovfh:hover{background:transparent}
+.ovdraft .nm b{color:#5F5C70}.ovdraft .nm small{color:#8E8BA0}
+.ovficon.dr{background:linear-gradient(135deg,#B9B6C6,#8F8BA3);box-shadow:none}
+.ovfst.dr{background:#E7E6EC;color:#5F5C70}
+.ovdtodo{display:flex;flex-wrap:wrap;gap:4px}.ovdtodo span{font-size:11px;color:#6B6880;background:#ECEBF0;border-radius:6px;padding:2px 7px;white-space:nowrap}
+.ovdraft .ovstrip{background:transparent;border-top:1px dashed #DAD8E2}
+.ovnode.dr{background:#FAFAFB;border-color:#DAD8E2;color:#6B6880;cursor:default}.ovnode.dr:hover{transform:none;box-shadow:none}.ovnode.dr i{background:#B9B6C6;box-shadow:none}.ovnode.dr b{background:#ECEBF0;color:#6B6880}
+.ovdraft .ovarr{color:#CFCDD8}
+.ovdraft .ovlink{color:#5F5C70}
+.ovunm .ovunmb{color:#fff!important}.ovunm.open .ovunmb{color:var(--accent-d)!important}
 </style>
 </head>
 <body>
 <aside class="side" id="side" aria-label="Main navigation">
-  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r80</span></small></span></div>
+  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r81</span></small></span></div>
   <div class="sglab">WORKSPACE</div>
   <button type="button" class="wschip" id="btnOpen" title="Open the workbook (the database)"><span class="wsdot" aria-hidden="true"></span><span class="file" id="fileName">No workbook loaded</span><span class="chev" aria-hidden="true">⌄</span></button>
   <nav class="sidenav hidden" id="tabs"></nav>
@@ -2630,7 +2645,16 @@ function ovNewHtml(P,Bl){const pids=new Set(P.map(pId));const byId=new Map(P.map
   const sg=uniqOrder(stg).map(s=>({s,n:openP.filter(r=>curStage(r)===s).length})).filter(x=>x.n);const smax=Math.max(1,...sg.map(x=>x.n));
   const top2=[...sg].sort((a,b)=>b.n-a.n).slice(0,2);
   return `  <section class="ove2e" aria-label="E2E workflows"><div class="ovsec"><span class="ove2eic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="2.5" y="3" width="6" height="5" rx="1.5"/><rect x="15.5" y="3" width="6" height="5" rx="1.5"/><rect x="9" y="16" width="6" height="5" rx="1.5"/><path d="M8.5 5.5h7M18.5 8v3.5H12V16M5.5 8v3.5H12" fill="none"/></svg></span><div><span class="ove2etag">E2E workflow</span><h2>E2E workflows</h2><p>Explore the business process first — workflow › swimlane › process › project. Find projects where the work happens.</p></div><span class="sp"></span><label class="ovsrch"><input type="search" id="ovQ" placeholder="Search workflows or projects…" value="${esc(D.ovQ||"")}"></label></div>
-  ${FLs.map(flowCard).join("")||`<div class="card pad muted">${FL.length?"Nothing matches the search.":"No E2E workflow is mapped yet — draw one under E2E flow maps and link its steps to projects."}</div>`}
+  ${FLs.map(flowCard).join("")}${(()=>{/* drafts: flows not finished yet — no project linked to any step (any version), or nothing drawn */
+    if(typeof hasE2E!=="function"||!hasE2E())return "";const linked=f=>["TO-BE","AS-IS"].some(v=>f.v[v]&&f.v[v].doc&&(f.v[v].doc.shapes||[]).some(sh=>(sh.proj||[]).length));
+    const DR=e2eFlows().filter(f=>!linked(f)&&hit(f.name));if(!DR.length)return "";
+    return `<div class="ovdrafts"><div class="ovdh"><b>Draft flows</b><span class="muted">${DR.length} flow${DR.length>1?"s":""} still being mapped — no project linked to a step yet</span></div>${DR.map(f=>{const vs=["AS-IS","TO-BE"].filter(v=>f.v[v]&&f.v[v].doc);const d=vs.length?f.v[vs.includes("TO-BE")?"TO-BE":"AS-IS"].doc:null;const fl=d?e2eFlat(d):{lanes:[],shapes:[]};
+      let steps=[];try{steps=d?stepOrder(d):[]}catch(e){steps=(fl.shapes||[]).filter(isStep)}const lanes=(fl.lanes||[]).map(l=>({name:l.name,n:steps.filter(sh=>laneOfShape(fl,sh)===l.name).length}));
+      const todo=[!vs.length?"nothing drawn yet":"",vs.length&&!vs.includes("TO-BE")?"TO-BE not drawn":"",vs.length&&!vs.includes("AS-IS")?"AS-IS not drawn":"","no projects linked"].filter(Boolean);
+      return `<div class="card ovflow ovdraft"><div class="ovfh"><span class="chev"></span><span class="ovficon dr" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="2.5" y="3" width="6" height="5" rx="1.5"/><rect x="15.5" y="3" width="6" height="5" rx="1.5"/><rect x="9" y="16" width="6" height="5" rx="1.5"/><path d="M8.5 5.5h7M18.5 8v3.5H12V16M5.5 8v3.5H12" fill="none"/></svg></span>
+        <span class="nm"><b>${esc(f.name)}</b><small>${lanes.length} swimlane${lanes.length!==1?"s":""} · ${steps.length} step${steps.length!==1?"s":""}${vs.length?" · "+vs.join(" + "):""}${f.owner?" · owner "+esc(f.owner):""}</small></span>
+        <span class="ovfst dr">Draft</span><span class="ovdtodo">${todo.map(t=>`<span>${esc(t)}</span>`).join("")}</span><span class="m"></span><span class="m"></span><button type="button" class="ovlink" data-ovmap="${esc(f.id)}">Open in E2E flow maps →</button></div>
+        ${lanes.length?`<div class="ovstrip">${lanes.map((x,i)=>`${i?'<span class="ovarr" aria-hidden="true"><svg viewBox="0 0 24 10"><path d="M0 5h20m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>':""}<span class="ovnode dr" title="${x.n} step(s)"><i></i><span>${esc(x.name)}</span><b>${x.n}</b></span>`).join("")}</div>`:""}</div>`}).join("")}</div>`})()}${FLs.length?"":`<div class="card pad muted">${FL.length?"Nothing matches the search.":"No E2E workflow is mapped yet — draw one under E2E flow maps and link its steps to projects."}</div>`}
   ${unm.length?(()=>{const SO={"Delayed":0,"At Risk":1,"On Track":2,"Not Started":3,"On-Hold":4,"Completed":5,"Cancelled":6};
     const fl=D.unmSt||"";const lst=unm.filter(r=>!fl||pStat(r)===fl).sort((a,b)=>(SO[pStat(a)]??9)-(SO[pStat(b)]??9)||String(gv("Projects",FP.name,a)).localeCompare(String(gv("Projects",FP.name,b))));
     const lim=D.unmAll?lst.length:10;const stc=STL.map(s=>[s,unm.filter(r=>pStat(r)===s).length]).filter(x=>x[1]);
