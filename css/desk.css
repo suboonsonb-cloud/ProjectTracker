@@ -1357,3 +1357,7 @@ tr.burow.sel td{background:color-mix(in srgb,var(--bc) 9%,#fff)!important}
 .ovur .sv.a b,.ovdr .sv.a b{color:#98A2B3}.ovur .sv.a b.ok,.ovdr .sv.a b.ok{color:#1E7B4E}
 @media (max-width:900px){.ovur .sv,.ovdr .sv,.ovdrh{display:none}}
 .ovhc .ovdr,.ovhc .ovdrh{grid-template-columns:minmax(0,1fr) 88px 78px 78px 10px}.ovhc .ovdr .pc,.ovhc .ovdr .dt,.ovhc .ovdrh span:nth-child(3),.ovhc .ovdrh span:nth-child(6){display:none}
+.e2row.top{overflow-x:auto}.e2row.top .e2a{min-width:150px}
+.e2cons.one{grid-template-columns:1fr;height:36px}
+.e2noarea{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px;font-size:12px}
+.e2nb{border:1px dashed #F79009;background:#FFFAEB;color:#B54708;border-radius:8px;padding:5px 10px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}.e2nb.on{background:#FEF0C7}
