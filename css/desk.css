@@ -1361,3 +1361,7 @@ tr.burow.sel td{background:color-mix(in srgb,var(--bc) 9%,#fff)!important}
 .e2cons.one{grid-template-columns:1fr;height:36px}
 .e2noarea{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px;font-size:12px}
 .e2nb{border:1px dashed #F79009;background:#FFFAEB;color:#B54708;border-radius:8px;padding:5px 10px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}.e2nb.on{background:#FEF0C7}
+.e2row.bot .e2a{flex:0 1 680px}.e2a.big .e2a-t .e2a-go{display:none}.e2a.big{padding-right:170px}
+.e2a .e2a-x{position:absolute;right:22px;top:50%;transform:translateY(-50%);font-size:12.5px;font-weight:700}
+.e2a.big .e2a-n{padding-top:8px}
+.e2xb{border:1px solid #E6E3F0;background:#fff;border-radius:8px;padding:4px 10px;font:inherit;font-size:12px;font-weight:600;cursor:pointer;color:var(--ink)}.e2xb b{color:var(--accent);margin-left:3px}.e2xb.on{border-color:var(--accent);background:#F1EDFF}

@@ -516,24 +516,26 @@ function vE2EHome(m){e2eHide();const H=UI.e2eH;const all=e2eFlows();const info=O
   let areas=uniqOrder([...(H.bu!=="*"&&H.bu!=="(not assigned)"?e2eBUAreas(H.bu):[]),...fl.map(f=>areaKey(f.area))]);
   areas=areas.filter(a=>!/^other$/i.test(a)||fl.some(f=>areaKey(f.area)===a));
   if(H.area&&!areas.includes(H.area))H.area="";
-  const TOPO=["P2P","TREASURY","O2C"],BOTO=["R2R","IR"],rk=(L,a)=>{const i=L.indexOf(a.toUpperCase());return i<0?99:i};
+  const pick=nm=>areas.find(a=>a.toUpperCase()===nm)||(nm==="TREASURY"?"Treasury":nm);
   const noArea=areas.includes("(no area)");
-  const top=areas.filter(a=>a!=="(no area)"&&!E2E_BOTTOM.test(a)).sort((x,y)=>rk(TOPO,x)-rk(TOPO,y)),bot=areas.filter(a=>E2E_BOTTOM.test(a)).sort((x,y)=>rk(BOTO,x)-rk(BOTO,y));
+  const top=["P2P","TREASURY","O2C"].map(pick),bot=[pick("R2R")];const core=new Set([...top,...bot].map(a=>a.toUpperCase()));
+  const extra=areas.filter(a=>a!=="(no area)"&&!core.has(a.toUpperCase())&&fl.some(f=>areaKey(f.area)===a));
   const box=(a,big)=>{const fs=fl.filter(f=>areaKey(f.area)===a);const d=E2E_AREA[a.toUpperCase()]||[a==="(no area)"?"No process area set":"","",""];const pr=new Set(fs.flatMap(f=>[...info[f.id].pids])).size;
     const k=d[2]||"g"+(Math.abs([...a].reduce((h,c)=>h*31+c.charCodeAt(0)|0,7))%3);
     return `<button type="button" class="e2a a-${k}${big?" big":""}${H.area===a?" on":""}${fs.length?" live":""}" data-e2area="${esc(a)}" title="${fs.length?"Show its flow maps":"No flow maps yet"}">
       <span class="e2a-t"><b>${esc(a==="(no area)"?"Other":a)}</b>${big&&d[0]?`<em>${esc(d[0])}</em>`:""}<span class="e2a-go" aria-hidden="true">↗</span></span>
-      ${big?`<span class="e2a-d">${esc(d[1])}</span>`:`${d[0]?`<em>${esc(d[0])}</em>`:""}${d[1]?`<span class="e2a-d">${esc(d[1])}</span>`:""}`}
+      ${big?`<span class="e2a-d">${esc(d[1])}</span><span class="e2a-x">Explore process ↗</span>`:`${d[0]?`<em>${esc(d[0])}</em>`:""}${d[1]?`<span class="e2a-d">${esc(d[1])}</span>`:""}`}
       <span class="e2a-n">${fs.length?`${fs.length} flow map${fs.length>1?"s":""} · ${pr} project${pr===1?"":"s"}`:"No flow maps yet"}</span>${fs.length?'<span class="e2a-stream" aria-hidden="true"></span>':""}</button>`};
   const n=top.length;
   const con=on=>`<span class="e2c${on?" on":""}" aria-hidden="true"><i></i></span>`;
   const totP=new Set(fl.flatMap(f=>[...info[f.id].pids])).size;
-  const glance=`<div class="card e2g"><div class="e2gh"><div><div class="e2step"><span>2</span>${esc(H.bu==="*"?"All BUs":H.bu==="(not assigned)"?"Not assigned":H.bu)} at a glance</div><div class="muted" style="font-size:12.5px">${top.length+bot.length} process area${top.length+bot.length===1?"":"s"} / ${fl.length} flow map${fl.length===1?"":"s"} / ${totP} linked project${totP===1?"":"s"}</div></div>
+  const glance=`<div class="card e2g"><div class="e2gh"><div><div class="e2step"><span>2</span>${esc(H.bu==="*"?"All BUs":H.bu==="(not assigned)"?"Not assigned":H.bu)} at a glance</div><div class="muted" style="font-size:12.5px">${top.length+bot.length+extra.length} process area${top.length+bot.length+extra.length===1?"":"s"} / ${fl.length} flow map${fl.length===1?"":"s"} / ${totP} linked project${totP===1?"":"s"}</div></div>
       <span class="muted" style="font-size:12.5px">${H.area?`Showing <b>${esc(H.area)}</b> · <a href="#" id="e2aClr">show all</a>`:"Select a process box to explore its flows"}</span></div>
     ${areas.length?`${n?`<div class="e2row top" style="grid-template-columns:repeat(${n},minmax(0,1fr))">${top.map(a=>box(a,false)).join("")}</div>
       <div class="e2cons" style="grid-template-columns:repeat(${n},minmax(0,1fr))">${top.map(a=>con(fl.some(f=>areaKey(f.area)===a))).join("")}</div>`:""}
       <div class="e2db"><span class="e2db-ic" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7"><ellipse cx="12" cy="5.5" rx="7.5" ry="2.8"/><path d="M4.5 5.5v6.5c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8V5.5M4.5 12v6.5c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8V12"/></svg></span><div><b>Central ERP database / general ledger</b><small>AR, AP, cash, bank and master data</small></div><span style="flex:1"></span><span class="e2db-tag">SHARED DATA FOUNDATION</span><span class="e2db-flow" aria-hidden="true"></span></div>
       ${bot.map((a,i)=>`<div class="e2cons one">${con(fl.some(f=>areaKey(f.area)===a)||(i===0&&fl.length>0))}</div><div class="e2row bot">${box(a,true)}</div>`).join("")}
+      ${extra.length?`<div class="e2noarea"><span class="muted">Other process areas</span>${extra.map(a=>{const c=fl.filter(f=>areaKey(f.area)===a).length;return `<button type="button" class="e2xb${H.area===a?" on":""}" data-e2area="${esc(a)}">${esc(a)} <b>${c}</b></button>`}).join("")}</div>`:""}
       ${noArea?`<div class="e2noarea"><button type="button" class="e2nb${H.area==="(no area)"?" on":""}" data-e2area="(no area)">⚠ ${fl.filter(f=>!f.area).length} flow map${fl.filter(f=>!f.area).length>1?"s have":" has"} no process area — show ${H.area==="(no area)"?"all":"them"}</button><span class="muted">Set one with ⚙ in the library so it sits in the flow above.</span></div>`:""}`
       :`<div class="muted pad">No process areas or flow maps for this BU yet — add org rows in Settings, or create a flow with ＋ New flow.</div>`}</div>`;
   /* ---- step 3: library ---- */
