@@ -1185,3 +1185,18 @@ button.ovhr{cursor:pointer}button.ovhr:hover{background:#F6F3FF}
 .ovins{margin:12px 0 0;background:#F1EDFF;color:var(--accent-d);border-radius:10px;padding:9px 12px;font-size:12px}.ovins.warn{background:#FBF2E6;color:#9A5B13}
 .ovrkc .ovdrill{margin-left:18px}
 @media (max-width:1100px){.ovang{grid-template-columns:1fr}.ovsum{grid-template-columns:1fr}.ovsum>div+div{border-left:0;border-top:1px solid #E7E4F0;padding-top:10px;margin-top:10px}}
+/* r72 — benefit card filters + breakdown table */
+.ovbf{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin:-2px 0 14px;padding:10px 12px;background:#FAF9FE;border:1px solid #EEEBF8;border-radius:12px}
+.ovbf label{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:#6E6893}
+.ovbf .gx-sel{height:32px;font-size:12.5px}
+.ovbiso{font-size:12.5px;color:var(--accent-d);background:#F1EDFF;border-radius:10px;padding:7px 12px;margin-bottom:8px;display:flex;gap:10px;align-items:center}
+.ovbsv .bal{fill:none;stroke:#2E9D5B;stroke-width:2.5;stroke-linejoin:round}
+.ovbtw{margin-top:16px;border-top:1px solid #EEEBF8;padding-top:8px}
+.ovbth,.ovbt{display:grid;grid-template-columns:minmax(200px,1.6fr) 60px repeat(5,minmax(90px,1fr));gap:10px;align-items:center;padding:7px 8px;font-size:12.5px}
+.ovbth{font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted)}
+.ovbth span:not(:first-child),.ovbt span:not(.nm){text-align:right}
+.ovbt{width:100%;border:0;border-bottom:1px solid #F3F1F8;background:transparent;font:inherit;font-size:12.5px;color:#3F3A57;cursor:pointer;text-align:left;border-radius:8px}
+.ovbt:hover{background:#F8F6FF}.ovbt.on{background:#F1EDFF;font-weight:600}.ovbt.dim{opacity:.5}
+.ovbt .nm{display:flex;align-items:center;gap:8px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ovbt .nm i{width:10px;height:10px;border-radius:3px;flex:none}
+.ovbt .ok{color:#1E7B4E}.ovbt .wa{color:#B54708}.ovbt .bad{color:#C4320A}
+@media (max-width:1000px){.ovbth,.ovbt{grid-template-columns:1fr 70px 90px}.ovbth span:nth-child(n+4),.ovbt span:nth-child(n+4){display:none}}

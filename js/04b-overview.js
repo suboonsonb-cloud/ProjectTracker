@@ -140,27 +140,6 @@ function ovKpiBind(m){const U=UI.dash;const re=()=>vDash(m,true);
   m.querySelectorAll("#ovKp [data-ovopen]").forEach(b=>b.onclick=()=>openProject(+b.dataset.ovopen))}
 /* ---- bottom of the dashboard: benefit realisation + simple ranked breakdowns ---- */
 function ovAnalysisHtml(P,Bl,months,scope){const U=UI.dash;const BlA=Bl.filter(b=>!b.drop);
-  const plan=months.map((_,i)=>BlA.reduce((a,b)=>a+(b.plan[i]||0),0)),act=months.map((_,i)=>BlA.reduce((a,b)=>a+(b.act[i]||0),0));
-  const td=months.map(mm=>mm.s<=TODAY);const pTD=plan.reduce((a,v,i)=>a+(td[i]?v:0),0),aTD=act.reduce((a,v,i)=>a+(td[i]?v:0),0);
-  const lab=mm=>{const d=serialToDate(mm.s);return {m:MON[d.getUTCMonth()],y:d.getUTCFullYear()}};
-  /* chart */
-  let chart='<p class="muted">No benefit plan yet.</p>';
-  if(months.length){const n=months.length,bw=50,pl=64,pr=16,pt=34,ph=250,W=pl+n*bw+pr,H=pt+ph+64;const mx0=Math.max(1,...plan,...act);
-    const step=(()=>{const raw=mx0/4,p=Math.pow(10,Math.floor(Math.log10(raw)));return [1,2,2.5,5,10].map(k=>k*p).find(k=>k>=raw)})();const mx=step*4;
-    const Y=v=>pt+ph-v/mx*ph;const ti=months.findIndex(mm=>mm.s<=TODAY&&TODAY<(months[months.indexOf(mm)+1]||{s:9e9}).s);
-    let g="";for(let k=0;k<=4;k++){const v=step*k;g+=`<line x1="${pl}" x2="${W-pr}" y1="${Y(v)}" y2="${Y(v)}" class="gl"/><text x="${pl-10}" y="${Y(v)+4}" text-anchor="end" class="ax">${fmtShort(v)}</text>`}
-    let bars="",xl="",yrs="";let y0=null,ys=0;
-    months.forEach((mm,i)=>{const x=pl+i*bw;const L=lab(mm);const p=plan[i],a=act[i];
-      bars+=`<g><title>${L.m} ${L.y} · plan ${fmtNum(Math.round(p))} THB${a?` · actual ${fmtNum(Math.round(a))} THB`:""}</title><rect x="${x+9}" y="${Y(p)}" width="${bw-18}" height="${Math.max(0,pt+ph-Y(p))}" rx="4" class="${td[i]?"bp":"bf"}"/>${a?`<rect x="${x+17}" y="${Y(a)}" width="${bw-34}" height="${pt+ph-Y(a)}" rx="3" class="ba"/>`:""}</g>`;
-      xl+=`<text x="${x+bw/2}" y="${pt+ph+20}" text-anchor="middle" class="ax">${L.m}</text>`;
-      if(L.y!==y0){if(y0!==null){yrs+=`<text x="${pl+(ys+i)/2*bw}" y="${pt+ph+52}" text-anchor="middle" class="yr">${y0}</text><line x1="${x}" x2="${x}" y1="${pt-6}" y2="${pt+ph+34}" class="ys"/>`}y0=L.y;ys=i}});
-    yrs+=`<text x="${pl+(ys+n)/2*bw}" y="${pt+ph+52}" text-anchor="middle" class="yr">${y0}</text>`;
-    let tl="";if(ti>=0){const x=pl+(ti+1)*bw;const L=lab(months[ti]);tl=`<line x1="${x}" x2="${x}" y1="${pt-6}" y2="${pt+ph}" class="td"/><g transform="translate(${x-62},${pt-30})"><rect width="124" height="22" rx="6" class="tdb"/><text x="62" y="15" text-anchor="middle" class="tdt">Today · ${L.m} ${L.y}</text></g>`}
-    chart=`<div class="ovbch"><span class="ovbu">THB / month</span><div class="ovbsv"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Monthly planned and actual benefit">${g}${bars}${tl}${xl}${yrs}</svg></div></div>`}
-  const rng=months.length?`${lab(months[0]).m} ${lab(months[0]).y} – ${lab(months[months.length-1]).m} ${lab(months[months.length-1]).y}`:"";
-  const ben=`<div class="card ovan"><div class="ovanh"><div><h3>Monthly benefit realisation</h3><p>${esc(scope)} · ${Bl.length} benefit line${Bl.length!==1?"s":""}</p></div><span class="sp"></span>${rng?`<span class="ovrng">Monthly · ${rng}</span>`:""}</div>
-    <div class="ovsum"><div><small>Planned to date</small><b>THB ${fmtNum(Math.round(pTD))}</b></div><div><small>Actual to date</small><b class="ok">THB ${fmtNum(Math.round(aTD))}</b><span>${aTD?"Realised benefits logged":"No realised benefits recorded"}</span></div><div><small>Plan achieved</small><b>${pTD?Math.round(aTD/pTD*100):0}%</b><span>Actual ÷ planned to date</span></div></div>
-    ${chart}<div class="ovleg"><span><i class="bp"></i>Planned (to date)</span><span><i class="bf"></i>Planned (future)</span><span><i class="ba"></i>Actual</span><span><i class="td"></i>Today</span></div></div>`;
   /* ranked lists */
   const tot=P.length||1;const rank=(key,title,sub,fn,opts={})=>{const by={};P.forEach(r=>{const k=fn(r)||opts.none||"(blank)";(by[k]=by[k]||[]).push(r)});
     const ks=Object.keys(by).sort((a,b)=>(a===opts.none)-(b===opts.none)||by[b].length-by[a].length);const mxn=Math.max(1,...ks.map(k=>by[k].length));
@@ -172,9 +151,73 @@ function ovAnalysisHtml(P,Bl,months,scope){const U=UI.dash;const BlA=Bl.filter(b
   const bus=uniq(P.map(r=>gv("Projects",FP.bu,r)||"(blank)"));
   const bu=rank(bus.length>1?"bu":"cf",bus.length>1?"Projects by business unit":"Projects by corporate function",bus.length>1?"ranked by project count":`one business unit in this view (${esc(bus[0]||"—")}) · split by CF`,r=>gv("Projects",bus.length>1?FP.bu:FP.cf,r),{extra:r=>esc(gv("Projects",FP.proc,r)||"")});
   return `<section class="ovansec"><div class="ovsec"><div><h2>Benefit &amp; portfolio analysis</h2><p>A clearer view of expected value, project distribution and ownership.</p></div></div>
-    ${ben}<div class="ovang"><div>${proc.html}</div><div class="ovangr">${wsl.html}${bu.html}</div></div></section>`}
+    ${ovBenCard(Bl,months,scope)}<div class="ovang"><div>${proc.html}</div><div class="ovangr">${wsl.html}${bu.html}</div></div></section>`}
 function ovAnalysisBind(m){const U=UI.dash;const re=()=>vDash(m,true);
   m.querySelectorAll("[data-anr]").forEach(b=>b.onclick=()=>{U.anOpen=U.anOpen===b.dataset.anr?"":b.dataset.anr;U.kAll="";re()});
   m.querySelectorAll(".ovansec [data-kall]").forEach(b=>b.onclick=()=>{U.kAll=U.kAll===b.dataset.kall?"":b.dataset.kall;re()});
   m.querySelectorAll(".ovansec [data-ovopen]").forEach(b=>b.onclick=()=>openProject(+b.dataset.ovopen));
-  const sv=m.querySelector(".ovbsv");if(sv&&!sv.dataset.sc){sv.dataset.sc=1;const td=sv.querySelector("line.td");if(td)sv.scrollLeft=Math.max(0,+td.getAttribute("x1")-sv.clientWidth*0.55)}}
+  ovBenBind(m);const sv=m.querySelector(".ovbsv");if(sv&&!sv.dataset.sc){sv.dataset.sc=1;const td=sv.querySelector("line.td");if(td)sv.scrollLeft=Math.max(0,+td.getAttribute("x1")-sv.clientWidth*0.55)}}
+
+/* ---- Monthly benefit realisation card with clean filters: view · split · E2E flow · range, plus a breakdown table ---- */
+const OVB_PAL=["#7C5CFC","#2E90FA","#12B76A","#F79009","#EE46BC","#06AED4","#875BF7","#F04438","#66C61C","#0E9384"];
+function ovBenCard(Bl,months,scope){const U=UI.dash;const o=U.bf=U.bf||{view:"m",split:"",flow:"",range:"all",iso:""};
+  const FL=benFlowIndex();const flows=uniq(Bl.flatMap(b=>(FL[b.pid]||[]).length?FL[b.pid]:["(no E2E flow yet)"]));if(o.flow&&!flows.includes(o.flow))o.flow="";
+  const teamOf=pid=>{const r=projRowById(pid);return (r&&gv("Projects","AB",r))||"(no team)"},typeOf=pid=>{const r=projRowById(pid);return (r&&gv("Projects",FP.init,r))||"(no type)"};
+  let L=Bl.filter(b=>!b.drop&&(!o.flow||(o.flow==="(no E2E flow yet)"?!(FL[b.pid]||[]).length:(FL[b.pid]||[]).includes(o.flow))));
+  if(o.split==="driver"){const out=[];for(const b of L){const tot=Object.values(b.drv||{}).reduce((a,v)=>a+v,0);if(!tot){out.push({...b,seg:"(no driver value)"});continue}
+    for(const [k,v] of Object.entries(b.drv)){if(!v)continue;const f=v/tot;out.push({...b,seg:k,gross:b.gross*f,hrs:k.startsWith("Time")?b.hrs:0,plan:b.plan.map(x=>x*f),act:b.act.map(x=>x*f)})}}L=out}
+  const SPL={"":"No split",bu:"Business unit",cf:"Corporate function",proc:"Process area",team:"Team",flow:"E2E flow",type:"Project type",driver:"Benefit driver",project:"Project"};
+  const segOf=b=>({bu:b.bu,cf:b.cf,proc:b.proc,team:teamOf(b.pid),flow:((FL[b.pid]||[])[0])||"(no E2E flow yet)",type:typeOf(b.pid),driver:b.seg,project:b.pid+" · "+(b.pname||"")})[o.split]||"All benefit lines";
+  /* months in range */
+  const yr=serialToDate(TODAY).getUTCFullYear();const idx=months.map((mm,i)=>i).filter(i=>{const s=months[i].s,d=serialToDate(s);
+    return o.range==="all"?true:o.range==="ytd"?d.getUTCFullYear()===yr:o.range==="n12"?s>TODAY-31&&s<=TODAY+335:o.range==="l12"?s<=TODAY&&s>TODAY-366:String(d.getUTCFullYear())===o.range});
+  const yrs=uniq(months.map(mm=>String(serialToDate(mm.s).getUTCFullYear())));
+  /* segments: biggest first, fold the rest into Other */
+  const tot=b=>b.plan.reduce((a,v)=>a+v,0)+b.act.reduce((a,v)=>a+v,0)+(b.gross||0)/1e6;
+  const by={};L.forEach(b=>{const k=segOf(b);(by[k]=by[k]||[]).push(b)});let keys=Object.keys(by).sort((a,b)=>by[b].reduce((x,y)=>x+tot(y),0)-by[a].reduce((x,y)=>x+tot(y),0));
+  if(keys.length>9){const rest=keys.slice(8);by.Other=rest.flatMap(k=>by[k]);rest.forEach(k=>delete by[k]);keys=[...keys.slice(0,8),"Other"]}
+  if(o.iso&&!keys.includes(o.iso))o.iso="";const show=o.iso?[o.iso]:keys;const col=k=>k==="Other"?"#A3ACB8":OVB_PAL[keys.indexOf(k)%OVB_PAL.length];
+  const sumM=(bs,key,i)=>bs.reduce((a,b)=>a+(b[key][i]||0),0);
+  const td=i=>months[i].s<=TODAY;const lab=i=>{const d=serialToDate(months[i].s);return {m:MON[d.getUTCMonth()],y:d.getUTCFullYear()}};
+  const Ls=show.flatMap(k=>by[k]);const pTD=months.reduce((a,_,i)=>a+(td(i)?sumM(Ls,"plan",i):0),0),aTD=months.reduce((a,_,i)=>a+(td(i)?sumM(Ls,"act",i):0),0);
+  /* series per month (stacked by segment) */
+  const cum=o.view==="c";const runP={},runA=[];let ra=0;
+  const seg=show.map(k=>{let r=0;return {k,v:months.map((_,i)=>{const v=sumM(by[k],"plan",i);if(cum){r+=v;return r}return v})}});
+  const actM=months.map((_,i)=>{const v=sumM(Ls,"act",i);if(cum){ra+=v;return ra}return v});
+  let chart='<p class="muted">No benefit plan for this selection.</p>';
+  if(idx.length&&Ls.length){const n=idx.length,bw=Math.max(22,Math.min(50,Math.floor(1500/n))),pl=64,pr=16,pt=34,ph=250,W=pl+n*bw+pr,H=pt+ph+64;
+    const totAt=i=>seg.reduce((a,s)=>a+s.v[i],0);const mx0=Math.max(1,...idx.map(i=>Math.max(totAt(i),actM[i])));
+    const step=(()=>{const raw=mx0/4,p=Math.pow(10,Math.floor(Math.log10(raw)));return [1,2,2.5,5,10].map(k=>k*p).find(k=>k>=raw)})();const mx=step*4;const Y=v=>pt+ph-v/mx*ph;
+    let g="";for(let k=0;k<=4;k++){const v=step*k;g+=`<line x1="${pl}" x2="${W-pr}" y1="${Y(v)}" y2="${Y(v)}" class="gl"/><text x="${pl-10}" y="${Y(v)+4}" text-anchor="end" class="ax">${fmtShort(v)}</text>`}
+    let bars="",xl="",yl="",y0=null,ys=0,tl="",line="";const single=show.length===1&&!o.split;
+    idx.forEach((i,j)=>{const x=pl+j*bw;const L_=lab(i);let acc=0;const fut=!td(i);
+      const tip=`${L_.m} ${L_.y}${cum?" (cumulative)":""}\n`+seg.map(s=>`${s.k}: ${fmtNum(Math.round(s.v[i]))}`).join("\n")+`\nActual: ${fmtNum(Math.round(actM[i]))} THB`;
+      bars+=`<g><title>${esc(tip)}</title>`+seg.map(s=>{const v=s.v[i];if(!v)return "";const y1=Y(acc+v),h=Y(acc)-y1;acc+=v;return `<rect x="${x+bw*0.18}" y="${y1}" width="${bw*0.64}" height="${Math.max(0,h)}" ${single?`class="${fut?"bf":"bp"}"`:`fill="${col(s.k)}" opacity="${fut?0.38:0.95}"`}/>`}).join("")+
+        (!cum&&actM[i]?`<rect x="${x+bw*0.34}" y="${Y(actM[i])}" width="${bw*0.32}" height="${pt+ph-Y(actM[i])}" rx="2" class="ba"/>`:"")+`</g>`;
+      if(cum&&td(i))line+=`${line?"L":"M"}${x+bw/2} ${Y(actM[i])} `;
+      xl+=`<text x="${x+bw/2}" y="${pt+ph+20}" text-anchor="middle" class="ax">${bw<30?L_.m[0]:L_.m}</text>`;
+      if(L_.y!==y0){if(y0!==null)yl+=`<text x="${pl+(ys+j)/2*bw}" y="${pt+ph+52}" text-anchor="middle" class="yr">${y0}</text><line x1="${x}" x2="${x}" y1="${pt-6}" y2="${pt+ph+34}" class="ys"/>`;y0=L_.y;ys=j}
+      if(td(i)&&(j===n-1||!td(idx[j+1]))&&idx[j+1]!==undefined){const tx=x+bw;tl=`<line x1="${tx}" x2="${tx}" y1="${pt-6}" y2="${pt+ph}" class="td"/><g transform="translate(${tx-62},${pt-30})"><rect width="124" height="22" rx="6" class="tdb"/><text x="62" y="15" text-anchor="middle" class="tdt">Today · ${L_.m} ${L_.y}</text></g>`}});
+    yl+=`<text x="${pl+(ys+n)/2*bw}" y="${pt+ph+52}" text-anchor="middle" class="yr">${y0}</text>`;
+    chart=`<div class="ovbch"><span class="ovbu">THB / month${cum?" · cumulative":""}</span><div class="ovbsv"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Benefit plan and actual by month">${g}${bars}${line?`<path d="${line}" class="bal"/>`:""}${tl}${xl}${yl}</svg></div></div>`}
+  /* breakdown table */
+  const rowsT=keys.map(k=>{const bs=by[k];const p=months.reduce((a,_,i)=>a+(td(i)?sumM(bs,"plan",i):0),0),a=months.reduce((x,_,i)=>x+(td(i)?sumM(bs,"act",i):0),0);
+    const yrv=bs.filter(b=>!b.one).reduce((x,b)=>x+b.gross,0),h=bs.reduce((x,b)=>x+(b.hrs||0),0),pc=p?Math.round(a/p*100):null;
+    return `<button type="button" class="ovbt${o.iso===k?" on":""}${o.iso&&o.iso!==k?" dim":""}" data-bfiso="${esc(k)}" title="${o.iso===k?"Show all again":"Show only this in the chart"}"><span class="nm"><i style="background:${col(k)}"></i>${esc(k)}</span><span>${new Set(bs.map(b=>b.id)).size}</span><span>${fmtShort(yrv)}</span><span>${h?fmtNum(Math.round(h)):"—"}</span><span>${fmtShort(p)}</span><span class="ok">${fmtShort(a)}</span><span class="${pc==null?"":pc>=90?"ok":pc>=60?"wa":"bad"}">${pc==null?"—":pc+"%"}</span></button>`}).join("");
+  const sel=(id,v,opts)=>`<select id="${id}" class="gx-sel${v&&v!=="all"?" act":""}">${opts.map(([a,b])=>`<option value="${esc(a)}" ${a===v?"selected":""}>${esc(b)}</option>`).join("")}</select>`;
+  const rngTxt=idx.length?`${lab(idx[0]).m} ${lab(idx[0]).y} – ${lab(idx[idx.length-1]).m} ${lab(idx[idx.length-1]).y}`:"—";
+  return `<div class="card ovan ovbcard"><div class="ovanh"><div><h3>Monthly benefit realisation</h3><p>${esc(scope)} · ${L.length} benefit line${L.length!==1?"s":""}${o.flow?" · "+esc(o.flow):""}</p></div><span class="sp"></span><span class="ovrng">${cum?"Cumulative":"Monthly"} · ${rngTxt}</span></div>
+    <div class="ovbf"><span class="seg gx-unit"><button type="button" data-bfv="m" class="${cum?"":"on"}">Monthly</button><button type="button" data-bfv="c" class="${cum?"on":""}">Cumulative</button></span>
+      <label>Split by ${sel("bfSplit",o.split,Object.entries(SPL))}</label>
+      <label>E2E flow ${sel("bfFlow",o.flow,[["","All flows"],...flows.map(f=>[f,f])])}</label>
+      <label>Period ${sel("bfRange",o.range,[["all","All months"],["ytd","This year"],["n12","Next 12 months"],["l12","Last 12 months"],...yrs.map(y=>[y,y])])}</label>
+      ${o.split||o.flow||o.range!=="all"||o.iso||cum?'<button type="button" class="gx-link" id="bfReset">Reset</button>':""}</div>
+    <div class="ovsum"><div><small>Planned to date</small><b>THB ${fmtNum(Math.round(pTD))}</b></div><div><small>Actual to date</small><b class="ok">THB ${fmtNum(Math.round(aTD))}</b><span>${aTD?"Realised benefits logged":"No realised benefits recorded"}</span></div><div><small>Plan achieved</small><b>${pTD?Math.round(aTD/pTD*100):0}%</b><span>Actual ÷ planned to date</span></div></div>
+    ${o.iso?`<div class="ovbiso">Showing only <b>${esc(o.iso)}</b> <button type="button" class="gx-link" data-bfiso="${esc(o.iso)}">Show all</button></div>`:""}
+    ${chart}<div class="ovleg">${o.split?keys.map(k=>`<span><i style="background:${col(k)}"></i>${esc(k)}</span>`).join("")+'<span><i class="bf" style="opacity:.6"></i>lighter = future</span>':'<span><i class="bp"></i>Planned (to date)</span><span><i class="bf"></i>Planned (future)</span>'}<span><i class="ba"></i>Actual</span><span><i class="td"></i>Today</span></div>
+    <div class="ovbtw"><div class="ovbth"><span>${esc(SPL[o.split]||"Breakdown")}</span><span>Lines</span><span>Run-rate / yr</span><span>Hours / mo</span><span>Plan to date</span><span>Actual to date</span><span>Achieved</span></div>${rowsT||'<p class="muted" style="margin:8px">No benefit lines.</p>'}</div></div>`}
+function ovBenBind(m){const U=UI.dash;const o=U.bf;if(!o)return;const re=()=>vDash(m,true);
+  m.querySelectorAll("[data-bfv]").forEach(b=>b.onclick=()=>{o.view=b.dataset.bfv;re()});
+  [["bfSplit","split"],["bfFlow","flow"],["bfRange","range"]].forEach(([id,k])=>{const el=m.querySelector("#"+id);if(el)el.onchange=()=>{o[k]=el.value;if(k==="split")o.iso="";re()}});
+  m.querySelectorAll("[data-bfiso]").forEach(b=>b.onclick=()=>{o.iso=o.iso===b.dataset.bfiso?"":b.dataset.bfiso;re()});
+  const r=m.querySelector("#bfReset");if(r)r.onclick=()=>{U.bf={view:"m",split:"",flow:"",range:"all",iso:""};re()}}
