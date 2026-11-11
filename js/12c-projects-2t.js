@@ -24,7 +24,7 @@ function t2Cols(){const ro=typeof canEdit==="function"&&!canEdit();const dis=ro?
   const n=v=>+v||0;const rate=()=>+setting("S_Rate")||0;
   const bhrs=br=>br!=null?n(gv("Benefits",FB.trh,br)):0;
   return [
-  {g:"p",h:"Project ID",w:120,cls:"t2id",f:r=>`<a href="#" data-t2op="${r}" title="Open the project details"><b>${esc(pId(r)||"(new)")}</b></a>${gv("Projects","Z",r)!==""?`<small>2T #${esc(gv("Projects","Z",r))}</small>`:""}`},
+  {g:"p",h:"Project ID",tip:"Code = PROGRAMME-TYPE-BU-CF-### (SIMP / 2T / CR). Help → Project codes for the full guide.",w:120,cls:"t2id",f:r=>`<a href="#" data-t2op="${r}" title="Open the project details"><b>${esc(pId(r)||"(new)")}</b></a>${gv("Projects","Z",r)!==""?`<small>2T #${esc(gv("Projects","Z",r))}</small>`:""}`},
   {g:"p",h:"Project Name",w:240,cls:"t2nm",f:r=>ta(r,FP.name,gv("Projects",FP.name,r))},
   {g:"p",h:"Objective",w:240,f:r=>ta(r,"AD",gv("Projects","AD",r))},
   {g:"p",h:"Category",tip:"Project type (Initiative)",w:140,f:r=>sl(r,`data-c="${FP.init}"`,listFromName("L_Init").map(String),gv("Projects",FP.init,r))},

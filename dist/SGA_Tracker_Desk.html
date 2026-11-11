@@ -1211,11 +1211,25 @@ button.ovhr{cursor:pointer}button.ovhr:hover{background:#F6F3FF}
 /* r74 — Programme (project code) filter highlight everywhere */
 .plsel select.act,.dfilt select.act{border-color:var(--accent)!important;background-color:#EDE8FF!important;color:var(--accent-d)!important;font-weight:700!important}
 .gx-morep select.act{border-color:var(--accent)!important;background-color:#EDE8FF!important}
+/* r76 — project code guide */
+.cg{display:flex;flex-direction:column;gap:10px;font-size:13px}
+.cgf{display:flex;align-items:stretch;gap:4px;flex-wrap:wrap}.cgf>i{font-style:normal;font-weight:700;color:#B9AEF0;align-self:center}
+.cgseg{display:flex;flex-direction:column;align-items:center;border:1.5px solid var(--c);background:color-mix(in srgb,var(--c) 9%,#fff);border-radius:10px;padding:6px 12px;min-width:74px}
+.cgseg b{font-size:12.5px;color:var(--c);letter-spacing:.3px}.cgseg small{font-size:10.5px;color:var(--muted)}
+.cgex{margin:0;color:#3F3A57}.cg code{background:#F1EDFF;color:var(--accent-d);border-radius:5px;padding:1px 6px;font-size:12px}
+.cgr{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;color:#3F3A57;font-size:12.5px}
+.cggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.cgt{border:1px solid #ECE9F6;border-radius:10px;padding:8px 10px;max-height:220px;overflow:auto}.cgt>b{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.cgt table{width:100%;border-collapse:collapse;margin-top:4px}.cgt td{padding:3px 4px;font-size:12px;border-bottom:1px solid #F3F1F8}.cgt td:first-child{width:56px}
+.cg.compact{background:#FAF9FE;border:1px dashed #D9D1FA;border-radius:12px;padding:10px 12px}
+.cgbtn{border:1px solid #D9D1FA;background:#fff;color:var(--accent-d);border-radius:999px;font:inherit;font-size:11px;font-weight:600;padding:2px 9px;cursor:pointer;margin-left:6px}.cgbtn:hover{background:#F1EDFF}
+.cgcard{margin-bottom:12px}.cgcard>summary{cursor:pointer}.cgcard .cg{margin-top:10px}
+#confirm .box .cg{max-width:760px}
 </style>
 </head>
 <body>
 <aside class="side" id="side" aria-label="Main navigation">
-  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r75</span></small></span></div>
+  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r76</span></small></span></div>
   <div class="sglab">WORKSPACE</div>
   <button type="button" class="wschip" id="btnOpen" title="Open the workbook (the database)"><span class="wsdot" aria-hidden="true"></span><span class="file" id="fileName">No workbook loaded</span><span class="chev" aria-hidden="true">⌄</span></button>
   <nav class="sidenav hidden" id="tabs"></nav>
@@ -1252,6 +1266,7 @@ button.ovhr{cursor:pointer}button.ovhr:hover{background:#F6F3FF}
 <div class="modal" id="help"><div class="box">
   <h2>How this app works</h2>
   <p>This page runs entirely in your browser. It does not connect to the internet or to any server. It opens the initiatives tracker <b>.xlsx</b>, lets you edit the 5 input sheets (Projects, Activities, Benefits, Realisation, RAIDD) and writes your changes straight back into the same workbook. It only changes the input cells you edited, so formulas, tables, charts and formatting stay exactly as they were.</p>
+  <h2>Project codes</h2><div id="helpCodes"></div>
   <h2>Recommended set-up with SharePoint (no third party)</h2>
   <ol class="steps">
     <li>In SharePoint, open the document library and click <b>Sync</b> (or "Add shortcut to My files") so the workbook appears in File Explorer through OneDrive.</li>
@@ -1522,6 +1537,24 @@ document.addEventListener("focusout",e=>{const el=e.target;if(el&&el.type==="dat
 document.addEventListener("keydown",e=>{const el=e.target;if(!el||el.type!=="date")return;if(e.key==="Enter"){e.preventDefault();el._typing=false;el.blur();return}
   if(/^[0-9]$/.test(e.key)||e.key==="Backspace"||e.key==="Delete"||e.key==="ArrowUp"||e.key==="ArrowDown")el._typing=true},true);
 document.addEventListener("focusin",e=>{const el=e.target;if(el&&el.type==="date"&&!el.min){el.min=DATE_MIN_Y+"-01-01";el.max=DATE_MAX_Y+"-12-31"}},true);
+
+function codeGuideHtml(o={}){const md=typeof hasMD==="function"&&hasMD();
+  const pairs=(v,c)=>{const vs=md?mdList(v):listFromName(v);const cs=md?mdList(c):listFromName(c);return vs.map((x,i)=>[x,cs[i]||codeFor(v,c,x,"?")]).filter(x=>x[0])};
+  const ty=pairs("L_Init","L_InitCode"),bu=pairs("L_BU","L_BUCode");let cf=[];try{cf=pairs("L_CF","L_CFCode")}catch(e){}
+  const ex=(()=>{const ids=rowsOf("Projects").map(pId).filter(x=>/^(SIMP|2T|CR)-/.test(String(x)));return ids[ids.length-1]||"CR-AUT-AO-OTH-002"})();const exP=String(ex).split("-");
+  const seg=(t,l,c)=>`<span class="cgseg" style="--c:${c}"><b>${esc(t)}</b><small>${l}</small></span>`;
+  const tbl=(h,rows)=>`<div class="cgt"><b>${h}</b><table>${rows.map(([a,b])=>`<tr><td><code>${esc(b)}</code></td><td>${esc(a)}</td></tr>`).join("")||'<tr><td colspan="2" class="muted">none yet</td></tr>'}</table></div>`;
+  return `<div class="cg${o.compact?" compact":""}">
+    <div class="cgf">${seg("PROGRAMME","SIMP · 2T · CR","#7C5CFC")}<i>-</i>${seg("TYPE","project type","#2E90FA")}<i>-</i>${seg("BU","business unit","#12B76A")}<i>-</i>${seg("CF","corporate function","#F79009")}<i>-</i>${seg("###","running no.","#6E6893")}</div>
+    <p class="cgex">Example <code>${esc(ex)}</code>${exP.length===5?` = ${esc(exP[0])} programme · ${esc((ty.find(x=>x[1]===exP[1])||["type "+exP[1]])[0])} · ${esc((bu.find(x=>x[1]===exP[2])||["BU "+exP[2]])[0])} · ${esc((cf.find(x=>x[1]===exP[3])||["CF "+exP[3]])[0])} · no. ${esc(exP[4])}`:""}</p>
+    <ul class="cgr"><li><b>Programme</b> comes from the project's Programme tag: <code>SIMP</code> = Simplification / Deep Dives (default), <code>2T</code> = 2T Club, <code>CR</code> = Complexity Reduction. Filters on every page use this prefix.</li>
+      <li><b>Type, BU and CF</b> codes come from ⚙ Settings → Lists (Master_Data). A new BU / CF added there or by Sync old file gets a suggested code you can change.</li>
+      <li><b>###</b> counts up per TYPE-BU-CF, shared by all programmes — so <code>SSC-048</code> never means two projects.</li>
+      <li>The code is made when the project gets its name and is <b>fixed once saved</b>. Changing a code in the lists only affects new projects.</li></ul>
+    ${o.compact?"":`<div class="cggrid">${tbl("Programme",[["Simplification / Deep Dive","SIMP"],["2T Club","2T"],["Complexity Reduction","CR"]])}${tbl("Type",ty)}${tbl("BU",bu)}${tbl("CF",cf)}</div>`}</div>`}
+function openCodeGuide(){choose("How project codes work",codeGuideHtml(),[["ok","Close","primary"]])}
+document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("[data-codeguide]");if(!b)return;e.preventDefault();e.stopPropagation();openCodeGuide()},true);
+const CG_BTN=`<button type="button" class="cgbtn" data-codeguide title="How project codes work">ⓘ code guide</button>`;
 
 /* ---------------- live calculation engine (mirrors the Excel formulas) ---------------- */
 const STL=["Not Started","On Track","At Risk","Delayed","On-Hold","Completed","Cancelled"];
@@ -3435,7 +3468,7 @@ function vProjectWS(m,r){
   m.innerHTML=`${banner("input","Projects")}
    <div class="toolbar">${pviewToggle()}<button class="btn" id="wsBack">← All projects</button><span style="flex:1"></span>
      <button class="btn" id="wsGantt">View in Gantt</button>${pid?raiddBtn(pid).replace('class="rdbtn','class="rdbtn big'):""}${pid?`<button class="btn" id="wsRp">⟳ Request re-plan</button>`:""}</div>
-   <div class="card pad wshead"><div><div class="muted mono">${pid?progChip(pid):""}${esc(pid||"Project ID is generated when you enter the project name")}</div>
+   <div class="card pad wshead"><div><div class="muted mono">${pid?progChip(pid):""}${esc(pid||"Project ID is generated when you enter the project name")} ${CG_BTN}</div>
      <h2 style="margin:2px 0 6px">${esc(gv("Projects",FP.name,r)||"New project")}</h2>
      <div style="margin-bottom:4px">${pid?e2eChip(pid,true):""}</div><div class="muted">${[gv("Projects",FP.bu,r),gv("Projects",FP.cf,r),gv("Projects",FP.proc,r),gv("Projects","AB",r)&&("Team "+gv("Projects","AB",r)),gv("Projects",FP.wsl,r)&&("Workstream leader "+gv("Projects",FP.wsl,r)),gv("Projects",FP.lead,r)&&("Project lead "+gv("Projects",FP.lead,r))].filter(Boolean).map(esc).join(" · ")||"Fill in the project details below"}</div></div>
      <div class="wskpi"><div><span>Status</span>${pill(L.status||"Not Started")}${rpTag(L.rpdays,L.rpref)}</div><div><span>Completion</span><b>${fmtPct(L.comp||0)}</b></div>
@@ -3685,6 +3718,7 @@ function vSettings(m){
     const pr=nameRef("L_People");const ppl=[];if(pr)for(let r=pr.r1;r<=pr.r2;r++){const v=gv(pr.sh,pr.col,r);if(v!==""&&(!q("ppl")||String(v).toLowerCase().includes(q("ppl"))))ppl.push(`<tr><td><input data-lp="${r}" value="${esc(v)}" style="width:260px"></td><td>${used(rowsOf("Activities").filter(x=>gv("Activities",FA.pic,x)===v).length).replace("project","task")}</td><td><button class="btn small danger" data-mdel="ppl:${r}">Delete</button></td></tr>`)}
     body=`<div class="stgrid">${t("Initiatives","name + 3-letter code used in new Project IDs",["Initiative","Code","Used by"],init,"init")}
       ${t("Regions","",["Region","Used by"],one("region","O",FP.region),"region")}</div>
+      <details class="card pad cgcard"><summary><b>ⓘ Project code guide</b> <span class="muted">— PROGRAMME-TYPE-BU-CF-### and where each part comes from</span></summary>${codeGuideHtml({compact:true})}</details>
       ${t("Org structure — BU · Corporate Function · Process Area","one row per valid combination · blank BU / CF = applies to all · codes feed new Project IDs",["BU","BU code","Corporate Function","CF code","Process Area","Matching projects"],org,"org")}
       <div class="stgrid">${t("Workstream leaders & project leads","",["Name","Used by"],one("lead","R",FP.lead),"lead")}${t("People (task PIC list)","Lists sheet",["Person","Used by"],ppl.join(""),"ppl")}</div>
       <p class="muted" style="font-size:12px">Renaming a value offers to update the projects that use it. Deleting only removes it from the dropdown — projects keep their current value. Changing a BU / CF code only affects Project IDs created from now on (saved IDs never change).</p>`}}
@@ -5011,7 +5045,7 @@ function pdHtml(r){const pid=pId(r),st=pStat(r),L=pLive(r),pc=(L.comp||0)*100,pl
   const ts=tasksOfProject(pid),lateT=ts.filter(t=>tStat(t)==="Delayed").length;
   const sec=(id,title,meta,body)=>`<details class="pdsec" data-sec="${id}" ${UI.qu.pdOpen&&UI.qu.pdOpen.has(id)?"open":""}><summary><span class="t">${title}</span><span class="m">${meta}</span><span class="cv" aria-hidden="true">⌄</span></summary><div class="pdin">${body}</div></details>`;
   const slip=fe&&pe?fe-pe:0;
-  return `<div class="pdtop"><span class="eyb">PROJECT DETAILS</span><button type="button" class="pdx" aria-label="Close details">✕</button></div>
+  return `<div class="pdtop"><span class="eyb">PROJECT DETAILS · ${esc(pid||"")}</span>${CG_BTN}<button type="button" class="pdx" aria-label="Close details">✕</button></div>
   <div class="pdbody">
     <h2 class="pdt">${esc(gv("Projects",FP.name,r)||"(no name yet)")}</h2><div class="pdid">${esc(pid)}</div>
     <div class="pdtags">${ro?plPill(st):quStatSel(r).replace('data-qst=','data-pdst=')}<span class="ty">${esc(gv("Projects",FP.init,r)||"")}</span>${gv("Projects",FP.proc,r)?`<span class="ty">${esc(gv("Projects",FP.proc,r))}</span>`:""}</div>
@@ -5154,7 +5188,7 @@ function t2Cols(){const ro=typeof canEdit==="function"&&!canEdit();const dis=ro?
   const n=v=>+v||0;const rate=()=>+setting("S_Rate")||0;
   const bhrs=br=>br!=null?n(gv("Benefits",FB.trh,br)):0;
   return [
-  {g:"p",h:"Project ID",w:120,cls:"t2id",f:r=>`<a href="#" data-t2op="${r}" title="Open the project details"><b>${esc(pId(r)||"(new)")}</b></a>${gv("Projects","Z",r)!==""?`<small>2T #${esc(gv("Projects","Z",r))}</small>`:""}`},
+  {g:"p",h:"Project ID",tip:"Code = PROGRAMME-TYPE-BU-CF-### (SIMP / 2T / CR). Help → Project codes for the full guide.",w:120,cls:"t2id",f:r=>`<a href="#" data-t2op="${r}" title="Open the project details"><b>${esc(pId(r)||"(new)")}</b></a>${gv("Projects","Z",r)!==""?`<small>2T #${esc(gv("Projects","Z",r))}</small>`:""}`},
   {g:"p",h:"Project Name",w:240,cls:"t2nm",f:r=>ta(r,FP.name,gv("Projects",FP.name,r))},
   {g:"p",h:"Objective",w:240,f:r=>ta(r,"AD",gv("Projects","AD",r))},
   {g:"p",h:"Category",tip:"Project type (Initiative)",w:140,f:r=>sl(r,`data-c="${FP.init}"`,listFromName("L_Init").map(String),gv("Projects",FP.init,r))},
@@ -5683,6 +5717,7 @@ async function e2eCreateProject(step,name){const f=e2eFlow(UI.e2e.flow);const ar
   const k=await choose("New project"+(step?" for this step":""),`<div class="fgrid">
      <label class="field wide"><span>Project name</span><input id="npName" value="${esc(name||"")}" placeholder="e.g. Auto AP posting for overseas vendors"></label>
      <label class="field"><span>Programme</span><select id="npProg"><option>Simplification</option><option>2T</option><option>Complexity Reduction</option><option>P2P Deep Dive</option><option>O2C Deep Dive</option><option>R2R Deep Dive</option></select></label>
+     <div class="field wide">${codeGuideHtml({compact:true})}</div>
      <label class="field"><span>Initiative (part of the ID)</span><select id="npInit"><option value="">— choose —</option>${inits.map(x=>`<option>${esc(x)}</option>`).join("")}</select></label>
      <label class="field"><span>Process area</span><input id="npArea" list="npAreas" value="${esc(area)}"><datalist id="npAreas">${areas.map(a=>`<option value="${esc(a)}">`).join("")}</datalist></label>
      <label class="field"><span>Division / team</span><input id="npTeam" list="npTeams"><datalist id="npTeams">${teams.map(a=>`<option value="${esc(a)}">`).join("")}</datalist></label>
@@ -6459,7 +6494,7 @@ function slideToPage(d, A, warn, sno, theme) {
 /* ---------------- wire up ---------------- */
 $("#btnOpen").onclick=openFile;$("#btnSave").onclick=()=>save(false);$("#btnCopy").onclick=()=>save(true);
 $("#btnSet").onclick=()=>{if(!S.zip){toast("Open the workbook first");return}view="Settings";UI.rulesBase=null;render();window.scrollTo(0,0)};
-$("#btnHelp").onclick=()=>$("#help").classList.add("on");$("#helpClose").onclick=()=>$("#help").classList.remove("on");
+$("#btnHelp").onclick=()=>{const hc=$("#helpCodes");if(hc)try{hc.innerHTML=codeGuideHtml()}catch(e){hc.textContent="Open a workbook to see the codes."}$("#help").classList.add("on")};$("#helpClose").onclick=()=>$("#help").classList.remove("on");
 if(!("DecompressionStream" in window)){document.body.insertAdjacentHTML("afterbegin",`<div class="warnbox" style="margin:10px">This browser is too old for this app. Please use a current Microsoft Edge or Google Chrome.</div>`)}
 (()=>{const sel=$("#tzSel");const list=TZ_LIST.includes(TZ)?TZ_LIST:[TZ,...TZ_LIST];sel.innerHTML=list.map(z=>`<option${z===TZ?" selected":""}>${z}</option>`).join("");sel.onchange=()=>setTZ(sel.value);paintClock()})();
 render();envCheck();$("#connChip").onclick=connMenu;paintConn();(async()=>{if(!(await bootSpConnect()))await bootConnect()})();

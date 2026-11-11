@@ -66,7 +66,7 @@ function pdHtml(r){const pid=pId(r),st=pStat(r),L=pLive(r),pc=(L.comp||0)*100,pl
   const ts=tasksOfProject(pid),lateT=ts.filter(t=>tStat(t)==="Delayed").length;
   const sec=(id,title,meta,body)=>`<details class="pdsec" data-sec="${id}" ${UI.qu.pdOpen&&UI.qu.pdOpen.has(id)?"open":""}><summary><span class="t">${title}</span><span class="m">${meta}</span><span class="cv" aria-hidden="true">⌄</span></summary><div class="pdin">${body}</div></details>`;
   const slip=fe&&pe?fe-pe:0;
-  return `<div class="pdtop"><span class="eyb">PROJECT DETAILS</span><button type="button" class="pdx" aria-label="Close details">✕</button></div>
+  return `<div class="pdtop"><span class="eyb">PROJECT DETAILS · ${esc(pid||"")}</span>${CG_BTN}<button type="button" class="pdx" aria-label="Close details">✕</button></div>
   <div class="pdbody">
     <h2 class="pdt">${esc(gv("Projects",FP.name,r)||"(no name yet)")}</h2><div class="pdid">${esc(pid)}</div>
     <div class="pdtags">${ro?plPill(st):quStatSel(r).replace('data-qst=','data-pdst=')}<span class="ty">${esc(gv("Projects",FP.init,r)||"")}</span>${gv("Projects",FP.proc,r)?`<span class="ty">${esc(gv("Projects",FP.proc,r))}</span>`:""}</div>

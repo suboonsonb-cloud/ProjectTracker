@@ -137,7 +137,7 @@ function vProjectWS(m,r){
   m.innerHTML=`${banner("input","Projects")}
    <div class="toolbar">${pviewToggle()}<button class="btn" id="wsBack">← All projects</button><span style="flex:1"></span>
      <button class="btn" id="wsGantt">View in Gantt</button>${pid?raiddBtn(pid).replace('class="rdbtn','class="rdbtn big'):""}${pid?`<button class="btn" id="wsRp">⟳ Request re-plan</button>`:""}</div>
-   <div class="card pad wshead"><div><div class="muted mono">${pid?progChip(pid):""}${esc(pid||"Project ID is generated when you enter the project name")}</div>
+   <div class="card pad wshead"><div><div class="muted mono">${pid?progChip(pid):""}${esc(pid||"Project ID is generated when you enter the project name")} ${CG_BTN}</div>
      <h2 style="margin:2px 0 6px">${esc(gv("Projects",FP.name,r)||"New project")}</h2>
      <div style="margin-bottom:4px">${pid?e2eChip(pid,true):""}</div><div class="muted">${[gv("Projects",FP.bu,r),gv("Projects",FP.cf,r),gv("Projects",FP.proc,r),gv("Projects","AB",r)&&("Team "+gv("Projects","AB",r)),gv("Projects",FP.wsl,r)&&("Workstream leader "+gv("Projects",FP.wsl,r)),gv("Projects",FP.lead,r)&&("Project lead "+gv("Projects",FP.lead,r))].filter(Boolean).map(esc).join(" · ")||"Fill in the project details below"}</div></div>
      <div class="wskpi"><div><span>Status</span>${pill(L.status||"Not Started")}${rpTag(L.rpdays,L.rpref)}</div><div><span>Completion</span><b>${fmtPct(L.comp||0)}</b></div>

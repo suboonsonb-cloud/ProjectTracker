@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Initiatives Tracker Desk</title>
-<link rel="stylesheet" href="css/desk.css?v=r75">
+<link rel="stylesheet" href="css/desk.css?v=r76">
 </head>
 <body>
 <aside class="side" id="side" aria-label="Main navigation">
-  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r75</span></small></span></div>
+  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r76</span></small></span></div>
   <div class="sglab">WORKSPACE</div>
   <button type="button" class="wschip" id="btnOpen" title="Open the workbook (the database)"><span class="wsdot" aria-hidden="true"></span><span class="file" id="fileName">No workbook loaded</span><span class="chev" aria-hidden="true">⌄</span></button>
   <nav class="sidenav hidden" id="tabs"></nav>
@@ -45,6 +45,7 @@
 <div class="modal" id="help"><div class="box">
   <h2>How this app works</h2>
   <p>This page runs entirely in your browser. It does not connect to the internet or to any server. It opens the initiatives tracker <b>.xlsx</b>, lets you edit the 5 input sheets (Projects, Activities, Benefits, Realisation, RAIDD) and writes your changes straight back into the same workbook. It only changes the input cells you edited, so formulas, tables, charts and formatting stay exactly as they were.</p>
+  <h2>Project codes</h2><div id="helpCodes"></div>
   <h2>Recommended set-up with SharePoint (no third party)</h2>
   <ol class="steps">
     <li>In SharePoint, open the document library and click <b>Sync</b> (or "Add shortcut to My files") so the workbook appears in File Explorer through OneDrive.</li>
@@ -78,32 +79,33 @@
 </div></div>
 <input type="file" id="filePick" accept=".xlsx" class="hidden">
 
-<script src="js/00-config.js?v=r75"></script>
-<script src="js/01-core.js?v=r75"></script>
-<script src="js/02-calc.js?v=r75"></script>
-<script src="js/03-io.js?v=r75"></script>
-<script src="js/03b-connect.js?v=r75"></script>
-<script src="js/03c-sharepoint.js?v=r75"></script>
-<script src="js/03d-merge.js?v=r75"></script>
-<script src="js/04-dashboard.js?v=r75"></script>
-<script src="js/04b-overview.js?v=r75"></script>
-<script src="js/05-benefit-analysis.js?v=r75"></script>
-<script src="js/06-list-editor.js?v=r75"></script>
-<script src="js/07-realisation.js?v=r75"></script>
-<script src="js/08-gantt.js?v=r75"></script>
-<script src="js/09-projects.js?v=r75"></script>
-<script src="js/10-settings.js?v=r75"></script>
-<script src="js/10b-activity.js?v=r75"></script>
-<script src="js/10c-access.js?v=r75"></script>
-<script src="js/11-sync.js?v=r75"></script>
-<script src="js/12-projects-list.js?v=r75"></script>
-<script src="js/12b-projects-new.js?v=r75"></script>
-<script src="js/12c-projects-2t.js?v=r75"></script>
-<script src="js/13-studio-embed.js?v=r75"></script>
-<script src="js/14-e2e.js?v=r75"></script>
-<script src="js/14b-e2e-import.js?v=r75"></script>
-<script src="js/14c-e2e-pptx.js?v=r75"></script>
-<script src="js/14d-e2e-pptx-import.js?v=r75"></script>
-<script src="js/15-boot.js?v=r75"></script>
+<script src="js/00-config.js?v=r76"></script>
+<script src="js/01-core.js?v=r76"></script>
+<script src="js/01b-codeguide.js?v=r76"></script>
+<script src="js/02-calc.js?v=r76"></script>
+<script src="js/03-io.js?v=r76"></script>
+<script src="js/03b-connect.js?v=r76"></script>
+<script src="js/03c-sharepoint.js?v=r76"></script>
+<script src="js/03d-merge.js?v=r76"></script>
+<script src="js/04-dashboard.js?v=r76"></script>
+<script src="js/04b-overview.js?v=r76"></script>
+<script src="js/05-benefit-analysis.js?v=r76"></script>
+<script src="js/06-list-editor.js?v=r76"></script>
+<script src="js/07-realisation.js?v=r76"></script>
+<script src="js/08-gantt.js?v=r76"></script>
+<script src="js/09-projects.js?v=r76"></script>
+<script src="js/10-settings.js?v=r76"></script>
+<script src="js/10b-activity.js?v=r76"></script>
+<script src="js/10c-access.js?v=r76"></script>
+<script src="js/11-sync.js?v=r76"></script>
+<script src="js/12-projects-list.js?v=r76"></script>
+<script src="js/12b-projects-new.js?v=r76"></script>
+<script src="js/12c-projects-2t.js?v=r76"></script>
+<script src="js/13-studio-embed.js?v=r76"></script>
+<script src="js/14-e2e.js?v=r76"></script>
+<script src="js/14b-e2e-import.js?v=r76"></script>
+<script src="js/14c-e2e-pptx.js?v=r76"></script>
+<script src="js/14d-e2e-pptx-import.js?v=r76"></script>
+<script src="js/15-boot.js?v=r76"></script>
 </body>
 </html>

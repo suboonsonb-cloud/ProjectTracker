@@ -1204,3 +1204,17 @@ button.ovhr{cursor:pointer}button.ovhr:hover{background:#F6F3FF}
 /* r74 — Programme (project code) filter highlight everywhere */
 .plsel select.act,.dfilt select.act{border-color:var(--accent)!important;background-color:#EDE8FF!important;color:var(--accent-d)!important;font-weight:700!important}
 .gx-morep select.act{border-color:var(--accent)!important;background-color:#EDE8FF!important}
+/* r76 — project code guide */
+.cg{display:flex;flex-direction:column;gap:10px;font-size:13px}
+.cgf{display:flex;align-items:stretch;gap:4px;flex-wrap:wrap}.cgf>i{font-style:normal;font-weight:700;color:#B9AEF0;align-self:center}
+.cgseg{display:flex;flex-direction:column;align-items:center;border:1.5px solid var(--c);background:color-mix(in srgb,var(--c) 9%,#fff);border-radius:10px;padding:6px 12px;min-width:74px}
+.cgseg b{font-size:12.5px;color:var(--c);letter-spacing:.3px}.cgseg small{font-size:10.5px;color:var(--muted)}
+.cgex{margin:0;color:#3F3A57}.cg code{background:#F1EDFF;color:var(--accent-d);border-radius:5px;padding:1px 6px;font-size:12px}
+.cgr{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;color:#3F3A57;font-size:12.5px}
+.cggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.cgt{border:1px solid #ECE9F6;border-radius:10px;padding:8px 10px;max-height:220px;overflow:auto}.cgt>b{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.cgt table{width:100%;border-collapse:collapse;margin-top:4px}.cgt td{padding:3px 4px;font-size:12px;border-bottom:1px solid #F3F1F8}.cgt td:first-child{width:56px}
+.cg.compact{background:#FAF9FE;border:1px dashed #D9D1FA;border-radius:12px;padding:10px 12px}
+.cgbtn{border:1px solid #D9D1FA;background:#fff;color:var(--accent-d);border-radius:999px;font:inherit;font-size:11px;font-weight:600;padding:2px 9px;cursor:pointer;margin-left:6px}.cgbtn:hover{background:#F1EDFF}
+.cgcard{margin-bottom:12px}.cgcard>summary{cursor:pointer}.cgcard .cg{margin-top:10px}
+#confirm .box .cg{max-width:760px}
