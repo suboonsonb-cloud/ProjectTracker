@@ -112,7 +112,7 @@ const PD_SECTIONS=[["What","📌",["G","AE","B","AD","AF"]],["Who","👥",["D","
 const PD_COLS=PD_SECTIONS.flatMap(s=>s[2]);
 function projDetailsHtml(r,ins,pchg){const byCol=Object.fromEntries(ins.map(c=>[c.col,c]));
   const fld=col=>{const c=byCol[col];if(!c)return "";const dirty=pchg.has(col)?" dirty":"";const v=gv("Projects",col,r);
-    if(col==="AE"){const o=uniqOrder(["2T","Simplification","O2C Deep Dive","P2P Deep Dive","R2R Deep Dive",v].filter(Boolean));
+    if(col==="AE"){const o=uniqOrder(["2T","Simplification","Complexity Reduction","O2C Deep Dive","P2P Deep Dive","R2R Deep Dive",v].filter(Boolean));
       return `<div class="field${dirty}"><label>Programme ${S.newRows.Projects&&S.newRows.Projects.has(r)?`<span class="addhint">2T → ID starts 2T- · others → SIMP-</span>`:`<span class="addhint" title="The ID is locked once saved">ID stays ${esc(pId(r).split("-")[0])}-</span>`}</label><select id="fld_AE"><option value=""></option>${o.map(x=>`<option ${x===v?"selected":""}>${esc(x)}</option>`).join("")}</select></div>`}
     if(col==="AB"){const o=uniq(rowsOf("Projects").map(x=>gv("Projects","AB",x)).filter(Boolean)).map(x=>({v:x,t:x}));
       return `<div class="field${dirty}"><label>Division / Team <span class="addhint">＋ new allowed</span></label>${comboHtml("fld_AB",v,o,{strict:false})}</div>`}

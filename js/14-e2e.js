@@ -415,7 +415,7 @@ async function e2eCreateProject(step,name){const f=e2eFlow(UI.e2e.flow);const ar
   const inits=listFromName("L_Init");const people=uniq([...listFromName("L_Leader"),...rowsOf("Projects").flatMap(r=>[gv("Projects",FP.lead,r),gv("Projects",FP.wsl,r)])].filter(Boolean));
   const k=await choose("New project"+(step?" for this step":""),`<div class="fgrid">
      <label class="field wide"><span>Project name</span><input id="npName" value="${esc(name||"")}" placeholder="e.g. Auto AP posting for overseas vendors"></label>
-     <label class="field"><span>Programme</span><select id="npProg"><option>Simplification</option><option>2T</option><option>P2P Deep Dive</option><option>O2C Deep Dive</option><option>R2R Deep Dive</option></select></label>
+     <label class="field"><span>Programme</span><select id="npProg"><option>Simplification</option><option>2T</option><option>Complexity Reduction</option><option>P2P Deep Dive</option><option>O2C Deep Dive</option><option>R2R Deep Dive</option></select></label>
      <label class="field"><span>Initiative (part of the ID)</span><select id="npInit"><option value="">— choose —</option>${inits.map(x=>`<option>${esc(x)}</option>`).join("")}</select></label>
      <label class="field"><span>Process area</span><input id="npArea" list="npAreas" value="${esc(area)}"><datalist id="npAreas">${areas.map(a=>`<option value="${esc(a)}">`).join("")}</datalist></label>
      <label class="field"><span>Division / team</span><input id="npTeam" list="npTeams"><datalist id="npTeams">${teams.map(a=>`<option value="${esc(a)}">`).join("")}</datalist></label>

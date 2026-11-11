@@ -1200,3 +1200,7 @@ button.ovhr{cursor:pointer}button.ovhr:hover{background:#F6F3FF}
 .ovbt .nm{display:flex;align-items:center;gap:8px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ovbt .nm i{width:10px;height:10px;border-radius:3px;flex:none}
 .ovbt .ok{color:#1E7B4E}.ovbt .wa{color:#B54708}.ovbt .bad{color:#C4320A}
 @media (max-width:1000px){.ovbth,.ovbt{grid-template-columns:1fr 70px 90px}.ovbth span:nth-child(n+4),.ovbt span:nth-child(n+4){display:none}}
+.pcr{background:#E8F7F0;color:#067647;border:1px solid #A6E3C8}
+/* r74 — Programme (project code) filter highlight everywhere */
+.plsel select.act,.dfilt select.act{border-color:var(--accent)!important;background-color:#EDE8FF!important;color:var(--accent-d)!important;font-weight:700!important}
+.gx-morep select.act{border-color:var(--accent)!important;background-color:#EDE8FF!important}

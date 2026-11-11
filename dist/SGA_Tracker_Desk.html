@@ -1207,11 +1207,15 @@ button.ovhr{cursor:pointer}button.ovhr:hover{background:#F6F3FF}
 .ovbt .nm{display:flex;align-items:center;gap:8px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ovbt .nm i{width:10px;height:10px;border-radius:3px;flex:none}
 .ovbt .ok{color:#1E7B4E}.ovbt .wa{color:#B54708}.ovbt .bad{color:#C4320A}
 @media (max-width:1000px){.ovbth,.ovbt{grid-template-columns:1fr 70px 90px}.ovbth span:nth-child(n+4),.ovbt span:nth-child(n+4){display:none}}
+.pcr{background:#E8F7F0;color:#067647;border:1px solid #A6E3C8}
+/* r74 — Programme (project code) filter highlight everywhere */
+.plsel select.act,.dfilt select.act{border-color:var(--accent)!important;background-color:#EDE8FF!important;color:var(--accent-d)!important;font-weight:700!important}
+.gx-morep select.act{border-color:var(--accent)!important;background-color:#EDE8FF!important}
 </style>
 </head>
 <body>
 <aside class="side" id="side" aria-label="Main navigation">
-  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r73</span></small></span></div>
+  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r74</span></small></span></div>
   <div class="sglab">WORKSPACE</div>
   <button type="button" class="wschip" id="btnOpen" title="Open the workbook (the database)"><span class="wsdot" aria-hidden="true"></span><span class="file" id="fileName">No workbook loaded</span><span class="chev" aria-hidden="true">⌄</span></button>
   <nav class="sidenav hidden" id="tabs"></nav>
@@ -1467,8 +1471,15 @@ function projMeth(pid){const r=projRowById(pid);return r&&gv("Projects",FP.meth,
 function codeFor(listNm,codeNm,val,def){const a=listFromName(listNm),b=listFromName(codeNm);const i=a.indexOf(val);return i>=0&&b[i]?b[i]:def}
 function maxSuffix(ids,prefix,width){let m=0;for(const id of ids){if(typeof id==="string"&&id.startsWith(prefix)){const n=parseInt(id.slice(prefix.length),10);if(!isNaN(n)&&id.length===prefix.length+width)m=Math.max(m,n)}}return m}
 /* ID prefix = programme: 2T (old 2T Club project, Programme Tag "2T") or SIMP (simplification — everything else) */
-function progChip(id){const p=String(id||"").split("-")[0];return p==="2T"?`<span class="pchipP p2t" title="Old 2T Club project">2T</span> `:p==="SIMP"?`<span class="pchipP psimp" title="Simplification project">SIMP</span> `:""}
-function progCode(r){return String(gv("Projects","AE",r)||"").trim().toUpperCase()==="2T"?"2T":"SIMP"}
+function progChip(id){const p=String(id||"").split("-")[0];return p==="2T"?`<span class="pchipP p2t" title="Old 2T Club project">2T</span> `:p==="SIMP"?`<span class="pchipP psimp" title="Simplification project">SIMP</span> `:p==="CR"?`<span class="pchipP pcr" title="Complexity Reduction project">CR</span> `:""}
+/* programme (initiative) = Projects!AE: 2T · Complexity Reduction · everything else (Simplification, Deep Dives, blank) = SIMP */
+const PROGS=["SIMP","2T","Complexity Reduction"];
+function progTag(r){const t=String(gv("Projects","AE",r)||"").trim().toUpperCase();return t==="2T"?"2T":/COMPLEX/.test(t)?"Complexity Reduction":"SIMP"}
+/* filters go by the project code (ID prefix SIMP- / 2T- / CR-); the tag is only the fallback for projects without an ID yet */
+function progOf(r){const p=String(pId(r)||"").split("-")[0].toUpperCase();return p==="2T"?"2T":p==="CR"?"Complexity Reduction":p==="SIMP"?"SIMP":progTag(r)}
+function progCode(r){const p=progTag(r);return p==="2T"?"2T":p==="SIMP"?"SIMP":"CR"}
+/* a Programme <select> for any filter bar; counts optional */
+function progSel(id,val,cnt){return `<label title="Filter by project code: SIMP- = Simplification & Deep Dives, 2T- = 2T Club, CR- = Complexity Reduction">Programme <select id="${id}"${val?' class="act"':""}><option value="">All</option>${PROGS.map(p=>`<option value="${esc(p)}" ${p===val?"selected":""}>${esc(p==="SIMP"?"SIMP- (Simplification)":p==="2T"?"2T- (2T Club)":"CR- (Complexity Reduction)")}${cnt?` (${cnt(p)})`:""}</option>`).join("")}</select></label>`}
 function genProjectId(r){
   const pre=[progCode(r),codeFor("L_Init","L_InitCode",gv("Projects",FP.init,r),"GEN"),codeFor("L_BU","L_BUCode",gv("Projects",FP.bu,r),"GRP"),codeFor("L_CF","L_CFCode",gv("Projects",FP.cf,r),"GEN")].join("-")+"-";
   /* one number sequence for 2T and SIMP, so "SSC-048" never means two projects */
@@ -2379,10 +2390,10 @@ function vDash0(m){
   const P1=allP.filter(r=>!bu||fv(r,FP.bu)===bu);const cfs_=uniq(P1.map(r=>fv(r,FP.cf)));if(F.cf&&!cfs_.includes(F.cf))F.cf="";
   const P2=P1.filter(r=>!F.cf||fv(r,FP.cf)===F.cf);const procs_=uniq(P2.map(r=>fv(r,FP.proc)));if(F.proc&&!procs_.includes(F.proc))F.proc="";
   const P2b=P2.filter(r=>!F.proc||fv(r,FP.proc)===F.proc);const inits_=uniq(P2b.map(r=>fv(r,FP.init)));if(F.init&&!inits_.includes(F.init))F.init="";
-  const P3a=P2b.filter(r=>!F.init||fv(r,FP.init)===F.init);F.stOff=Array.isArray(F.stOff)?F.stOff:[];const off=new Set(F.stOff);const sts_=off.size?STL.slice():STL.filter(st=>P3a.some(r=>pStat(r)===st));
+  const P3a=P2b.filter(r=>(!F.init||fv(r,FP.init)===F.init)&&(!F.prog||progOf(r)===F.prog));F.stOff=Array.isArray(F.stOff)?F.stOff:[];const off=new Set(F.stOff);const sts_=off.size?STL.slice():STL.filter(st=>P3a.some(r=>pStat(r)===st));
   const P3=P3a.filter(r=>!off.has(pStat(r)));const qq=(F.q||"").trim().toLowerCase();
   const P=P3.filter(r=>!qq||(pId(r)+" "+gv("Projects",FP.name,r)).toLowerCase().includes(qq));const pids=new Set(P.map(pId));DASHP=pids;
-  const nF=[bu,F.cf,F.proc,F.init,F.stOff.length?1:"",qq].filter(Boolean).length;
+  const nF=[bu,F.cf,F.proc,F.init,F.prog,F.stOff.length?1:"",qq].filter(Boolean).length;
   const A=rowsOf("Activities").filter(r=>pids.has(gv("Activities",FA.pid,r))),D=rowsOf("RAIDD").filter(r=>pids.has(gv("RAIDD",FD.pid,r)));
   const BS=benefitSeries();const Bl=BS.list.filter(b=>pids.has(b.pid));const months=BS.months;
   const BlA=Bl.filter(b=>!b.drop);const plan=months.map((_,i)=>BlA.reduce((a,b)=>a+b.plan[i],0)),act=months.map((_,i)=>BlA.reduce((a,b)=>a+b.act[i],0));
@@ -2422,10 +2433,11 @@ function vDash0(m){
    <label>CF <select id="fCF"><option value="">All${bu?" in "+esc(bu):""}</option>${cfs_.map(b=>`<option ${b===F.cf?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
    <label>Project <span style="width:300px;display:inline-block">${comboHtml("fQ",F.q||"",[{v:"",t:`All projects${F.cf?" in "+esc(F.cf):bu?" in "+esc(bu):""} (${P3.length})`},...P3.map(r=>({v:pId(r),t:pId(r)+" — "+gv("Projects",FP.name,r)}))],{strict:false})}</span></label>
    <label>Process area <select id="fProc"><option value="">All</option>${procs_.map(b=>`<option ${b===F.proc?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
+   ${progSel("fProg",F.prog||"",p=>P2b.filter(r=>(!F.init||fv(r,FP.init)===F.init)&&progOf(r)===p).length)}
    <label title="Project type = Initiative (Automation, Standardisation …)">Project type <select id="fInit"><option value="">All</option>${inits_.map(b=>`<option value="${esc(b)}" ${b===F.init?"selected":""}>${esc(b)} (${P2b.filter(r=>fv(r,FP.init)===b).length})</option>`).join("")}</select></label>
    ${stChips(sts_,off,st=>P3a.filter(r=>pStat(r)===st).length,"dst")}
    
-   ${nF?`<div class="dfchips"><span class="dfl">Filtered by</span>${[bu?["bu","BU",bu]:null,F.cf?["cf","CF",F.cf]:null,F.proc?["proc","Process area",F.proc]:null,F.init?["init","Project type",F.init]:null,qq?["q","Project",F.q]:null,F.stOff.length?["st","Status",STL.filter(x=>!off.has(x)).join(", ")||"none"]:null].filter(Boolean).map(([k,l,v])=>`<button type="button" class="dfc" data-dfclr="${k}" title="Remove this filter">${esc(l)}: <b>${esc(v)}</b> <i>✕</i></button>`).join("")}<button type="button" class="dfc all" data-dfclr="all">Clear all</button></div>`:""}
+   ${nF?`<div class="dfchips"><span class="dfl">Filtered by</span>${[bu?["bu","BU",bu]:null,F.cf?["cf","CF",F.cf]:null,F.proc?["proc","Process area",F.proc]:null,F.init?["init","Project type",F.init]:null,F.prog?["prog","Programme",F.prog]:null,qq?["q","Project",F.q]:null,F.stOff.length?["st","Status",STL.filter(x=>!off.has(x)).join(", ")||"none"]:null].filter(Boolean).map(([k,l,v])=>`<button type="button" class="dfc" data-dfclr="${k}" title="Remove this filter">${esc(l)}: <b>${esc(v)}</b> <i>✕</i></button>`).join("")}<button type="button" class="dfc all" data-dfclr="all">Clear all</button></div>`:""}
    <span class="muted${nF?" dfcount":""}" style="margin-left:auto">${P.length} of ${allP.length} projects · ${A.length} tasks · ${Bl.length} benefit lines</span>
    <span class="muted finfo" title="Pick a BU, then a CF of that BU, then a project of that CF — or leave any on All. Status: untick a box to hide projects with that status, tick it to show them again (Only = show just that one). Type part of a name in Project to show all matching projects. These filters apply to every chart, KPI and table on the dashboard; dropdowns inside a card only change how that card is drawn.">ⓘ</span></div>
   ${ovKpis(P,A,D,Bl,{valRec,valOne,hrs,fteh,pTD,aTD,pids})}${ovNewHtml(P,Bl)}
@@ -2436,10 +2448,10 @@ function vDash0(m){
     <h2 style="margin-top:12px">Projects by status × process area</h2>${matrix("Process Area",P,r=>gv("Projects",FP.proc,r),{})}
     <h2 style="margin-top:12px">Delayed & at-risk projects</h2>${riskList(P)}</details>`;
   const reF=()=>{UI.dash.cell=null;UI.dash.zoom=null;vDash(m,true)};
-  ovBind(m);ovNewBind(m);ovKpiBind(m);$("#fBU").onchange=e=>{F.bu=e.target.value;F.cf="";F.proc="";reF()};$("#fCF").onchange=e=>{F.cf=e.target.value;F.proc="";reF()};$("#fProc").onchange=e=>{F.proc=e.target.value;F.init="";reF()};$("#fInit").onchange=e=>{F.init=e.target.value;reF()};bindStChips(m,"dst",F,reF);
+  ovBind(m);ovNewBind(m);ovKpiBind(m);if($("#fProg"))$("#fProg").onchange=e=>{F.prog=e.target.value;reF()};$("#fBU").onchange=e=>{F.bu=e.target.value;F.cf="";F.proc="";reF()};$("#fCF").onchange=e=>{F.cf=e.target.value;F.proc="";reF()};$("#fProc").onchange=e=>{F.proc=e.target.value;F.init="";reF()};$("#fInit").onchange=e=>{F.init=e.target.value;reF()};bindStChips(m,"dst",F,reF);
   $("#fQ").addEventListener("change",e=>{F.q=e.target.value.trim();reF()});
-  m.querySelectorAll("[data-dfclr]").forEach(b=>b.onclick=()=>{const k=b.dataset.dfclr;if(k==="all"){F.bu=F.cf=F.proc=F.init=F.q="";F.stOff=[]}else if(k==="bu"){F.bu=F.cf=F.proc=""}else if(k==="cf"){F.cf=F.proc=""}else if(k==="st")F.stOff=[];else F[k]="";reF()});
-  ["fBU","fCF","fProc","fInit"].forEach(id=>{const el=$("#"+id);if(el&&el.value){el.classList.add("act");const lb=el.closest("label");if(lb)lb.classList.add("act")}});{const q=$("#fQ");if(q&&q.value){q.classList.add("act");const lb=q.closest("label");if(lb)lb.classList.add("act")}}
+  m.querySelectorAll("[data-dfclr]").forEach(b=>b.onclick=()=>{const k=b.dataset.dfclr;if(k==="all"){F.bu=F.cf=F.proc=F.init=F.prog=F.q="";F.stOff=[]}else if(k==="bu"){F.bu=F.cf=F.proc=""}else if(k==="cf"){F.cf=F.proc=""}else if(k==="st")F.stOff=[];else F[k]="";reF()});
+  ["fBU","fCF","fProc","fInit","fProg"].forEach(id=>{const el=$("#"+id);if(el&&el.value){el.classList.add("act");const lb=el.closest("label");if(lb)lb.classList.add("act")}});{const q=$("#fQ");if(q&&q.value){q.classList.add("act");const lb=q.closest("label");if(lb)lb.classList.add("act")}}
   if($("#clrAll"))$("#clrAll").onclick=()=>{F.bu=F.cf=F.proc=F.init=F.q="";F.stOff=[];reF()};
   if($("#procView"))$("#procView").onchange=e=>{UI.dash.procView=e.target.value;vDash(m,true)};if($("#buView"))$("#buView").onchange=e=>{UI.dash.buView=e.target.value;vDash(m,true)};ovAnalysisBind(m);
   m.querySelectorAll("svg [data-click]").forEach(el=>el.onclick=()=>{const chart=el.closest("[data-chart]").dataset.chart;const seg=el.dataset.seg||"";
@@ -2855,6 +2867,9 @@ function listView(m,sheet,opts){
   const q=opts.noSearch?"":(UI.q[sheet]||"").toLowerCase();const f=opts.filters.length?(UI.f[sheet]||{}):{};const chg=changedRows(sheet);
   let rows=rowsOf(sheet);if(opts.rowFilter)rows=rows.filter(opts.rowFilter);
   let e2eHtml="";if(opts.e2e&&typeof e2eBar==="function"&&typeof hasE2E==="function"&&hasE2E()){e2eHtml=e2eBar(rows,opts.e2e.pid,opts.e2e.noun);rows=rows.filter(r=>passE2EPid(opts.e2e.pid(r),UI.qu.flow,UI.qu.lane))}
+  /* programme = project code prefix (SIMP- / 2T- / CR-), shared with the Projects page */
+  const pgOfPid=pid=>{const p=String(pid||"").split("-")[0].toUpperCase();return p==="2T"?"2T":p==="CR"?"Complexity Reduction":"SIMP"};const pgBase=rows;
+  if(opts.e2e&&UI.qu.prog)rows=rows.filter(r=>pgOfPid(opts.e2e.pid(r))===UI.qu.prog);
   const fvs=(k,r)=>opts.filterAll&&opts.filterAll(k,r)||[opts.filterVal(k,r)];
   for(const [k,v] of Object.entries(f)){if(k==="stOff"||!v)continue;rows=rows.filter(r=>fvs(k,r).some(x=>String(x)===v))}
   const chipK=(opts.filters.find(fl=>fl.k==="status"||fl.k==="bstat")||{}).k;const hasSt=!!chipK;const stOffL=new Set(hasSt&&Array.isArray(f.stOff)?f.stOff:[]);const stBase=rows;
@@ -2869,10 +2884,10 @@ function listView(m,sheet,opts){
   const filters=opts.filters.filter(fl=>fl.k!==chipK||stVals.length>1||stOffL.size).map(fl=>fl.k===chipK?stChips(stVals,stOffL,v=>stBase.filter(r=>String(opts.filterVal(chipK,r))===v).length,"l"+sheet):sel("f_"+fl.k,fl.label,uniq(rowsOf(sheet).flatMap(r=>fvs(fl.k,r).map(String))),f[fl.k]||"")).join("");
   const TBL=`<div class="card tablewrap"><table class="data"><thead><tr>${opts.cols.map((c,i)=>`<th class="${c.num?"num":""}"><span class="thf">${c.h}<button class="cfbtn${CF[i]?" on":""}${so&&so.i===i?" so":""}" data-cf="${i}" title="Filter / sort this column">${CF[i]?"⏷":so&&so.i===i?(so.dir>0?"▲":"▼"):"▾"}</button></span></th>`).join("")}<th>Actions</th></tr></thead>
    <tbody>${rows.map(r=>`<tr data-r="${r}" class="${chg.has(r)?"changed":""}">${opts.cols.map(c=>`<td class="${c.num?"num":""}">${c.html?c.html(r):`<span class="clip">${esc(c.v(r))}</span>`}</td>`).join("")}<td><span class="rowact"><button class="btn" data-edit="${r}">Edit</button><button class="btn danger" data-del="${r}">Delete</button></span></td></tr>`).join("")||`<tr><td colspan="${opts.cols.length+1}" class="muted">No rows</td></tr>`}</tbody></table></div>`;
-  const LVF=`<div class="filterbar card dfilt lvfilt"><b>Filter</b>${opts.noSearch?"":`<input type="search" id="q" class="bq" placeholder="Search…" value="${esc(UI.q[sheet]||"")}">`}${filters}${nCF||so?`<button class="btn small" id="cfClear">✕ Clear column filters${nCF?` (${nCF})`:""}${so?" & sort":""}</button>`:""}<span class="muted" style="margin-left:auto">${rows.length} ${opts.noun}${rows.length===1?"":"s"}</span></div>`;
+  const LVF=`<div class="filterbar card dfilt lvfilt${opts.e2e&&UI.qu.prog?" filtered":""}"><b>Filter</b>${opts.noSearch?"":`<input type="search" id="q" class="bq" placeholder="Search…" value="${esc(UI.q[sheet]||"")}">`}${opts.e2e?progSel("lvProg",UI.qu.prog||"",p=>pgBase.filter(r=>pgOfPid(opts.e2e.pid(r))===p).length):""}${filters}${nCF||so?`<button class="btn small" id="cfClear">✕ Clear column filters${nCF?` (${nCF})`:""}${so?" & sort":""}</button>`:""}<span class="muted" style="margin-left:auto">${rows.length} ${opts.noun}${rows.length===1?"":"s"}</span></div>`;
   m.innerHTML=opts.top?`${opts.top}${e2eHtml}${opts.panel&&!opts.panelBelow?opts.panel():""}${opts.noSearch&&!opts.filters.length?(nCF||so?`<div class="toolbar"><button class="btn small" id="cfClear">✕ Clear column filters${nCF?` (${nCF})`:""}${so?" & sort":""}</button></div>`:""):LVF}${opts.panel&&opts.panelBelow?opts.panel():""}`+TBL:`${banner("input",sheet)}${opts.panel&&!opts.panelBelow?opts.panel():""}<div class="toolbar">${opts.pre||""}${opts.noSearch?"":`<input type="search" id="q" placeholder="Search…" value="${esc(UI.q[sheet]||"")}">`}${filters}
    ${nCF||so?`<button class="btn small" id="cfClear">✕ Clear column filters${nCF?` (${nCF})`:""}${so?" & sort":""}</button>`:""}<span class="spacer" style="flex:1"></span><span class="muted">${rows.length} rows</span><button class="btn new" id="addNew">+ New ${opts.noun}</button></div>${opts.panel&&opts.panelBelow?opts.panel():""}`+TBL;
-  if($("#q"))$("#q").oninput=e=>{UI.q[sheet]=e.target.value;const pos=e.target.selectionStart;listView(m,sheet,opts);const qi=$("#q");qi.focus();qi.setSelectionRange(pos,pos)};
+  if($("#lvProg"))$("#lvProg").onchange=e=>{UI.qu.prog=e.target.value;listView(m,sheet,opts)};if($("#q"))$("#q").oninput=e=>{UI.q[sheet]=e.target.value;const pos=e.target.selectionStart;listView(m,sheet,opts);const qi=$("#q");qi.focus();qi.setSelectionRange(pos,pos)};
   opts.filters.forEach(fl=>{if(fl.k===chipK){UI.f[sheet]=UI.f[sheet]||{};bindStChips(m,"l"+sheet,UI.f[sheet],()=>listView(m,sheet,opts));return}$("#f_"+fl.k).onchange=e=>{UI.f[sheet]={...(UI.f[sheet]||{}),[fl.k]:e.target.value};if(fl.k==="flow")delete UI.f[sheet].lane;listView(m,sheet,opts)}});
   m.querySelectorAll("tbody tr[data-r]").forEach(tr=>tr.onclick=e=>{if(e.target.closest("[data-del]")||e.target.closest("[data-openp]"))return;opts.onOpen?opts.onOpen(+tr.dataset.r):openEditor(sheet,+tr.dataset.r)});
   m.querySelectorAll("[data-openp]").forEach(b=>b.onclick=e=>{e.stopPropagation();const pr=projRowById(b.dataset.openp);if(pr)openProject(pr)});bindPview(m);
@@ -3040,11 +3055,11 @@ function vReal(m){if(view==="Realisation"){view="Projects";UI.pview="real";UI.pr
   const B=rowsOf("Benefits");const q=(UI.q.Real||"").toLowerCase();const RF=UI.realF=UI.realF||{bu:"",cf:"",p:""};
   const pv_=(pid,c)=>{const pr=projRowById(pid);return pr?(gv("Projects",c,pr)||"(blank)"):"(no project)"};const pname=pid=>{const pr=projRowById(pid);return pr?gv("Projects",FP.name,pr):""};
   const bus=uniq(B.map(r=>pv_(gv("Benefits",FB.pid,r),FP.bu)));if(RF.bu&&!bus.includes(RF.bu))RF.bu="";
-  const B1=B.filter(r=>!RF.bu||pv_(gv("Benefits",FB.pid,r),FP.bu)===RF.bu);const cfs=uniq(B1.map(r=>pv_(gv("Benefits",FB.pid,r),FP.cf)));if(RF.cf&&!cfs.includes(RF.cf))RF.cf="";
+  const pgP=pid=>{const p=String(pid||"").split("-")[0].toUpperCase();return p==="2T"?"2T":p==="CR"?"Complexity Reduction":"SIMP"};const B0=B;const B1=B.filter(r=>(!RF.bu||pv_(gv("Benefits",FB.pid,r),FP.bu)===RF.bu)&&(!UI.qu.prog||pgP(gv("Benefits",FB.pid,r))===UI.qu.prog));const cfs=uniq(B1.map(r=>pv_(gv("Benefits",FB.pid,r),FP.cf)));if(RF.cf&&!cfs.includes(RF.cf))RF.cf="";
   const B2=B1.filter(r=>!RF.cf||pv_(gv("Benefits",FB.pid,r),FP.cf)===RF.cf);const pids=uniq(B2.map(r=>gv("Benefits",FB.pid,r)));const pq=(RF.p||"").toLowerCase();
   const B3=B2.filter(r=>{const pid=gv("Benefits",FB.pid,r);return !pq||(pid+" "+pname(pid)).toLowerCase().includes(pq)});
   const list=B3.filter(r=>!q||(bId(r)+" "+gv("Benefits",FB.desc,r)+" "+gv("Benefits",FB.pid,r)).toLowerCase().includes(q));
-  const nRF=[RF.bu,RF.cf,RF.p,q].filter(Boolean).length;
+  const nRF=[RF.bu,RF.cf,RF.p,q,UI.qu.prog].filter(Boolean).length;
   const cur=UI.realSel&&list.includes(UI.realSel)?UI.realSel:list[0];UI.realSel=cur;
   const months=realMonths();
   let right=`<p class="muted">Select a benefit line.</p>`;
@@ -3060,7 +3075,7 @@ function vReal(m){if(view==="Realisation"){view="Projects";UI.pview="real";UI.pr
       ${trackGrid(cur,bid,months,_ser||{plan:months.map((mm,j)=>planOf(j))})}${projRowById(gv("Benefits",FB.pid,cur))?`<p style="margin:10px 0 0"><button class="btn small" id="rOpenP">Open the project's benefit plan ›</button></p>`:""}</div>`;
   }
   m.innerHTML=`${hubHead("real")}
-   <div class="filterbar card dfilt rfilt"><b>Filter</b>
+   <div class="filterbar card dfilt rfilt${nRF?" filtered":""}"><b>Filter</b>${progSel("rfProg",UI.qu.prog||"",p=>B0.filter(r=>pgP(gv("Benefits",FB.pid,r))===p).length)}
     <label>BU <select id="rfBU"><option value="">All</option>${bus.map(b=>`<option ${b===RF.bu?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
     <label>CF <select id="rfCF"><option value="">All${RF.bu?" in "+esc(RF.bu):""}</option>${cfs.map(b=>`<option ${b===RF.cf?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
     <label>Project <span style="width:320px;display:inline-block">${comboHtml("rfP",RF.p||"",[{v:"",t:`All projects${RF.cf?" in "+esc(RF.cf):RF.bu?" in "+esc(RF.bu):""} (${pids.length})`},...pids.map(pid=>({v:pid,t:pid+" — "+pname(pid)}))],{strict:false})}</span></label>
@@ -3069,8 +3084,8 @@ function vReal(m){if(view==="Realisation"){view="Projects";UI.pview="real";UI.pr
     <div class="list">${list.map(r=>`<div class="it ${r===cur?"on":""}" data-r="${r}"><div class="t">${esc(bId(r))} · ${esc(gv("Benefits",FB.desc,r))}</div><div class="s">${esc(gv("Benefits",FB.pid,r))} · ${esc(pname(gv("Benefits",FB.pid,r)).slice(0,40))} · ${esc(gv("Benefits",FB.nature,r)||"Recurring")}</div></div>`).join("")||`<div class="pad muted">No benefits</div>`}</div></div><div>${right}</div></div>`;
   $("#rq").oninput=e=>{UI.q.Real=e.target.value;const p=e.target.selectionStart;vReal(m);const i=$("#rq");i.focus();i.setSelectionRange(p,p)};
   m.querySelectorAll(".it[data-r]").forEach(d=>d.onclick=()=>{UI.realSel=+d.dataset.r;vReal(m)});
-  $("#rfBU").onchange=e=>{RF.bu=e.target.value;RF.cf="";RF.p="";UI.realSel=null;vReal(m)};$("#rfCF").onchange=e=>{RF.cf=e.target.value;RF.p="";UI.realSel=null;vReal(m)};
-  $("#rfP").addEventListener("change",e=>{RF.p=e.target.value.trim();UI.realSel=null;vReal(m)});if($("#rfClr"))$("#rfClr").onclick=()=>{RF.bu=RF.cf=RF.p="";UI.q.Real="";UI.realSel=null;vReal(m)};
+  if($("#rfProg"))$("#rfProg").onchange=e=>{UI.qu.prog=e.target.value;RF.p="";UI.realSel=null;vReal(m)};$("#rfBU").onchange=e=>{RF.bu=e.target.value;RF.cf="";RF.p="";UI.realSel=null;vReal(m)};$("#rfCF").onchange=e=>{RF.cf=e.target.value;RF.p="";UI.realSel=null;vReal(m)};
+  $("#rfP").addEventListener("change",e=>{RF.p=e.target.value.trim();UI.realSel=null;vReal(m)});if($("#rfClr"))$("#rfClr").onclick=()=>{RF.bu=RF.cf=RF.p="";UI.qu.prog="";UI.q.Real="";UI.realSel=null;vReal(m)};
   if($("#delReal"))$("#delReal").onclick=()=>{const rr=rowsOf("Realisation").find(x=>gv("Realisation",FR.bid,x)===bId(cur));if(rr)askDelete("Realisation",rr)};
   if($("#mkReal"))$("#mkReal").onclick=()=>{const r=firstFree("Realisation");if(!r){toast("Realisation table is full — insert rows in Excel",5000);return}setCell("Realisation",FR.bid,r,bId(cur));vReal(m);renderTabs()};
   bindPview(m);m.querySelectorAll(".it[data-r]").forEach(d=>d.ondblclick=()=>{const pr=projRowById(gv("Benefits",FB.pid,+d.dataset.r));if(pr){openProject(pr);setTimeout(()=>{const b=document.getElementById("wsBen");if(b)b.scrollIntoView({block:"start"})},50)}});
@@ -3102,7 +3117,7 @@ function vGantt0(m){
   const cfs=uniq(P1.map(p=>fv(p,FP.cf)));if(g.cf&&!cfs.includes(g.cf))g.cf="";const P2=P1.filter(p=>!g.cf||fv(p,FP.cf)===g.cf);
   const procs=uniq(P2.map(p=>fv(p,FP.proc)));if(g.proc&&!procs.includes(g.proc))g.proc="";const P2b=P2.filter(p=>!g.proc||fv(p,FP.proc)===g.proc);
   const teams=uniq(P2b.map(p=>fv(p,"AB")));if(g.team&&!teams.includes(g.team))g.team="";const P2c=P2b.filter(p=>!g.team||fv(p,"AB")===g.team);
-  const inits=uniq(P2c.map(p=>fv(p,FP.init)));if(g.init&&!inits.includes(g.init))g.init="";const P2d=P2c.filter(p=>!g.init||fv(p,FP.init)===g.init);
+  const inits=uniq(P2c.map(p=>fv(p,FP.init)));if(g.init&&!inits.includes(g.init))g.init="";const P2d=P2c.filter(p=>(!g.init||fv(p,FP.init)===g.init)&&(!g.prog||progOf(p.r)===g.prog));
   /* status: one pick from the dropdown (All = every status) */
   const stCount=st=>P2d.filter(p=>pStat(p.r)===st).length;if(g.st&&!STL.includes(g.st))g.st="";
   const P3=P2d.filter(p=>!g.st||pStat(p.r)===g.st);
@@ -3197,7 +3212,7 @@ function vGantt0(m){
       <p class="gx-foot">Highlighted cards are linked to your selection. Other steps stay visible for context. Click a card to find its project in the schedule.</p>
       ${g.swFull?`<div class="gx-full"><div class="e2esnaph"><span class="muted">Full ${SF.ver} swimlane</span><span style="flex:1"></span><span class="gzbtns" role="group" aria-label="Zoom the swimlane"><button class="btn small" data-gsz="-" data-f="${esc(SF.f.id)}" title="Zoom out">−</button><span class="gzv">${Math.round(((g.swz||{})[SF.f.id]||1)*100)}%</span><button class="btn small" data-gsz="+" data-f="${esc(SF.f.id)}" title="Zoom in">＋</button><button class="btn small" data-gsz="0" data-f="${esc(SF.f.id)}" title="Fit to width">Fit</button></span></div>
         <div class="e2esnapimg gswimimg" data-gsnap="${esc(SF.f.id)}" style="--gsz:${(g.swz||{})[SF.f.id]||1}" title="Ctrl + scroll to zoom"></div></div>`:""}</div>`}
-  const nMore=[g.bu,g.cf,g.proc,g.team,g.init].filter(Boolean).length+(g.level!=="tasks"?1:0);
+  const nMore=[g.bu,g.cf,g.proc,g.team,g.init,g.prog].filter(Boolean).length+(g.level!=="tasks"?1:0);
   const IC={search:`<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m13.2 13.2 3.6 3.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`,
     filt:`<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M6 10h8M8.5 15h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`,
     lanes:`<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7.5 3.5v13M12.5 3.5v13" stroke="currentColor" stroke-width="1.6"/></svg>`};
@@ -3213,7 +3228,7 @@ function vGantt0(m){
     <label class="gx-chk"><input type="checkbox" id="gh" ${g.hideDone?"checked":""}> Hide completed</label>
     <span class="sp"></span><span class="gx-count">${PR.length} of ${P.length} projects</span>
     <span class="seg gx-unit"><button data-gunit="month" class="${wk?"":"on"}">Month</button><button data-gunit="week" class="${wk?"on":""}">Week</button></span>
-    ${g.more?`<div class="gx-morep">${[["gb","BU",bus,g.bu],["gf","CF",cfs,g.cf],["gc","Process",procs,g.proc],["gt","Team",teams,g.team||""],["gi","Project type",inits,g.init||""]].map(([id,lb,o,v])=>`<label>${lb}${sel(id,lb,o,v)}</label>`).join("")}
+    ${g.more?`<div class="gx-morep">${[["gb","BU",bus,g.bu],["gf","CF",cfs,g.cf],["gc","Process",procs,g.proc],["gt","Team",teams,g.team||""],["gi","Project type",inits,g.init||""],["gpg","Programme",PROGS,g.prog||""]].map(([id,lb,o,v])=>`<label>${lb}${sel(id,lb,o,v)}</label>`).join("")}
       <label>Detail<select id="gl"><option value="projects" ${g.level==="projects"?"selected":""}>Projects only</option><option value="stages" ${g.level==="stages"?"selected":""}>+ Stages</option><option value="tasks" ${g.level==="tasks"?"selected":""}>+ Stages + Tasks</option></select></label>
       ${nMore?'<button class="gx-link" id="gclear">Clear filters</button>':""}</div>`:""}
   </div>
@@ -3239,8 +3254,8 @@ function vGantt0(m){
   m.querySelectorAll("[data-gwin]").forEach(b=>b.onclick=()=>{const n=+b.dataset.gwin;g.win=n?addM(g.win,n):addM(curM,-3);g._scrolled=!!n;if(n)gr.scrollLeft=0;R()});
   $("#gsw").onclick=()=>{g.swimOn=!g.swimOn;R()};
   const on=(id,f)=>{const el=m.querySelector("#"+id);if(el)el.onchange=f};
-  on("gb",e=>{g.bu=e.target.value;g.cf="";g.proc="";R()});on("gf",e=>{g.cf=e.target.value;g.proc="";R()});on("gc",e=>{g.proc=e.target.value;R()});on("gt",e=>{g.team=e.target.value;R()});on("gi",e=>{g.init=e.target.value;R()});on("gl",e=>{g.level=e.target.value;R()});
-  const gcl=m.querySelector("#gclear");if(gcl)gcl.onclick=()=>{g.bu=g.cf=g.proc=g.team=g.init="";g.level="tasks";R()};
+  on("gb",e=>{g.bu=e.target.value;g.cf="";g.proc="";R()});on("gf",e=>{g.cf=e.target.value;g.proc="";R()});on("gc",e=>{g.proc=e.target.value;R()});on("gt",e=>{g.team=e.target.value;R()});on("gpg",e=>{g.prog=e.target.value;R()});on("gi",e=>{g.init=e.target.value;R()});on("gl",e=>{g.level=e.target.value;R()});
+  const gcl=m.querySelector("#gclear");if(gcl)gcl.onclick=()=>{g.bu=g.cf=g.proc=g.team=g.init=g.prog="";g.level="tasks";R()};
   $("#gx").onclick=()=>{PR.forEach(p=>g.open.add(p.id));if(GRP){FLOWS.forEach(F=>{g.open.add("f:"+F.f.id);F.lanes.forEach(L=>g.open.add("f:"+F.f.id+"|"+L.name))});g.open.add("f:none")}if(g.level==="projects")g.level="tasks";R()};$("#gcoll").onclick=()=>{g.open.clear();R()};
   $("#gtoday").onclick=()=>{if(!(TODAY>=min&&TODAY<max))g.win=addM(curM,-3);g._scrolled=false;R()};
   m.querySelectorAll(".g-caret[data-p]").forEach(c=>c.onclick=e=>{e.stopPropagation();const id=c.dataset.p;g.open.has(id)?g.open.delete(id):g.open.add(id);if(g.level==="projects"&&g.open.has(id))g.level="tasks";R()});
@@ -3395,7 +3410,7 @@ const PD_SECTIONS=[["What","📌",["G","AE","B","AD","AF"]],["Who","👥",["D","
 const PD_COLS=PD_SECTIONS.flatMap(s=>s[2]);
 function projDetailsHtml(r,ins,pchg){const byCol=Object.fromEntries(ins.map(c=>[c.col,c]));
   const fld=col=>{const c=byCol[col];if(!c)return "";const dirty=pchg.has(col)?" dirty":"";const v=gv("Projects",col,r);
-    if(col==="AE"){const o=uniqOrder(["2T","Simplification","O2C Deep Dive","P2P Deep Dive","R2R Deep Dive",v].filter(Boolean));
+    if(col==="AE"){const o=uniqOrder(["2T","Simplification","Complexity Reduction","O2C Deep Dive","P2P Deep Dive","R2R Deep Dive",v].filter(Boolean));
       return `<div class="field${dirty}"><label>Programme ${S.newRows.Projects&&S.newRows.Projects.has(r)?`<span class="addhint">2T → ID starts 2T- · others → SIMP-</span>`:`<span class="addhint" title="The ID is locked once saved">ID stays ${esc(pId(r).split("-")[0])}-</span>`}</label><select id="fld_AE"><option value=""></option>${o.map(x=>`<option ${x===v?"selected":""}>${esc(x)}</option>`).join("")}</select></div>`}
     if(col==="AB"){const o=uniq(rowsOf("Projects").map(x=>gv("Projects","AB",x)).filter(Boolean)).map(x=>({v:x,t:x}));
       return `<div class="field${dirty}"><label>Division / Team <span class="addhint">＋ new allowed</span></label>${comboHtml("fld_AB",v,o,{strict:false})}</div>`}
@@ -4307,7 +4322,7 @@ function oldValues(rec){const R=rec.raw,O={};const nm=splitName(R.name);O.name=n
   O.notes=[...O.upd,...O.notes,...p2n];O.remark=O.notes.join(" | ");
   const hrs=typeof R.savinghrs==="number"?R.savinghrs:parseFloat(R.savinghrs);O.hrs=isNaN(hrs)||hrs<=0?"":hrs;
   O.freq=isBlank(R.frequency)?"":one(R.frequency);O.asis=isBlank(R.asis)?"":one(R.asis);O.tobe=isBlank(R.tobe)?"":one(R.tobe);O.savingtxt=isBlank(R.savingtxt)?"":one(R.savingtxt);
-  const tag=tx(R.name).match(/\(([^()]*(deep\s*dive|simplification|2t\b)[^()]*)\)/i);O.tag=tag?one(tag[1]):"";{const pg=one(R.programme||"");const m=["2T","Deep Dive","Simplification"].find(x=>x.toLowerCase()===pg.toLowerCase());if(m)O.tag=m}
+  const tag=tx(R.name).match(/\(([^()]*(deep\s*dive|simplification|2t\b)[^()]*)\)/i);O.tag=tag?one(tag[1]):"";{const pg=one(R.programme||"");const m=["2T","Deep Dive","Simplification","Complexity Reduction"].find(x=>x.toLowerCase()===pg.toLowerCase())||(/complex/i.test(pg)?"Complexity Reduction":"");if(m)O.tag=m}
   return O}
 
 /* ---------- the database side ---------- */
@@ -4886,7 +4901,7 @@ function quRdPass(r,k){if(!k)return true;const rs=raiddOf(pId(r));const open=rs.
   if(k==="od")return open.some(x=>+gv("RAIDD",FD.due,x)&&+gv("RAIDD",FD.due,x)<TODAY&&gv("RAIDD",FD.type,x)!=="Re-plan");
   const t=k.slice(2);if(t==="Re-plan")return rs.some(x=>gv("RAIDD",FD.type,x)==="Re-plan");return open.some(x=>gv("RAIDD",FD.type,x)===t)}
 function quRows(){const F=UI.qu;const all=rowsOf("Projects").filter(r=>gv("Projects",FP.name,r)!=="");const fv=(r,c)=>gv("Projects",c,r)||"(blank)";
-  const P1=all.filter(r=>!F.cf||fv(r,FP.cf)===F.cf);if(F.proc&&!P1.some(r=>fv(r,FP.proc)===F.proc))F.proc="";const P2a=P1.filter(r=>!F.proc||fv(r,FP.proc)===F.proc);if(F.team&&!P2a.some(r=>fv(r,"AB")===F.team))F.team="";const P2b=P2a.filter(r=>!F.team||fv(r,"AB")===F.team);if(F.flow&&F.flow!=="none"&&!e2eFlows().some(f=>f.id===F.flow)){F.flow="";F.lane=""}const P2=P2b.filter(r=>passE2E(r,F.flow,F.lane)&&quRdPass(r,F.rd));const off=new Set(F.stOff||[]);const q=(F.q||"").toLowerCase();
+  const P1=all.filter(r=>(!F.cf||fv(r,FP.cf)===F.cf)&&(!F.prog||progOf(r)===F.prog));if(F.proc&&!P1.some(r=>fv(r,FP.proc)===F.proc))F.proc="";const P2a=P1.filter(r=>!F.proc||fv(r,FP.proc)===F.proc);if(F.team&&!P2a.some(r=>fv(r,"AB")===F.team))F.team="";const P2b=P2a.filter(r=>!F.team||fv(r,"AB")===F.team);if(F.flow&&F.flow!=="none"&&!e2eFlows().some(f=>f.id===F.flow)){F.flow="";F.lane=""}const P2=P2b.filter(r=>passE2E(r,F.flow,F.lane)&&quRdPass(r,F.rd));const off=new Set(F.stOff||[]);const q=(F.q||"").toLowerCase();
   // rows edited in this session stay visible even if their status is now filtered out
   const rows=P2.filter(r=>(F.edited.has(r)||!off.has(pStat(r)))&&(!q||(pId(r)+" "+gv("Projects",FP.name,r)+" "+gv("Projects",FP.lead,r)+" "+gv("Projects",FP.wsl,r)+" "+gv("Projects","AG",r)+" "+gv("Projects","AB",r)+" "+gv("Projects","Z",r)).toLowerCase().includes(q))&&(!F.chg||F.edited.has(r)));
   return {all,P1,P2,P2a,P2b,rows,off}}
@@ -4894,7 +4909,8 @@ function quCountText(){const {all,rows}=quRows();return `${rows.length} of ${all
 /* one filter card for the Projects page — Simple and Table views share it (and its state, UI.qu) */
 function quFilterBar(){const F=UI.qu;const {all,P1,P2,P2a,P2b,off}=quRows();const fv=(r,c)=>gv("Projects",c,r)||"(blank)";
   const cfs=uniq(all.map(r=>fv(r,FP.cf)));const procs=uniq(P1.map(r=>fv(r,FP.proc)));const sts=off.size?STL.slice():STL.filter(s=>P2.some(r=>pStat(r)===s));
-  return e2eBar(P2b)+`<div class="filterbar card dfilt rfilt"><b>Filter</b><input type="search" id="quQ" class="bq" placeholder="Search project / ID / leader…" value="${esc(F.q||"")}">
+  return e2eBar(P2b)+`<div class="filterbar card dfilt rfilt${F.prog||F.cf||F.proc||F.team||F.rd?" filtered":""}"><b>Filter</b><input type="search" id="quQ" class="bq" placeholder="Search project / ID / leader…" value="${esc(F.q||"")}">
+   ${progSel("quProg",F.prog||"",p=>all.filter(r=>(!F.cf||fv(r,FP.cf)===F.cf)&&progOf(r)===p).length)}
    <label>CF <select id="quCF"><option value="">All</option>${cfs.map(x=>`<option ${x===F.cf?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
    <label>Process area <select id="quProc"><option value="">All</option>${procs.map(x=>`<option ${x===F.proc?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
    <label>Division / team <select id="quTeam"><option value="">All</option>${uniq(P2a.map(r=>fv(r,"AB"))).map(x=>`<option ${x===F.team?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
@@ -4903,7 +4919,7 @@ function quFilterBar(){const F=UI.qu;const {all,P1,P2,P2a,P2b,off}=quRows();cons
    <label><input type="checkbox" id="quChg" ${F.chg?"checked":""}> only edited</label>
    <span class="muted" id="quCount" style="margin-left:auto">${quCountText()}</span></div>`}
 function quFilterBind(m,re){const F=UI.qu;const qi=$("#quQ");qi.oninput=()=>{F.q=qi.value;clearTimeout(quFilterBind._t);quFilterBind._t=setTimeout(()=>{re();const e2=$("#quQ");if(e2){e2.focus();e2.setSelectionRange(e2.value.length,e2.value.length)}},300)};
-  $("#quCF").onchange=e=>{F.cf=e.target.value;F.proc="";F.team="";re()};$("#quProc").onchange=e=>{F.proc=e.target.value;F.team="";re()};$("#quTeam").onchange=e=>{F.team=e.target.value;re()};if($("#quRd"))$("#quRd").onchange=e=>{F.rd=e.target.value;re()};e2eBarBind(m,re);$("#quChg").onchange=e=>{F.chg=e.target.checked;re()};
+  $("#quCF").onchange=e=>{F.cf=e.target.value;F.proc="";F.team="";re()};if($("#quProg"))$("#quProg").onchange=e=>{F.prog=e.target.value;F.proc="";F.team="";re()};$("#quProc").onchange=e=>{F.proc=e.target.value;F.team="";re()};$("#quTeam").onchange=e=>{F.team=e.target.value;re()};if($("#quRd"))$("#quRd").onchange=e=>{F.rd=e.target.value;re()};e2eBarBind(m,re);$("#quChg").onchange=e=>{F.chg=e.target.checked;re()};
   bindStChips(m,"qst",F,re)}
 function vQuick(m,simple){if(simple&&UI.plist==="table")return v2T(m);if(simple&&UI.plist!=="simple"&&UI.plist!=="table")return vPList(m);const F=UI.qu;F.simple=!!simple;liveCalc();const {all,P1,P2,P2a,P2b,rows,off}=quRows();const EO=e2eFilterOpts(P2b);const lanes=laneOpts(F.flow);if(F.lane&&!lanes.includes(F.lane))F.lane="";const fv=(r,c)=>gv("Projects",c,r)||"(blank)";
   const cfs=uniq(all.map(r=>fv(r,FP.cf)));const procs=uniq(P1.map(r=>fv(r,FP.proc)));if(F.proc&&!procs.includes(F.proc))F.proc="";
@@ -4948,6 +4964,7 @@ function vPList(m){const F=UI.qu;liveCalc();const {all,tabs,cur,T}=plFiltered();
   <div class="card pllist">
     <div class="pltool"><label class="plsearch"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" id="plQ" placeholder="Search projects or project ID" value="${esc(F.q||"")}" aria-label="Search projects"></label>
       <label class="plsel"><span class="sr">Status</span><select id="plSt" aria-label="Status"><option value="">Status: All</option>${sts.map(s=>`<option value="${esc(s)}" ${F.st1===s?"selected":""}>${esc(s)}</option>`).join("")}</select></label>
+      <label class="plsel"><span class="sr">Programme</span><select id="plProg" aria-label="Programme (project code)"${F.prog?' class="act"':""}><option value="">Programme: All</option>${PROGS.map(p=>`<option value="${esc(p)}" ${F.prog===p?"selected":""}>${esc(p==="SIMP"?"SIMP- Simplification":p==="2T"?"2T- 2T Club":"CR- Complexity Reduction")}</option>`).join("")}</select></label>
       <button type="button" class="btn plmore ${F.more?"on":""}" id="plMore" aria-expanded="${!!F.more}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4"/></svg> More filters${nf?` <span class="nfb">${nf}</span>`:""}</button>
       ${nf||F.q||F.st1?`<button type="button" class="btn small" id="plClr">Clear</button>`:""}<span class="sp"></span><span class="muted plcnt">${n} project${n===1?"":"s"}</span></div>
     ${F.more?`<div class="plmorebox">
@@ -4967,7 +4984,7 @@ function vPList(m){const F=UI.qu;liveCalc();const {all,tabs,cur,T}=plFiltered();
   bindPview(m);const re=()=>{vPList(m)};
   const nb=m.querySelector("#quNew");if(nb)nb.onclick=newProject;const e2=m.querySelector("#plE2E");if(e2)e2.onclick=()=>{UI.e2e.home=true;view="E2E";render()};
   const q=m.querySelector("#plQ");let tq;q.oninput=()=>{clearTimeout(tq);tq=setTimeout(()=>{F.q=q.value;F.pg=1;const p=q.selectionStart;re();const q2=m.querySelector("#plQ");q2.focus();try{q2.setSelectionRange(p,p)}catch(e){}},220)};
-  m.querySelector("#plSt").onchange=e=>{F.st1=e.target.value;F.pg=1;re()};
+  m.querySelector("#plSt").onchange=e=>{F.st1=e.target.value;F.pg=1;re()};{const pp=m.querySelector("#plProg");if(pp)pp.onchange=e=>{F.prog=e.target.value;F.pg=1;re()}}
   m.querySelector("#plMore").onclick=()=>{F.more=!F.more;re()};const cl=m.querySelector("#plClr");if(cl)cl.onclick=()=>{F.cf=F.proc=F.team=F.rd=F.flow=F.lane=F.q=F.st1="";F.pg=1;re()};
   m.querySelectorAll("[data-plf]").forEach(s=>s.onchange=()=>{F[s.dataset.plf]=s.value;if(s.dataset.plf==="flow")F.lane="";F.pg=1;re()});
   m.querySelectorAll("[data-pltab]").forEach(b=>b.onclick=()=>{F.ptab=b.dataset.pltab;F.pg=1;re()});
@@ -5112,7 +5129,7 @@ function pdAttach(pid,v){if(!v)return {tid:"",stg:""};if(!v.startsWith("stg:"))r
    Every 2T column is filled from the tracker (tasks, benefits, RAIDD); cells are edited in place and written back
    to the same fields the rest of the app uses. Tracker-only fields sit in an extra group on the right. */
 "use strict";
-const T2_TAGS=["2T","Deep Dive","Simplification"];
+const T2_TAGS=["2T","Simplification","Complexity Reduction","Deep Dive"];
 function t2Ben(r){return typeof benefitRowOf==="function"?benefitRowOf(pId(r)):null}
 function t2Basis(br){const s=br!=null?String(gv("Benefits","AJ",br)||""):"";const m=/^As-is (.*?) → To-be (.*?)(?: \(saving (.*?)\))?\.?(?:\s*\|\s*([\s\S]*))?$/.exec(s);
   return m?{a:m[1]==="?"?"":m[1],b:m[2]==="?"?"":m[2],s:m[3]||"",rest:m[4]||""}:{a:"",b:"",s:"",rest:s}}
@@ -5662,7 +5679,7 @@ async function e2eCreateProject(step,name){const f=e2eFlow(UI.e2e.flow);const ar
   const inits=listFromName("L_Init");const people=uniq([...listFromName("L_Leader"),...rowsOf("Projects").flatMap(r=>[gv("Projects",FP.lead,r),gv("Projects",FP.wsl,r)])].filter(Boolean));
   const k=await choose("New project"+(step?" for this step":""),`<div class="fgrid">
      <label class="field wide"><span>Project name</span><input id="npName" value="${esc(name||"")}" placeholder="e.g. Auto AP posting for overseas vendors"></label>
-     <label class="field"><span>Programme</span><select id="npProg"><option>Simplification</option><option>2T</option><option>P2P Deep Dive</option><option>O2C Deep Dive</option><option>R2R Deep Dive</option></select></label>
+     <label class="field"><span>Programme</span><select id="npProg"><option>Simplification</option><option>2T</option><option>Complexity Reduction</option><option>P2P Deep Dive</option><option>O2C Deep Dive</option><option>R2R Deep Dive</option></select></label>
      <label class="field"><span>Initiative (part of the ID)</span><select id="npInit"><option value="">— choose —</option>${inits.map(x=>`<option>${esc(x)}</option>`).join("")}</select></label>
      <label class="field"><span>Process area</span><input id="npArea" list="npAreas" value="${esc(area)}"><datalist id="npAreas">${areas.map(a=>`<option value="${esc(a)}">`).join("")}</datalist></label>
      <label class="field"><span>Division / team</span><input id="npTeam" list="npTeams"><datalist id="npTeams">${teams.map(a=>`<option value="${esc(a)}">`).join("")}</datalist></label>

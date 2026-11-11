@@ -22,7 +22,7 @@ function vGantt0(m){
   const cfs=uniq(P1.map(p=>fv(p,FP.cf)));if(g.cf&&!cfs.includes(g.cf))g.cf="";const P2=P1.filter(p=>!g.cf||fv(p,FP.cf)===g.cf);
   const procs=uniq(P2.map(p=>fv(p,FP.proc)));if(g.proc&&!procs.includes(g.proc))g.proc="";const P2b=P2.filter(p=>!g.proc||fv(p,FP.proc)===g.proc);
   const teams=uniq(P2b.map(p=>fv(p,"AB")));if(g.team&&!teams.includes(g.team))g.team="";const P2c=P2b.filter(p=>!g.team||fv(p,"AB")===g.team);
-  const inits=uniq(P2c.map(p=>fv(p,FP.init)));if(g.init&&!inits.includes(g.init))g.init="";const P2d=P2c.filter(p=>!g.init||fv(p,FP.init)===g.init);
+  const inits=uniq(P2c.map(p=>fv(p,FP.init)));if(g.init&&!inits.includes(g.init))g.init="";const P2d=P2c.filter(p=>(!g.init||fv(p,FP.init)===g.init)&&(!g.prog||progOf(p.r)===g.prog));
   /* status: one pick from the dropdown (All = every status) */
   const stCount=st=>P2d.filter(p=>pStat(p.r)===st).length;if(g.st&&!STL.includes(g.st))g.st="";
   const P3=P2d.filter(p=>!g.st||pStat(p.r)===g.st);
@@ -117,7 +117,7 @@ function vGantt0(m){
       <p class="gx-foot">Highlighted cards are linked to your selection. Other steps stay visible for context. Click a card to find its project in the schedule.</p>
       ${g.swFull?`<div class="gx-full"><div class="e2esnaph"><span class="muted">Full ${SF.ver} swimlane</span><span style="flex:1"></span><span class="gzbtns" role="group" aria-label="Zoom the swimlane"><button class="btn small" data-gsz="-" data-f="${esc(SF.f.id)}" title="Zoom out">−</button><span class="gzv">${Math.round(((g.swz||{})[SF.f.id]||1)*100)}%</span><button class="btn small" data-gsz="+" data-f="${esc(SF.f.id)}" title="Zoom in">＋</button><button class="btn small" data-gsz="0" data-f="${esc(SF.f.id)}" title="Fit to width">Fit</button></span></div>
         <div class="e2esnapimg gswimimg" data-gsnap="${esc(SF.f.id)}" style="--gsz:${(g.swz||{})[SF.f.id]||1}" title="Ctrl + scroll to zoom"></div></div>`:""}</div>`}
-  const nMore=[g.bu,g.cf,g.proc,g.team,g.init].filter(Boolean).length+(g.level!=="tasks"?1:0);
+  const nMore=[g.bu,g.cf,g.proc,g.team,g.init,g.prog].filter(Boolean).length+(g.level!=="tasks"?1:0);
   const IC={search:`<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m13.2 13.2 3.6 3.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`,
     filt:`<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M6 10h8M8.5 15h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`,
     lanes:`<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7.5 3.5v13M12.5 3.5v13" stroke="currentColor" stroke-width="1.6"/></svg>`};
@@ -133,7 +133,7 @@ function vGantt0(m){
     <label class="gx-chk"><input type="checkbox" id="gh" ${g.hideDone?"checked":""}> Hide completed</label>
     <span class="sp"></span><span class="gx-count">${PR.length} of ${P.length} projects</span>
     <span class="seg gx-unit"><button data-gunit="month" class="${wk?"":"on"}">Month</button><button data-gunit="week" class="${wk?"on":""}">Week</button></span>
-    ${g.more?`<div class="gx-morep">${[["gb","BU",bus,g.bu],["gf","CF",cfs,g.cf],["gc","Process",procs,g.proc],["gt","Team",teams,g.team||""],["gi","Project type",inits,g.init||""]].map(([id,lb,o,v])=>`<label>${lb}${sel(id,lb,o,v)}</label>`).join("")}
+    ${g.more?`<div class="gx-morep">${[["gb","BU",bus,g.bu],["gf","CF",cfs,g.cf],["gc","Process",procs,g.proc],["gt","Team",teams,g.team||""],["gi","Project type",inits,g.init||""],["gpg","Programme",PROGS,g.prog||""]].map(([id,lb,o,v])=>`<label>${lb}${sel(id,lb,o,v)}</label>`).join("")}
       <label>Detail<select id="gl"><option value="projects" ${g.level==="projects"?"selected":""}>Projects only</option><option value="stages" ${g.level==="stages"?"selected":""}>+ Stages</option><option value="tasks" ${g.level==="tasks"?"selected":""}>+ Stages + Tasks</option></select></label>
       ${nMore?'<button class="gx-link" id="gclear">Clear filters</button>':""}</div>`:""}
   </div>
@@ -159,8 +159,8 @@ function vGantt0(m){
   m.querySelectorAll("[data-gwin]").forEach(b=>b.onclick=()=>{const n=+b.dataset.gwin;g.win=n?addM(g.win,n):addM(curM,-3);g._scrolled=!!n;if(n)gr.scrollLeft=0;R()});
   $("#gsw").onclick=()=>{g.swimOn=!g.swimOn;R()};
   const on=(id,f)=>{const el=m.querySelector("#"+id);if(el)el.onchange=f};
-  on("gb",e=>{g.bu=e.target.value;g.cf="";g.proc="";R()});on("gf",e=>{g.cf=e.target.value;g.proc="";R()});on("gc",e=>{g.proc=e.target.value;R()});on("gt",e=>{g.team=e.target.value;R()});on("gi",e=>{g.init=e.target.value;R()});on("gl",e=>{g.level=e.target.value;R()});
-  const gcl=m.querySelector("#gclear");if(gcl)gcl.onclick=()=>{g.bu=g.cf=g.proc=g.team=g.init="";g.level="tasks";R()};
+  on("gb",e=>{g.bu=e.target.value;g.cf="";g.proc="";R()});on("gf",e=>{g.cf=e.target.value;g.proc="";R()});on("gc",e=>{g.proc=e.target.value;R()});on("gt",e=>{g.team=e.target.value;R()});on("gpg",e=>{g.prog=e.target.value;R()});on("gi",e=>{g.init=e.target.value;R()});on("gl",e=>{g.level=e.target.value;R()});
+  const gcl=m.querySelector("#gclear");if(gcl)gcl.onclick=()=>{g.bu=g.cf=g.proc=g.team=g.init=g.prog="";g.level="tasks";R()};
   $("#gx").onclick=()=>{PR.forEach(p=>g.open.add(p.id));if(GRP){FLOWS.forEach(F=>{g.open.add("f:"+F.f.id);F.lanes.forEach(L=>g.open.add("f:"+F.f.id+"|"+L.name))});g.open.add("f:none")}if(g.level==="projects")g.level="tasks";R()};$("#gcoll").onclick=()=>{g.open.clear();R()};
   $("#gtoday").onclick=()=>{if(!(TODAY>=min&&TODAY<max))g.win=addM(curM,-3);g._scrolled=false;R()};
   m.querySelectorAll(".g-caret[data-p]").forEach(c=>c.onclick=e=>{e.stopPropagation();const id=c.dataset.p;g.open.has(id)?g.open.delete(id):g.open.add(id);if(g.level==="projects"&&g.open.has(id))g.level="tasks";R()});

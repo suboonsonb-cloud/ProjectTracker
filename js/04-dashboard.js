@@ -313,10 +313,10 @@ function vDash0(m){
   const P1=allP.filter(r=>!bu||fv(r,FP.bu)===bu);const cfs_=uniq(P1.map(r=>fv(r,FP.cf)));if(F.cf&&!cfs_.includes(F.cf))F.cf="";
   const P2=P1.filter(r=>!F.cf||fv(r,FP.cf)===F.cf);const procs_=uniq(P2.map(r=>fv(r,FP.proc)));if(F.proc&&!procs_.includes(F.proc))F.proc="";
   const P2b=P2.filter(r=>!F.proc||fv(r,FP.proc)===F.proc);const inits_=uniq(P2b.map(r=>fv(r,FP.init)));if(F.init&&!inits_.includes(F.init))F.init="";
-  const P3a=P2b.filter(r=>!F.init||fv(r,FP.init)===F.init);F.stOff=Array.isArray(F.stOff)?F.stOff:[];const off=new Set(F.stOff);const sts_=off.size?STL.slice():STL.filter(st=>P3a.some(r=>pStat(r)===st));
+  const P3a=P2b.filter(r=>(!F.init||fv(r,FP.init)===F.init)&&(!F.prog||progOf(r)===F.prog));F.stOff=Array.isArray(F.stOff)?F.stOff:[];const off=new Set(F.stOff);const sts_=off.size?STL.slice():STL.filter(st=>P3a.some(r=>pStat(r)===st));
   const P3=P3a.filter(r=>!off.has(pStat(r)));const qq=(F.q||"").trim().toLowerCase();
   const P=P3.filter(r=>!qq||(pId(r)+" "+gv("Projects",FP.name,r)).toLowerCase().includes(qq));const pids=new Set(P.map(pId));DASHP=pids;
-  const nF=[bu,F.cf,F.proc,F.init,F.stOff.length?1:"",qq].filter(Boolean).length;
+  const nF=[bu,F.cf,F.proc,F.init,F.prog,F.stOff.length?1:"",qq].filter(Boolean).length;
   const A=rowsOf("Activities").filter(r=>pids.has(gv("Activities",FA.pid,r))),D=rowsOf("RAIDD").filter(r=>pids.has(gv("RAIDD",FD.pid,r)));
   const BS=benefitSeries();const Bl=BS.list.filter(b=>pids.has(b.pid));const months=BS.months;
   const BlA=Bl.filter(b=>!b.drop);const plan=months.map((_,i)=>BlA.reduce((a,b)=>a+b.plan[i],0)),act=months.map((_,i)=>BlA.reduce((a,b)=>a+b.act[i],0));
@@ -356,10 +356,11 @@ function vDash0(m){
    <label>CF <select id="fCF"><option value="">All${bu?" in "+esc(bu):""}</option>${cfs_.map(b=>`<option ${b===F.cf?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
    <label>Project <span style="width:300px;display:inline-block">${comboHtml("fQ",F.q||"",[{v:"",t:`All projects${F.cf?" in "+esc(F.cf):bu?" in "+esc(bu):""} (${P3.length})`},...P3.map(r=>({v:pId(r),t:pId(r)+" — "+gv("Projects",FP.name,r)}))],{strict:false})}</span></label>
    <label>Process area <select id="fProc"><option value="">All</option>${procs_.map(b=>`<option ${b===F.proc?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
+   ${progSel("fProg",F.prog||"",p=>P2b.filter(r=>(!F.init||fv(r,FP.init)===F.init)&&progOf(r)===p).length)}
    <label title="Project type = Initiative (Automation, Standardisation …)">Project type <select id="fInit"><option value="">All</option>${inits_.map(b=>`<option value="${esc(b)}" ${b===F.init?"selected":""}>${esc(b)} (${P2b.filter(r=>fv(r,FP.init)===b).length})</option>`).join("")}</select></label>
    ${stChips(sts_,off,st=>P3a.filter(r=>pStat(r)===st).length,"dst")}
    
-   ${nF?`<div class="dfchips"><span class="dfl">Filtered by</span>${[bu?["bu","BU",bu]:null,F.cf?["cf","CF",F.cf]:null,F.proc?["proc","Process area",F.proc]:null,F.init?["init","Project type",F.init]:null,qq?["q","Project",F.q]:null,F.stOff.length?["st","Status",STL.filter(x=>!off.has(x)).join(", ")||"none"]:null].filter(Boolean).map(([k,l,v])=>`<button type="button" class="dfc" data-dfclr="${k}" title="Remove this filter">${esc(l)}: <b>${esc(v)}</b> <i>✕</i></button>`).join("")}<button type="button" class="dfc all" data-dfclr="all">Clear all</button></div>`:""}
+   ${nF?`<div class="dfchips"><span class="dfl">Filtered by</span>${[bu?["bu","BU",bu]:null,F.cf?["cf","CF",F.cf]:null,F.proc?["proc","Process area",F.proc]:null,F.init?["init","Project type",F.init]:null,F.prog?["prog","Programme",F.prog]:null,qq?["q","Project",F.q]:null,F.stOff.length?["st","Status",STL.filter(x=>!off.has(x)).join(", ")||"none"]:null].filter(Boolean).map(([k,l,v])=>`<button type="button" class="dfc" data-dfclr="${k}" title="Remove this filter">${esc(l)}: <b>${esc(v)}</b> <i>✕</i></button>`).join("")}<button type="button" class="dfc all" data-dfclr="all">Clear all</button></div>`:""}
    <span class="muted${nF?" dfcount":""}" style="margin-left:auto">${P.length} of ${allP.length} projects · ${A.length} tasks · ${Bl.length} benefit lines</span>
    <span class="muted finfo" title="Pick a BU, then a CF of that BU, then a project of that CF — or leave any on All. Status: untick a box to hide projects with that status, tick it to show them again (Only = show just that one). Type part of a name in Project to show all matching projects. These filters apply to every chart, KPI and table on the dashboard; dropdowns inside a card only change how that card is drawn.">ⓘ</span></div>
   ${ovKpis(P,A,D,Bl,{valRec,valOne,hrs,fteh,pTD,aTD,pids})}${ovNewHtml(P,Bl)}
@@ -370,10 +371,10 @@ function vDash0(m){
     <h2 style="margin-top:12px">Projects by status × process area</h2>${matrix("Process Area",P,r=>gv("Projects",FP.proc,r),{})}
     <h2 style="margin-top:12px">Delayed & at-risk projects</h2>${riskList(P)}</details>`;
   const reF=()=>{UI.dash.cell=null;UI.dash.zoom=null;vDash(m,true)};
-  ovBind(m);ovNewBind(m);ovKpiBind(m);$("#fBU").onchange=e=>{F.bu=e.target.value;F.cf="";F.proc="";reF()};$("#fCF").onchange=e=>{F.cf=e.target.value;F.proc="";reF()};$("#fProc").onchange=e=>{F.proc=e.target.value;F.init="";reF()};$("#fInit").onchange=e=>{F.init=e.target.value;reF()};bindStChips(m,"dst",F,reF);
+  ovBind(m);ovNewBind(m);ovKpiBind(m);if($("#fProg"))$("#fProg").onchange=e=>{F.prog=e.target.value;reF()};$("#fBU").onchange=e=>{F.bu=e.target.value;F.cf="";F.proc="";reF()};$("#fCF").onchange=e=>{F.cf=e.target.value;F.proc="";reF()};$("#fProc").onchange=e=>{F.proc=e.target.value;F.init="";reF()};$("#fInit").onchange=e=>{F.init=e.target.value;reF()};bindStChips(m,"dst",F,reF);
   $("#fQ").addEventListener("change",e=>{F.q=e.target.value.trim();reF()});
-  m.querySelectorAll("[data-dfclr]").forEach(b=>b.onclick=()=>{const k=b.dataset.dfclr;if(k==="all"){F.bu=F.cf=F.proc=F.init=F.q="";F.stOff=[]}else if(k==="bu"){F.bu=F.cf=F.proc=""}else if(k==="cf"){F.cf=F.proc=""}else if(k==="st")F.stOff=[];else F[k]="";reF()});
-  ["fBU","fCF","fProc","fInit"].forEach(id=>{const el=$("#"+id);if(el&&el.value){el.classList.add("act");const lb=el.closest("label");if(lb)lb.classList.add("act")}});{const q=$("#fQ");if(q&&q.value){q.classList.add("act");const lb=q.closest("label");if(lb)lb.classList.add("act")}}
+  m.querySelectorAll("[data-dfclr]").forEach(b=>b.onclick=()=>{const k=b.dataset.dfclr;if(k==="all"){F.bu=F.cf=F.proc=F.init=F.prog=F.q="";F.stOff=[]}else if(k==="bu"){F.bu=F.cf=F.proc=""}else if(k==="cf"){F.cf=F.proc=""}else if(k==="st")F.stOff=[];else F[k]="";reF()});
+  ["fBU","fCF","fProc","fInit","fProg"].forEach(id=>{const el=$("#"+id);if(el&&el.value){el.classList.add("act");const lb=el.closest("label");if(lb)lb.classList.add("act")}});{const q=$("#fQ");if(q&&q.value){q.classList.add("act");const lb=q.closest("label");if(lb)lb.classList.add("act")}}
   if($("#clrAll"))$("#clrAll").onclick=()=>{F.bu=F.cf=F.proc=F.init=F.q="";F.stOff=[];reF()};
   if($("#procView"))$("#procView").onchange=e=>{UI.dash.procView=e.target.value;vDash(m,true)};if($("#buView"))$("#buView").onchange=e=>{UI.dash.buView=e.target.value;vDash(m,true)};ovAnalysisBind(m);
   m.querySelectorAll("svg [data-click]").forEach(el=>el.onclick=()=>{const chart=el.closest("[data-chart]").dataset.chart;const seg=el.dataset.seg||"";

@@ -170,8 +170,15 @@ function projMeth(pid){const r=projRowById(pid);return r&&gv("Projects",FP.meth,
 function codeFor(listNm,codeNm,val,def){const a=listFromName(listNm),b=listFromName(codeNm);const i=a.indexOf(val);return i>=0&&b[i]?b[i]:def}
 function maxSuffix(ids,prefix,width){let m=0;for(const id of ids){if(typeof id==="string"&&id.startsWith(prefix)){const n=parseInt(id.slice(prefix.length),10);if(!isNaN(n)&&id.length===prefix.length+width)m=Math.max(m,n)}}return m}
 /* ID prefix = programme: 2T (old 2T Club project, Programme Tag "2T") or SIMP (simplification — everything else) */
-function progChip(id){const p=String(id||"").split("-")[0];return p==="2T"?`<span class="pchipP p2t" title="Old 2T Club project">2T</span> `:p==="SIMP"?`<span class="pchipP psimp" title="Simplification project">SIMP</span> `:""}
-function progCode(r){return String(gv("Projects","AE",r)||"").trim().toUpperCase()==="2T"?"2T":"SIMP"}
+function progChip(id){const p=String(id||"").split("-")[0];return p==="2T"?`<span class="pchipP p2t" title="Old 2T Club project">2T</span> `:p==="SIMP"?`<span class="pchipP psimp" title="Simplification project">SIMP</span> `:p==="CR"?`<span class="pchipP pcr" title="Complexity Reduction project">CR</span> `:""}
+/* programme (initiative) = Projects!AE: 2T · Complexity Reduction · everything else (Simplification, Deep Dives, blank) = SIMP */
+const PROGS=["SIMP","2T","Complexity Reduction"];
+function progTag(r){const t=String(gv("Projects","AE",r)||"").trim().toUpperCase();return t==="2T"?"2T":/COMPLEX/.test(t)?"Complexity Reduction":"SIMP"}
+/* filters go by the project code (ID prefix SIMP- / 2T- / CR-); the tag is only the fallback for projects without an ID yet */
+function progOf(r){const p=String(pId(r)||"").split("-")[0].toUpperCase();return p==="2T"?"2T":p==="CR"?"Complexity Reduction":p==="SIMP"?"SIMP":progTag(r)}
+function progCode(r){const p=progTag(r);return p==="2T"?"2T":p==="SIMP"?"SIMP":"CR"}
+/* a Programme <select> for any filter bar; counts optional */
+function progSel(id,val,cnt){return `<label title="Filter by project code: SIMP- = Simplification & Deep Dives, 2T- = 2T Club, CR- = Complexity Reduction">Programme <select id="${id}"${val?' class="act"':""}><option value="">All</option>${PROGS.map(p=>`<option value="${esc(p)}" ${p===val?"selected":""}>${esc(p==="SIMP"?"SIMP- (Simplification)":p==="2T"?"2T- (2T Club)":"CR- (Complexity Reduction)")}${cnt?` (${cnt(p)})`:""}</option>`).join("")}</select></label>`}
 function genProjectId(r){
   const pre=[progCode(r),codeFor("L_Init","L_InitCode",gv("Projects",FP.init,r),"GEN"),codeFor("L_BU","L_BUCode",gv("Projects",FP.bu,r),"GRP"),codeFor("L_CF","L_CFCode",gv("Projects",FP.cf,r),"GEN")].join("-")+"-";
   /* one number sequence for 2T and SIMP, so "SSC-048" never means two projects */

@@ -6,11 +6,11 @@ function vReal(m){if(view==="Realisation"){view="Projects";UI.pview="real";UI.pr
   const B=rowsOf("Benefits");const q=(UI.q.Real||"").toLowerCase();const RF=UI.realF=UI.realF||{bu:"",cf:"",p:""};
   const pv_=(pid,c)=>{const pr=projRowById(pid);return pr?(gv("Projects",c,pr)||"(blank)"):"(no project)"};const pname=pid=>{const pr=projRowById(pid);return pr?gv("Projects",FP.name,pr):""};
   const bus=uniq(B.map(r=>pv_(gv("Benefits",FB.pid,r),FP.bu)));if(RF.bu&&!bus.includes(RF.bu))RF.bu="";
-  const B1=B.filter(r=>!RF.bu||pv_(gv("Benefits",FB.pid,r),FP.bu)===RF.bu);const cfs=uniq(B1.map(r=>pv_(gv("Benefits",FB.pid,r),FP.cf)));if(RF.cf&&!cfs.includes(RF.cf))RF.cf="";
+  const pgP=pid=>{const p=String(pid||"").split("-")[0].toUpperCase();return p==="2T"?"2T":p==="CR"?"Complexity Reduction":"SIMP"};const B0=B;const B1=B.filter(r=>(!RF.bu||pv_(gv("Benefits",FB.pid,r),FP.bu)===RF.bu)&&(!UI.qu.prog||pgP(gv("Benefits",FB.pid,r))===UI.qu.prog));const cfs=uniq(B1.map(r=>pv_(gv("Benefits",FB.pid,r),FP.cf)));if(RF.cf&&!cfs.includes(RF.cf))RF.cf="";
   const B2=B1.filter(r=>!RF.cf||pv_(gv("Benefits",FB.pid,r),FP.cf)===RF.cf);const pids=uniq(B2.map(r=>gv("Benefits",FB.pid,r)));const pq=(RF.p||"").toLowerCase();
   const B3=B2.filter(r=>{const pid=gv("Benefits",FB.pid,r);return !pq||(pid+" "+pname(pid)).toLowerCase().includes(pq)});
   const list=B3.filter(r=>!q||(bId(r)+" "+gv("Benefits",FB.desc,r)+" "+gv("Benefits",FB.pid,r)).toLowerCase().includes(q));
-  const nRF=[RF.bu,RF.cf,RF.p,q].filter(Boolean).length;
+  const nRF=[RF.bu,RF.cf,RF.p,q,UI.qu.prog].filter(Boolean).length;
   const cur=UI.realSel&&list.includes(UI.realSel)?UI.realSel:list[0];UI.realSel=cur;
   const months=realMonths();
   let right=`<p class="muted">Select a benefit line.</p>`;
@@ -26,7 +26,7 @@ function vReal(m){if(view==="Realisation"){view="Projects";UI.pview="real";UI.pr
       ${trackGrid(cur,bid,months,_ser||{plan:months.map((mm,j)=>planOf(j))})}${projRowById(gv("Benefits",FB.pid,cur))?`<p style="margin:10px 0 0"><button class="btn small" id="rOpenP">Open the project's benefit plan ›</button></p>`:""}</div>`;
   }
   m.innerHTML=`${hubHead("real")}
-   <div class="filterbar card dfilt rfilt"><b>Filter</b>
+   <div class="filterbar card dfilt rfilt${nRF?" filtered":""}"><b>Filter</b>${progSel("rfProg",UI.qu.prog||"",p=>B0.filter(r=>pgP(gv("Benefits",FB.pid,r))===p).length)}
     <label>BU <select id="rfBU"><option value="">All</option>${bus.map(b=>`<option ${b===RF.bu?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
     <label>CF <select id="rfCF"><option value="">All${RF.bu?" in "+esc(RF.bu):""}</option>${cfs.map(b=>`<option ${b===RF.cf?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
     <label>Project <span style="width:320px;display:inline-block">${comboHtml("rfP",RF.p||"",[{v:"",t:`All projects${RF.cf?" in "+esc(RF.cf):RF.bu?" in "+esc(RF.bu):""} (${pids.length})`},...pids.map(pid=>({v:pid,t:pid+" — "+pname(pid)}))],{strict:false})}</span></label>
@@ -35,8 +35,8 @@ function vReal(m){if(view==="Realisation"){view="Projects";UI.pview="real";UI.pr
     <div class="list">${list.map(r=>`<div class="it ${r===cur?"on":""}" data-r="${r}"><div class="t">${esc(bId(r))} · ${esc(gv("Benefits",FB.desc,r))}</div><div class="s">${esc(gv("Benefits",FB.pid,r))} · ${esc(pname(gv("Benefits",FB.pid,r)).slice(0,40))} · ${esc(gv("Benefits",FB.nature,r)||"Recurring")}</div></div>`).join("")||`<div class="pad muted">No benefits</div>`}</div></div><div>${right}</div></div>`;
   $("#rq").oninput=e=>{UI.q.Real=e.target.value;const p=e.target.selectionStart;vReal(m);const i=$("#rq");i.focus();i.setSelectionRange(p,p)};
   m.querySelectorAll(".it[data-r]").forEach(d=>d.onclick=()=>{UI.realSel=+d.dataset.r;vReal(m)});
-  $("#rfBU").onchange=e=>{RF.bu=e.target.value;RF.cf="";RF.p="";UI.realSel=null;vReal(m)};$("#rfCF").onchange=e=>{RF.cf=e.target.value;RF.p="";UI.realSel=null;vReal(m)};
-  $("#rfP").addEventListener("change",e=>{RF.p=e.target.value.trim();UI.realSel=null;vReal(m)});if($("#rfClr"))$("#rfClr").onclick=()=>{RF.bu=RF.cf=RF.p="";UI.q.Real="";UI.realSel=null;vReal(m)};
+  if($("#rfProg"))$("#rfProg").onchange=e=>{UI.qu.prog=e.target.value;RF.p="";UI.realSel=null;vReal(m)};$("#rfBU").onchange=e=>{RF.bu=e.target.value;RF.cf="";RF.p="";UI.realSel=null;vReal(m)};$("#rfCF").onchange=e=>{RF.cf=e.target.value;RF.p="";UI.realSel=null;vReal(m)};
+  $("#rfP").addEventListener("change",e=>{RF.p=e.target.value.trim();UI.realSel=null;vReal(m)});if($("#rfClr"))$("#rfClr").onclick=()=>{RF.bu=RF.cf=RF.p="";UI.qu.prog="";UI.q.Real="";UI.realSel=null;vReal(m)};
   if($("#delReal"))$("#delReal").onclick=()=>{const rr=rowsOf("Realisation").find(x=>gv("Realisation",FR.bid,x)===bId(cur));if(rr)askDelete("Realisation",rr)};
   if($("#mkReal"))$("#mkReal").onclick=()=>{const r=firstFree("Realisation");if(!r){toast("Realisation table is full — insert rows in Excel",5000);return}setCell("Realisation",FR.bid,r,bId(cur));vReal(m);renderTabs()};
   bindPview(m);m.querySelectorAll(".it[data-r]").forEach(d=>d.ondblclick=()=>{const pr=projRowById(gv("Benefits",FB.pid,+d.dataset.r));if(pr){openProject(pr);setTimeout(()=>{const b=document.getElementById("wsBen");if(b)b.scrollIntoView({block:"start"})},50)}});

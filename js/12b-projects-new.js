@@ -22,6 +22,7 @@ function vPList(m){const F=UI.qu;liveCalc();const {all,tabs,cur,T}=plFiltered();
   <div class="card pllist">
     <div class="pltool"><label class="plsearch"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" id="plQ" placeholder="Search projects or project ID" value="${esc(F.q||"")}" aria-label="Search projects"></label>
       <label class="plsel"><span class="sr">Status</span><select id="plSt" aria-label="Status"><option value="">Status: All</option>${sts.map(s=>`<option value="${esc(s)}" ${F.st1===s?"selected":""}>${esc(s)}</option>`).join("")}</select></label>
+      <label class="plsel"><span class="sr">Programme</span><select id="plProg" aria-label="Programme (project code)"${F.prog?' class="act"':""}><option value="">Programme: All</option>${PROGS.map(p=>`<option value="${esc(p)}" ${F.prog===p?"selected":""}>${esc(p==="SIMP"?"SIMP- Simplification":p==="2T"?"2T- 2T Club":"CR- Complexity Reduction")}</option>`).join("")}</select></label>
       <button type="button" class="btn plmore ${F.more?"on":""}" id="plMore" aria-expanded="${!!F.more}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4"/></svg> More filters${nf?` <span class="nfb">${nf}</span>`:""}</button>
       ${nf||F.q||F.st1?`<button type="button" class="btn small" id="plClr">Clear</button>`:""}<span class="sp"></span><span class="muted plcnt">${n} project${n===1?"":"s"}</span></div>
     ${F.more?`<div class="plmorebox">
@@ -41,7 +42,7 @@ function vPList(m){const F=UI.qu;liveCalc();const {all,tabs,cur,T}=plFiltered();
   bindPview(m);const re=()=>{vPList(m)};
   const nb=m.querySelector("#quNew");if(nb)nb.onclick=newProject;const e2=m.querySelector("#plE2E");if(e2)e2.onclick=()=>{UI.e2e.home=true;view="E2E";render()};
   const q=m.querySelector("#plQ");let tq;q.oninput=()=>{clearTimeout(tq);tq=setTimeout(()=>{F.q=q.value;F.pg=1;const p=q.selectionStart;re();const q2=m.querySelector("#plQ");q2.focus();try{q2.setSelectionRange(p,p)}catch(e){}},220)};
-  m.querySelector("#plSt").onchange=e=>{F.st1=e.target.value;F.pg=1;re()};
+  m.querySelector("#plSt").onchange=e=>{F.st1=e.target.value;F.pg=1;re()};{const pp=m.querySelector("#plProg");if(pp)pp.onchange=e=>{F.prog=e.target.value;F.pg=1;re()}}
   m.querySelector("#plMore").onclick=()=>{F.more=!F.more;re()};const cl=m.querySelector("#plClr");if(cl)cl.onclick=()=>{F.cf=F.proc=F.team=F.rd=F.flow=F.lane=F.q=F.st1="";F.pg=1;re()};
   m.querySelectorAll("[data-plf]").forEach(s=>s.onchange=()=>{F[s.dataset.plf]=s.value;if(s.dataset.plf==="flow")F.lane="";F.pg=1;re()});
   m.querySelectorAll("[data-pltab]").forEach(b=>b.onclick=()=>{F.ptab=b.dataset.pltab;F.pg=1;re()});

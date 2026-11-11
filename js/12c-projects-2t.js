@@ -2,7 +2,7 @@
    Every 2T column is filled from the tracker (tasks, benefits, RAIDD); cells are edited in place and written back
    to the same fields the rest of the app uses. Tracker-only fields sit in an extra group on the right. */
 "use strict";
-const T2_TAGS=["2T","Deep Dive","Simplification"];
+const T2_TAGS=["2T","Simplification","Complexity Reduction","Deep Dive"];
 function t2Ben(r){return typeof benefitRowOf==="function"?benefitRowOf(pId(r)):null}
 function t2Basis(br){const s=br!=null?String(gv("Benefits","AJ",br)||""):"";const m=/^As-is (.*?) → To-be (.*?)(?: \(saving (.*?)\))?\.?(?:\s*\|\s*([\s\S]*))?$/.exec(s);
   return m?{a:m[1]==="?"?"":m[1],b:m[2]==="?"?"":m[2],s:m[3]||"",rest:m[4]||""}:{a:"",b:"",s:"",rest:s}}

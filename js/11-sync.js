@@ -129,7 +129,7 @@ function oldValues(rec){const R=rec.raw,O={};const nm=splitName(R.name);O.name=n
   O.notes=[...O.upd,...O.notes,...p2n];O.remark=O.notes.join(" | ");
   const hrs=typeof R.savinghrs==="number"?R.savinghrs:parseFloat(R.savinghrs);O.hrs=isNaN(hrs)||hrs<=0?"":hrs;
   O.freq=isBlank(R.frequency)?"":one(R.frequency);O.asis=isBlank(R.asis)?"":one(R.asis);O.tobe=isBlank(R.tobe)?"":one(R.tobe);O.savingtxt=isBlank(R.savingtxt)?"":one(R.savingtxt);
-  const tag=tx(R.name).match(/\(([^()]*(deep\s*dive|simplification|2t\b)[^()]*)\)/i);O.tag=tag?one(tag[1]):"";{const pg=one(R.programme||"");const m=["2T","Deep Dive","Simplification"].find(x=>x.toLowerCase()===pg.toLowerCase());if(m)O.tag=m}
+  const tag=tx(R.name).match(/\(([^()]*(deep\s*dive|simplification|2t\b)[^()]*)\)/i);O.tag=tag?one(tag[1]):"";{const pg=one(R.programme||"");const m=["2T","Deep Dive","Simplification","Complexity Reduction"].find(x=>x.toLowerCase()===pg.toLowerCase())||(/complex/i.test(pg)?"Complexity Reduction":"");if(m)O.tag=m}
   return O}
 
 /* ---------- the database side ---------- */
