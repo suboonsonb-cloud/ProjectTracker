@@ -1154,11 +1154,22 @@ button.ovhr{cursor:pointer}button.ovhr:hover{background:#F6F3FF}
 .ovdrill.flat{margin:0;border-left:0;padding:0}
 .ovdr.t{grid-template-columns:1fr auto 110px 110px 10px}
 .ovkv{color:var(--accent-d);font-weight:700}
+/* r68 — dashboard filters: show clearly what is filtered */
+.dfilt.filtered{border-color:var(--accent)!important;border-left-width:6px!important;background:linear-gradient(180deg,#FBFAFF,#F3EFFF)!important;box-shadow:0 10px 26px rgba(124,92,252,.22)!important}
+.dfilt .dfn{margin-left:4px;background:var(--accent);color:#fff;border-radius:999px;font-size:11px;padding:1px 8px;font-weight:700}
+.dfilt label.act{color:var(--accent-d)!important}
+.dfilt select.act,.dfilt .combo input.act{border-color:var(--accent)!important;background-color:#EDE8FF!important;color:var(--accent-d)!important;font-weight:700!important;box-shadow:0 0 0 3px rgba(124,92,252,.18)}
+.dfchips{flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding-top:8px;border-top:1px dashed #D9D1FA}
+.dfchips .dfl{font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--accent-d);margin-right:2px}
+.dfc{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:999px;padding:4px 10px;font:inherit;font-size:12px;cursor:pointer}
+.dfc b{font-weight:700}.dfc i{font-style:normal;opacity:.8;font-size:11px}.dfc:hover{background:var(--accent-d)}
+.dfc.all{background:#fff;color:var(--accent-d)}.dfc.all:hover{background:#F1EDFF}
+.dfcount{color:var(--accent-d)!important;font-weight:700}
 </style>
 </head>
 <body>
 <aside class="side" id="side" aria-label="Main navigation">
-  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r67</span></small></span></div>
+  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r68</span></small></span></div>
   <div class="sglab">WORKSPACE</div>
   <button type="button" class="wschip" id="btnOpen" title="Open the workbook (the database)"><span class="wsdot" aria-hidden="true"></span><span class="file" id="fileName">No workbook loaded</span><span class="chev" aria-hidden="true">⌄</span></button>
   <nav class="sidenav hidden" id="tabs"></nav>
@@ -2359,15 +2370,16 @@ function vDash(m,keepScroll){const _y=window.scrollY;setTimeout(()=>{if(keepScro
   const selOpt=(id,val,opts)=>`<select id="${id}" class="mini">${opts.map(([v,t])=>`<option value="${v}" ${v===val?"selected":""}>${t}</option>`).join("")}</select>`;
   m.innerHTML=`${banner("report")}
   <div class="ovh"><div><h1>Your projects, at a glance.</h1><p>Keep the big picture. Move every detail forward.</p></div><span class="sp"></span>${typeof canEdit==="function"&&!canEdit()?"":`<button class="btn new" id="ovNew"><span aria-hidden="true">＋</span> New project</button>`}</div>
-  <div class="filterbar card dfilt"><b>Filter dashboard</b>
+  <div class="filterbar card dfilt${nF?" filtered":""}"><b>Filter dashboard${nF?` <span class="dfn">${nF} active</span>`:""}</b>
    <label>BU <select id="fBU"><option value="">All</option>${bus.map(b=>`<option ${b===bu?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
    <label>CF <select id="fCF"><option value="">All${bu?" in "+esc(bu):""}</option>${cfs_.map(b=>`<option ${b===F.cf?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
    <label>Project <span style="width:300px;display:inline-block">${comboHtml("fQ",F.q||"",[{v:"",t:`All projects${F.cf?" in "+esc(F.cf):bu?" in "+esc(bu):""} (${P3.length})`},...P3.map(r=>({v:pId(r),t:pId(r)+" — "+gv("Projects",FP.name,r)}))],{strict:false})}</span></label>
    <label>Process area <select id="fProc"><option value="">All</option>${procs_.map(b=>`<option ${b===F.proc?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
    <label title="Project type = Initiative (Automation, Standardisation …)">Project type <select id="fInit"><option value="">All</option>${inits_.map(b=>`<option value="${esc(b)}" ${b===F.init?"selected":""}>${esc(b)} (${P2b.filter(r=>fv(r,FP.init)===b).length})</option>`).join("")}</select></label>
    ${stChips(sts_,off,st=>P3a.filter(r=>pStat(r)===st).length,"dst")}
-   ${nF?`<button class="btn small" id="clrAll">✕ Clear filters (${nF})</button>`:""}
-   <span class="muted" style="margin-left:auto">${P.length} of ${allP.length} projects · ${A.length} tasks · ${Bl.length} benefit lines</span>
+   
+   ${nF?`<div class="dfchips"><span class="dfl">Filtered by</span>${[bu?["bu","BU",bu]:null,F.cf?["cf","CF",F.cf]:null,F.proc?["proc","Process area",F.proc]:null,F.init?["init","Project type",F.init]:null,qq?["q","Project",F.q]:null,F.stOff.length?["st","Status",STL.filter(x=>!off.has(x)).join(", ")||"none"]:null].filter(Boolean).map(([k,l,v])=>`<button type="button" class="dfc" data-dfclr="${k}" title="Remove this filter">${esc(l)}: <b>${esc(v)}</b> <i>✕</i></button>`).join("")}<button type="button" class="dfc all" data-dfclr="all">Clear all</button></div>`:""}
+   <span class="muted${nF?" dfcount":""}" style="margin-left:auto">${P.length} of ${allP.length} projects · ${A.length} tasks · ${Bl.length} benefit lines</span>
    <span class="muted finfo" title="Pick a BU, then a CF of that BU, then a project of that CF — or leave any on All. Status: untick a box to hide projects with that status, tick it to show them again (Only = show just that one). Type part of a name in Project to show all matching projects. These filters apply to every chart, KPI and table on the dashboard; dropdowns inside a card only change how that card is drawn.">ⓘ</span></div>
   ${ovKpis(P,A,D,Bl,{valRec,valOne,hrs,fteh,pTD,aTD,pids})}${ovNewHtml(P,Bl)}
   <details class="card pad ovmore"${UI.dash.more?" open":""}><summary><b>More analysis</b> <span class="muted">— benefit plan vs actual, breakdowns by process area / BU / leader, detail tables</span></summary>
@@ -2389,6 +2401,8 @@ function vDash(m,keepScroll){const _y=window.scrollY;setTimeout(()=>{if(keepScro
   const reF=()=>{UI.dash.cell=null;UI.dash.zoom=null;vDash(m,true)};
   ovBind(m);ovNewBind(m);ovKpiBind(m);{const mo=m.querySelector(".ovmore");if(mo)mo.ontoggle=()=>{UI.dash.more=mo.open}}$("#fBU").onchange=e=>{F.bu=e.target.value;F.cf="";F.proc="";reF()};$("#fCF").onchange=e=>{F.cf=e.target.value;F.proc="";reF()};$("#fProc").onchange=e=>{F.proc=e.target.value;F.init="";reF()};$("#fInit").onchange=e=>{F.init=e.target.value;reF()};bindStChips(m,"dst",F,reF);
   $("#fQ").addEventListener("change",e=>{F.q=e.target.value.trim();reF()});
+  m.querySelectorAll("[data-dfclr]").forEach(b=>b.onclick=()=>{const k=b.dataset.dfclr;if(k==="all"){F.bu=F.cf=F.proc=F.init=F.q="";F.stOff=[]}else if(k==="bu"){F.bu=F.cf=F.proc=""}else if(k==="cf"){F.cf=F.proc=""}else if(k==="st")F.stOff=[];else F[k]="";reF()});
+  ["fBU","fCF","fProc","fInit"].forEach(id=>{const el=$("#"+id);if(el&&el.value){el.classList.add("act");const lb=el.closest("label");if(lb)lb.classList.add("act")}});{const q=$("#fQ");if(q&&q.value){q.classList.add("act");const lb=q.closest("label");if(lb)lb.classList.add("act")}}
   if($("#clrAll"))$("#clrAll").onclick=()=>{F.bu=F.cf=F.proc=F.init=F.q="";F.stOff=[];reF()};
   $("#procView").onchange=e=>{UI.dash.procView=e.target.value;vDash(m,true)};$("#buView").onchange=e=>{UI.dash.buView=e.target.value;vDash(m,true)};
   m.querySelectorAll("svg [data-click]").forEach(el=>el.onclick=()=>{const chart=el.closest("[data-chart]").dataset.chart;const seg=el.dataset.seg||"";

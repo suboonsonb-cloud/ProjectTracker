@@ -346,15 +346,16 @@ function vDash(m,keepScroll){const _y=window.scrollY;setTimeout(()=>{if(keepScro
   const selOpt=(id,val,opts)=>`<select id="${id}" class="mini">${opts.map(([v,t])=>`<option value="${v}" ${v===val?"selected":""}>${t}</option>`).join("")}</select>`;
   m.innerHTML=`${banner("report")}
   <div class="ovh"><div><h1>Your projects, at a glance.</h1><p>Keep the big picture. Move every detail forward.</p></div><span class="sp"></span>${typeof canEdit==="function"&&!canEdit()?"":`<button class="btn new" id="ovNew"><span aria-hidden="true">＋</span> New project</button>`}</div>
-  <div class="filterbar card dfilt"><b>Filter dashboard</b>
+  <div class="filterbar card dfilt${nF?" filtered":""}"><b>Filter dashboard${nF?` <span class="dfn">${nF} active</span>`:""}</b>
    <label>BU <select id="fBU"><option value="">All</option>${bus.map(b=>`<option ${b===bu?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
    <label>CF <select id="fCF"><option value="">All${bu?" in "+esc(bu):""}</option>${cfs_.map(b=>`<option ${b===F.cf?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
    <label>Project <span style="width:300px;display:inline-block">${comboHtml("fQ",F.q||"",[{v:"",t:`All projects${F.cf?" in "+esc(F.cf):bu?" in "+esc(bu):""} (${P3.length})`},...P3.map(r=>({v:pId(r),t:pId(r)+" — "+gv("Projects",FP.name,r)}))],{strict:false})}</span></label>
    <label>Process area <select id="fProc"><option value="">All</option>${procs_.map(b=>`<option ${b===F.proc?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
    <label title="Project type = Initiative (Automation, Standardisation …)">Project type <select id="fInit"><option value="">All</option>${inits_.map(b=>`<option value="${esc(b)}" ${b===F.init?"selected":""}>${esc(b)} (${P2b.filter(r=>fv(r,FP.init)===b).length})</option>`).join("")}</select></label>
    ${stChips(sts_,off,st=>P3a.filter(r=>pStat(r)===st).length,"dst")}
-   ${nF?`<button class="btn small" id="clrAll">✕ Clear filters (${nF})</button>`:""}
-   <span class="muted" style="margin-left:auto">${P.length} of ${allP.length} projects · ${A.length} tasks · ${Bl.length} benefit lines</span>
+   
+   ${nF?`<div class="dfchips"><span class="dfl">Filtered by</span>${[bu?["bu","BU",bu]:null,F.cf?["cf","CF",F.cf]:null,F.proc?["proc","Process area",F.proc]:null,F.init?["init","Project type",F.init]:null,qq?["q","Project",F.q]:null,F.stOff.length?["st","Status",STL.filter(x=>!off.has(x)).join(", ")||"none"]:null].filter(Boolean).map(([k,l,v])=>`<button type="button" class="dfc" data-dfclr="${k}" title="Remove this filter">${esc(l)}: <b>${esc(v)}</b> <i>✕</i></button>`).join("")}<button type="button" class="dfc all" data-dfclr="all">Clear all</button></div>`:""}
+   <span class="muted${nF?" dfcount":""}" style="margin-left:auto">${P.length} of ${allP.length} projects · ${A.length} tasks · ${Bl.length} benefit lines</span>
    <span class="muted finfo" title="Pick a BU, then a CF of that BU, then a project of that CF — or leave any on All. Status: untick a box to hide projects with that status, tick it to show them again (Only = show just that one). Type part of a name in Project to show all matching projects. These filters apply to every chart, KPI and table on the dashboard; dropdowns inside a card only change how that card is drawn.">ⓘ</span></div>
   ${ovKpis(P,A,D,Bl,{valRec,valOne,hrs,fteh,pTD,aTD,pids})}${ovNewHtml(P,Bl)}
   <details class="card pad ovmore"${UI.dash.more?" open":""}><summary><b>More analysis</b> <span class="muted">— benefit plan vs actual, breakdowns by process area / BU / leader, detail tables</span></summary>
@@ -376,6 +377,8 @@ function vDash(m,keepScroll){const _y=window.scrollY;setTimeout(()=>{if(keepScro
   const reF=()=>{UI.dash.cell=null;UI.dash.zoom=null;vDash(m,true)};
   ovBind(m);ovNewBind(m);ovKpiBind(m);{const mo=m.querySelector(".ovmore");if(mo)mo.ontoggle=()=>{UI.dash.more=mo.open}}$("#fBU").onchange=e=>{F.bu=e.target.value;F.cf="";F.proc="";reF()};$("#fCF").onchange=e=>{F.cf=e.target.value;F.proc="";reF()};$("#fProc").onchange=e=>{F.proc=e.target.value;F.init="";reF()};$("#fInit").onchange=e=>{F.init=e.target.value;reF()};bindStChips(m,"dst",F,reF);
   $("#fQ").addEventListener("change",e=>{F.q=e.target.value.trim();reF()});
+  m.querySelectorAll("[data-dfclr]").forEach(b=>b.onclick=()=>{const k=b.dataset.dfclr;if(k==="all"){F.bu=F.cf=F.proc=F.init=F.q="";F.stOff=[]}else if(k==="bu"){F.bu=F.cf=F.proc=""}else if(k==="cf"){F.cf=F.proc=""}else if(k==="st")F.stOff=[];else F[k]="";reF()});
+  ["fBU","fCF","fProc","fInit"].forEach(id=>{const el=$("#"+id);if(el&&el.value){el.classList.add("act");const lb=el.closest("label");if(lb)lb.classList.add("act")}});{const q=$("#fQ");if(q&&q.value){q.classList.add("act");const lb=q.closest("label");if(lb)lb.classList.add("act")}}
   if($("#clrAll"))$("#clrAll").onclick=()=>{F.bu=F.cf=F.proc=F.init=F.q="";F.stOff=[];reF()};
   $("#procView").onchange=e=>{UI.dash.procView=e.target.value;vDash(m,true)};$("#buView").onchange=e=>{UI.dash.buView=e.target.value;vDash(m,true)};
   m.querySelectorAll("svg [data-click]").forEach(el=>el.onclick=()=>{const chart=el.closest("[data-chart]").dataset.chart;const seg=el.dataset.seg||"";
