@@ -71,10 +71,13 @@ async function readOldWorkbook(buf,fname,lastMod){
   const allCols=new Set();G.forEach(row=>row.forEach((_,c)=>allCols.add(c)));
   for(const c of [...allCols].sort((a,b)=>colIdx(a)-colIdx(b))){const h=hdr.has(c)?String(hdr.get(c)).trim():"";const hl=h.toLowerCase().replace(/\s+/g," ");
     if(!h){notesCols.push({c,h:"(no header)"});continue}
+    /* v1.6+: a column headed by a date (e.g. "04.11.2026") holds that week's update note */
+    if(/^\d{1,2}[.\/-]\d{1,2}[.\/-]\d{2,4}$/.test(h)||(/^\d{5}(\.0+)?$/.test(h)&&+h>40000&&+h<80000)){(map.upd=map.upd||[]).push({c,h:/^\d{5}/.test(h)?fmtDate(+h):h});continue}
     if(PHASE_RX.test(h)||/^remarks?$|^notes?$|^comments?$|^daily\s*=|^-?\d+(\.\d+)?$/i.test(hl)){notesCols.push({c,h});continue}
     const hit=OLDH.find(([k,rx])=>rx.test(hl));
     if(!hit){unmapped.push({c,h});continue}if(hit[0]==="_skip")continue;
     if(hit[0]==="app"){(map.app=map.app||[]).push(c);continue}
+    if(hit[0]==="phase"&&map.phase&&!map.phase2){map.phase2=c;continue}/* v1.6 has two "Phase" columns — the further one wins */
     if(map[hit[0]]){unmapped.push({c,h:h+" (duplicate of "+hit[0]+")"});continue}map[hit[0]]=c}
   if(!map.name)throw new Error("The project sheet has no 'Project Name' column");
   const recs=[];let maxR=0;G.forEach((_,r)=>{if(r>maxR)maxR=r});
@@ -84,6 +87,7 @@ async function readOldWorkbook(buf,fname,lastMod){
       apps:(map.app||[]).map(c=>row.has(c)?row.get(c):""),lead:g("lead"),members:g("members"),phase:g("phase"),quarter:g("quarter"),start:g("start"),end:g("end"),
       progress:g("progress"),status:g("status"),done:g("done"),willdo:g("willdo"),issue:g("issue"),frequency:g("frequency"),asis:g("asis"),tobe:g("tobe"),
       savingtxt:g("savingtxt"),savinghrs:g("savinghrs"),priority:g("priority"),requester:g("requester"),
+      phase2:map.phase2&&row.has(map.phase2)?row.get(map.phase2):"",upd:(map.upd||[]).map(u=>({h:u.h,v:row.has(u.c)?row.get(u.c):""})).filter(u=>tx(u.v)),
       notes:notesCols.map(n=>row.has(n.c)?row.get(n.c):"").filter(v=>v!==""&&v!=null)}})}
   // optional "Progress" sheet: remarks per project name
   const prog=[];const ps=shs.find(s=>/^progress$/i.test(s.name));
@@ -109,7 +113,7 @@ function oldValues(rec){const R=rec.raw,O={};const nm=splitName(R.name);O.name=n
   /* Division / Team: the old file's Division column holds the team when Process is filled (AR, AP, US/EU…); otherwise Function does */
   const dv=one(R.division);O.subfn=normTeam(dv&&!inA(dv)&&!/,/.test(dv)?dv:one(R.function));
   O.tools=R.apps.map(a=>one(a).replace(/[,;]+$/,"").trim()).filter(a=>a&&!PHASE_RX.test(a)).join(" / ");
-  O.lead=one(R.lead);O.members=one(R.members);O.phase=phaseOf(R.phase)?one(R.phase):"";O.quarter=one(R.quarter);
+  O.lead=one(R.lead);O.members=one(R.members);O.phase=phaseOf(R.phase)?one(R.phase):"";if(phaseOf(R.phase2)&&phaseOf(R.phase2)>phaseOf(O.phase))O.phase=one(R.phase2);O.quarter=one(R.quarter);
   O.start=parseDateAny(R.start);O.end=parseDateAny(R.end);O.startRaw=R.start;O.endRaw=R.end;O.progress=parsePct(R.progress);
   const st=one(R.status);O.status=st;
   const cancel=/cancel/i.test(st)||[R.requester,R.done,R.willdo,R.issue,R.lead].some(v=>/^\s*project\s*cancell?ed\s*$/i.test(tx(v)))||/\(\s*cancell?ed\s*\)/i.test(tx(R.objective))||/\(\s*cancell?ed\s*\)/i.test(tx(R.name));
@@ -118,6 +122,11 @@ function oldValues(rec){const R=rec.raw,O={};const nm=splitName(R.name);O.name=n
   O.done=one(R.done);O.willdo=one(R.willdo);O.issue=one(R.issue);O.priority=one(R.priority);O.requester=one(R.requester);
   O.category=one(R.category);O.id=tx(R.id);
   O.notes=[...R.notes.filter(v=>typeof v!=="number"&&typeof v!=="boolean").map(one).filter(v=>v&&!PHASE_RX.test(v)&&!STATUSW.test(v)&&parseDateAny(v)===""&&!/^monthly hours|\(\s*\d+\s*\*\s*\d+\s*\)/i.test(v)),...O.nameNotes];
+  /* dated update columns → "[04.11.2026] note" at the front of the remark */
+  O.upd=(R.upd||[]).map(u=>`[${u.h}] ${one(String(u.v).replace(/^\s*'/gm,""))}`);
+  /* the second Phase column sometimes holds a note instead of a phase — keep it */
+  const p2=R.phase2;const p2n=typeof p2==="string"&&tx(p2)&&!PHASE_RX.test(p2)&&!STATUSW.test(p2)&&!/^\s*hold\s*$/i.test(p2)&&parseDateAny(p2)===""?["Phase note: "+one(p2)]:[];
+  O.notes=[...O.upd,...O.notes,...p2n];O.remark=O.notes.join(" | ");
   const hrs=typeof R.savinghrs==="number"?R.savinghrs:parseFloat(R.savinghrs);O.hrs=isNaN(hrs)||hrs<=0?"":hrs;
   O.freq=isBlank(R.frequency)?"":one(R.frequency);O.asis=isBlank(R.asis)?"":one(R.asis);O.tobe=isBlank(R.tobe)?"":one(R.tobe);O.savingtxt=isBlank(R.savingtxt)?"":one(R.savingtxt);
   const tag=tx(R.name).match(/\(([^()]*(deep\s*dive|simplification|2t\b)[^()]*)\)/i);O.tag=tag?one(tag[1]):"";

@@ -17,10 +17,10 @@ function t2SetPhase(r,name){const st=stagesOf(r);const k=st.names.indexOf(name);
     const v=si<k?1:si>k?0:(a>=1?0.5:a);if(Math.abs(v-a)>0.0005){setCell("Activities",FA.act,t,v);ch=true}}return ch}
 function t2Cols(){const ro=typeof canEdit==="function"&&!canEdit();const dis=ro?" disabled":"";
   const inp=(r,c,v,cls="")=>`<input class="t2i ${cls}" data-t2="${r}" data-c="${c}" value="${esc(v)}"${dis}>`;
-  const ta=(r,c,v)=>`<textarea class="t2t" data-t2="${r}" data-c="${c}" rows="2"${dis}>${esc(v)}</textarea>`;
+  const ta=(r,c,v)=>`<textarea class="t2t" data-t2="${r}" data-c="${c}" rows="1"${dis}>${esc(v)}</textarea>`;
   const sl=(r,attr,opts,v,blank)=>{const o=uniqOrder([...(v&&!opts.includes(v)?[v]:[]),...opts]);return `<select class="t2s" data-t2="${r}" ${attr}${dis}>${blank!=null?`<option value="">${esc(blank)}</option>`:""}${o.map(x=>`<option ${String(x)===String(v)?"selected":""}>${esc(x)}</option>`).join("")}</select>`};
   const k=(r,key,v,type="text",extra="")=>`<input class="t2i" data-t2="${r}" data-k="${key}" type="${type}" value="${esc(v)}" ${extra}${dis}>`;
-  const kta=(r,key,v)=>`<textarea class="t2t" data-t2="${r}" data-k="${key}" rows="2"${dis}>${esc(v)}</textarea>`;
+  const kta=(r,key,v)=>`<textarea class="t2t" data-t2="${r}" data-k="${key}" rows="1"${dis}>${esc(v)}</textarea>`;
   const n=v=>+v||0;const rate=()=>+setting("S_Rate")||0;
   const bhrs=br=>br!=null?n(gv("Benefits",FB.trh,br)):0;
   return [
@@ -76,6 +76,8 @@ function v2T(m){const F=UI.qu;F.simple=true;liveCalc();const {rows}=quRows();con
   m.innerHTML=projHead(true)+quFilterBar()+`
   <div class="card t2card"><div class="t2top"><div><b>Project data</b><span class="muted">Same columns as the 2T Club <i>Project_Data</i> sheet — edit any cell, it saves into the tracker. Hover a header for where it comes from.</span></div><span class="sp"></span>
     <label class="gx-chk"><input type="checkbox" id="t2x" ${showX?"checked":""}> Show tracker detail</label><span class="t2cnt">${rows.length} project(s)</span></div>
+  <div class="t2nav"><span class="muted">Jump to</span>${groups.map(g=>`<button type="button" data-t2go="${g.g}" style="--gc:${T2G[g.g][1]}">${T2G[g.g][0].replace(/ \(.*\)$/,"")}</button>`).join("")}<span class="sp"></span><span class="muted t2tip">Tip: drag an empty spot in the table, or Shift + mouse wheel, to scroll sideways</span><button type="button" class="t2arr" data-t2by="-1" title="Scroll left">‹</button><button type="button" class="t2arr" data-t2by="1" title="Scroll right">›</button></div>
+  <div class="t2sbar" aria-hidden="true"><div></div></div>
   <div class="t2wrap"><table class="t2"><colgroup>${C.map(c=>`<col style="width:${c.w}px">`).join("")}</colgroup>
     <thead><tr class="t2g">${groups.map((g,i)=>`<th colspan="${g.n}" style="--gc:${T2G[g.g][1]}">${T2G[g.g][0]}</th>`).join("")}</tr>
     <tr class="t2hr">${C.map((c,i)=>`<th class="g-${c.g}${i<2?" fz fz"+i:""}" style="--gc:${T2G[c.g][1]}" ${c.tip?`title="${esc(c.tip)}"`:""}>${esc(c.h)}${c.tip?' <span class="t2q">ⓘ</span>':""}</th>`).join("")}</tr></thead>
@@ -83,10 +85,12 @@ function v2T(m){const F=UI.qu;F.simple=true;liveCalc();const {rows}=quRows();con
   <datalist id="quTeams">${uniq(_rowsOf0Safe("Projects").map(r=>String(gv("Projects","AB",r)||"").trim()).filter(Boolean)).sort().map(x=>`<option value="${esc(x)}">`).join("")}</datalist><datalist id="quPeople">${uniq([...listFromName("L_Leader"),..._rowsOf0Safe("Projects").flatMap(x=>[gv("Projects",FP.lead,x),gv("Projects",FP.wsl,x)])].filter(Boolean)).sort().map(x=>`<option value="${esc(x)}">`).join("")}</datalist>`;
   quFilterBind(m,re);bindPview(m);const nb=$("#quNew");if(nb)nb.onclick=newProject;
   $("#t2x").onchange=e=>{UI.t2x=e.target.checked;re()};
+  t2Scroll(m,C);const df=m.querySelector(".dfilt");if(df)df.style.position="static";/* the sticky filter would cover the table header and scrollbar */
+  m.querySelectorAll("textarea.t2t").forEach(t=>{t.addEventListener("focus",()=>t2Grow(t));t.addEventListener("blur",()=>t2Grow(t))});
   const fz=()=>{const a=m.querySelector("td.fz0,th.fz0");if(a)m.querySelector(".t2wrap").style.setProperty("--fz1",a.offsetWidth+"px")};fz();
   m.querySelectorAll("tr[data-t2row]").forEach(tr=>t2Bind(m,tr,C));
   m.querySelectorAll("textarea.t2t").forEach(t2Grow)}
-function t2Grow(t){t.style.height="auto";t.style.height=Math.min(140,Math.max(34,t.scrollHeight+2))+"px"}
+function t2Grow(t){t.style.height="auto";t.style.height=Math.min(document.activeElement===t?160:58,Math.max(30,t.scrollHeight+2))+"px"}
 function t2Bind(m,tr,C){
   const commit=async el=>{if(el._busy)return;el._busy=true;const r=+el.dataset.t2,c=el.dataset.c,k=el.dataset.k;let v=el.value;let ok=false;
     try{
@@ -109,3 +113,23 @@ function t2Bind(m,tr,C){
     el.onchange=()=>commit(el);el.onkeydown=e=>{if(e.key==="Enter"&&(el.tagName==="INPUT"||e.ctrlKey)){e.preventDefault();el.blur()}if(e.key==="Escape"){el.value=el.defaultValue;el.blur()}};if(el.tagName==="TEXTAREA")el.oninput=()=>t2Grow(el)});
   tr.querySelectorAll("[data-t2op]").forEach(a=>a.onclick=e=>{e.preventDefault();openProject(+a.dataset.t2op)});
   tr.querySelectorAll("[data-op]").forEach(a=>a.onclick=e=>{e.preventDefault();openProject(+a.dataset.op)})}
+
+/* sideways scrolling made easy: a scrollbar on top (synced), jump-to-group buttons, ‹ › arrows, drag-to-pan, plain wheel over the header row */
+function t2Scroll(m,C){const w=m.querySelector(".t2wrap"),bar=m.querySelector(".t2sbar"),t=m.querySelector("table.t2");if(!w||!t)return;
+  const fzW=()=>{const a=t.querySelector("th.fz0"),b=t.querySelector("th.fz1");return (a?a.offsetWidth:0)+(b?b.offsetWidth:0)};
+  const sync=()=>{bar.firstElementChild.style.width=t.offsetWidth+"px";bar.style.display=t.offsetWidth>w.clientWidth+2?"":"none"};sync();
+  let lock=0;bar.onscroll=()=>{if(lock===2){lock=0;return}lock=1;w.scrollLeft=bar.scrollLeft};w.addEventListener("scroll",()=>{if(lock===1){lock=0;return}lock=2;bar.scrollLeft=w.scrollLeft;t2Act()});
+  const t2Act=()=>{const x=w.scrollLeft+fzW()+4;let cur=null;t.querySelectorAll("tr.t2hr th").forEach((th,i)=>{if(th.offsetLeft<=x)cur=C[i]&&C[i].g});m.querySelectorAll("[data-t2go]").forEach(b=>b.classList.toggle("on",b.dataset.t2go===cur))};t2Act();
+  m.querySelectorAll("[data-t2go]").forEach(b=>b.onclick=()=>{const i=C.findIndex(c=>c.g===b.dataset.t2go);const th=t.querySelectorAll("tr.t2hr th")[i];if(th)w.scrollTo({left:i<2?0:th.offsetLeft-fzW(),behavior:"smooth"})});
+  m.querySelectorAll("[data-t2by]").forEach(b=>b.onclick=()=>w.scrollBy({left:(+b.dataset.t2by)*Math.max(300,(w.clientWidth-fzW())*0.8),behavior:"smooth"}));
+  /* wheel over the header scrolls sideways */
+  t.querySelector("thead").addEventListener("wheel",e=>{if(!e.deltaY||e.shiftKey)return;e.preventDefault();w.scrollLeft+=e.deltaY},{passive:false});
+  /* drag to pan (not on inputs / links / buttons) */
+  let d=null;w.addEventListener("pointerdown",e=>{if(e.button!==0||e.target.closest("input,textarea,select,a,button,label"))return;d={x:e.clientX,y:e.clientY,l:w.scrollLeft,tp:w.scrollTop,moved:false};w.setPointerCapture(e.pointerId)});
+  w.addEventListener("pointermove",e=>{if(!d)return;const dx=e.clientX-d.x,dy=e.clientY-d.y;if(!d.moved&&Math.abs(dx)+Math.abs(dy)<4)return;d.moved=true;w.classList.add("drag");w.scrollLeft=d.l-dx/ZF();w.scrollTop=d.tp-dy/ZF()});
+  const end=e=>{if(!d)return;d=null;w.classList.remove("drag");try{w.releasePointerCapture(e.pointerId)}catch(_){}};w.addEventListener("pointerup",end);w.addEventListener("pointercancel",end);
+  if(!t2Scroll._rs){t2Scroll._rs=1;window.addEventListener("resize",()=>{const b=document.querySelector(".t2sbar"),tt=document.querySelector("table.t2"),ww=document.querySelector(".t2wrap");if(b&&tt&&ww){b.firstElementChild.style.width=tt.offsetWidth+"px";b.style.display=tt.offsetWidth>ww.clientWidth+2?"":"none"}})}
+  /* the box always ends inside the window, so its sideways scrollbar is always on screen */
+  const fit=()=>{if(!document.body.contains(w)){window.removeEventListener("scroll",onS);window.removeEventListener("resize",onS);return}const top=w.getBoundingClientRect().top;const vh=innerHeight/ZF();w.style.maxHeight=Math.max(200,Math.round(vh-Math.max(top,0)-14))+"px"};
+  let raf=0;const onS=()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;fit()})};window.addEventListener("scroll",onS,{passive:true});window.addEventListener("resize",onS);fit();
+  if(UI.qu.t2L)w.scrollLeft=UI.qu.t2L;w.addEventListener("scroll",()=>{UI.qu.t2L=w.scrollLeft})}
