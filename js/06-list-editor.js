@@ -87,9 +87,9 @@ function listView(m,sheet,opts){
   let e2eHtml="";if(opts.e2e&&typeof e2eBar==="function"&&typeof hasE2E==="function"&&hasE2E()){e2eHtml=e2eBar(rows,opts.e2e.pid,opts.e2e.noun);rows=rows.filter(r=>passE2EPid(opts.e2e.pid(r),UI.qu.flow,UI.qu.lane))}
   /* programme = project code prefix (SIMP- / 2T- / CR-), shared with the Projects page */
   const pgOfPid=pid=>{const p=String(pid||"").split("-")[0].toUpperCase();return p==="2T"?"2T":p==="CR"?"Complexity Reduction":"SIMP"};const pgBase=rows;
-  if(opts.e2e&&UI.qu.prog)rows=rows.filter(r=>pgOfPid(opts.e2e.pid(r))===UI.qu.prog);
+  if(opts.e2e&&UI.qu.prog)rows=rows.filter(r=>mIn(UI.qu.prog,pgOfPid(opts.e2e.pid(r))));
   const fvs=(k,r)=>opts.filterAll&&opts.filterAll(k,r)||[opts.filterVal(k,r)];
-  for(const [k,v] of Object.entries(f)){if(k==="stOff"||!v)continue;rows=rows.filter(r=>fvs(k,r).some(x=>String(x)===v))}
+  for(const [k,v] of Object.entries(f)){if(k==="stOff"||!v)continue;rows=rows.filter(r=>fvs(k,r).some(x=>mIn(v,String(x))))}
   const chipK=(opts.filters.find(fl=>fl.k==="status"||fl.k==="bstat")||{}).k;const hasSt=!!chipK;const stOffL=new Set(hasSt&&Array.isArray(f.stOff)?f.stOff:[]);const stBase=rows;
   if(stOffL.size)rows=rows.filter(r=>!stOffL.has(String(opts.filterVal(chipK,r))));
   if(q)rows=rows.filter(r=>opts.cols.some(c=>String(c.v(r)).toLowerCase().includes(q)));
@@ -99,7 +99,7 @@ function listView(m,sheet,opts){
   const so=UI.sort[sheet];if(so&&opts.cols[so.i]){rows=[...rows].sort((a,b)=>{const x=cv(so.i,a),y=cv(so.i,b);if(x===""&&y!=="")return 1;if(y===""&&x!=="")return -1;return cfCmp(x,y)*so.dir})}
   const nCF=Object.keys(CF).length;
   const stVals=hasSt?(()=>{const u=uniq(rowsOf(sheet).map(r=>String(opts.filterVal(chipK,r))));const o=uniqOrder(["Not Started","In Progress","On Track","At Risk","Delayed","On-Hold","Completed","Cancelled",...listFromName("L_RStatus"),...listFromName("L_BStat")]);return [...o.filter(x=>u.includes(x)||stOffL.has(x)),...u.filter(x=>!o.includes(x))]})():[];
-  const filters=opts.filters.filter(fl=>fl.k!==chipK||stVals.length>1||stOffL.size).map(fl=>fl.k===chipK?stChips(stVals,stOffL,v=>stBase.filter(r=>String(opts.filterVal(chipK,r))===v).length,"l"+sheet):sel("f_"+fl.k,fl.label,uniq(rowsOf(sheet).flatMap(r=>fvs(fl.k,r).map(String))),f[fl.k]||"")).join("");
+  const filters=opts.filters.filter(fl=>fl.k!==chipK||stVals.length>1||stOffL.size).map(fl=>fl.k===chipK?stChips(stVals,stOffL,v=>stBase.filter(r=>String(opts.filterVal(chipK,r))===v).length,"l"+sheet):sel("f_"+fl.k,fl.label,uniq(rowsOf(sheet).flatMap(r=>fvs(fl.k,r).map(String))),f[fl.k]||"",true)).join("");
   const TBL=`<div class="card tablewrap"><table class="data"><thead><tr>${opts.cols.map((c,i)=>`<th class="${c.num?"num":""}"><span class="thf">${c.h}<button class="cfbtn${CF[i]?" on":""}${so&&so.i===i?" so":""}" data-cf="${i}" title="Filter / sort this column">${CF[i]?"⏷":so&&so.i===i?(so.dir>0?"▲":"▼"):"▾"}</button></span></th>`).join("")}<th>Actions</th></tr></thead>
    <tbody>${rows.map(r=>`<tr data-r="${r}" class="${chg.has(r)?"changed":""}">${opts.cols.map(c=>`<td class="${c.num?"num":""}">${c.html?c.html(r):`<span class="clip">${esc(c.v(r))}</span>`}</td>`).join("")}<td><span class="rowact"><button class="btn" data-edit="${r}">Edit</button><button class="btn danger" data-del="${r}">Delete</button></span></td></tr>`).join("")||`<tr><td colspan="${opts.cols.length+1}" class="muted">No rows</td></tr>`}</tbody></table></div>`;
   const LVF=`<div class="filterbar card dfilt lvfilt${opts.e2e&&UI.qu.prog?" filtered":""}"><b>Filter</b>${opts.noSearch?"":`<input type="search" id="q" class="bq" placeholder="Search…" value="${esc(UI.q[sheet]||"")}">`}${opts.e2e?progSel("lvProg",UI.qu.prog||"",p=>pgBase.filter(r=>pgOfPid(opts.e2e.pid(r))===p).length):""}${filters}${nCF||so?`<button class="btn small" id="cfClear">✕ Clear column filters${nCF?` (${nCF})`:""}${so?" & sort":""}</button>`:""}<span class="muted" style="margin-left:auto">${rows.length} ${opts.noun}${rows.length===1?"":"s"}</span></div>`;

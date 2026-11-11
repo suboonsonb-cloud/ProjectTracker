@@ -18,14 +18,14 @@ function scrollKey(e,root){const p=[];for(let n=e;n&&n!==root;n=n.parentElement)
 function vGantt0(m){
   const g=UI.gantt;const P=projects().filter(p=>p.id);
   const fv=(p,f)=>gv("Projects",f,p.r)||"(blank)";
-  const bus=uniq(P.map(p=>fv(p,FP.bu)));const P1=P.filter(p=>!g.bu||fv(p,FP.bu)===g.bu);
-  const cfs=uniq(P1.map(p=>fv(p,FP.cf)));if(g.cf&&!cfs.includes(g.cf))g.cf="";const P2=P1.filter(p=>!g.cf||fv(p,FP.cf)===g.cf);
-  const procs=uniq(P2.map(p=>fv(p,FP.proc)));if(g.proc&&!procs.includes(g.proc))g.proc="";const P2b=P2.filter(p=>!g.proc||fv(p,FP.proc)===g.proc);
-  const teams=uniq(P2b.map(p=>fv(p,"AB")));if(g.team&&!teams.includes(g.team))g.team="";const P2c=P2b.filter(p=>!g.team||fv(p,"AB")===g.team);
-  const inits=uniq(P2c.map(p=>fv(p,FP.init)));if(g.init&&!inits.includes(g.init))g.init="";const P2d=P2c.filter(p=>(!g.init||fv(p,FP.init)===g.init)&&(!g.prog||progOf(p.r)===g.prog));
+  const bus=uniq(P.map(p=>fv(p,FP.bu)));g.bu=mKeep(g.bu,bus);const P1=P.filter(p=>mIn(g.bu,fv(p,FP.bu)));
+  const cfs=uniq(P1.map(p=>fv(p,FP.cf)));g.cf=mKeep(g.cf,cfs);const P2=P1.filter(p=>mIn(g.cf,fv(p,FP.cf)));
+  const procs=uniq(P2.map(p=>fv(p,FP.proc)));g.proc=mKeep(g.proc,procs);const P2b=P2.filter(p=>mIn(g.proc,fv(p,FP.proc)));
+  const teams=uniq(P2b.map(p=>fv(p,"AB")));g.team=mKeep(g.team,teams);const P2c=P2b.filter(p=>mIn(g.team,fv(p,"AB")));
+  const inits=uniq(P2c.map(p=>fv(p,FP.init)));g.init=mKeep(g.init,inits);const P2d=P2c.filter(p=>mIn(g.init,fv(p,FP.init))&&mIn(g.prog,progOf(p.r)));
   /* status: one pick from the dropdown (All = every status) */
-  const stCount=st=>P2d.filter(p=>pStat(p.r)===st).length;if(g.st&&!STL.includes(g.st))g.st="";
-  const P3=P2d.filter(p=>!g.st||pStat(p.r)===g.st);
+  const stCount=st=>P2d.filter(p=>pStat(p.r)===st).length;g.st=mKeep(g.st,STL);
+  const P3=P2d.filter(p=>mIn(g.st,pStat(p.r)));
   /* E2E map of every flow ▸ lane ▸ project (before filters) — used for grouping, lane search and the swimlane card */
   const MAP=gFlowMap();const pNames={};MAP.forEach(F=>F.lanes.forEach(L=>L.ids.forEach(pid=>{(pNames[pid]=pNames[pid]||[]).push(F.f.name,L.name)})));
   /* search box: an exact ID shows that project; other text matches project ID / name, or the flow / lane it sits in */
@@ -128,12 +128,12 @@ function vGantt0(m){
   <div class="card gx-tools">
     <label class="gx-search">${IC.search}<input id="gQ" type="search" placeholder="Search projects or lanes" value="${esc(g.q||"")}" autocomplete="off"></label>
     <select id="ggrp" class="gx-sel" title="Group the rows"><option value="e2e" ${g.grp!=="flat"?"selected":""}>By E2E flow</option><option value="flat" ${g.grp==="flat"?"selected":""}>By project</option></select>
-    <select id="gst" class="gx-sel${g.st?" act":""}" title="Status"><option value="">Status: All</option>${STL.map(st=>`<option value="${esc(st)}" ${g.st===st?"selected":""}>${esc(st)} (${stCount(st)})</option>`).join("")}</select>
+    <select id="gst" class="gx-sel${g.st?" act":""}" title="Status" data-v="${esc(g.st||"")}"><option value="">Status: All</option>${STL.map(st=>`<option value="${esc(st)}" ${g.st===st?"selected":""}>${esc(st)} (${stCount(st)})</option>`).join("")}</select>
     <button class="btn gx-more${g.more?" on":""}${nMore?" act":""}" id="gmore" aria-expanded="${!!g.more}">${IC.filt}More filters${nMore?`<b>${nMore}</b>`:""}</button>
     <label class="gx-chk"><input type="checkbox" id="gh" ${g.hideDone?"checked":""}> Hide completed</label>
     <span class="sp"></span><span class="gx-count">${PR.length} of ${P.length} projects</span>
     <span class="seg gx-unit"><button data-gunit="month" class="${wk?"":"on"}">Month</button><button data-gunit="week" class="${wk?"on":""}">Week</button></span>
-    ${g.more?`<div class="gx-morep">${[["gb","BU",bus,g.bu],["gf","CF",cfs,g.cf],["gc","Process",procs,g.proc],["gt","Team",teams,g.team||""],["gi","Project type",inits,g.init||""],["gpg","Programme",PROGS,g.prog||""]].map(([id,lb,o,v])=>`<label>${lb}${sel(id,lb,o,v)}</label>`).join("")}
+    ${g.more?`<div class="gx-morep">${[["gb","BU",bus,g.bu],["gf","CF",cfs,g.cf],["gc","Process",procs,g.proc],["gt","Team",teams,g.team||""],["gi","Project type",inits,g.init||""],["gpg","Programme",PROGS,g.prog||""]].map(([id,lb,o,v])=>`<label>${lb}${sel(id,lb,o,v,true)}</label>`).join("")}
       <label>Detail<select id="gl"><option value="projects" ${g.level==="projects"?"selected":""}>Projects only</option><option value="stages" ${g.level==="stages"?"selected":""}>+ Stages</option><option value="tasks" ${g.level==="tasks"?"selected":""}>+ Stages + Tasks</option></select></label>
       ${nMore?'<button class="gx-link" id="gclear">Clear filters</button>':""}</div>`:""}
   </div>

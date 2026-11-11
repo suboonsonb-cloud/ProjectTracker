@@ -5,9 +5,9 @@ function planRowFor(bid){const pc=S.sheets.Plan_Calc;for(let r=6;r<=CFG.Benefits
 function vReal(m){if(view==="Realisation"){view="Projects";UI.pview="real";UI.proj=null;renderTabs()}
   const B=rowsOf("Benefits");const q=(UI.q.Real||"").toLowerCase();const RF=UI.realF=UI.realF||{bu:"",cf:"",p:""};
   const pv_=(pid,c)=>{const pr=projRowById(pid);return pr?(gv("Projects",c,pr)||"(blank)"):"(no project)"};const pname=pid=>{const pr=projRowById(pid);return pr?gv("Projects",FP.name,pr):""};
-  const bus=uniq(B.map(r=>pv_(gv("Benefits",FB.pid,r),FP.bu)));if(RF.bu&&!bus.includes(RF.bu))RF.bu="";
-  const pgP=pid=>{const p=String(pid||"").split("-")[0].toUpperCase();return p==="2T"?"2T":p==="CR"?"Complexity Reduction":"SIMP"};const B0=B;const B1=B.filter(r=>(!RF.bu||pv_(gv("Benefits",FB.pid,r),FP.bu)===RF.bu)&&(!UI.qu.prog||pgP(gv("Benefits",FB.pid,r))===UI.qu.prog));const cfs=uniq(B1.map(r=>pv_(gv("Benefits",FB.pid,r),FP.cf)));if(RF.cf&&!cfs.includes(RF.cf))RF.cf="";
-  const B2=B1.filter(r=>!RF.cf||pv_(gv("Benefits",FB.pid,r),FP.cf)===RF.cf);const pids=uniq(B2.map(r=>gv("Benefits",FB.pid,r)));const pq=(RF.p||"").toLowerCase();
+  const bus=uniq(B.map(r=>pv_(gv("Benefits",FB.pid,r),FP.bu)));RF.bu=mKeep(RF.bu,bus);
+  const pgP=pid=>{const p=String(pid||"").split("-")[0].toUpperCase();return p==="2T"?"2T":p==="CR"?"Complexity Reduction":"SIMP"};const B0=B;const B1=B.filter(r=>mIn(RF.bu,pv_(gv("Benefits",FB.pid,r),FP.bu))&&mIn(UI.qu.prog,pgP(gv("Benefits",FB.pid,r))));const cfs=uniq(B1.map(r=>pv_(gv("Benefits",FB.pid,r),FP.cf)));RF.cf=mKeep(RF.cf,cfs);
+  const B2=B1.filter(r=>mIn(RF.cf,pv_(gv("Benefits",FB.pid,r),FP.cf)));const pids=uniq(B2.map(r=>gv("Benefits",FB.pid,r)));const pq=(RF.p||"").toLowerCase();
   const B3=B2.filter(r=>{const pid=gv("Benefits",FB.pid,r);return !pq||(pid+" "+pname(pid)).toLowerCase().includes(pq)});
   const list=B3.filter(r=>!q||(bId(r)+" "+gv("Benefits",FB.desc,r)+" "+gv("Benefits",FB.pid,r)).toLowerCase().includes(q));
   const nRF=[RF.bu,RF.cf,RF.p,q,UI.qu.prog].filter(Boolean).length;
@@ -27,9 +27,9 @@ function vReal(m){if(view==="Realisation"){view="Projects";UI.pview="real";UI.pr
   }
   m.innerHTML=`${hubHead("real")}
    <div class="filterbar card dfilt rfilt${nRF?" filtered":""}"><b>Filter</b>${progSel("rfProg",UI.qu.prog||"",p=>B0.filter(r=>pgP(gv("Benefits",FB.pid,r))===p).length)}
-    <label>BU <select id="rfBU"><option value="">All</option>${bus.map(b=>`<option ${b===RF.bu?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
-    <label>CF <select id="rfCF"><option value="">All${RF.bu?" in "+esc(RF.bu):""}</option>${cfs.map(b=>`<option ${b===RF.cf?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
-    <label>Project <span style="width:320px;display:inline-block">${comboHtml("rfP",RF.p||"",[{v:"",t:`All projects${RF.cf?" in "+esc(RF.cf):RF.bu?" in "+esc(RF.bu):""} (${pids.length})`},...pids.map(pid=>({v:pid,t:pid+" — "+pname(pid)}))],{strict:false})}</span></label>
+    <label>BU <select id="rfBU" data-v="${esc(RF.bu||"")}"><option value="">All</option>${bus.map(b=>`<option ${b===RF.bu?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
+    <label>CF <select id="rfCF" data-v="${esc(RF.cf||"")}"><option value="">All${RF.bu?" in "+esc(mLabel(RF.bu)):""}</option>${cfs.map(b=>`<option ${b===RF.cf?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
+    <label>Project <span style="width:320px;display:inline-block">${comboHtml("rfP",RF.p||"",[{v:"",t:`All projects${RF.cf?" in "+esc(mLabel(RF.cf)):RF.bu?" in "+esc(mLabel(RF.bu)):""} (${pids.length})`},...pids.map(pid=>({v:pid,t:pid+" — "+pname(pid)}))],{strict:false})}</span></label>
     ${nRF?`<button class="btn small" id="rfClr">✕ Clear filters (${nRF})</button>`:""}<span class="muted" style="margin-left:auto">${list.length} of ${B.length} benefit lines</span></div>
    <div class="split"><div class="card"><div class="pad" style="padding-bottom:8px"><input type="search" id="rq" placeholder="Search benefit ID / description…" value="${esc(UI.q.Real||"")}" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:7px 10px"></div>
     <div class="list">${list.map(r=>`<div class="it ${r===cur?"on":""}" data-r="${r}"><div class="t">${esc(bId(r))} · ${esc(gv("Benefits",FB.desc,r))}</div><div class="s">${esc(gv("Benefits",FB.pid,r))} · ${esc(pname(gv("Benefits",FB.pid,r)).slice(0,40))} · ${esc(gv("Benefits",FB.nature,r)||"Recurring")}</div></div>`).join("")||`<div class="pad muted">No benefits</div>`}</div></div><div>${right}</div></div>`;

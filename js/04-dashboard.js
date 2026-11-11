@@ -75,7 +75,7 @@ function renderLanding(){
     const f=e.dataTransfer.files[0];if(f)await ingest(await f.arrayBuffer(),f.name,null,f.lastModified)};
 }
 function uniq(a){return [...new Set(a.filter(x=>x!==""&&x!=null))].sort()}
-function sel(id,label,opts,val){return `<select id="${id}" title="${esc(label)}"><option value="">${esc(label)}: All</option>${opts.map(o=>`<option ${o===val?"selected":""}>${esc(o)}</option>`).join("")}</select>`}
+function sel(id,label,opts,val,multi){return `<select id="${id}" title="${esc(label)}"${multi?` data-v="${esc(val||"")}"`:""}><option value="">${esc(label)}: All</option>${opts.map(o=>`<option ${o===val?"selected":""}>${esc(o)}</option>`).join("")}</select>`}
 function changedRows(sheet){const s=new Set();for(const c of S.changes)if(c.sheet===sheet)s.add(+c.ref.replace(/[A-Z]+/,""));return s}
 
 /* ---- dashboard (charts) ---- */
@@ -309,11 +309,11 @@ function vDash(m,keepScroll){const _y=window.scrollY,_x=window.scrollX;
   vDash0(m);if(keepScroll&&Math.abs(window.scrollY-_y)>1)window.scrollTo(_x,_y)}
 function vDash0(m){
   const allP=rowsOf("Projects");const F=UI.dash;const fv=(r,c)=>gv("Projects",c,r)||"(blank)";
-  const bus=uniq(allP.map(r=>fv(r,FP.bu)));if(F.bu&&!bus.includes(F.bu))F.bu="";const bu=F.bu;
-  const P1=allP.filter(r=>!bu||fv(r,FP.bu)===bu);const cfs_=uniq(P1.map(r=>fv(r,FP.cf)));if(F.cf&&!cfs_.includes(F.cf))F.cf="";
-  const P2=P1.filter(r=>!F.cf||fv(r,FP.cf)===F.cf);const procs_=uniq(P2.map(r=>fv(r,FP.proc)));if(F.proc&&!procs_.includes(F.proc))F.proc="";
-  const P2b=P2.filter(r=>!F.proc||fv(r,FP.proc)===F.proc);const inits_=uniq(P2b.map(r=>fv(r,FP.init)));if(F.init&&!inits_.includes(F.init))F.init="";
-  const P3a=P2b.filter(r=>(!F.init||fv(r,FP.init)===F.init)&&(!F.prog||progOf(r)===F.prog));F.stOff=Array.isArray(F.stOff)?F.stOff:[];const off=new Set(F.stOff);const sts_=off.size?STL.slice():STL.filter(st=>P3a.some(r=>pStat(r)===st));
+  const bus=uniq(allP.map(r=>fv(r,FP.bu)));F.bu=mKeep(F.bu,bus);const bu=F.bu;
+  const P1=allP.filter(r=>mIn(bu,fv(r,FP.bu)));const cfs_=uniq(P1.map(r=>fv(r,FP.cf)));F.cf=mKeep(F.cf,cfs_);
+  const P2=P1.filter(r=>mIn(F.cf,fv(r,FP.cf)));const procs_=uniq(P2.map(r=>fv(r,FP.proc)));F.proc=mKeep(F.proc,procs_);
+  const P2b=P2.filter(r=>mIn(F.proc,fv(r,FP.proc)));const inits_=uniq(P2b.map(r=>fv(r,FP.init)));F.init=mKeep(F.init,inits_);
+  const P3a=P2b.filter(r=>mIn(F.init,fv(r,FP.init))&&mIn(F.prog,progOf(r)));F.stOff=Array.isArray(F.stOff)?F.stOff:[];const off=new Set(F.stOff);const sts_=off.size?STL.slice():STL.filter(st=>P3a.some(r=>pStat(r)===st));
   const P3=P3a.filter(r=>!off.has(pStat(r)));const qq=(F.q||"").trim().toLowerCase();
   const P=P3.filter(r=>!qq||(pId(r)+" "+gv("Projects",FP.name,r)).toLowerCase().includes(qq));const pids=new Set(P.map(pId));DASHP=pids;
   const nF=[bu,F.cf,F.proc,F.init,F.prog,F.stOff.length?1:"",qq].filter(Boolean).length;
@@ -352,19 +352,19 @@ function vDash0(m){
   m.innerHTML=`${banner("report")}
   <div class="ovh"><div><h1>Your projects, at a glance.</h1><p>Keep the big picture. Move every detail forward.</p></div><span class="sp"></span>${typeof canEdit==="function"&&!canEdit()?"":`<button class="btn new" id="ovNew"><span aria-hidden="true">＋</span> New project</button>`}</div>
   <div class="filterbar card dfilt${nF?" filtered":""}"><b>Filter dashboard${nF?` <span class="dfn">${nF} active</span>`:""}</b>
-   <label>BU <select id="fBU"><option value="">All</option>${bus.map(b=>`<option ${b===bu?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
-   <label>CF <select id="fCF"><option value="">All${bu?" in "+esc(bu):""}</option>${cfs_.map(b=>`<option ${b===F.cf?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
-   <label>Project <span style="width:300px;display:inline-block">${comboHtml("fQ",F.q||"",[{v:"",t:`All projects${F.cf?" in "+esc(F.cf):bu?" in "+esc(bu):""} (${P3.length})`},...P3.map(r=>({v:pId(r),t:pId(r)+" — "+gv("Projects",FP.name,r)}))],{strict:false})}</span></label>
-   <label>Process area <select id="fProc"><option value="">All</option>${procs_.map(b=>`<option ${b===F.proc?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
-   ${progSel("fProg",F.prog||"",p=>P2b.filter(r=>(!F.init||fv(r,FP.init)===F.init)&&progOf(r)===p).length)}
-   <label title="Project type = Initiative (Automation, Standardisation …)">Project type <select id="fInit"><option value="">All</option>${inits_.map(b=>`<option value="${esc(b)}" ${b===F.init?"selected":""}>${esc(b)} (${P2b.filter(r=>fv(r,FP.init)===b).length})</option>`).join("")}</select></label>
+   <label>BU <select id="fBU" data-v="${esc(bu||"")}"><option value="">All</option>${bus.map(b=>`<option ${b===bu?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
+   <label>CF <select id="fCF" data-v="${esc(F.cf||"")}"><option value="">All${bu?" in "+esc(mLabel(bu)):""}</option>${cfs_.map(b=>`<option ${b===F.cf?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
+   <label>Project <span style="width:300px;display:inline-block">${comboHtml("fQ",F.q||"",[{v:"",t:`All projects${F.cf?" in "+esc(mLabel(F.cf)):bu?" in "+esc(mLabel(bu)):""} (${P3.length})`},...P3.map(r=>({v:pId(r),t:pId(r)+" — "+gv("Projects",FP.name,r)}))],{strict:false})}</span></label>
+   <label>Process area <select id="fProc" data-v="${esc(F.proc||"")}"><option value="">All</option>${procs_.map(b=>`<option ${b===F.proc?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
+   ${progSel("fProg",F.prog||"",p=>P2b.filter(r=>mIn(F.init,fv(r,FP.init))&&progOf(r)===p).length)}
+   <label title="Project type = Initiative (Automation, Standardisation …)">Project type <select id="fInit" data-v="${esc(F.init||"")}"><option value="">All</option>${inits_.map(b=>`<option value="${esc(b)}" ${b===F.init?"selected":""}>${esc(b)} (${P2b.filter(r=>fv(r,FP.init)===b).length})</option>`).join("")}</select></label>
    ${stChips(sts_,off,st=>P3a.filter(r=>pStat(r)===st).length,"dst")}
    
-   ${nF?`<div class="dfchips"><span class="dfl">Filtered by</span>${[bu?["bu","BU",bu]:null,F.cf?["cf","CF",F.cf]:null,F.proc?["proc","Process area",F.proc]:null,F.init?["init","Project type",F.init]:null,F.prog?["prog","Programme",F.prog]:null,qq?["q","Project",F.q]:null,F.stOff.length?["st","Status",STL.filter(x=>!off.has(x)).join(", ")||"none"]:null].filter(Boolean).map(([k,l,v])=>`<button type="button" class="dfc" data-dfclr="${k}" title="Remove this filter">${esc(l)}: <b>${esc(v)}</b> <i>✕</i></button>`).join("")}<button type="button" class="dfc all" data-dfclr="all">Clear all</button></div>`:""}
+   ${nF?`<div class="dfchips"><span class="dfl">Filtered by</span>${[bu?["bu","BU",bu]:null,F.cf?["cf","CF",F.cf]:null,F.proc?["proc","Process area",F.proc]:null,F.init?["init","Project type",F.init]:null,F.prog?["prog","Programme",F.prog]:null,qq?["q","Project",F.q]:null,F.stOff.length?["st","Status",STL.filter(x=>!off.has(x)).join(", ")||"none"]:null].filter(Boolean).map(([k,l,v])=>`<button type="button" class="dfc" data-dfclr="${k}" title="Remove this filter">${esc(l)}: <b>${esc(String(v).split(MSEP).join(", "))}</b> <i>✕</i></button>`).join("")}<button type="button" class="dfc all" data-dfclr="all">Clear all</button></div>`:""}
    <span class="muted${nF?" dfcount":""}" style="margin-left:auto">${P.length} of ${allP.length} projects · ${A.length} tasks · ${Bl.length} benefit lines</span>
    <span class="muted finfo" title="Pick a BU, then a CF of that BU, then a project of that CF — or leave any on All. Status: untick a box to hide projects with that status, tick it to show them again (Only = show just that one). Type part of a name in Project to show all matching projects. These filters apply to every chart, KPI and table on the dashboard; dropdowns inside a card only change how that card is drawn.">ⓘ</span></div>
   ${ovKpis(P,A,D,Bl,{valRec,valOne,hrs,fteh,pTD,aTD,pids})}${ovNewHtml(P,Bl)}
-  ${ovAnalysisHtml(P,Bl,months,F.cf||bu||"All business units")}
+  ${ovAnalysisHtml(P,Bl,months,mLabel(F.cf)||mLabel(bu)||"All business units")}
   <div id="cellList"></div>
   <details class="card pad" style="margin-top:14px"><summary><b>Detail tables</b> <span class="muted">— status × BU / CF / process area and the delayed & at-risk list</span></summary>
     <h2 style="margin-top:12px">Projects by status × ${bu?"CF":"BU"}</h2>${matrix(bu?"CF":"BU",P,r=>gv("Projects",bu?FP.cf:FP.bu,r),{})}

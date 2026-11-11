@@ -178,7 +178,7 @@ function progTag(r){const t=String(gv("Projects","AE",r)||"").trim().toUpperCase
 function progOf(r){const p=String(pId(r)||"").split("-")[0].toUpperCase();return p==="2T"?"2T":p==="CR"?"Complexity Reduction":p==="SIMP"?"SIMP":progTag(r)}
 function progCode(r){const p=progTag(r);return p==="2T"?"2T":p==="SIMP"?"SIMP":"CR"}
 /* a Programme <select> for any filter bar; counts optional */
-function progSel(id,val,cnt){return `<label title="Filter by project code: SIMP- = Simplification & Deep Dives, 2T- = 2T Club, CR- = Complexity Reduction">Programme <select id="${id}"${val?' class="act"':""}><option value="">All</option>${PROGS.map(p=>`<option value="${esc(p)}" ${p===val?"selected":""}>${esc(p==="SIMP"?"SIMP- (Simplification)":p==="2T"?"2T- (2T Club)":"CR- (Complexity Reduction)")}${cnt?` (${cnt(p)})`:""}</option>`).join("")}</select></label>`}
+function progSel(id,val,cnt){return `<label title="Filter by project code: SIMP- = Simplification & Deep Dives, 2T- = 2T Club, CR- = Complexity Reduction">Programme <select id="${id}" data-v="${esc(val||"")}"${val?' class="act"':""}><option value="">All</option>${PROGS.map(p=>`<option value="${esc(p)}" ${p===val?"selected":""}>${esc(p==="SIMP"?"SIMP- (Simplification)":p==="2T"?"2T- (2T Club)":"CR- (Complexity Reduction)")}${cnt?` (${cnt(p)})`:""}</option>`).join("")}</select></label>`}
 function genProjectId(r){
   const pre=[progCode(r),codeFor("L_Init","L_InitCode",gv("Projects",FP.init,r),"GEN"),codeFor("L_BU","L_BUCode",gv("Projects",FP.bu,r),"GRP"),codeFor("L_CF","L_CFCode",gv("Projects",FP.cf,r),"GEN")].join("-")+"-";
   /* one number sequence for 2T and SIMP, so "SSC-048" never means two projects */

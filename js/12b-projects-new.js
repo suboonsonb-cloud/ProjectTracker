@@ -2,7 +2,7 @@
 const PL_PAGE=10;
 function plFiltered(){const F=UI.qu;const {all,P2,rows,off}=quRows();const T=F.ptab||"all";
   const attn=r=>["Delayed","At Risk"].includes(pStat(r));
-  const st=F.st1||"";const base=rows.filter(r=>!st||pStat(r)===st);
+  const st=F.st1||"";const base=rows.filter(r=>mIn(st,pStat(r)));
   const tabs=[["all","All projects",base],["active","Active",base.filter(r=>!["Completed","Cancelled"].includes(pStat(r)))],["attn","Needs attention",base.filter(attn)],["done","Completed",base.filter(r=>pStat(r)==="Completed")]];
   const cur=(tabs.find(t=>t[0]===T)||tabs[0])[2];return {all,P2,tabs,cur,T}}
 function plOwner(r){return gv("Projects",FP.lead,r)||gv("Projects",FP.wsl,r)||"—"}
@@ -21,14 +21,14 @@ function vPList(m){const F=UI.qu;liveCalc();const {all,tabs,cur,T}=plFiltered();
   ${flows.length?`<div class="plcon"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="6" height="6" rx="1.2"/><rect x="15" y="3" width="6" height="6" rx="1.2"/><rect x="9" y="15" width="6" height="6" rx="1.2"/><path d="M6 9v2a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9M12 13v2"/></svg></span><div><b>See how your projects connect</b><span>Explore end-to-end processes, lanes, and linked projects.</span></div><span class="sp"></span><button class="btn plcbtn" id="plE2E">Open E2E flow map</button></div>`:""}
   <div class="card pllist">
     <div class="pltool"><label class="plsearch"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" id="plQ" placeholder="Search projects or project ID" value="${esc(F.q||"")}" aria-label="Search projects"></label>
-      <label class="plsel"><span class="sr">Status</span><select id="plSt" aria-label="Status"><option value="">Status: All</option>${sts.map(s=>`<option value="${esc(s)}" ${F.st1===s?"selected":""}>${esc(s)}</option>`).join("")}</select></label>
-      <label class="plsel"><span class="sr">Programme</span><select id="plProg" aria-label="Programme (project code)"${F.prog?' class="act"':""}><option value="">Programme: All</option>${PROGS.map(p=>`<option value="${esc(p)}" ${F.prog===p?"selected":""}>${esc(p==="SIMP"?"SIMP- Simplification":p==="2T"?"2T- 2T Club":"CR- Complexity Reduction")}</option>`).join("")}</select></label>
+      <label class="plsel"><span class="sr">Status</span><select id="plSt" aria-label="Status" data-v="${esc(F.st1||"")}"><option value="">Status: All</option>${sts.map(s=>`<option value="${esc(s)}" ${F.st1===s?"selected":""}>${esc(s)}</option>`).join("")}</select></label>
+      <label class="plsel"><span class="sr">Programme</span><select id="plProg" data-v="${esc(F.prog||"")}" aria-label="Programme (project code)"${F.prog?' class="act"':""}><option value="">Programme: All</option>${PROGS.map(p=>`<option value="${esc(p)}" ${F.prog===p?"selected":""}>${esc(p==="SIMP"?"SIMP- Simplification":p==="2T"?"2T- 2T Club":"CR- Complexity Reduction")}</option>`).join("")}</select></label>
       <button type="button" class="btn plmore ${F.more?"on":""}" id="plMore" aria-expanded="${!!F.more}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4"/></svg> More filters${nf?` <span class="nfb">${nf}</span>`:""}</button>
       ${nf||F.q||F.st1?`<button type="button" class="btn small" id="plClr">Clear</button>`:""}<span class="sp"></span><span class="muted plcnt">${n} project${n===1?"":"s"}</span></div>
     ${F.more?`<div class="plmorebox">
-      <label>CF <select data-plf="cf"><option value="">All</option>${fv(FP.cf).map(x=>`<option ${x===F.cf?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
-      <label>Process area <select data-plf="proc"><option value="">All</option>${fv(FP.proc).map(x=>`<option ${x===F.proc?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
-      <label>Division / team <select data-plf="team"><option value="">All</option>${fv("AB").map(x=>`<option ${x===F.team?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
+      <label>CF <select data-plf="cf" data-v="${esc(F.cf||"")}"><option value="">All</option>${fv(FP.cf).map(x=>`<option ${x===F.cf?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
+      <label>Process area <select data-plf="proc" data-v="${esc(F.proc||"")}"><option value="">All</option>${fv(FP.proc).map(x=>`<option ${x===F.proc?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
+      <label>Division / team <select data-plf="team" data-v="${esc(F.team||"")}"><option value="">All</option>${fv("AB").map(x=>`<option ${x===F.team?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
       <label>⚑ RAIDD <select data-plf="rd">${QU_RD.map(([k,t])=>`<option value="${k}" ${k===(F.rd||"")?"selected":""}>${esc(t)}</option>`).join("")}</select></label>
       ${flows.length?`<label>E2E flow <select data-plf="flow"><option value="">All</option><option value="none" ${F.flow==="none"?"selected":""}>Not mapped yet</option>${flows.map(f=>`<option value="${esc(f.id)}" ${F.flow===f.id?"selected":""}>${esc(f.name)}</option>`).join("")}</select></label>
         ${F.flow&&F.flow!=="none"?`<label>Lane <select data-plf="lane"><option value="">All</option>${laneOpts(F.flow).map(l=>`<option ${l===F.lane?"selected":""}>${esc(l)}</option>`).join("")}</select></label>`:""}`:""}</div>`:""}

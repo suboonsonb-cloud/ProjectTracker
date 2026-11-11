@@ -336,7 +336,7 @@ function quRdPass(r,k){if(!k)return true;const rs=raiddOf(pId(r));const open=rs.
   if(k==="od")return open.some(x=>+gv("RAIDD",FD.due,x)&&+gv("RAIDD",FD.due,x)<TODAY&&gv("RAIDD",FD.type,x)!=="Re-plan");
   const t=k.slice(2);if(t==="Re-plan")return rs.some(x=>gv("RAIDD",FD.type,x)==="Re-plan");return open.some(x=>gv("RAIDD",FD.type,x)===t)}
 function quRows(){const F=UI.qu;const all=rowsOf("Projects").filter(r=>gv("Projects",FP.name,r)!=="");const fv=(r,c)=>gv("Projects",c,r)||"(blank)";
-  const P1=all.filter(r=>(!F.cf||fv(r,FP.cf)===F.cf)&&(!F.prog||progOf(r)===F.prog));if(F.proc&&!P1.some(r=>fv(r,FP.proc)===F.proc))F.proc="";const P2a=P1.filter(r=>!F.proc||fv(r,FP.proc)===F.proc);if(F.team&&!P2a.some(r=>fv(r,"AB")===F.team))F.team="";const P2b=P2a.filter(r=>!F.team||fv(r,"AB")===F.team);if(F.flow&&F.flow!=="none"&&!e2eFlows().some(f=>f.id===F.flow)){F.flow="";F.lane=""}const P2=P2b.filter(r=>passE2E(r,F.flow,F.lane)&&quRdPass(r,F.rd));const off=new Set(F.stOff||[]);const q=(F.q||"").toLowerCase();
+  const P1=all.filter(r=>mIn(F.cf,fv(r,FP.cf))&&mIn(F.prog,progOf(r)));F.proc=mKeep(F.proc,uniq(P1.map(r=>fv(r,FP.proc))));const P2a=P1.filter(r=>mIn(F.proc,fv(r,FP.proc)));F.team=mKeep(F.team,uniq(P2a.map(r=>fv(r,"AB"))));const P2b=P2a.filter(r=>mIn(F.team,fv(r,"AB")));if(F.flow&&F.flow!=="none"&&!e2eFlows().some(f=>f.id===F.flow)){F.flow="";F.lane=""}const P2=P2b.filter(r=>passE2E(r,F.flow,F.lane)&&quRdPass(r,F.rd));const off=new Set(F.stOff||[]);const q=(F.q||"").toLowerCase();
   // rows edited in this session stay visible even if their status is now filtered out
   const rows=P2.filter(r=>(F.edited.has(r)||!off.has(pStat(r)))&&(!q||(pId(r)+" "+gv("Projects",FP.name,r)+" "+gv("Projects",FP.lead,r)+" "+gv("Projects",FP.wsl,r)+" "+gv("Projects","AG",r)+" "+gv("Projects","AB",r)+" "+gv("Projects","Z",r)).toLowerCase().includes(q))&&(!F.chg||F.edited.has(r)));
   return {all,P1,P2,P2a,P2b,rows,off}}
@@ -345,10 +345,10 @@ function quCountText(){const {all,rows}=quRows();return `${rows.length} of ${all
 function quFilterBar(){const F=UI.qu;const {all,P1,P2,P2a,P2b,off}=quRows();const fv=(r,c)=>gv("Projects",c,r)||"(blank)";
   const cfs=uniq(all.map(r=>fv(r,FP.cf)));const procs=uniq(P1.map(r=>fv(r,FP.proc)));const sts=off.size?STL.slice():STL.filter(s=>P2.some(r=>pStat(r)===s));
   return e2eBar(P2b)+`<div class="filterbar card dfilt rfilt${F.prog||F.cf||F.proc||F.team||F.rd?" filtered":""}"><b>Filter</b><input type="search" id="quQ" class="bq" placeholder="Search project / ID / leader…" value="${esc(F.q||"")}">
-   ${progSel("quProg",F.prog||"",p=>all.filter(r=>(!F.cf||fv(r,FP.cf)===F.cf)&&progOf(r)===p).length)}
-   <label>CF <select id="quCF"><option value="">All</option>${cfs.map(x=>`<option ${x===F.cf?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
-   <label>Process area <select id="quProc"><option value="">All</option>${procs.map(x=>`<option ${x===F.proc?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
-   <label>Division / team <select id="quTeam"><option value="">All</option>${uniq(P2a.map(r=>fv(r,"AB"))).map(x=>`<option ${x===F.team?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
+   ${progSel("quProg",F.prog||"",p=>all.filter(r=>mIn(F.cf,fv(r,FP.cf))&&progOf(r)===p).length)}
+   <label>CF <select id="quCF" data-v="${esc(F.cf||"")}"><option value="">All</option>${cfs.map(x=>`<option ${x===F.cf?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
+   <label>Process area <select id="quProc" data-v="${esc(F.proc||"")}"><option value="">All</option>${procs.map(x=>`<option ${x===F.proc?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
+   <label>Division / team <select id="quTeam" data-v="${esc(F.team||"")}"><option value="">All</option>${uniq(P2a.map(r=>fv(r,"AB"))).map(x=>`<option ${x===F.team?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
     <label class="muted" style="display:inline-flex;align-items:center;gap:6px">⚑ RAIDD <select id="quRd">${QU_RD.map(([k,t])=>{const n=k?P2b.filter(r=>passE2E(r,F.flow,F.lane)&&quRdPass(r,k)).length:"";return `<option value="${k}" ${k===(F.rd||"")?"selected":""}>${esc(t)}${n!==""?` (${n})`:""}</option>`}).join("")}</select></label>
    ${stChips(sts,off,s=>P2.filter(r=>pStat(r)===s).length,"qst")}
    <label><input type="checkbox" id="quChg" ${F.chg?"checked":""}> only edited</label>

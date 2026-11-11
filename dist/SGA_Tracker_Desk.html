@@ -1236,11 +1236,25 @@ button.ovhr{cursor:pointer}button.ovhr:hover{background:#F6F3FF}
 .sutab tr.su-ok .suc{color:#1E7B4E}.sutab tr.su-def .suc{color:var(--accent-d)}
 .sutab .suc{font-size:12px;min-width:240px}.sutab .suc .btn{margin-left:4px}
 .suh{margin:14px 0 6px;font-size:13px;color:#B42318}
+/* r80 — multi-select filters */
+select.msnative{display:none!important}
+.msb{display:inline-flex;align-items:center;gap:6px;height:34px;min-width:110px;max-width:260px;border:1px solid #DCD6F2;border-radius:10px;background:#fff;padding:0 10px 0 12px;font:inherit;font-size:13px;color:var(--ink);cursor:pointer;text-align:left;box-sizing:border-box}
+.msb span{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.msb i{font-style:normal;color:#7C5CFC;font-size:11px}
+.msb b{background:var(--accent);color:#fff;border-radius:999px;font-size:10.5px;min-width:18px;height:18px;display:inline-grid;place-items:center;padding:0 5px;box-sizing:border-box}
+.msb:hover{border-color:#B9AEF0}.msb.act{border-color:var(--accent);background:#EDE8FF;color:var(--accent-d);font-weight:700;box-shadow:0 0 0 3px rgba(124,92,252,.14)}
+.gx-morep .msb,.gx-tools .msb{height:36px}
+.msp{position:fixed;z-index:9999;background:#fff;border:1px solid #DCD6F2;border-radius:12px;box-shadow:0 14px 34px rgba(30,27,46,.18);padding:8px;display:flex;flex-direction:column;gap:6px;max-width:380px}
+.msh{display:flex;align-items:center;gap:6px;padding:2px 4px 6px;border-bottom:1px solid #EEEBF8}.msn{flex:1;font-size:12px;font-weight:700;color:var(--accent-d)}
+.msh button{border:0;background:#F4F2FA;border-radius:7px;padding:3px 9px;font:inherit;font-size:11.5px;cursor:pointer;color:#3F3A57}.msh button:hover{background:#EDE8FF;color:var(--accent-d)}
+.mss{height:30px;border:1px solid #E2DDF5;border-radius:8px;padding:0 9px;font:inherit;font-size:12.5px}
+.msl{max-height:300px;overflow:auto;display:flex;flex-direction:column}
+.msi{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:7px;font-size:13px;cursor:pointer}.msi:hover{background:#F6F3FF}.msi input{accent-color:var(--accent);width:15px;height:15px;margin:0}
+.msf{display:flex;justify-content:flex-end;gap:6px;padding-top:6px;border-top:1px solid #EEEBF8}
 </style>
 </head>
 <body>
 <aside class="side" id="side" aria-label="Main navigation">
-  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r79</span></small></span></div>
+  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r80</span></small></span></div>
   <div class="sglab">WORKSPACE</div>
   <button type="button" class="wschip" id="btnOpen" title="Open the workbook (the database)"><span class="wsdot" aria-hidden="true"></span><span class="file" id="fileName">No workbook loaded</span><span class="chev" aria-hidden="true">⌄</span></button>
   <nav class="sidenav hidden" id="tabs"></nav>
@@ -1505,7 +1519,7 @@ function progTag(r){const t=String(gv("Projects","AE",r)||"").trim().toUpperCase
 function progOf(r){const p=String(pId(r)||"").split("-")[0].toUpperCase();return p==="2T"?"2T":p==="CR"?"Complexity Reduction":p==="SIMP"?"SIMP":progTag(r)}
 function progCode(r){const p=progTag(r);return p==="2T"?"2T":p==="SIMP"?"SIMP":"CR"}
 /* a Programme <select> for any filter bar; counts optional */
-function progSel(id,val,cnt){return `<label title="Filter by project code: SIMP- = Simplification & Deep Dives, 2T- = 2T Club, CR- = Complexity Reduction">Programme <select id="${id}"${val?' class="act"':""}><option value="">All</option>${PROGS.map(p=>`<option value="${esc(p)}" ${p===val?"selected":""}>${esc(p==="SIMP"?"SIMP- (Simplification)":p==="2T"?"2T- (2T Club)":"CR- (Complexity Reduction)")}${cnt?` (${cnt(p)})`:""}</option>`).join("")}</select></label>`}
+function progSel(id,val,cnt){return `<label title="Filter by project code: SIMP- = Simplification & Deep Dives, 2T- = 2T Club, CR- = Complexity Reduction">Programme <select id="${id}" data-v="${esc(val||"")}"${val?' class="act"':""}><option value="">All</option>${PROGS.map(p=>`<option value="${esc(p)}" ${p===val?"selected":""}>${esc(p==="SIMP"?"SIMP- (Simplification)":p==="2T"?"2T- (2T Club)":"CR- (Complexity Reduction)")}${cnt?` (${cnt(p)})`:""}</option>`).join("")}</select></label>`}
 function genProjectId(r){
   const pre=[progCode(r),codeFor("L_Init","L_InitCode",gv("Projects",FP.init,r),"GEN"),codeFor("L_BU","L_BUCode",gv("Projects",FP.bu,r),"GRP"),codeFor("L_CF","L_CFCode",gv("Projects",FP.cf,r),"GEN")].join("-")+"-";
   /* one number sequence for 2T and SIMP, so "SSC-048" never means two projects */
@@ -1566,6 +1580,48 @@ function codeGuideHtml(o={}){const md=typeof hasMD==="function"&&hasMD();
 function openCodeGuide(){choose("How project codes work",codeGuideHtml(),[["ok","Close","primary"]])}
 document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("[data-codeguide]");if(!b)return;e.preventDefault();e.stopPropagation();openCodeGuide()},true);
 const CG_BTN=`<button type="button" class="cgbtn" data-codeguide title="How project codes work">ⓘ code guide</button>`;
+
+/* 01c-multisel.js — every filter dropdown can pick several values.
+   A filter <select data-v="current value"> is shown as a button + checklist; the picked values are joined with "||" and
+   written back into the same <select> (a matching <option> is added) with a normal "change" event, so every page's own
+   handler keeps working. Filter code uses mIn(state,value) instead of state===value. */
+"use strict";
+const MSEP="||";
+function mIn(sel,v){if(sel==null||sel==="")return true;return String(sel).split(MSEP).includes(String(v))}
+function mList(sel){return sel?String(sel).split(MSEP).filter(Boolean):[]}
+/* drop picked values that are no longer offered (e.g. after the BU changed) */
+function mKeep(sel,avail){if(!sel)return "";const a=new Set(avail.map(String));return mList(sel).filter(x=>a.has(x)).join(MSEP)}
+function mLabel(sel){const l=mList(sel);return l.length>1?`${l[0]} +${l.length-1}`:l[0]||""}
+let MS_OPEN=null;
+function msEnhance(root){(root||document).querySelectorAll("select[data-v]:not([data-ms])").forEach(sel=>{
+  sel.dataset.ms="1";const v=sel.dataset.v||"";
+  if(v&&![...sel.options].some(o=>o.value===v)){const o=document.createElement("option");o.value=v;o.textContent=mLabel(v);sel.appendChild(o)}
+  sel.value=v;sel.classList.add("msnative");
+  const b=document.createElement("button");b.type="button";b.className="msb"+(v?" act":"")+(sel.className?" "+sel.className.replace(/\bmsnative\b/,""):"");b.setAttribute("aria-haspopup","listbox");
+  const opts=[...sel.options].filter(o=>o.value!==""&&!o.value.includes(MSEP));const first=sel.options[0]&&sel.options[0].value===""?sel.options[0].textContent:"All";
+  const picked=mList(v);const txt=o=>o.textContent.replace(/\s*\(\d+\)\s*$/,"");
+  const prefix=(first.match(/^([^:]+):\s*All/)||[])[1];
+  b.innerHTML=`<span>${picked.length?(prefix?esc(prefix)+": ":"")+esc(picked.length===1?txt(opts.find(o=>o.value===picked[0])||{textContent:picked[0]}):`${picked.length} selected`):esc(first)}</span>${picked.length>1?`<b>${picked.length}</b>`:""}<i aria-hidden="true">▾</i>`;
+  b.title=picked.length?picked.map(p=>txt(opts.find(o=>o.value===p)||{textContent:p})).join(", "):(sel.title||first);
+  sel.after(b);b.onclick=e=>{e.stopPropagation();msOpen(sel,b,opts,first)}})}
+function msClose(apply){const S_=MS_OPEN;if(!S_)return;MS_OPEN=null;S_.pop.remove();document.removeEventListener("mousedown",S_.out,true);window.removeEventListener("resize",S_.rz);if(apply)S_.apply()}
+function msOpen(sel,b,opts,first){if(MS_OPEN){const same=MS_OPEN.sel===sel;msClose(true);if(same)return}
+  const cur=new Set(mList(sel.value));const pop=document.createElement("div");pop.className="msp";pop.setAttribute("role","listbox");pop.setAttribute("aria-multiselectable","true");
+  const draw=(q="")=>{const ql=q.toLowerCase();pop.querySelector(".msl").innerHTML=opts.filter(o=>!ql||o.textContent.toLowerCase().includes(ql)).map(o=>`<label class="msi"><input type="checkbox" value="${esc(o.value)}" ${cur.has(o.value)?"checked":""}><span>${esc(o.textContent)}</span></label>`).join("")||'<p class="muted" style="margin:6px">No match</p>';
+    pop.querySelectorAll(".msl input").forEach(c=>c.onchange=()=>{c.checked?cur.add(c.value):cur.delete(c.value);cnt()})};
+  const cnt=()=>{pop.querySelector(".msn").textContent=cur.size?`${cur.size} selected`:first};
+  pop.innerHTML=`<div class="msh"><span class="msn"></span><button type="button" class="msall">All</button><button type="button" class="msnone">Clear</button></div>${opts.length>7?'<input type="search" class="mss" placeholder="Search…">':""}<div class="msl"></div><div class="msf"><button type="button" class="btn small" data-x>Cancel</button><button type="button" class="btn small primary" data-ok>Apply</button></div>`;
+  document.body.appendChild(pop);draw();cnt();
+  const place=()=>{const r=b.getBoundingClientRect(),z=typeof ZF==="function"?ZF():1;pop.style.left=Math.max(8,Math.min(r.left/z,innerWidth/z-pop.offsetWidth-8))+"px";const below=r.bottom/z+4;pop.style.top=(below+pop.offsetHeight>innerHeight/z-8?Math.max(8,r.top/z-pop.offsetHeight-4):below)+"px";pop.style.minWidth=Math.max(220,r.width/z)+"px"};place();
+  const apply=()=>{const val=opts.map(o=>o.value).filter(x=>cur.has(x)).join(MSEP);if(val===sel.value)return;if(val&&![...sel.options].some(o=>o.value===val)){const o=document.createElement("option");o.value=val;o.textContent=mLabel(val);sel.appendChild(o)}sel.value=val;sel.dispatchEvent(new Event("input",{bubbles:true}));sel.dispatchEvent(new Event("change",{bubbles:true}))};
+  const out=e=>{if(!pop.contains(e.target)&&e.target!==b&&!b.contains(e.target))msClose(true)};const rz=()=>place();
+  MS_OPEN={sel,pop,apply,out,rz};setTimeout(()=>document.addEventListener("mousedown",out,true),0);window.addEventListener("resize",rz);
+  pop.querySelector(".msall").onclick=()=>{opts.forEach(o=>cur.add(o.value));draw(pop.querySelector(".mss")?pop.querySelector(".mss").value:"");cnt()};
+  pop.querySelector(".msnone").onclick=()=>{cur.clear();draw(pop.querySelector(".mss")?pop.querySelector(".mss").value:"");cnt()};
+  pop.querySelector("[data-ok]").onclick=()=>msClose(true);pop.querySelector("[data-x]").onclick=()=>msClose(false);
+  const s=pop.querySelector(".mss");if(s){s.oninput=()=>draw(s.value);setTimeout(()=>s.focus(),0)}
+  pop.addEventListener("keydown",e=>{if(e.key==="Escape")msClose(false);if(e.key==="Enter"){e.preventDefault();msClose(true)}})}
+new MutationObserver(()=>{if(document.querySelector("select[data-v]:not([data-ms])"))msEnhance()}).observe(document.documentElement,{childList:true,subtree:true});
 
 /* ---------------- live calculation engine (mirrors the Excel formulas) ---------------- */
 const STL=["Not Started","On Track","At Risk","Delayed","On-Hold","Completed","Cancelled"];
@@ -2196,7 +2252,7 @@ function renderLanding(){
     const f=e.dataTransfer.files[0];if(f)await ingest(await f.arrayBuffer(),f.name,null,f.lastModified)};
 }
 function uniq(a){return [...new Set(a.filter(x=>x!==""&&x!=null))].sort()}
-function sel(id,label,opts,val){return `<select id="${id}" title="${esc(label)}"><option value="">${esc(label)}: All</option>${opts.map(o=>`<option ${o===val?"selected":""}>${esc(o)}</option>`).join("")}</select>`}
+function sel(id,label,opts,val,multi){return `<select id="${id}" title="${esc(label)}"${multi?` data-v="${esc(val||"")}"`:""}><option value="">${esc(label)}: All</option>${opts.map(o=>`<option ${o===val?"selected":""}>${esc(o)}</option>`).join("")}</select>`}
 function changedRows(sheet){const s=new Set();for(const c of S.changes)if(c.sheet===sheet)s.add(+c.ref.replace(/[A-Z]+/,""));return s}
 
 /* ---- dashboard (charts) ---- */
@@ -2430,11 +2486,11 @@ function vDash(m,keepScroll){const _y=window.scrollY,_x=window.scrollX;
   vDash0(m);if(keepScroll&&Math.abs(window.scrollY-_y)>1)window.scrollTo(_x,_y)}
 function vDash0(m){
   const allP=rowsOf("Projects");const F=UI.dash;const fv=(r,c)=>gv("Projects",c,r)||"(blank)";
-  const bus=uniq(allP.map(r=>fv(r,FP.bu)));if(F.bu&&!bus.includes(F.bu))F.bu="";const bu=F.bu;
-  const P1=allP.filter(r=>!bu||fv(r,FP.bu)===bu);const cfs_=uniq(P1.map(r=>fv(r,FP.cf)));if(F.cf&&!cfs_.includes(F.cf))F.cf="";
-  const P2=P1.filter(r=>!F.cf||fv(r,FP.cf)===F.cf);const procs_=uniq(P2.map(r=>fv(r,FP.proc)));if(F.proc&&!procs_.includes(F.proc))F.proc="";
-  const P2b=P2.filter(r=>!F.proc||fv(r,FP.proc)===F.proc);const inits_=uniq(P2b.map(r=>fv(r,FP.init)));if(F.init&&!inits_.includes(F.init))F.init="";
-  const P3a=P2b.filter(r=>(!F.init||fv(r,FP.init)===F.init)&&(!F.prog||progOf(r)===F.prog));F.stOff=Array.isArray(F.stOff)?F.stOff:[];const off=new Set(F.stOff);const sts_=off.size?STL.slice():STL.filter(st=>P3a.some(r=>pStat(r)===st));
+  const bus=uniq(allP.map(r=>fv(r,FP.bu)));F.bu=mKeep(F.bu,bus);const bu=F.bu;
+  const P1=allP.filter(r=>mIn(bu,fv(r,FP.bu)));const cfs_=uniq(P1.map(r=>fv(r,FP.cf)));F.cf=mKeep(F.cf,cfs_);
+  const P2=P1.filter(r=>mIn(F.cf,fv(r,FP.cf)));const procs_=uniq(P2.map(r=>fv(r,FP.proc)));F.proc=mKeep(F.proc,procs_);
+  const P2b=P2.filter(r=>mIn(F.proc,fv(r,FP.proc)));const inits_=uniq(P2b.map(r=>fv(r,FP.init)));F.init=mKeep(F.init,inits_);
+  const P3a=P2b.filter(r=>mIn(F.init,fv(r,FP.init))&&mIn(F.prog,progOf(r)));F.stOff=Array.isArray(F.stOff)?F.stOff:[];const off=new Set(F.stOff);const sts_=off.size?STL.slice():STL.filter(st=>P3a.some(r=>pStat(r)===st));
   const P3=P3a.filter(r=>!off.has(pStat(r)));const qq=(F.q||"").trim().toLowerCase();
   const P=P3.filter(r=>!qq||(pId(r)+" "+gv("Projects",FP.name,r)).toLowerCase().includes(qq));const pids=new Set(P.map(pId));DASHP=pids;
   const nF=[bu,F.cf,F.proc,F.init,F.prog,F.stOff.length?1:"",qq].filter(Boolean).length;
@@ -2473,19 +2529,19 @@ function vDash0(m){
   m.innerHTML=`${banner("report")}
   <div class="ovh"><div><h1>Your projects, at a glance.</h1><p>Keep the big picture. Move every detail forward.</p></div><span class="sp"></span>${typeof canEdit==="function"&&!canEdit()?"":`<button class="btn new" id="ovNew"><span aria-hidden="true">＋</span> New project</button>`}</div>
   <div class="filterbar card dfilt${nF?" filtered":""}"><b>Filter dashboard${nF?` <span class="dfn">${nF} active</span>`:""}</b>
-   <label>BU <select id="fBU"><option value="">All</option>${bus.map(b=>`<option ${b===bu?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
-   <label>CF <select id="fCF"><option value="">All${bu?" in "+esc(bu):""}</option>${cfs_.map(b=>`<option ${b===F.cf?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
-   <label>Project <span style="width:300px;display:inline-block">${comboHtml("fQ",F.q||"",[{v:"",t:`All projects${F.cf?" in "+esc(F.cf):bu?" in "+esc(bu):""} (${P3.length})`},...P3.map(r=>({v:pId(r),t:pId(r)+" — "+gv("Projects",FP.name,r)}))],{strict:false})}</span></label>
-   <label>Process area <select id="fProc"><option value="">All</option>${procs_.map(b=>`<option ${b===F.proc?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
-   ${progSel("fProg",F.prog||"",p=>P2b.filter(r=>(!F.init||fv(r,FP.init)===F.init)&&progOf(r)===p).length)}
-   <label title="Project type = Initiative (Automation, Standardisation …)">Project type <select id="fInit"><option value="">All</option>${inits_.map(b=>`<option value="${esc(b)}" ${b===F.init?"selected":""}>${esc(b)} (${P2b.filter(r=>fv(r,FP.init)===b).length})</option>`).join("")}</select></label>
+   <label>BU <select id="fBU" data-v="${esc(bu||"")}"><option value="">All</option>${bus.map(b=>`<option ${b===bu?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
+   <label>CF <select id="fCF" data-v="${esc(F.cf||"")}"><option value="">All${bu?" in "+esc(mLabel(bu)):""}</option>${cfs_.map(b=>`<option ${b===F.cf?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
+   <label>Project <span style="width:300px;display:inline-block">${comboHtml("fQ",F.q||"",[{v:"",t:`All projects${F.cf?" in "+esc(mLabel(F.cf)):bu?" in "+esc(mLabel(bu)):""} (${P3.length})`},...P3.map(r=>({v:pId(r),t:pId(r)+" — "+gv("Projects",FP.name,r)}))],{strict:false})}</span></label>
+   <label>Process area <select id="fProc" data-v="${esc(F.proc||"")}"><option value="">All</option>${procs_.map(b=>`<option ${b===F.proc?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
+   ${progSel("fProg",F.prog||"",p=>P2b.filter(r=>mIn(F.init,fv(r,FP.init))&&progOf(r)===p).length)}
+   <label title="Project type = Initiative (Automation, Standardisation …)">Project type <select id="fInit" data-v="${esc(F.init||"")}"><option value="">All</option>${inits_.map(b=>`<option value="${esc(b)}" ${b===F.init?"selected":""}>${esc(b)} (${P2b.filter(r=>fv(r,FP.init)===b).length})</option>`).join("")}</select></label>
    ${stChips(sts_,off,st=>P3a.filter(r=>pStat(r)===st).length,"dst")}
    
-   ${nF?`<div class="dfchips"><span class="dfl">Filtered by</span>${[bu?["bu","BU",bu]:null,F.cf?["cf","CF",F.cf]:null,F.proc?["proc","Process area",F.proc]:null,F.init?["init","Project type",F.init]:null,F.prog?["prog","Programme",F.prog]:null,qq?["q","Project",F.q]:null,F.stOff.length?["st","Status",STL.filter(x=>!off.has(x)).join(", ")||"none"]:null].filter(Boolean).map(([k,l,v])=>`<button type="button" class="dfc" data-dfclr="${k}" title="Remove this filter">${esc(l)}: <b>${esc(v)}</b> <i>✕</i></button>`).join("")}<button type="button" class="dfc all" data-dfclr="all">Clear all</button></div>`:""}
+   ${nF?`<div class="dfchips"><span class="dfl">Filtered by</span>${[bu?["bu","BU",bu]:null,F.cf?["cf","CF",F.cf]:null,F.proc?["proc","Process area",F.proc]:null,F.init?["init","Project type",F.init]:null,F.prog?["prog","Programme",F.prog]:null,qq?["q","Project",F.q]:null,F.stOff.length?["st","Status",STL.filter(x=>!off.has(x)).join(", ")||"none"]:null].filter(Boolean).map(([k,l,v])=>`<button type="button" class="dfc" data-dfclr="${k}" title="Remove this filter">${esc(l)}: <b>${esc(String(v).split(MSEP).join(", "))}</b> <i>✕</i></button>`).join("")}<button type="button" class="dfc all" data-dfclr="all">Clear all</button></div>`:""}
    <span class="muted${nF?" dfcount":""}" style="margin-left:auto">${P.length} of ${allP.length} projects · ${A.length} tasks · ${Bl.length} benefit lines</span>
    <span class="muted finfo" title="Pick a BU, then a CF of that BU, then a project of that CF — or leave any on All. Status: untick a box to hide projects with that status, tick it to show them again (Only = show just that one). Type part of a name in Project to show all matching projects. These filters apply to every chart, KPI and table on the dashboard; dropdowns inside a card only change how that card is drawn.">ⓘ</span></div>
   ${ovKpis(P,A,D,Bl,{valRec,valOne,hrs,fteh,pTD,aTD,pids})}${ovNewHtml(P,Bl)}
-  ${ovAnalysisHtml(P,Bl,months,F.cf||bu||"All business units")}
+  ${ovAnalysisHtml(P,Bl,months,mLabel(F.cf)||mLabel(bu)||"All business units")}
   <div id="cellList"></div>
   <details class="card pad" style="margin-top:14px"><summary><b>Detail tables</b> <span class="muted">— status × BU / CF / process area and the delayed & at-risk list</span></summary>
     <h2 style="margin-top:12px">Projects by status × ${bu?"CF":"BU"}</h2>${matrix(bu?"CF":"BU",P,r=>gv("Projects",bu?FP.cf:FP.bu,r),{})}
@@ -2913,9 +2969,9 @@ function listView(m,sheet,opts){
   let e2eHtml="";if(opts.e2e&&typeof e2eBar==="function"&&typeof hasE2E==="function"&&hasE2E()){e2eHtml=e2eBar(rows,opts.e2e.pid,opts.e2e.noun);rows=rows.filter(r=>passE2EPid(opts.e2e.pid(r),UI.qu.flow,UI.qu.lane))}
   /* programme = project code prefix (SIMP- / 2T- / CR-), shared with the Projects page */
   const pgOfPid=pid=>{const p=String(pid||"").split("-")[0].toUpperCase();return p==="2T"?"2T":p==="CR"?"Complexity Reduction":"SIMP"};const pgBase=rows;
-  if(opts.e2e&&UI.qu.prog)rows=rows.filter(r=>pgOfPid(opts.e2e.pid(r))===UI.qu.prog);
+  if(opts.e2e&&UI.qu.prog)rows=rows.filter(r=>mIn(UI.qu.prog,pgOfPid(opts.e2e.pid(r))));
   const fvs=(k,r)=>opts.filterAll&&opts.filterAll(k,r)||[opts.filterVal(k,r)];
-  for(const [k,v] of Object.entries(f)){if(k==="stOff"||!v)continue;rows=rows.filter(r=>fvs(k,r).some(x=>String(x)===v))}
+  for(const [k,v] of Object.entries(f)){if(k==="stOff"||!v)continue;rows=rows.filter(r=>fvs(k,r).some(x=>mIn(v,String(x))))}
   const chipK=(opts.filters.find(fl=>fl.k==="status"||fl.k==="bstat")||{}).k;const hasSt=!!chipK;const stOffL=new Set(hasSt&&Array.isArray(f.stOff)?f.stOff:[]);const stBase=rows;
   if(stOffL.size)rows=rows.filter(r=>!stOffL.has(String(opts.filterVal(chipK,r))));
   if(q)rows=rows.filter(r=>opts.cols.some(c=>String(c.v(r)).toLowerCase().includes(q)));
@@ -2925,7 +2981,7 @@ function listView(m,sheet,opts){
   const so=UI.sort[sheet];if(so&&opts.cols[so.i]){rows=[...rows].sort((a,b)=>{const x=cv(so.i,a),y=cv(so.i,b);if(x===""&&y!=="")return 1;if(y===""&&x!=="")return -1;return cfCmp(x,y)*so.dir})}
   const nCF=Object.keys(CF).length;
   const stVals=hasSt?(()=>{const u=uniq(rowsOf(sheet).map(r=>String(opts.filterVal(chipK,r))));const o=uniqOrder(["Not Started","In Progress","On Track","At Risk","Delayed","On-Hold","Completed","Cancelled",...listFromName("L_RStatus"),...listFromName("L_BStat")]);return [...o.filter(x=>u.includes(x)||stOffL.has(x)),...u.filter(x=>!o.includes(x))]})():[];
-  const filters=opts.filters.filter(fl=>fl.k!==chipK||stVals.length>1||stOffL.size).map(fl=>fl.k===chipK?stChips(stVals,stOffL,v=>stBase.filter(r=>String(opts.filterVal(chipK,r))===v).length,"l"+sheet):sel("f_"+fl.k,fl.label,uniq(rowsOf(sheet).flatMap(r=>fvs(fl.k,r).map(String))),f[fl.k]||"")).join("");
+  const filters=opts.filters.filter(fl=>fl.k!==chipK||stVals.length>1||stOffL.size).map(fl=>fl.k===chipK?stChips(stVals,stOffL,v=>stBase.filter(r=>String(opts.filterVal(chipK,r))===v).length,"l"+sheet):sel("f_"+fl.k,fl.label,uniq(rowsOf(sheet).flatMap(r=>fvs(fl.k,r).map(String))),f[fl.k]||"",true)).join("");
   const TBL=`<div class="card tablewrap"><table class="data"><thead><tr>${opts.cols.map((c,i)=>`<th class="${c.num?"num":""}"><span class="thf">${c.h}<button class="cfbtn${CF[i]?" on":""}${so&&so.i===i?" so":""}" data-cf="${i}" title="Filter / sort this column">${CF[i]?"⏷":so&&so.i===i?(so.dir>0?"▲":"▼"):"▾"}</button></span></th>`).join("")}<th>Actions</th></tr></thead>
    <tbody>${rows.map(r=>`<tr data-r="${r}" class="${chg.has(r)?"changed":""}">${opts.cols.map(c=>`<td class="${c.num?"num":""}">${c.html?c.html(r):`<span class="clip">${esc(c.v(r))}</span>`}</td>`).join("")}<td><span class="rowact"><button class="btn" data-edit="${r}">Edit</button><button class="btn danger" data-del="${r}">Delete</button></span></td></tr>`).join("")||`<tr><td colspan="${opts.cols.length+1}" class="muted">No rows</td></tr>`}</tbody></table></div>`;
   const LVF=`<div class="filterbar card dfilt lvfilt${opts.e2e&&UI.qu.prog?" filtered":""}"><b>Filter</b>${opts.noSearch?"":`<input type="search" id="q" class="bq" placeholder="Search…" value="${esc(UI.q[sheet]||"")}">`}${opts.e2e?progSel("lvProg",UI.qu.prog||"",p=>pgBase.filter(r=>pgOfPid(opts.e2e.pid(r))===p).length):""}${filters}${nCF||so?`<button class="btn small" id="cfClear">✕ Clear column filters${nCF?` (${nCF})`:""}${so?" & sort":""}</button>`:""}<span class="muted" style="margin-left:auto">${rows.length} ${opts.noun}${rows.length===1?"":"s"}</span></div>`;
@@ -3098,9 +3154,9 @@ function planRowFor(bid){const pc=S.sheets.Plan_Calc;for(let r=6;r<=CFG.Benefits
 function vReal(m){if(view==="Realisation"){view="Projects";UI.pview="real";UI.proj=null;renderTabs()}
   const B=rowsOf("Benefits");const q=(UI.q.Real||"").toLowerCase();const RF=UI.realF=UI.realF||{bu:"",cf:"",p:""};
   const pv_=(pid,c)=>{const pr=projRowById(pid);return pr?(gv("Projects",c,pr)||"(blank)"):"(no project)"};const pname=pid=>{const pr=projRowById(pid);return pr?gv("Projects",FP.name,pr):""};
-  const bus=uniq(B.map(r=>pv_(gv("Benefits",FB.pid,r),FP.bu)));if(RF.bu&&!bus.includes(RF.bu))RF.bu="";
-  const pgP=pid=>{const p=String(pid||"").split("-")[0].toUpperCase();return p==="2T"?"2T":p==="CR"?"Complexity Reduction":"SIMP"};const B0=B;const B1=B.filter(r=>(!RF.bu||pv_(gv("Benefits",FB.pid,r),FP.bu)===RF.bu)&&(!UI.qu.prog||pgP(gv("Benefits",FB.pid,r))===UI.qu.prog));const cfs=uniq(B1.map(r=>pv_(gv("Benefits",FB.pid,r),FP.cf)));if(RF.cf&&!cfs.includes(RF.cf))RF.cf="";
-  const B2=B1.filter(r=>!RF.cf||pv_(gv("Benefits",FB.pid,r),FP.cf)===RF.cf);const pids=uniq(B2.map(r=>gv("Benefits",FB.pid,r)));const pq=(RF.p||"").toLowerCase();
+  const bus=uniq(B.map(r=>pv_(gv("Benefits",FB.pid,r),FP.bu)));RF.bu=mKeep(RF.bu,bus);
+  const pgP=pid=>{const p=String(pid||"").split("-")[0].toUpperCase();return p==="2T"?"2T":p==="CR"?"Complexity Reduction":"SIMP"};const B0=B;const B1=B.filter(r=>mIn(RF.bu,pv_(gv("Benefits",FB.pid,r),FP.bu))&&mIn(UI.qu.prog,pgP(gv("Benefits",FB.pid,r))));const cfs=uniq(B1.map(r=>pv_(gv("Benefits",FB.pid,r),FP.cf)));RF.cf=mKeep(RF.cf,cfs);
+  const B2=B1.filter(r=>mIn(RF.cf,pv_(gv("Benefits",FB.pid,r),FP.cf)));const pids=uniq(B2.map(r=>gv("Benefits",FB.pid,r)));const pq=(RF.p||"").toLowerCase();
   const B3=B2.filter(r=>{const pid=gv("Benefits",FB.pid,r);return !pq||(pid+" "+pname(pid)).toLowerCase().includes(pq)});
   const list=B3.filter(r=>!q||(bId(r)+" "+gv("Benefits",FB.desc,r)+" "+gv("Benefits",FB.pid,r)).toLowerCase().includes(q));
   const nRF=[RF.bu,RF.cf,RF.p,q,UI.qu.prog].filter(Boolean).length;
@@ -3120,9 +3176,9 @@ function vReal(m){if(view==="Realisation"){view="Projects";UI.pview="real";UI.pr
   }
   m.innerHTML=`${hubHead("real")}
    <div class="filterbar card dfilt rfilt${nRF?" filtered":""}"><b>Filter</b>${progSel("rfProg",UI.qu.prog||"",p=>B0.filter(r=>pgP(gv("Benefits",FB.pid,r))===p).length)}
-    <label>BU <select id="rfBU"><option value="">All</option>${bus.map(b=>`<option ${b===RF.bu?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
-    <label>CF <select id="rfCF"><option value="">All${RF.bu?" in "+esc(RF.bu):""}</option>${cfs.map(b=>`<option ${b===RF.cf?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
-    <label>Project <span style="width:320px;display:inline-block">${comboHtml("rfP",RF.p||"",[{v:"",t:`All projects${RF.cf?" in "+esc(RF.cf):RF.bu?" in "+esc(RF.bu):""} (${pids.length})`},...pids.map(pid=>({v:pid,t:pid+" — "+pname(pid)}))],{strict:false})}</span></label>
+    <label>BU <select id="rfBU" data-v="${esc(RF.bu||"")}"><option value="">All</option>${bus.map(b=>`<option ${b===RF.bu?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
+    <label>CF <select id="rfCF" data-v="${esc(RF.cf||"")}"><option value="">All${RF.bu?" in "+esc(mLabel(RF.bu)):""}</option>${cfs.map(b=>`<option ${b===RF.cf?"selected":""}>${esc(b)}</option>`).join("")}</select></label>
+    <label>Project <span style="width:320px;display:inline-block">${comboHtml("rfP",RF.p||"",[{v:"",t:`All projects${RF.cf?" in "+esc(mLabel(RF.cf)):RF.bu?" in "+esc(mLabel(RF.bu)):""} (${pids.length})`},...pids.map(pid=>({v:pid,t:pid+" — "+pname(pid)}))],{strict:false})}</span></label>
     ${nRF?`<button class="btn small" id="rfClr">✕ Clear filters (${nRF})</button>`:""}<span class="muted" style="margin-left:auto">${list.length} of ${B.length} benefit lines</span></div>
    <div class="split"><div class="card"><div class="pad" style="padding-bottom:8px"><input type="search" id="rq" placeholder="Search benefit ID / description…" value="${esc(UI.q.Real||"")}" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:7px 10px"></div>
     <div class="list">${list.map(r=>`<div class="it ${r===cur?"on":""}" data-r="${r}"><div class="t">${esc(bId(r))} · ${esc(gv("Benefits",FB.desc,r))}</div><div class="s">${esc(gv("Benefits",FB.pid,r))} · ${esc(pname(gv("Benefits",FB.pid,r)).slice(0,40))} · ${esc(gv("Benefits",FB.nature,r)||"Recurring")}</div></div>`).join("")||`<div class="pad muted">No benefits</div>`}</div></div><div>${right}</div></div>`;
@@ -3157,14 +3213,14 @@ function scrollKey(e,root){const p=[];for(let n=e;n&&n!==root;n=n.parentElement)
 function vGantt0(m){
   const g=UI.gantt;const P=projects().filter(p=>p.id);
   const fv=(p,f)=>gv("Projects",f,p.r)||"(blank)";
-  const bus=uniq(P.map(p=>fv(p,FP.bu)));const P1=P.filter(p=>!g.bu||fv(p,FP.bu)===g.bu);
-  const cfs=uniq(P1.map(p=>fv(p,FP.cf)));if(g.cf&&!cfs.includes(g.cf))g.cf="";const P2=P1.filter(p=>!g.cf||fv(p,FP.cf)===g.cf);
-  const procs=uniq(P2.map(p=>fv(p,FP.proc)));if(g.proc&&!procs.includes(g.proc))g.proc="";const P2b=P2.filter(p=>!g.proc||fv(p,FP.proc)===g.proc);
-  const teams=uniq(P2b.map(p=>fv(p,"AB")));if(g.team&&!teams.includes(g.team))g.team="";const P2c=P2b.filter(p=>!g.team||fv(p,"AB")===g.team);
-  const inits=uniq(P2c.map(p=>fv(p,FP.init)));if(g.init&&!inits.includes(g.init))g.init="";const P2d=P2c.filter(p=>(!g.init||fv(p,FP.init)===g.init)&&(!g.prog||progOf(p.r)===g.prog));
+  const bus=uniq(P.map(p=>fv(p,FP.bu)));g.bu=mKeep(g.bu,bus);const P1=P.filter(p=>mIn(g.bu,fv(p,FP.bu)));
+  const cfs=uniq(P1.map(p=>fv(p,FP.cf)));g.cf=mKeep(g.cf,cfs);const P2=P1.filter(p=>mIn(g.cf,fv(p,FP.cf)));
+  const procs=uniq(P2.map(p=>fv(p,FP.proc)));g.proc=mKeep(g.proc,procs);const P2b=P2.filter(p=>mIn(g.proc,fv(p,FP.proc)));
+  const teams=uniq(P2b.map(p=>fv(p,"AB")));g.team=mKeep(g.team,teams);const P2c=P2b.filter(p=>mIn(g.team,fv(p,"AB")));
+  const inits=uniq(P2c.map(p=>fv(p,FP.init)));g.init=mKeep(g.init,inits);const P2d=P2c.filter(p=>mIn(g.init,fv(p,FP.init))&&mIn(g.prog,progOf(p.r)));
   /* status: one pick from the dropdown (All = every status) */
-  const stCount=st=>P2d.filter(p=>pStat(p.r)===st).length;if(g.st&&!STL.includes(g.st))g.st="";
-  const P3=P2d.filter(p=>!g.st||pStat(p.r)===g.st);
+  const stCount=st=>P2d.filter(p=>pStat(p.r)===st).length;g.st=mKeep(g.st,STL);
+  const P3=P2d.filter(p=>mIn(g.st,pStat(p.r)));
   /* E2E map of every flow ▸ lane ▸ project (before filters) — used for grouping, lane search and the swimlane card */
   const MAP=gFlowMap();const pNames={};MAP.forEach(F=>F.lanes.forEach(L=>L.ids.forEach(pid=>{(pNames[pid]=pNames[pid]||[]).push(F.f.name,L.name)})));
   /* search box: an exact ID shows that project; other text matches project ID / name, or the flow / lane it sits in */
@@ -3267,12 +3323,12 @@ function vGantt0(m){
   <div class="card gx-tools">
     <label class="gx-search">${IC.search}<input id="gQ" type="search" placeholder="Search projects or lanes" value="${esc(g.q||"")}" autocomplete="off"></label>
     <select id="ggrp" class="gx-sel" title="Group the rows"><option value="e2e" ${g.grp!=="flat"?"selected":""}>By E2E flow</option><option value="flat" ${g.grp==="flat"?"selected":""}>By project</option></select>
-    <select id="gst" class="gx-sel${g.st?" act":""}" title="Status"><option value="">Status: All</option>${STL.map(st=>`<option value="${esc(st)}" ${g.st===st?"selected":""}>${esc(st)} (${stCount(st)})</option>`).join("")}</select>
+    <select id="gst" class="gx-sel${g.st?" act":""}" title="Status" data-v="${esc(g.st||"")}"><option value="">Status: All</option>${STL.map(st=>`<option value="${esc(st)}" ${g.st===st?"selected":""}>${esc(st)} (${stCount(st)})</option>`).join("")}</select>
     <button class="btn gx-more${g.more?" on":""}${nMore?" act":""}" id="gmore" aria-expanded="${!!g.more}">${IC.filt}More filters${nMore?`<b>${nMore}</b>`:""}</button>
     <label class="gx-chk"><input type="checkbox" id="gh" ${g.hideDone?"checked":""}> Hide completed</label>
     <span class="sp"></span><span class="gx-count">${PR.length} of ${P.length} projects</span>
     <span class="seg gx-unit"><button data-gunit="month" class="${wk?"":"on"}">Month</button><button data-gunit="week" class="${wk?"on":""}">Week</button></span>
-    ${g.more?`<div class="gx-morep">${[["gb","BU",bus,g.bu],["gf","CF",cfs,g.cf],["gc","Process",procs,g.proc],["gt","Team",teams,g.team||""],["gi","Project type",inits,g.init||""],["gpg","Programme",PROGS,g.prog||""]].map(([id,lb,o,v])=>`<label>${lb}${sel(id,lb,o,v)}</label>`).join("")}
+    ${g.more?`<div class="gx-morep">${[["gb","BU",bus,g.bu],["gf","CF",cfs,g.cf],["gc","Process",procs,g.proc],["gt","Team",teams,g.team||""],["gi","Project type",inits,g.init||""],["gpg","Programme",PROGS,g.prog||""]].map(([id,lb,o,v])=>`<label>${lb}${sel(id,lb,o,v,true)}</label>`).join("")}
       <label>Detail<select id="gl"><option value="projects" ${g.level==="projects"?"selected":""}>Projects only</option><option value="stages" ${g.level==="stages"?"selected":""}>+ Stages</option><option value="tasks" ${g.level==="tasks"?"selected":""}>+ Stages + Tasks</option></select></label>
       ${nMore?'<button class="gx-link" id="gclear">Clear filters</button>':""}</div>`:""}
   </div>
@@ -5026,7 +5082,7 @@ function quRdPass(r,k){if(!k)return true;const rs=raiddOf(pId(r));const open=rs.
   if(k==="od")return open.some(x=>+gv("RAIDD",FD.due,x)&&+gv("RAIDD",FD.due,x)<TODAY&&gv("RAIDD",FD.type,x)!=="Re-plan");
   const t=k.slice(2);if(t==="Re-plan")return rs.some(x=>gv("RAIDD",FD.type,x)==="Re-plan");return open.some(x=>gv("RAIDD",FD.type,x)===t)}
 function quRows(){const F=UI.qu;const all=rowsOf("Projects").filter(r=>gv("Projects",FP.name,r)!=="");const fv=(r,c)=>gv("Projects",c,r)||"(blank)";
-  const P1=all.filter(r=>(!F.cf||fv(r,FP.cf)===F.cf)&&(!F.prog||progOf(r)===F.prog));if(F.proc&&!P1.some(r=>fv(r,FP.proc)===F.proc))F.proc="";const P2a=P1.filter(r=>!F.proc||fv(r,FP.proc)===F.proc);if(F.team&&!P2a.some(r=>fv(r,"AB")===F.team))F.team="";const P2b=P2a.filter(r=>!F.team||fv(r,"AB")===F.team);if(F.flow&&F.flow!=="none"&&!e2eFlows().some(f=>f.id===F.flow)){F.flow="";F.lane=""}const P2=P2b.filter(r=>passE2E(r,F.flow,F.lane)&&quRdPass(r,F.rd));const off=new Set(F.stOff||[]);const q=(F.q||"").toLowerCase();
+  const P1=all.filter(r=>mIn(F.cf,fv(r,FP.cf))&&mIn(F.prog,progOf(r)));F.proc=mKeep(F.proc,uniq(P1.map(r=>fv(r,FP.proc))));const P2a=P1.filter(r=>mIn(F.proc,fv(r,FP.proc)));F.team=mKeep(F.team,uniq(P2a.map(r=>fv(r,"AB"))));const P2b=P2a.filter(r=>mIn(F.team,fv(r,"AB")));if(F.flow&&F.flow!=="none"&&!e2eFlows().some(f=>f.id===F.flow)){F.flow="";F.lane=""}const P2=P2b.filter(r=>passE2E(r,F.flow,F.lane)&&quRdPass(r,F.rd));const off=new Set(F.stOff||[]);const q=(F.q||"").toLowerCase();
   // rows edited in this session stay visible even if their status is now filtered out
   const rows=P2.filter(r=>(F.edited.has(r)||!off.has(pStat(r)))&&(!q||(pId(r)+" "+gv("Projects",FP.name,r)+" "+gv("Projects",FP.lead,r)+" "+gv("Projects",FP.wsl,r)+" "+gv("Projects","AG",r)+" "+gv("Projects","AB",r)+" "+gv("Projects","Z",r)).toLowerCase().includes(q))&&(!F.chg||F.edited.has(r)));
   return {all,P1,P2,P2a,P2b,rows,off}}
@@ -5035,10 +5091,10 @@ function quCountText(){const {all,rows}=quRows();return `${rows.length} of ${all
 function quFilterBar(){const F=UI.qu;const {all,P1,P2,P2a,P2b,off}=quRows();const fv=(r,c)=>gv("Projects",c,r)||"(blank)";
   const cfs=uniq(all.map(r=>fv(r,FP.cf)));const procs=uniq(P1.map(r=>fv(r,FP.proc)));const sts=off.size?STL.slice():STL.filter(s=>P2.some(r=>pStat(r)===s));
   return e2eBar(P2b)+`<div class="filterbar card dfilt rfilt${F.prog||F.cf||F.proc||F.team||F.rd?" filtered":""}"><b>Filter</b><input type="search" id="quQ" class="bq" placeholder="Search project / ID / leader…" value="${esc(F.q||"")}">
-   ${progSel("quProg",F.prog||"",p=>all.filter(r=>(!F.cf||fv(r,FP.cf)===F.cf)&&progOf(r)===p).length)}
-   <label>CF <select id="quCF"><option value="">All</option>${cfs.map(x=>`<option ${x===F.cf?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
-   <label>Process area <select id="quProc"><option value="">All</option>${procs.map(x=>`<option ${x===F.proc?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
-   <label>Division / team <select id="quTeam"><option value="">All</option>${uniq(P2a.map(r=>fv(r,"AB"))).map(x=>`<option ${x===F.team?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
+   ${progSel("quProg",F.prog||"",p=>all.filter(r=>mIn(F.cf,fv(r,FP.cf))&&progOf(r)===p).length)}
+   <label>CF <select id="quCF" data-v="${esc(F.cf||"")}"><option value="">All</option>${cfs.map(x=>`<option ${x===F.cf?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
+   <label>Process area <select id="quProc" data-v="${esc(F.proc||"")}"><option value="">All</option>${procs.map(x=>`<option ${x===F.proc?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
+   <label>Division / team <select id="quTeam" data-v="${esc(F.team||"")}"><option value="">All</option>${uniq(P2a.map(r=>fv(r,"AB"))).map(x=>`<option ${x===F.team?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
     <label class="muted" style="display:inline-flex;align-items:center;gap:6px">⚑ RAIDD <select id="quRd">${QU_RD.map(([k,t])=>{const n=k?P2b.filter(r=>passE2E(r,F.flow,F.lane)&&quRdPass(r,k)).length:"";return `<option value="${k}" ${k===(F.rd||"")?"selected":""}>${esc(t)}${n!==""?` (${n})`:""}</option>`}).join("")}</select></label>
    ${stChips(sts,off,s=>P2.filter(r=>pStat(r)===s).length,"qst")}
    <label><input type="checkbox" id="quChg" ${F.chg?"checked":""}> only edited</label>
@@ -5069,7 +5125,7 @@ document.addEventListener("click",e=>{const a=e.target.closest&&e.target.closest
 const PL_PAGE=10;
 function plFiltered(){const F=UI.qu;const {all,P2,rows,off}=quRows();const T=F.ptab||"all";
   const attn=r=>["Delayed","At Risk"].includes(pStat(r));
-  const st=F.st1||"";const base=rows.filter(r=>!st||pStat(r)===st);
+  const st=F.st1||"";const base=rows.filter(r=>mIn(st,pStat(r)));
   const tabs=[["all","All projects",base],["active","Active",base.filter(r=>!["Completed","Cancelled"].includes(pStat(r)))],["attn","Needs attention",base.filter(attn)],["done","Completed",base.filter(r=>pStat(r)==="Completed")]];
   const cur=(tabs.find(t=>t[0]===T)||tabs[0])[2];return {all,P2,tabs,cur,T}}
 function plOwner(r){return gv("Projects",FP.lead,r)||gv("Projects",FP.wsl,r)||"—"}
@@ -5088,14 +5144,14 @@ function vPList(m){const F=UI.qu;liveCalc();const {all,tabs,cur,T}=plFiltered();
   ${flows.length?`<div class="plcon"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="6" height="6" rx="1.2"/><rect x="15" y="3" width="6" height="6" rx="1.2"/><rect x="9" y="15" width="6" height="6" rx="1.2"/><path d="M6 9v2a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9M12 13v2"/></svg></span><div><b>See how your projects connect</b><span>Explore end-to-end processes, lanes, and linked projects.</span></div><span class="sp"></span><button class="btn plcbtn" id="plE2E">Open E2E flow map</button></div>`:""}
   <div class="card pllist">
     <div class="pltool"><label class="plsearch"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" id="plQ" placeholder="Search projects or project ID" value="${esc(F.q||"")}" aria-label="Search projects"></label>
-      <label class="plsel"><span class="sr">Status</span><select id="plSt" aria-label="Status"><option value="">Status: All</option>${sts.map(s=>`<option value="${esc(s)}" ${F.st1===s?"selected":""}>${esc(s)}</option>`).join("")}</select></label>
-      <label class="plsel"><span class="sr">Programme</span><select id="plProg" aria-label="Programme (project code)"${F.prog?' class="act"':""}><option value="">Programme: All</option>${PROGS.map(p=>`<option value="${esc(p)}" ${F.prog===p?"selected":""}>${esc(p==="SIMP"?"SIMP- Simplification":p==="2T"?"2T- 2T Club":"CR- Complexity Reduction")}</option>`).join("")}</select></label>
+      <label class="plsel"><span class="sr">Status</span><select id="plSt" aria-label="Status" data-v="${esc(F.st1||"")}"><option value="">Status: All</option>${sts.map(s=>`<option value="${esc(s)}" ${F.st1===s?"selected":""}>${esc(s)}</option>`).join("")}</select></label>
+      <label class="plsel"><span class="sr">Programme</span><select id="plProg" data-v="${esc(F.prog||"")}" aria-label="Programme (project code)"${F.prog?' class="act"':""}><option value="">Programme: All</option>${PROGS.map(p=>`<option value="${esc(p)}" ${F.prog===p?"selected":""}>${esc(p==="SIMP"?"SIMP- Simplification":p==="2T"?"2T- 2T Club":"CR- Complexity Reduction")}</option>`).join("")}</select></label>
       <button type="button" class="btn plmore ${F.more?"on":""}" id="plMore" aria-expanded="${!!F.more}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4"/></svg> More filters${nf?` <span class="nfb">${nf}</span>`:""}</button>
       ${nf||F.q||F.st1?`<button type="button" class="btn small" id="plClr">Clear</button>`:""}<span class="sp"></span><span class="muted plcnt">${n} project${n===1?"":"s"}</span></div>
     ${F.more?`<div class="plmorebox">
-      <label>CF <select data-plf="cf"><option value="">All</option>${fv(FP.cf).map(x=>`<option ${x===F.cf?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
-      <label>Process area <select data-plf="proc"><option value="">All</option>${fv(FP.proc).map(x=>`<option ${x===F.proc?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
-      <label>Division / team <select data-plf="team"><option value="">All</option>${fv("AB").map(x=>`<option ${x===F.team?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
+      <label>CF <select data-plf="cf" data-v="${esc(F.cf||"")}"><option value="">All</option>${fv(FP.cf).map(x=>`<option ${x===F.cf?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
+      <label>Process area <select data-plf="proc" data-v="${esc(F.proc||"")}"><option value="">All</option>${fv(FP.proc).map(x=>`<option ${x===F.proc?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
+      <label>Division / team <select data-plf="team" data-v="${esc(F.team||"")}"><option value="">All</option>${fv("AB").map(x=>`<option ${x===F.team?"selected":""}>${esc(x)}</option>`).join("")}</select></label>
       <label>⚑ RAIDD <select data-plf="rd">${QU_RD.map(([k,t])=>`<option value="${k}" ${k===(F.rd||"")?"selected":""}>${esc(t)}</option>`).join("")}</select></label>
       ${flows.length?`<label>E2E flow <select data-plf="flow"><option value="">All</option><option value="none" ${F.flow==="none"?"selected":""}>Not mapped yet</option>${flows.map(f=>`<option value="${esc(f.id)}" ${F.flow===f.id?"selected":""}>${esc(f.name)}</option>`).join("")}</select></label>
         ${F.flow&&F.flow!=="none"?`<label>Lane <select data-plf="lane"><option value="">All</option>${laneOpts(F.flow).map(l=>`<option ${l===F.lane?"selected":""}>${esc(l)}</option>`).join("")}</select></label>`:""}`:""}</div>`:""}

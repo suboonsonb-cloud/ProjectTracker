@@ -1229,3 +1229,17 @@ button.ovhr{cursor:pointer}button.ovhr:hover{background:#F6F3FF}
 .sutab tr.su-ok .suc{color:#1E7B4E}.sutab tr.su-def .suc{color:var(--accent-d)}
 .sutab .suc{font-size:12px;min-width:240px}.sutab .suc .btn{margin-left:4px}
 .suh{margin:14px 0 6px;font-size:13px;color:#B42318}
+/* r80 — multi-select filters */
+select.msnative{display:none!important}
+.msb{display:inline-flex;align-items:center;gap:6px;height:34px;min-width:110px;max-width:260px;border:1px solid #DCD6F2;border-radius:10px;background:#fff;padding:0 10px 0 12px;font:inherit;font-size:13px;color:var(--ink);cursor:pointer;text-align:left;box-sizing:border-box}
+.msb span{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.msb i{font-style:normal;color:#7C5CFC;font-size:11px}
+.msb b{background:var(--accent);color:#fff;border-radius:999px;font-size:10.5px;min-width:18px;height:18px;display:inline-grid;place-items:center;padding:0 5px;box-sizing:border-box}
+.msb:hover{border-color:#B9AEF0}.msb.act{border-color:var(--accent);background:#EDE8FF;color:var(--accent-d);font-weight:700;box-shadow:0 0 0 3px rgba(124,92,252,.14)}
+.gx-morep .msb,.gx-tools .msb{height:36px}
+.msp{position:fixed;z-index:9999;background:#fff;border:1px solid #DCD6F2;border-radius:12px;box-shadow:0 14px 34px rgba(30,27,46,.18);padding:8px;display:flex;flex-direction:column;gap:6px;max-width:380px}
+.msh{display:flex;align-items:center;gap:6px;padding:2px 4px 6px;border-bottom:1px solid #EEEBF8}.msn{flex:1;font-size:12px;font-weight:700;color:var(--accent-d)}
+.msh button{border:0;background:#F4F2FA;border-radius:7px;padding:3px 9px;font:inherit;font-size:11.5px;cursor:pointer;color:#3F3A57}.msh button:hover{background:#EDE8FF;color:var(--accent-d)}
+.mss{height:30px;border:1px solid #E2DDF5;border-radius:8px;padding:0 9px;font:inherit;font-size:12.5px}
+.msl{max-height:300px;overflow:auto;display:flex;flex-direction:column}
+.msi{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:7px;font-size:13px;cursor:pointer}.msi:hover{background:#F6F3FF}.msi input{accent-color:var(--accent);width:15px;height:15px;margin:0}
+.msf{display:flex;justify-content:flex-end;gap:6px;padding-top:6px;border-top:1px solid #EEEBF8}
