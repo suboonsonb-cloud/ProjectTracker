@@ -1391,11 +1391,28 @@ tr.burow.sel td{background:color-mix(in srgb,var(--bc) 9%,#fff)!important}
 @media (max-width:1100px){.ovpr,.ovprh{grid-template-columns:minmax(0,1fr) 92px 76px 72px 10px!important}.ovpr .pc,.ovpr .ow,.ovpr .dt,.ovprh span:nth-child(4),.ovprh span:nth-child(7),.ovprh span:nth-child(8){display:none}}
 @media (max-width:860px){.ovprh{display:none!important}.ovpr{grid-template-columns:1fr auto!important}.ovpr .sv{display:none}}
 .ovpg{display:inline-block;font-size:10px;font-weight:700;padding:0 5px;border-radius:4px;background:#FEF0C7;color:#B54708;border:1px solid #FEC84B;margin-left:2px}
+/* r94 — Overview E2E: BU first, then that BU's workflows */
+.ovbu{border:1px solid #E6E3F0;border-left:5px solid var(--bc);border-radius:14px;background:#fff;margin-bottom:12px;overflow:hidden}
+.ovbu.open{box-shadow:0 2px 12px rgba(16,24,40,.06)}
+.ovbuh{display:grid;grid-template-columns:22px 14px minmax(200px,1.4fr) auto 1fr 1fr 1fr;align-items:center;gap:14px;width:100%;border:0;background:color-mix(in srgb,var(--bc) 6%,#fff);padding:16px 18px;font:inherit;text-align:left;cursor:pointer}
+.ovbuh:hover{background:color-mix(in srgb,var(--bc) 11%,#fff)}.ovbuh .chev{color:var(--muted);font-size:16px}
+.ovbudot{width:12px;height:12px;border-radius:50%;background:var(--bc)}
+.ovbuh .nm b{display:block;font-size:17px;color:var(--ink)}.ovbuh .nm small{font-size:12px;color:var(--muted)}
+.ovbuh .m small{display:block;font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted)}.ovbuh .m b{font-size:17px;color:var(--ink)}.ovbuh .m b.ok{color:#1E7B4E}.ovbuh .m.pg b{margin-right:8px}
+.ovbub{padding:12px 12px 2px;border-top:1px solid #EEEBF8;background:#FBFAFE}
+@media (max-width:1200px){.ovbuh{grid-template-columns:22px 14px 1fr auto}.ovbuh .m{display:none}}
+/* r94 — fixed columns so progress / saving line up across every workflow card */
+.ovfh{grid-template-columns:22px 44px minmax(200px,1fr) 104px 92px 190px 150px 150px!important}
+.ovfh .ovdtodo{grid-column:5/7;justify-self:start}.ovdraft .ovfh .m{display:none}.ovdraft .ovfh>.ovlink{grid-column:7/9;justify-self:end}
+.ovfh .ovfst,.ovfh .ovfdl{justify-self:start}
+.ovbuh{grid-template-columns:22px 44px minmax(200px,1fr) 104px 92px 190px 150px 150px!important}.ovbuh .ovbudot{justify-self:center}.ovbuh .ovfst{grid-column:5;justify-self:start}
+.ovbuh .ovfst.bad{background:#FEECEA;color:#C4320A}
+@media (max-width:1200px){.ovfh,.ovbuh{grid-template-columns:22px 44px 1fr auto auto!important}.ovfh .m,.ovbuh .m{display:none}}
 </style>
 </head>
 <body>
 <aside class="side" id="side" aria-label="Main navigation">
-  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r93</span></small></span></div>
+  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r94</span></small></span></div>
   <div class="sglab">WORKSPACE</div>
   <button type="button" class="wschip" id="btnOpen" title="Open the workbook (the database)"><span class="wsdot" aria-hidden="true"></span><span class="file" id="fileName">No workbook loaded</span><span class="chev" aria-hidden="true">⌄</span></button>
   <nav class="sidenav hidden" id="tabs"></nav>
@@ -2774,7 +2791,7 @@ function ovNewHtml(P0,Bl0){const P=P0;/* r93 — Programme filter picks flows by
     const ICON=`<span class="ovficon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="2.5" y="3" width="6" height="5" rx="1.5"/><rect x="15.5" y="3" width="6" height="5" rx="1.5"/><rect x="9" y="16" width="6" height="5" rx="1.5"/><path d="M8.5 5.5h7M18.5 8v3.5H12V16M5.5 8v3.5H12" fill="none"/></svg></span>`;
     return `<div class="card ovflow${open?" open":""}" style="--fc:${buColor(flowBU(F.f))}"><button type="button" class="ovfh" data-ovflow="${esc(F.f.id)}" aria-expanded="${open}">
       <span class="chev">${open?"⌄":"›"}</span>${ICON}<span class="nm"><b>${esc(F.f.name)}</b><small>${flowBU(F.f)?buChip(flowBU(F.f)):""}${lanes.length} swimlane${lanes.length!==1?"s":""} · ${F.pids.size} unique project${F.pids.size!==1?"s":""}${F.ver==="AS-IS"?" · AS-IS map":""}</small></span>
-      <span class="ovfst ${stC}">${stT}</span>${nDel?`<span class="ovfdl">${nDel} delayed</span>`:""}
+      <span class="ovfst ${stC}">${stT}</span>${nDel?`<span class="ovfdl">${nDel} delayed</span>`:"<span></span>"}
       <span class="m pg"><small>Project progress</small><b>${pct(prog)}%</b>${bar(prog,stC==="ok"?"ok":"")}</span><span class="m"><small>Planned / year</small><b>${yr?"THB "+fmtShort(yr):"—"}</b></span><span class="m"><small>Planned time saved</small><b>${hr?fmtNum(Math.round(hr))+" h/mo":"—"}</b></span></button>${strip}
       ${open?`<div class="ovfb"><div class="ovlanes"><div class="cap">Swimlanes</div>${lanes.map(x=>`<button type="button" class="ovl${x.name===selL?" on":""}" data-ovlane="${esc(x.name)}" data-ovf="${esc(F.f.id)}">${ring(lprog(x),tone(x))}<span>${esc(x.name)}</span><b>${x.pids.size}</b><i>›</i></button>`).join("")||'<span class="muted">No steps linked yet</span>'}</div>
         <div class="ovproc">${L?`<div class="ovph"><b>${esc(L.name)}</b><span class="muted">${L.procs.length} process${L.procs.length!==1?"es":""} / ${L.pids.size} project${L.pids.size!==1?"s":""}</span><span class="sp"></span><span class="crumb">Workflow › Swimlane › Process › Project</span></div>
@@ -2791,16 +2808,29 @@ function ovNewHtml(P0,Bl0){const P=P0;/* r93 — Programme filter picks flows by
   const sg=uniqOrder(stg).map(s=>({s,n:openP.filter(r=>curStage(r)===s).length})).filter(x=>x.n);const smax=Math.max(1,...sg.map(x=>x.n));
   const top2=[...sg].sort((a,b)=>b.n-a.n).slice(0,2);
   return `  <section class="ove2e" aria-label="E2E workflows"><div class="ovsec"><span class="ove2eic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="2.5" y="3" width="6" height="5" rx="1.5"/><rect x="15.5" y="3" width="6" height="5" rx="1.5"/><rect x="9" y="16" width="6" height="5" rx="1.5"/><path d="M8.5 5.5h7M18.5 8v3.5H12V16M5.5 8v3.5H12" fill="none"/></svg></span><div><span class="ove2etag">E2E workflow</span><h2>E2E workflows</h2><p>Explore the business process first — workflow › swimlane › process › project. Find projects where the work happens.</p></div><span class="sp"></span><label class="ovsrch"><input type="search" id="ovQ" placeholder="Search workflows or projects…" value="${esc(D.ovQ||"")}"></label></div>
-  ${FLs.map(flowCard).join("")}${(()=>{/* drafts: flows not finished yet — no project linked to any step (any version), or nothing drawn */
-    if(typeof hasE2E!=="function"||!hasE2E())return "";const linked=f=>["TO-BE","AS-IS"].some(v=>f.v[v]&&f.v[v].doc&&(f.v[v].doc.shapes||[]).some(sh=>(sh.proj||[]).length));
-    const DR=e2eFlows().filter(f=>!linked(f)&&hit(f.name));if(!DR.length)return "";
+  ${(()=>{/* r94 — group workflows by BU first: BU row ▸ that BU's workflows (and drafts) */
+    const buF=f=>(typeof e2eFlowBU==="function"?e2eFlowBU(f):flowBU(f))||"Finance";
+    const linked=f=>["TO-BE","AS-IS"].some(v=>f.v[v]&&f.v[v].doc&&(f.v[v].doc.shapes||[]).some(sh=>(sh.proj||[]).length));
+    const DRall=(typeof hasE2E==="function"&&hasE2E())?e2eFlows().filter(f=>!linked(f)&&hit(f.name)&&(!UI.dash.prog||mIn(UI.dash.prog,f.prog||"SIMP"))):[];
+    const bus=uniqOrder([...FLs.map(F=>buF(F.f)),...DRall.map(buF)]);if(!bus.length)return "";
+    if(D.ovBU===undefined||(D.ovBU!==null&&!bus.includes(D.ovBU)))D.ovBU=bus.length===1||!D.ovBU?bus[0]:null;
+    const draftsOf=DR=>{/* drafts: flows not finished yet — no project linked to any step (any version), or nothing drawn */
+    const linked=f=>["TO-BE","AS-IS"].some(v=>f.v[v]&&f.v[v].doc&&(f.v[v].doc.shapes||[]).some(sh=>(sh.proj||[]).length));
+    if(!DR.length)return "";
     return `<div class="ovdrafts"><div class="ovdh"><b>Draft flows</b><span class="muted">${DR.length} flow${DR.length>1?"s":""} still being mapped — no project linked to a step yet</span></div>${DR.map(f=>{const vs=["AS-IS","TO-BE"].filter(v=>f.v[v]&&f.v[v].doc);const d=vs.length?f.v[vs.includes("TO-BE")?"TO-BE":"AS-IS"].doc:null;const fl=d?e2eFlat(d):{lanes:[],shapes:[]};
       let steps=[];try{steps=d?stepOrder(d):[]}catch(e){steps=(fl.shapes||[]).filter(isStep)}const lanes=(fl.lanes||[]).map(l=>({name:l.name,n:steps.filter(sh=>laneOfShape(fl,sh)===l.name).length}));
       const todo=[!vs.length?"nothing drawn yet":"",vs.length&&!vs.includes("TO-BE")?"TO-BE not drawn":"",vs.length&&!vs.includes("AS-IS")?"AS-IS not drawn":"","no projects linked"].filter(Boolean);
       return `<div class="card ovflow ovdraft"><div class="ovfh"><span class="chev"></span><span class="ovficon dr" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="2.5" y="3" width="6" height="5" rx="1.5"/><rect x="15.5" y="3" width="6" height="5" rx="1.5"/><rect x="9" y="16" width="6" height="5" rx="1.5"/><path d="M8.5 5.5h7M18.5 8v3.5H12V16M5.5 8v3.5H12" fill="none"/></svg></span>
         <span class="nm"><b>${esc(f.name)}</b><small>${lanes.length} swimlane${lanes.length!==1?"s":""} · ${steps.length} step${steps.length!==1?"s":""}${vs.length?" · "+vs.join(" + "):""}${f.owner?" · owner "+esc(f.owner):""}</small></span>
         <span class="ovfst dr">Draft</span><span class="ovdtodo">${todo.map(t=>`<span>${esc(t)}</span>`).join("")}</span><span class="m"></span><span class="m"></span><button type="button" class="ovlink" data-ovmap="${esc(f.id)}">Open in E2E flow maps →</button></div>
-        ${lanes.length?`<div class="ovstrip">${lanes.map((x,i)=>`${i?'<span class="ovarr" aria-hidden="true"><svg viewBox="0 0 24 10"><path d="M0 5h20m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>':""}<span class="ovnode dr" title="${x.n} step(s)"><i></i><span>${esc(x.name)}</span><b>${x.n}</b></span>`).join("")}</div>`:""}</div>`}).join("")}</div>`})()}${FLs.length?"":`<div class="card pad muted">${FL.length?"Nothing matches the search.":"No E2E workflow is mapped yet — draw one under E2E flow maps and link its steps to projects."}</div>`}
+        ${lanes.length?`<div class="ovstrip">${lanes.map((x,i)=>`${i?'<span class="ovarr" aria-hidden="true"><svg viewBox="0 0 24 10"><path d="M0 5h20m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>':""}<span class="ovnode dr" title="${x.n} step(s)"><i></i><span>${esc(x.name)}</span><b>${x.n}</b></span>`).join("")}</div>`:""}</div>`}).join("")}</div>`};
+    return bus.map(bu=>{const fs=FLs.filter(F=>buF(F.f)===bu),dr=DRall.filter(f=>buF(f)===bu);const open=D.ovBU===bu;
+      const ps=new Set(fs.flatMap(F=>[...F.pids]));const rows=[...ps].map(p=>byId.get(p)).filter(Boolean);const prog=rows.length?rows.reduce((a,r)=>a+(pLive(r).comp||0),0)/rows.length:0;
+      const yr=rows.reduce((a,r)=>a+ben(pId(r)).yr,0);const nDel=rows.filter(r=>pStat(r)==="Delayed").length;const sv=rows.reduce((a,r)=>{const o=ovSav(pId(r));return {e:a.e+o.est,x:a.x+o.act}},{e:0,x:0});
+      return `<div class="ovbu${open?" open":""}" style="--bc:${buColor(bu)}"><button type="button" class="ovbuh" data-ovbu="${esc(bu)}" aria-expanded="${open}"><span class="chev">${open?"⌄":"›"}</span><span class="ovbudot"></span>
+        <span class="nm"><b>${esc(bu)}</b><small>${fs.length} workflow${fs.length!==1?"s":""}${dr.length?` · ${dr.length} draft${dr.length>1?"s":""}`:""} · ${ps.size} project${ps.size!==1?"s":""}</small></span>
+        <span></span>${nDel?`<span class="ovfst bad">${nDel} delayed</span>`:"<span></span>"}<span class="m pg"><small>Project progress</small><b>${pct(prog)}%</b>${bar(prog)}</span><span class="m"><small>Plan saving</small><b>${sv.e?"THB "+fmtShort(sv.e):"—"}</b></span><span class="m"><small>Actual saving</small><b class="${sv.x?"ok":""}">${sv.x?"THB "+fmtShort(sv.x):"0"}</b></span></button>
+        ${open?`<div class="ovbub">${fs.map(flowCard).join("")}${dr.length?draftsOf(dr):""}</div>`:""}</div>`}).join("")})()}${FLs.length?"":`<div class="card pad muted">${FL.length?"Nothing matches the search.":"No E2E workflow is mapped yet — draw one under E2E flow maps and link its steps to projects."}</div>`}
   ${unm.length?(()=>{const SO={"Delayed":0,"At Risk":1,"On Track":2,"Not Started":3,"On-Hold":4,"Completed":5,"Cancelled":6};
     const fl=D.unmSt||"";const lst=unm.filter(r=>!fl||pStat(r)===fl).sort((a,b)=>(SO[pStat(a)]??9)-(SO[pStat(b)]??9)||String(gv("Projects",FP.name,a)).localeCompare(String(gv("Projects",FP.name,b))));
     const lim=D.unmAll?lst.length:10;const stc=STL.map(s=>[s,unm.filter(r=>pStat(r)===s).length]).filter(x=>x[1]);
@@ -2821,9 +2851,10 @@ function ovNewHtml(P0,Bl0){const P=P0;/* r93 — Programme filter picks flows by
   <div class="ovnote"><span>Process groupings come from the E2E flow maps; project data follows the tracker.</span><span>Planned benefits are estimates, not realised savings.</span></div>`}
 function ovNewBind(m){const D=UI.dash;const re=()=>vDash(m,true);
   m.querySelectorAll("[data-ovflow]").forEach(b=>b.onclick=()=>{D.ovOpen=D.ovOpen===b.dataset.ovflow?"":b.dataset.ovflow;re()});
+  m.querySelectorAll("[data-ovbu]").forEach(b=>b.onclick=()=>{D.ovBU=D.ovBU===b.dataset.ovbu?null:b.dataset.ovbu;re()});
   m.querySelectorAll("[data-ovnode]").forEach(b=>b.onclick=()=>{D.ovOpen=b.dataset.ovf;D.ovLane[b.dataset.ovf]=b.dataset.ovnode;re()});
   m.querySelectorAll("[data-ovlane]").forEach(b=>b.onclick=()=>{D.ovLane[b.dataset.ovf]=b.dataset.ovlane;re()});
-  const q=m.querySelector("#ovQ");if(q)q.oninput=()=>{clearTimeout(ovNewBind._t);ovNewBind._t=setTimeout(()=>{D.ovQ=q.value;D.ovOpen=undefined;re();const n=m.querySelector("#ovQ");if(n){n.focus();n.setSelectionRange(n.value.length,n.value.length)}},300)};
+  const q=m.querySelector("#ovQ");if(q)q.oninput=()=>{clearTimeout(ovNewBind._t);ovNewBind._t=setTimeout(()=>{D.ovQ=q.value;D.ovOpen=undefined;if(q.value.trim())D.ovBU=undefined;re();const n=m.querySelector("#ovQ");if(n){n.focus();n.setSelectionRange(n.value.length,n.value.length)}},300)};
   const ut=m.querySelector("#ovUnmT");if(ut)ut.onclick=()=>{D.unmOpen=!D.unmOpen;re()};
   m.querySelectorAll("[data-unmst]").forEach(b=>b.onclick=()=>{D.unmSt=b.dataset.unmst;D.unmAll=false;re()});
   const ua=m.querySelector("#ovUnmAll");if(ua)ua.onclick=()=>{D.unmAll=!D.unmAll;re()};
