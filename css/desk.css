@@ -1383,3 +1383,4 @@ tr.burow.sel td{background:color-mix(in srgb,var(--bc) 9%,#fff)!important}
 .ovpr .sv.a b{color:#98A2B3}.ovpr .sv.a b.ok{color:#1E7B4E}.ovpr .ow{font-size:12px;color:#3F3A57;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ovpr .dt{font-size:12px;color:#3F3A57;text-align:right}.ovpr .dt.bad{color:#C4320A;font-weight:600}.ovprh span:nth-child(8){text-align:right}.ovpr .n small{display:block}
 @media (max-width:1100px){.ovpr,.ovprh{grid-template-columns:minmax(0,1fr) 92px 76px 72px 10px!important}.ovpr .pc,.ovpr .ow,.ovpr .dt,.ovprh span:nth-child(4),.ovprh span:nth-child(7),.ovprh span:nth-child(8){display:none}}
 @media (max-width:860px){.ovprh{display:none!important}.ovpr{grid-template-columns:1fr auto!important}.ovpr .sv{display:none}}
+.ovpg{display:inline-block;font-size:10px;font-weight:700;padding:0 5px;border-radius:4px;background:#FEF0C7;color:#B54708;border:1px solid #FEC84B;margin-left:2px}

@@ -12,9 +12,11 @@ function ovFlows(pids){if(typeof hasE2E!=="function"||!hasE2E())return [];const 
   return out}
 function ovStatusOf(rows){if(!rows.length)return ["Not mapped","nm"];const st=rows.map(pStat);if(st.every(s=>s==="Completed"||s==="Cancelled"))return ["Completed","ok"];
   if(st.every(s=>s==="Not Started"))return ["Not started","ns"];return ["In progress","ip"]}
-function ovNewHtml(P,Bl){const pids=new Set(P.map(pId));const byId=new Map(P.map(r=>[pId(r),r]));const D=UI.dash;D.ovLane=D.ovLane||{};
+function ovNewHtml(P0,Bl0){const P=P0;/* r93 — Programme filter picks flows by the flow's own programme; inside a flow every linked project shows (2T ones tagged) */
+  const PF=UI.dash.prog&&DASHP_NOPROG?DASHP_NOPROG:P0;const pidsF=new Set(PF.map(pId));const Bl=UI.dash.prog&&DASHP_NOPROG?benefitSeries().list.filter(b=>pidsF.has(b.pid)):Bl0;
+  const pids=pidsF;const byId=new Map(PF.map(r=>[pId(r),r]));const D=UI.dash;D.ovLane=D.ovLane||{};
   const ben=pid=>{const b=Bl.filter(x=>x.pid===pid&&!x.drop);return {yr:b.filter(x=>!x.one).reduce((a,x)=>a+x.gross,0),hrs:b.reduce((a,x)=>a+x.hrs,0)}};
-  const FL=ovFlows(pids);const mapped=new Set(FL.flatMap(F=>[...F.pids]));const unm=P.filter(r=>!mapped.has(pId(r)));
+  const FL=ovFlows(pids).filter(F=>!UI.dash.prog||mIn(UI.dash.prog,F.f.prog||"SIMP"));const mapped=new Set(FL.flatMap(F=>[...F.pids]));const unm=P.filter(r=>!mapped.has(pId(r)));
   const delayed=P.filter(r=>pStat(r)==="Delayed").length;const mappedYr=[...mapped].reduce((a,p)=>a+ben(p).yr,0);
   const q=String(D.ovQ||"").trim().toLowerCase();const hit=s=>!q||String(s).toLowerCase().includes(q);
   const projHit=pid=>{const r=byId.get(pid);return r&&hit(pid+" "+gv("Projects",FP.name,r))};
@@ -29,7 +31,7 @@ function ovNewHtml(P,Bl){const pids=new Set(P.map(pId));const byId=new Map(P.map
     let selL=D.ovLane[F.f.id];if(!lanes.some(L=>L.name===selL))selL=(lanes.find(L=>q&&(hit(L.name)||L.procs.some(p=>hit(p.title)||p.pids.some(projHit))))||lanes[0]||{}).name;
     const L=lanes.find(x=>x.name===selL);
     const projRow=pid=>{const r=byId.get(pid);if(!r)return "";const other=F.lanes.filter(x=>x.name!==selL&&x.pids.has(pid)).length;const c=pLive(r).comp||0;
-      return `<button type="button" class="ovpr" data-ovopen="${r}" style="--bc:${buColor(gv("Projects",FP.bu,r))}"><span class="k">Project</span><span class="n"><b>${esc(gv("Projects",FP.name,r))}</b><small>${buChip(gv("Projects",FP.bu,r))}${esc(pid)}${gv("Projects","AB",r)?" · "+esc(gv("Projects","AB",r)):""}${other?` · Also supports ${other} lane${other>1?"s":""}`:""}</small></span>${pill(pStat(r))}<span class="pc">${pct(c)}%${bar(c,pStat(r)==="Completed"?"ok":pStat(r)==="Delayed"?"bad":"")}</span>${ovSavCells(r)}<span class="ow">${esc(gv("Projects",FP.lead,r)||"—")}</span>${(()=>{const pe=+gv("Projects",FP.pe,r)||0;const late=pe&&pe<TODAY&&!["Completed","Cancelled"].includes(pStat(r));return `<span class="dt${late?" bad":""}">${pe?fmtDate(pe):"—"}</span>`})()}<span class="cv">›</span></button>`};
+      return `<button type="button" class="ovpr" data-ovopen="${r}" style="--bc:${buColor(gv("Projects",FP.bu,r))}"><span class="k">Project</span><span class="n"><b>${esc(gv("Projects",FP.name,r))}</b><small>${buChip(gv("Projects",FP.bu,r))}${esc(pid)}${gv("Projects","AB",r)?" · "+esc(gv("Projects","AB",r)):""}${other?` · Also supports ${other} lane${other>1?"s":""}`:""}${progOf(r)!==(F.f.prog||"SIMP")?` <span class="ovpg">${esc(progOf(r))}</span>`:""}</small></span>${pill(pStat(r))}<span class="pc">${pct(c)}%${bar(c,pStat(r)==="Completed"?"ok":pStat(r)==="Delayed"?"bad":"")}</span>${ovSavCells(r)}<span class="ow">${esc(gv("Projects",FP.lead,r)||"—")}</span>${(()=>{const pe=+gv("Projects",FP.pe,r)||0;const late=pe&&pe<TODAY&&!["Completed","Cancelled"].includes(pStat(r));return `<span class="dt${late?" bad":""}">${pe?fmtDate(pe):"—"}</span>`})()}<span class="cv">›</span></button>`};
     /* lane health: worst status of its projects → colour; progress ring = average % done */
     const tone=Lx=>{const st=[...Lx.pids].map(p=>byId.get(p)).filter(Boolean).map(pStat);return st.includes("Delayed")?"bad":st.includes("At Risk")?"risk":st.length&&st.every(x=>x==="Completed"||x==="Cancelled")?"ok":st.every(x=>x==="Not Started")?"ns":"ip"};
     const lprog=Lx=>{const rs=[...Lx.pids].map(p=>byId.get(p)).filter(Boolean);return rs.length?rs.reduce((a,r)=>a+(pLive(r).comp||0),0)/rs.length:0};

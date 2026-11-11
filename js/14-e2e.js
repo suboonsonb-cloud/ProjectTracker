@@ -7,7 +7,7 @@
    "Diagram data 1..30"; E2E_Map = one row per step ↔ project link (rebuilt on each change).
    Editing happens in the embedded Swimlane Studio (iframe, postMessage).
    ===================================================================================== */
-const E2EF="E2E_Flows",E2EM="E2E_Map",EF={id:"B",name:"C",area:"D",ver:"E",owner:"F",steps:"G",projs:"H",upd:"I",notes:"J",bu:"AO"},EF_DATA0=11,EF_NDATA=30,EF_FIRST=6,EF_LAST=205;
+const E2EF="E2E_Flows",E2EM="E2E_Map",EF={id:"B",name:"C",area:"D",ver:"E",owner:"F",steps:"G",projs:"H",upd:"I",notes:"J",bu:"AO",prog:"AP"},EF_DATA0=11,EF_NDATA=30,EF_FIRST=6,EF_LAST=205;
 const EM={fid:"B",fname:"C",ver:"D",no:"E",lane:"F",sid:"G",step:"H",chg:"I",repl:"J",pid:"K",cp:"R",key:"S",hrs:"T",saved:"U",cost:"V"},EM_FIRST=6,EM_LAST=1505,VERS=["AS-IS","TO-BE"];
 UI.e2e=UI.e2e||{flow:null,ver:"TO-BE",all:false,q:"",chip:"count",tags:true,link:null,focus:null,full:true};
 const hasE2E=()=>!!(S.sheets[E2EF]&&S.sheets[E2EF].vals&&S.sheets[E2EM]&&S.sheets[E2EM].vals);
@@ -21,7 +21,7 @@ function e2eFlows(){const all=e2eFlowsAll();return (typeof scope==="function"&&s
 function e2eFlowsAll(){if(E2E_CACHE)return E2E_CACHE;const out=[];if(!hasE2E())return out;const by={};
   for(let r=EF_FIRST;r<=EF_LAST;r++){const id=String(gv(E2EF,EF.id,r)||"");if(!id)continue;const ver=String(gv(E2EF,EF.ver,r)||"AS-IS").toUpperCase().includes("TO")?"TO-BE":"AS-IS";
     let js="";for(let k=0;k<EF_NDATA;k++){const v=gv(E2EF,colLet(EF_DATA0+k),r);if(v===""||v==null)break;js+=String(v)}let doc=null;try{doc=js?JSON.parse(js):null}catch(e){doc=null}
-    const f=by[id]||(by[id]={id,name:String(gv(E2EF,EF.name,r)||id),area:String(gv(E2EF,EF.area,r)||""),owner:String(gv(E2EF,EF.owner,r)||""),bu:String(gv(E2EF,EF.bu,r)||""),notes:String(gv(E2EF,EF.notes,r)||""),v:{}});
+    const f=by[id]||(by[id]={id,name:String(gv(E2EF,EF.name,r)||id),area:String(gv(E2EF,EF.area,r)||""),owner:String(gv(E2EF,EF.owner,r)||""),bu:String(gv(E2EF,EF.bu,r)||""),prog:String(gv(E2EF,EF.prog,r)||""),notes:String(gv(E2EF,EF.notes,r)||""),v:{}});
     if(f.v[ver])(f.dup||(f.dup=[])).push(ver+" (row "+r+")");else f.v[ver]={r,doc,bad:!!js&&!doc};if(!out.includes(f))out.push(f)}
   E2E_CACHE=out;return out}
 function e2eFlow(id){return e2eFlows().find(f=>f.id===id)||null}
@@ -279,7 +279,7 @@ function e2eSidePanel(){const box=document.getElementById("e2eSide");const f=e2e
 function e2eFlowForm(f){const areas=uniqOrder([...(hasMD()?mdList("L_Proc"):listFromName("L_Proc")),...e2eFlows().map(x=>x.area)]).filter(Boolean);
   return `<div class="fgrid"><label>Flow name<input id="efName" value="${esc(f?f.name:"")}" placeholder="e.g. P2P Domestic — AP & Payment"></label>
    <label>Process area<input id="efArea" list="efAreas" value="${esc(f?f.area:"")}" placeholder="O2C, P2P, R2R…"><datalist id="efAreas">${areas.map(a=>`<option value="${esc(a)}">`).join("")}</datalist></label>
-   <label>Business unit<select id="efBU"><option value="">Auto — from linked projects</option>${(()=>{let L=[];try{L=listFromName("L_BU").map(String).filter(Boolean)}catch(e){}const cur=f?f.bu:(UI.e2eH&&UI.e2eH.bu&&!["*","(not assigned)"].includes(UI.e2eH.bu)?UI.e2eH.bu:"");return uniqOrder([...L,...(cur?[cur]:[])]).map(b=>`<option ${b===cur?"selected":""}>${esc(b)}</option>`).join("")})()}</select></label><label>Owner<input id="efOwner" value="${esc(f?f.owner:"")}"></label><label>Notes<input id="efNotes" value="${esc(f?f.notes:"")}"></label></div>`}
+   <label>Business unit<select id="efBU"><option value="">Auto — from linked projects</option>${(()=>{let L=[];try{L=listFromName("L_BU").map(String).filter(Boolean)}catch(e){}const cur=f?f.bu:(UI.e2eH&&UI.e2eH.bu&&!["*","(not assigned)"].includes(UI.e2eH.bu)?UI.e2eH.bu:"");return uniqOrder([...L,...(cur?[cur]:[])]).map(b=>`<option ${b===cur?"selected":""}>${esc(b)}</option>`).join("")})()}</select></label><label>Programme<select id="efProg">${PROGS.map(g=>`<option ${g===((f&&f.prog)||"SIMP")?"selected":""}>${esc(g)}</option>`).join("")}</select></label><label>Owner<input id="efOwner" value="${esc(f?f.owner:"")}"></label><label>Notes<input id="efNotes" value="${esc(f?f.notes:"")}"></label></div>`}
 async function e2eNewFlow(){let IMP=null;
   const p=choose("New E2E process flow",e2eFlowForm(null)+`<div class="nfimp"><div class="nfh"><b>Start from Excel / AI (optional)</b><span class="muted">or leave empty for blank lanes</span></div>
     <div class="nfdrops"><div class="nfdrop" id="nfDrop" tabindex="0" role="button" aria-label="Drop or choose an Excel file"><b>📊 Excel table</b><br>Drop the .xlsx here or <u>choose a file</u> · or paste the table below<input type="file" id="nfFile" accept=".xlsx,.csv,.txt" hidden></div>
@@ -318,18 +318,18 @@ async function e2eNewFlow(){let IMP=null;
   box.querySelector("#nfTpl").onclick=()=>download(new Blob(["\ufeff"+e2eTemplateCsv()],{type:"text/csv"}),"E2E_flow_template.csv");
   const k=await p;if(k!=="ok")return;
   const name=$("#efName").value.trim(),area=$("#efArea").value.trim();if(!name){toast("Give the flow a name");return}
-  const id=e2eNewId(area);const f={id,name,area,bu:($("#efBU")||{}).value||"",owner:$("#efOwner").value.trim()||(typeof scope==="function"&&scope()&&ACC?ACC.name||ACC.login:""),notes:$("#efNotes").value.trim(),v:{}};
+  const id=e2eNewId(area);const f={id,name,area,bu:($("#efBU")||{}).value||"",prog:($("#efProg")||{}).value||"SIMP",owner:$("#efOwner").value.trim()||(typeof scope==="function"&&scope()&&ACC?ACC.name||ACC.login:""),notes:$("#efNotes").value.trim(),v:{}};
   const vp=(document.querySelector('input[name="nfVer"]:checked')||{}).value||"auto";const pgs=!!(document.getElementById("nfPages")||{}).checked;if(IMP&&IMP.sheets){IMP=e2eImportFromGrids(IMP.sheets,name,vp,{pages:pgs})}
   if(IMP&&IMP.pptx){for(const v of Object.keys(IMP.res)){const d=IMP.res[v].doc;d.title=name;d.name=name+" "+v}if(vp!=="auto"&&Object.keys(IMP.res).length===1){const only=Object.keys(IMP.res)[0];if(only!==vp){IMP.res[vp]=IMP.res[only];IMP.res[vp].doc.tag=vp;delete IMP.res[only]}}}/* rebuild with the final name */
   const vers=IMP?VERS.filter(v=>IMP.res[v]):[];
   if(vers.length){for(const v of vers){if(!e2eWriteDoc(e2eFlow(id)||f,v,IMP.res[v].doc))return;E2E_CACHE=null}}
   else{const doc={id:"d"+Date.now(),name:name+" AS-IS",title:name,tag:"AS-IS",ori:"v",flow:700,head:46,lanes:["Requester","Team A","Team B","System"].map((n,i)=>({id:"L"+i,name:n,sub:"",size:220})),secs:[],shapes:[],links:[]};if(!e2eWriteDoc(f,"AS-IS",doc))return}
-  const x=e2eFlow(id);if(x)VERS.forEach(v=>{if(x.v[v]){eSet(E2EF,EF.notes,x.v[v].r,f.notes);e2eSetBU(x.v[v].r,f.bu)}});
+  const x=e2eFlow(id);if(x)VERS.forEach(v=>{if(x.v[v]){eSet(E2EF,EF.notes,x.v[v].r,f.notes);e2eSetBU(x.v[v].r,f.bu);e2eSetProg(x.v[v].r,f.prog)}});
   UI.e2e.home=false;UI.e2e.flow=id;UI.e2e.ver=vers.includes("AS-IS")||!vers.length?"AS-IS":"TO-BE";E2E_CACHE=null;e2eRebuildMap();render();
   toast(vers.length?`Created ${name} from the table — ${vers.join(" + ")}. Drag boxes to fine-tune.`:"Created "+name+" — rename the lanes by double-clicking their headers",6000)}
 async function e2eEditFlow(f){const k=await choose("Flow details",e2eFlowForm(f),[["del","Delete this flow…","danger"],["c","Cancel"],["ok","Save","primary"]]);if(k==="del"){e2eDeleteFlow(f);return}if(k!=="ok")return;
-  const name=$("#efName").value.trim()||f.name,area=$("#efArea").value.trim(),owner=$("#efOwner").value.trim(),notes=$("#efNotes").value.trim(),bu=($("#efBU")||{}).value||"";
-  for(const v of VERS){const x=f.v[v];if(!x)continue;eSet(E2EF,EF.name,x.r,name);eSet(E2EF,EF.area,x.r,area);eSet(E2EF,EF.owner,x.r,owner);eSet(E2EF,EF.notes,x.r,notes);e2eSetBU(x.r,bu)}E2E_CACHE=null;e2eQueueMap();render()}
+  const name=$("#efName").value.trim()||f.name,area=$("#efArea").value.trim(),owner=$("#efOwner").value.trim(),notes=$("#efNotes").value.trim(),bu=($("#efBU")||{}).value||"",prog=($("#efProg")||{}).value||"SIMP";
+  for(const v of VERS){const x=f.v[v];if(!x)continue;eSet(E2EF,EF.name,x.r,name);eSet(E2EF,EF.area,x.r,area);eSet(E2EF,EF.owner,x.r,owner);eSet(E2EF,EF.notes,x.r,notes);e2eSetBU(x.r,bu);e2eSetProg(x.r,prog)}E2E_CACHE=null;e2eQueueMap();render()}
 async function e2eDeleteFlow(f){const links=VERS.reduce((a,v)=>a+((f.v[v]&&f.v[v].doc)?(f.v[v].doc.shapes||[]).reduce((n,sh)=>n+(sh.proj||[]).length,0):0),0);
   const k=await choose(`Delete “${esc(f.name)}”?`,`<p>This removes its AS-IS and TO-BE diagrams${links?` and ${links} step↔project link(s)`:""} from the workbook (when you save). Projects themselves are not changed.</p>`,[["c","Cancel"],["ok","Delete flow","danger"]]);if(k!=="ok")return;
   for(const v of VERS){const x=f.v[v];if(!x)continue;for(const c of [...Object.values(EF),...Array.from({length:EF_NDATA},(_,i)=>colLet(EF_DATA0+i))])eSet(E2EF,c,x.r,"")}
@@ -555,7 +555,7 @@ function vE2EHome(m){e2eHide();const H=UI.e2eH;const all=e2eFlows();const info=O
   const mix=st=>{const ks=STL.filter(s=>st[s]);return ks.length?`<span class="tmix" title="${ks.map(s=>s+": "+st[s]).join(" · ")}">${ks.map(s=>`<i style="flex:${st[s]};background:${SCOL[s]}"></i>`).join("")}</span>`:""};
   const ak=a=>{const d=E2E_AREA[String(a||"").toUpperCase()];return d?d[2]:"g"+(Math.abs([...areaKey(a)].reduce((h,c)=>h*31+c.charCodeAt(0)|0,7))%3)};
   const row=f=>{const I=info[f.id],h=hit(f);const vc=(v)=>{const n=I.steps[v];return `<td><button type="button" class="e2v${n?"":" empty"}" data-fopen="${esc(f.id)}" data-fver="${v}" title="${n?`Open ${v}`:`Start the ${v} version`}">${n?n+" steps":"Not started"}</button></td>`};
-    return `<tr><td><span class="e2chip a-${ak(e2eArea(f))}">${esc(e2eArea(f)||"—")}</span></td><td class="nm"><a href="#" data-fopen="${esc(f.id)}" data-fver="${I.steps["TO-BE"]?"TO-BE":"AS-IS"}">${esc(f.name)}</a><small>${esc(f.id)}${f.owner?" · "+esc(f.owner):""}${H.bu==="*"?` · ${buChip(e2eFlowBU(f))||"no BU"}`:""}${h.steps&&q?` · <b class="fhhit">${h.steps} step${h.steps>1?"s":""} match</b>`:""}</small></td>
+    return `<tr><td><span class="e2chip a-${ak(e2eArea(f))}">${esc(e2eArea(f)||"—")}</span></td><td class="nm"><a href="#" data-fopen="${esc(f.id)}" data-fver="${I.steps["TO-BE"]?"TO-BE":"AS-IS"}">${esc(f.name)}</a><small>${esc(f.id)} · ${esc(f.prog||"SIMP")}${f.owner?" · "+esc(f.owner):""}${H.bu==="*"?` · ${buChip(e2eFlowBU(f))||"no BU"}`:""}${h.steps&&q?` · <b class="fhhit">${h.steps} step${h.steps>1?"s":""} match</b>`:""}</small></td>
       <td class="muted">${I.lanes.length} lane${I.lanes.length===1?"":"s"}</td>${vc("AS-IS")}${vc("TO-BE")}<td><b>${I.pids.size}</b> ${mix(I.st)}</td><td class="muted">${I.upd?fmtDate(I.upd):"—"}</td>
       <td class="act"><button type="button" class="btn small" data-fedit="${esc(f.id)}" title="Rename, BU, process area, owner, notes">⚙</button><button type="button" class="btn small" data-fdup="${esc(f.id)}" title="Duplicate">⧉</button><button type="button" class="btn small danger" data-fdel="${esc(f.id)}" title="Delete">🗑</button></td></tr>`};
   const lib=`<div class="e2lib" id="e2lib"><div class="e2libh"><div><div class="e2step"><span>3</span>Flow map library</div><div class="muted" style="font-size:12.5px">${H.area?`${list.length} map${list.length===1?"":"s"} in ${esc(H.area)}`:`All ${fl.length} map${fl.length===1?"":"s"}, grouped by ${isFin?"finance ":""}process`}</div></div><span style="flex:1"></span>
@@ -583,6 +583,7 @@ async function e2eDupFlow(f){const k=await choose("Duplicate flow",`<p>Copy <b>$
   const name=($("#fdName").value||"").trim()||f.name+" (copy)",keep=$("#fdLinks").checked;const nf={id:e2eNewId(f.area),name,area:f.area,owner:f.owner,notes:f.notes,v:{}};
   for(const v of VERS){const d=f.v[v]&&f.v[v].doc;if(!d)continue;const c=JSON.parse(JSON.stringify(d));c.id="d"+Date.now()+v.length;c.name=name+" "+v;c.title=name;if(!keep)(c.shapes||[]).forEach(sh=>{sh.proj=[]});
     const cur=e2eFlow(nf.id)||nf;if(!e2eWriteDoc(cur,v,c))return;E2E_CACHE=null}
-  const x=e2eFlow(nf.id);if(x)VERS.forEach(v=>{if(x.v[v]){eSet(E2EF,EF.notes,x.v[v].r,f.notes||"");e2eSetBU(x.v[v].r,f.bu||"")}});E2E_CACHE=null;e2eRebuildMap();render();toast(`Duplicated as ${name} (${nf.id})`)}
+  const x=e2eFlow(nf.id);if(x)VERS.forEach(v=>{if(x.v[v]){eSet(E2EF,EF.notes,x.v[v].r,f.notes||"");e2eSetBU(x.v[v].r,f.bu||"");e2eSetProg(x.v[v].r,f.prog||"")}});E2E_CACHE=null;e2eRebuildMap();render();toast(`Duplicated as ${name} (${nf.id})`)}
 
 function e2eSetBU(r,bu){if(bu&&gv(E2EF,EF.bu,5)==="")eSet(E2EF,EF.bu,5,"Business unit");eSet(E2EF,EF.bu,r,bu||"")}
+function e2eSetProg(r,p){if(p&&gv(E2EF,EF.prog,5)==="")eSet(E2EF,EF.prog,5,"Programme");eSet(E2EF,EF.prog,r,p||"")}

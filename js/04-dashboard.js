@@ -1,3 +1,4 @@
+var DASHP_NOPROG=null;
 /* 04-dashboard.js — views router, dashboard charts, zoom panel, page banners */
 "use strict";
 /* ---------------- views ---------------- */
@@ -314,7 +315,7 @@ function vDash0(m){
   const P2b=P2.filter(r=>mIn(F.proc,fv(r,FP.proc)));const inits_=uniq(P2b.map(r=>fv(r,FP.init)));F.init=mKeep(F.init,inits_);
   const P3a=P2b.filter(r=>mIn(F.init,fv(r,FP.init))&&mIn(F.prog,progOf(r)));F.stOff=Array.isArray(F.stOff)?F.stOff:[];const off=new Set(F.stOff);const sts_=off.size?STL.slice():STL.filter(st=>P3a.some(r=>pStat(r)===st));
   const P3=P3a.filter(r=>!off.has(pStat(r)));const qq=(F.q||"").trim().toLowerCase();
-  const P=P3.filter(r=>!qq||(pId(r)+" "+gv("Projects",FP.name,r)).toLowerCase().includes(qq));const pids=new Set(P.map(pId));DASHP=pids;
+  const P=P3.filter(r=>!qq||(pId(r)+" "+gv("Projects",FP.name,r)).toLowerCase().includes(qq));const pids=new Set(P.map(pId));DASHP=pids;DASHP_NOPROG=F.prog?P2b.filter(r=>mIn(F.init,fv(r,FP.init))&&!off.has(pStat(r))&&(!qq||(pId(r)+" "+gv("Projects",FP.name,r)).toLowerCase().includes(qq))):null;
   const nF=[bu,F.cf,F.proc,F.init,F.prog,F.stOff.length?1:"",qq].filter(Boolean).length;
   const A=rowsOf("Activities").filter(r=>pids.has(gv("Activities",FA.pid,r))),D=rowsOf("RAIDD").filter(r=>pids.has(gv("RAIDD",FD.pid,r)));
   const BS=benefitSeries();const Bl=BS.list.filter(b=>pids.has(b.pid));const months=BS.months;
