@@ -1306,11 +1306,61 @@ tr.burow.sel td{background:color-mix(in srgb,var(--bc) 9%,#fff)!important}
 .pdtk-dl:hover{background:#F1EDFF;color:var(--accent);border-bottom-color:var(--accent)}
 .pdtk-dl.ro{cursor:default;border-bottom:0}.pdtk-dl.ro:hover{background:none;color:inherit}
 .pdtk-dl input{position:absolute;left:0;bottom:0;width:100%;height:100%;opacity:0;pointer-events:none;border:0;padding:0}
+
+/* r86 — E2E home: BU ▸ big flow ▸ library */
+.e2h{display:flex;align-items:flex-end;gap:10px;margin:2px 0 14px}.e2h h2{margin:2px 0 4px;font-size:26px;letter-spacing:-.3px}.e2h p{margin:0;font-size:13px}
+.e2kick{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--accent)}
+.e2step{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;color:var(--ink)}.e2step>span{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px}
+.e2bus{padding:14px 16px;margin-bottom:14px}.e2bugrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin-top:10px}
+.e2bu{position:relative;overflow:hidden;text-align:left;display:flex;flex-direction:column;gap:3px;padding:12px 14px 14px;border:1px solid #E6E3F0;border-left:4px solid var(--bc);border-radius:12px;background:#fff;cursor:pointer;font:inherit;transition:box-shadow .15s,transform .15s}
+.e2bu:hover{box-shadow:0 4px 14px rgba(16,24,40,.08);transform:translateY(-1px)}.e2bu b{font-size:14px;color:var(--ink)}.e2bu small{font-size:11.5px;color:var(--muted)}
+.e2bu .dot{position:absolute;right:12px;top:12px;width:9px;height:9px;border-radius:50%;background:var(--bc)}
+.e2bu.on{background:color-mix(in srgb,var(--bc) 9%,#fff);border-color:var(--bc);box-shadow:0 0 0 3px color-mix(in srgb,var(--bc) 18%,transparent)}
+.e2bu-flow{position:absolute;left:0;right:0;bottom:0;height:3px;background:repeating-linear-gradient(90deg,var(--bc) 0 10px,transparent 10px 22px);opacity:.55;animation:e2flowX 1.4s linear infinite}
+.e2pick{display:flex;flex-direction:column;gap:4px;align-items:center;text-align:center;padding:34px}
+.e2g{padding:18px 22px 22px;margin-bottom:18px}.e2gh{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.e2row{display:grid;gap:12px}.e2row.bot{display:flex;justify-content:center}.e2row.bot .e2a{flex:0 1 680px}
+.e2a{--a1:#FDEDE8;--a2:#B42318;--a3:#F8C9BC;position:relative;overflow:hidden;text-align:left;font:inherit;cursor:pointer;display:flex;flex-direction:column;gap:3px;min-height:128px;padding:14px 18px 16px;border-radius:12px;border:1px solid var(--a3);background:var(--a1);color:var(--a2);transition:transform .15s,box-shadow .15s}
+.e2a:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(16,24,40,.08)}.e2a.on{box-shadow:0 0 0 3px var(--a2) inset,0 8px 20px rgba(16,24,40,.08)}
+.e2a .e2a-t{display:flex;align-items:baseline;gap:14px}.e2a .e2a-t b{font-size:19px}.e2a .e2a-t em{font-style:normal;font-weight:600;font-size:14.5px}
+.e2a .e2a-go{margin-left:auto;font-size:16px;opacity:.75}.e2a>em{font-style:normal;font-weight:600;font-size:14px;margin-top:4px}.e2a .e2a-d{font-size:12.5px;opacity:.85}
+.e2a .e2a-n{margin-top:auto;padding-top:12px;font-size:11.5px;font-weight:600;opacity:.9}
+.e2a.big{min-height:84px}
+.e2a.a-p2p{--a1:#FDEDE8;--a2:#A63A24;--a3:#F6CFC3}.e2a.a-trs{--a1:#FEF6E1;--a2:#8A5A00;--a3:#F4DFA6}.e2a.a-o2c{--a1:#E8F5EE;--a2:#1E6B48;--a3:#BFE3CF}
+.e2a.a-r2r{--a1:#EFEBFF;--a2:#5B3FD1;--a3:#D3C9FB}.e2a.a-ir{--a1:#E9F2FE;--a2:#1F57A8;--a3:#C4DAF8}.e2a.a-tfm{--a1:#F2F4F7;--a2:#344054;--a3:#D0D5DD}.e2a.a-itc{--a1:#E7F7F8;--a2:#0E7076;--a3:#B8E6E8}
+.e2a.a-g0{--a1:#EAF2FF;--a2:#2459B8;--a3:#C9DAFA}.e2a.a-g1{--a1:#E7F7F8;--a2:#0E7076;--a3:#B8E6E8}.e2a.a-g2{--a1:#F4F0FF;--a2:#6941C6;--a3:#DCD2FB}
+/* data flowing */
+.e2a-stream{position:absolute;left:0;right:0;bottom:0;height:3px;background:repeating-linear-gradient(90deg,var(--a2) 0 12px,transparent 12px 26px);opacity:.45;animation:e2flowX 1.2s linear infinite}
+.e2a.live::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.55) 50%,transparent 65%);transform:translateX(-120%);animation:e2shine 4.5s ease-in-out infinite;pointer-events:none}
+.e2cons{display:grid;gap:12px;height:44px}.e2c{display:flex;justify-content:center;position:relative}
+.e2c i{width:2px;height:100%;background:#D0D5DD;position:relative;overflow:hidden}
+.e2c i::after{content:"";position:absolute;left:-2px;width:6px;height:100%;background:repeating-linear-gradient(180deg,transparent 0 8px,#98A2B3 8px 13px);animation:e2flowY 1s linear infinite}
+.e2c.on i{background:#C8BEF8}.e2c.on i::after{background:repeating-linear-gradient(180deg,transparent 0 8px,var(--accent) 8px 13px);left:-2px;border-radius:3px}
+.e2c::after{content:"";position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top:6px solid #98A2B3;border-bottom:0}.e2c.on::after{border-top-color:var(--accent)}
+.e2db{position:relative;overflow:hidden;display:flex;align-items:center;gap:12px;padding:14px 20px;border-radius:12px;background:#F2F2F7;border:1px solid #DCDCE6}
+.e2db b{display:block;font-size:15px;color:#2A2A40}.e2db small{font-size:12.5px;color:#6E6E85}.e2db-ic{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:#fff;color:#6E6893;border:1px solid #E1E0EA}
+.e2db-tag{font-size:10.5px;font-weight:700;letter-spacing:.6px;color:#6E6E85}
+.e2db-flow{position:absolute;left:0;right:0;bottom:0;height:3px;background:repeating-linear-gradient(90deg,#9E8CF5 0 6px,transparent 6px 14px,#5FC79A 14px 20px,transparent 20px 30px,#F4A78E 30px 36px,transparent 36px 46px);animation:e2flowX 2s linear infinite;opacity:.8}
+@keyframes e2flowX{from{background-position:0 0}to{background-position:46px 0}}
+@keyframes e2flowY{from{transform:translateY(-13px)}to{transform:translateY(0)}}
+@keyframes e2shine{0%,55%{transform:translateX(-120%)}85%,100%{transform:translateX(120%)}}
+@media (prefers-reduced-motion:reduce){.e2a-stream,.e2c i::after,.e2db-flow,.e2bu-flow,.e2a.live::after{animation:none}}
+.e2lib{scroll-margin-top:80px}.e2libh{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.e2libh input[type=search]{height:32px;min-width:240px;border:1px solid #E6E3F0;border-radius:8px;padding:0 10px;font:inherit;font-size:12.5px}.e2libh select{height:32px;border:1px solid #E6E3F0;border-radius:8px;font:inherit;font-size:12.5px;padding:0 6px;background:#fff}
+.e2tbl{overflow-x:auto;padding:0}.e2tbl table{width:100%;border-collapse:collapse;font-size:12.5px}
+.e2tbl th{text-align:left;font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:#6E6893;padding:11px 12px;border-bottom:1px solid #EEECF5;background:#FBFAFE}
+.e2tbl td{padding:10px 12px;border-bottom:1px solid #F1EFF7;vertical-align:middle}.e2tbl tr:last-child td{border-bottom:0}.e2tbl tr:hover td{background:#FAF9FE}
+.e2tbl td.nm a{font-weight:600;color:var(--ink);text-decoration:none}.e2tbl td.nm a:hover{color:var(--accent)}.e2tbl td.nm small{display:block;font-size:11px;color:var(--muted);margin-top:1px}
+.e2tbl td.act{white-space:nowrap;text-align:right}.e2tbl td.act .btn{padding:2px 6px}
+.e2chip{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--a1,#F2F4F7);color:var(--a2,#344054)}
+.e2chip.a-p2p{--a1:#FDEDE8;--a2:#A63A24}.e2chip.a-trs{--a1:#FEF6E1;--a2:#8A5A00}.e2chip.a-o2c{--a1:#E8F5EE;--a2:#1E6B48}.e2chip.a-r2r{--a1:#EFEBFF;--a2:#5B3FD1}.e2chip.a-ir{--a1:#E9F2FE;--a2:#1F57A8}.e2chip.a-itc{--a1:#E7F7F8;--a2:#0E7076}.e2chip.a-g0{--a1:#EAF2FF;--a2:#2459B8}.e2chip.a-g1{--a1:#E7F7F8;--a2:#0E7076}.e2chip.a-g2{--a1:#F4F0FF;--a2:#6941C6}
+.e2v{border:0;background:none;font:inherit;font-size:12.5px;color:var(--ink);cursor:pointer;padding:2px 6px;border-radius:6px}.e2v:hover{background:#F1EDFF;color:var(--accent)}.e2v.empty{color:#98A2B3}
+@media (max-width:760px){.e2row{grid-template-columns:1fr!important}.e2cons{display:none}.e2db-tag{display:none}}
 </style>
 </head>
 <body>
 <aside class="side" id="side" aria-label="Main navigation">
-  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r85</span></small></span></div>
+  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r86</span></small></span></div>
   <div class="sglab">WORKSPACE</div>
   <button type="button" class="wschip" id="btnOpen" title="Open the workbook (the database)"><span class="wsdot" aria-hidden="true"></span><span class="file" id="fileName">No workbook loaded</span><span class="chev" aria-hidden="true">⌄</span></button>
   <nav class="sidenav hidden" id="tabs"></nav>
@@ -5555,7 +5605,7 @@ const STUDIO_HTML="<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"
    "Diagram data 1..30"; E2E_Map = one row per step ↔ project link (rebuilt on each change).
    Editing happens in the embedded Swimlane Studio (iframe, postMessage).
    ===================================================================================== */
-const E2EF="E2E_Flows",E2EM="E2E_Map",EF={id:"B",name:"C",area:"D",ver:"E",owner:"F",steps:"G",projs:"H",upd:"I",notes:"J"},EF_DATA0=11,EF_NDATA=30,EF_FIRST=6,EF_LAST=205;
+const E2EF="E2E_Flows",E2EM="E2E_Map",EF={id:"B",name:"C",area:"D",ver:"E",owner:"F",steps:"G",projs:"H",upd:"I",notes:"J",bu:"AO"},EF_DATA0=11,EF_NDATA=30,EF_FIRST=6,EF_LAST=205;
 const EM={fid:"B",fname:"C",ver:"D",no:"E",lane:"F",sid:"G",step:"H",chg:"I",repl:"J",pid:"K",cp:"R",key:"S",hrs:"T",saved:"U",cost:"V"},EM_FIRST=6,EM_LAST=1505,VERS=["AS-IS","TO-BE"];
 UI.e2e=UI.e2e||{flow:null,ver:"TO-BE",all:false,q:"",chip:"count",tags:true,link:null,focus:null,full:true};
 const hasE2E=()=>!!(S.sheets[E2EF]&&S.sheets[E2EF].vals&&S.sheets[E2EM]&&S.sheets[E2EM].vals);
@@ -5569,7 +5619,7 @@ function e2eFlows(){const all=e2eFlowsAll();return (typeof scope==="function"&&s
 function e2eFlowsAll(){if(E2E_CACHE)return E2E_CACHE;const out=[];if(!hasE2E())return out;const by={};
   for(let r=EF_FIRST;r<=EF_LAST;r++){const id=String(gv(E2EF,EF.id,r)||"");if(!id)continue;const ver=String(gv(E2EF,EF.ver,r)||"AS-IS").toUpperCase().includes("TO")?"TO-BE":"AS-IS";
     let js="";for(let k=0;k<EF_NDATA;k++){const v=gv(E2EF,colLet(EF_DATA0+k),r);if(v===""||v==null)break;js+=String(v)}let doc=null;try{doc=js?JSON.parse(js):null}catch(e){doc=null}
-    const f=by[id]||(by[id]={id,name:String(gv(E2EF,EF.name,r)||id),area:String(gv(E2EF,EF.area,r)||""),owner:String(gv(E2EF,EF.owner,r)||""),notes:String(gv(E2EF,EF.notes,r)||""),v:{}});
+    const f=by[id]||(by[id]={id,name:String(gv(E2EF,EF.name,r)||id),area:String(gv(E2EF,EF.area,r)||""),owner:String(gv(E2EF,EF.owner,r)||""),bu:String(gv(E2EF,EF.bu,r)||""),notes:String(gv(E2EF,EF.notes,r)||""),v:{}});
     if(f.v[ver])(f.dup||(f.dup=[])).push(ver+" (row "+r+")");else f.v[ver]={r,doc,bad:!!js&&!doc};if(!out.includes(f))out.push(f)}
   E2E_CACHE=out;return out}
 function e2eFlow(id){return e2eFlows().find(f=>f.id===id)||null}
@@ -5827,7 +5877,7 @@ function e2eSidePanel(){const box=document.getElementById("e2eSide");const f=e2e
 function e2eFlowForm(f){const areas=uniqOrder([...(hasMD()?mdList("L_Proc"):listFromName("L_Proc")),...e2eFlows().map(x=>x.area)]).filter(Boolean);
   return `<div class="fgrid"><label>Flow name<input id="efName" value="${esc(f?f.name:"")}" placeholder="e.g. P2P Domestic — AP & Payment"></label>
    <label>Process area<input id="efArea" list="efAreas" value="${esc(f?f.area:"")}" placeholder="O2C, P2P, R2R…"><datalist id="efAreas">${areas.map(a=>`<option value="${esc(a)}">`).join("")}</datalist></label>
-   <label>Owner<input id="efOwner" value="${esc(f?f.owner:"")}"></label><label>Notes<input id="efNotes" value="${esc(f?f.notes:"")}"></label></div>`}
+   <label>Business unit<select id="efBU"><option value="">Auto — from linked projects</option>${(()=>{let L=[];try{L=listFromName("L_BU").map(String).filter(Boolean)}catch(e){}const cur=f?f.bu:(UI.e2eH&&UI.e2eH.bu&&!["*","(not assigned)"].includes(UI.e2eH.bu)?UI.e2eH.bu:"");return uniqOrder([...L,...(cur?[cur]:[])]).map(b=>`<option ${b===cur?"selected":""}>${esc(b)}</option>`).join("")})()}</select></label><label>Owner<input id="efOwner" value="${esc(f?f.owner:"")}"></label><label>Notes<input id="efNotes" value="${esc(f?f.notes:"")}"></label></div>`}
 async function e2eNewFlow(){let IMP=null;
   const p=choose("New E2E process flow",e2eFlowForm(null)+`<div class="nfimp"><div class="nfh"><b>Start from Excel / AI (optional)</b><span class="muted">or leave empty for blank lanes</span></div>
     <div class="nfdrops"><div class="nfdrop" id="nfDrop" tabindex="0" role="button" aria-label="Drop or choose an Excel file"><b>📊 Excel table</b><br>Drop the .xlsx here or <u>choose a file</u> · or paste the table below<input type="file" id="nfFile" accept=".xlsx,.csv,.txt" hidden></div>
@@ -5866,18 +5916,18 @@ async function e2eNewFlow(){let IMP=null;
   box.querySelector("#nfTpl").onclick=()=>download(new Blob(["\ufeff"+e2eTemplateCsv()],{type:"text/csv"}),"E2E_flow_template.csv");
   const k=await p;if(k!=="ok")return;
   const name=$("#efName").value.trim(),area=$("#efArea").value.trim();if(!name){toast("Give the flow a name");return}
-  const id=e2eNewId(area);const f={id,name,area,owner:$("#efOwner").value.trim()||(typeof scope==="function"&&scope()&&ACC?ACC.name||ACC.login:""),notes:$("#efNotes").value.trim(),v:{}};
+  const id=e2eNewId(area);const f={id,name,area,bu:($("#efBU")||{}).value||"",owner:$("#efOwner").value.trim()||(typeof scope==="function"&&scope()&&ACC?ACC.name||ACC.login:""),notes:$("#efNotes").value.trim(),v:{}};
   const vp=(document.querySelector('input[name="nfVer"]:checked')||{}).value||"auto";const pgs=!!(document.getElementById("nfPages")||{}).checked;if(IMP&&IMP.sheets){IMP=e2eImportFromGrids(IMP.sheets,name,vp,{pages:pgs})}
   if(IMP&&IMP.pptx){for(const v of Object.keys(IMP.res)){const d=IMP.res[v].doc;d.title=name;d.name=name+" "+v}if(vp!=="auto"&&Object.keys(IMP.res).length===1){const only=Object.keys(IMP.res)[0];if(only!==vp){IMP.res[vp]=IMP.res[only];IMP.res[vp].doc.tag=vp;delete IMP.res[only]}}}/* rebuild with the final name */
   const vers=IMP?VERS.filter(v=>IMP.res[v]):[];
   if(vers.length){for(const v of vers){if(!e2eWriteDoc(e2eFlow(id)||f,v,IMP.res[v].doc))return;E2E_CACHE=null}}
   else{const doc={id:"d"+Date.now(),name:name+" AS-IS",title:name,tag:"AS-IS",ori:"v",flow:700,head:46,lanes:["Requester","Team A","Team B","System"].map((n,i)=>({id:"L"+i,name:n,sub:"",size:220})),secs:[],shapes:[],links:[]};if(!e2eWriteDoc(f,"AS-IS",doc))return}
-  const x=e2eFlow(id);if(x)VERS.forEach(v=>{if(x.v[v])eSet(E2EF,EF.notes,x.v[v].r,f.notes)});
+  const x=e2eFlow(id);if(x)VERS.forEach(v=>{if(x.v[v]){eSet(E2EF,EF.notes,x.v[v].r,f.notes);e2eSetBU(x.v[v].r,f.bu)}});
   UI.e2e.home=false;UI.e2e.flow=id;UI.e2e.ver=vers.includes("AS-IS")||!vers.length?"AS-IS":"TO-BE";E2E_CACHE=null;e2eRebuildMap();render();
   toast(vers.length?`Created ${name} from the table — ${vers.join(" + ")}. Drag boxes to fine-tune.`:"Created "+name+" — rename the lanes by double-clicking their headers",6000)}
 async function e2eEditFlow(f){const k=await choose("Flow details",e2eFlowForm(f),[["del","Delete this flow…","danger"],["c","Cancel"],["ok","Save","primary"]]);if(k==="del"){e2eDeleteFlow(f);return}if(k!=="ok")return;
-  const name=$("#efName").value.trim()||f.name,area=$("#efArea").value.trim(),owner=$("#efOwner").value.trim(),notes=$("#efNotes").value.trim();
-  for(const v of VERS){const x=f.v[v];if(!x)continue;eSet(E2EF,EF.name,x.r,name);eSet(E2EF,EF.area,x.r,area);eSet(E2EF,EF.owner,x.r,owner);eSet(E2EF,EF.notes,x.r,notes)}E2E_CACHE=null;e2eQueueMap();render()}
+  const name=$("#efName").value.trim()||f.name,area=$("#efArea").value.trim(),owner=$("#efOwner").value.trim(),notes=$("#efNotes").value.trim(),bu=($("#efBU")||{}).value||"";
+  for(const v of VERS){const x=f.v[v];if(!x)continue;eSet(E2EF,EF.name,x.r,name);eSet(E2EF,EF.area,x.r,area);eSet(E2EF,EF.owner,x.r,owner);eSet(E2EF,EF.notes,x.r,notes);e2eSetBU(x.r,bu)}E2E_CACHE=null;e2eQueueMap();render()}
 async function e2eDeleteFlow(f){const links=VERS.reduce((a,v)=>a+((f.v[v]&&f.v[v].doc)?(f.v[v].doc.shapes||[]).reduce((n,sh)=>n+(sh.proj||[]).length,0):0),0);
   const k=await choose(`Delete “${esc(f.name)}”?`,`<p>This removes its AS-IS and TO-BE diagrams${links?` and ${links} step↔project link(s)`:""} from the workbook (when you save). Projects themselves are not changed.</p>`,[["c","Cancel"],["ok","Delete flow","danger"]]);if(k!=="ok")return;
   for(const v of VERS){const x=f.v[v];if(!x)continue;for(const c of [...Object.values(EF),...Array.from({length:EF_NDATA},(_,i)=>colLet(EF_DATA0+i))])eSet(E2EF,c,x.r,"")}
@@ -6036,56 +6086,93 @@ function e2eFlowInfo(f){const docs=VERS.map(v=>f.v[v]&&f.v[v].doc).filter(Boolea
   const st={};[...pids].forEach(p=>{const r=projRowById(p);const s=r?pStat(r):"(not in Projects)";st[s]=(st[s]||0)+1});
   const texts=docs.flatMap(d=>(d.shapes||[]).filter(isStep).map(sh=>String(sh.text||"")));
   return {pids,steps,lanes,upd,st,t:e2eFlowTotals(f),texts}}
-function vE2EHome(m){e2eHide();const H=UI.e2eH;const fl=e2eFlows();const info=Object.fromEntries(fl.map(f=>[f.id,e2eFlowInfo(f)]));
-  const q=H.q.trim().toLowerCase();const areas=uniq(fl.map(f=>f.area||"(no area)")).sort();if(H.area&&!areas.includes(H.area))H.area="";
-  const pname=p=>{const r=projRowById(p);return r?gv("Projects",FP.name,r):""};
-  const hit=f=>{if(!q)return {ok:true,steps:0};const I=info[f.id];const base=[f.name,f.id,f.area,f.owner,f.notes,...I.lanes,...[...I.pids].flatMap(p=>[p,pname(p)])].join(" ").toLowerCase();
-    const steps=I.texts.filter(t=>t.toLowerCase().includes(q)).length;return {ok:base.includes(q)||steps>0,steps}};
+/* r86 — E2E home: pick a BU ▸ "<BU> at a glance" big flow (process areas → shared data → reporting, animated) ▸ flow map library table */
+const E2E_AREA={P2P:["Procure to pay","Supplier to payment","p2p"],O2C:["Order to cash","Customer order to collection","o2c"],TREASURY:["Cash, banks, FX, investments","Manage liquidity and cash","trs"],
+  R2R:["Record to report","Close, reconcile, consolidate, report","r2r"],IR:["Investor relations","Results, MD&A and investor communication","ir"]};
+const E2E_BOTTOM=/^(R2R|IR|FP&?A|TAX|ACR|REPORTING)$/i;
+function e2eFlowBU(f){return f.bu||flowBU(f)||""}
+function e2eBUAreas(bu){let rs=[];try{if(hasMD())rs=mdRows(ORGC).filter(r=>mg("J",r)&&(mg("F",r)===bu||mg("F",r)===""))}catch(e){}return uniqOrder(rs.map(r=>String(mg("J",r))))}
+function vE2EHome(m){e2eHide();const H=UI.e2eH;const all=e2eFlows();const info=Object.fromEntries(all.map(f=>[f.id,e2eFlowInfo(f)]));
+  const buOf=f=>e2eFlowBU(f)||"(not assigned)";
+  /* ---- step 1: business units ---- */
+  let BUL=[];try{BUL=listFromName("L_BU").map(String).filter(Boolean)}catch(e){}
+  const pBU={};projects().forEach(p=>{const b=String(gv("Projects",FP.bu,p.r)||"");if(b)pBU[b]=(pBU[b]||0)+1});
+  const bus=uniqOrder([...BUL.filter(b=>pBU[b]||all.some(f=>buOf(f)===b)),...all.map(buOf).filter(b=>b!=="(not assigned)"),...(all.some(f=>buOf(f)==="(not assigned)")?["(not assigned)"]:[])]);
+  if(H.bu&&H.bu!=="*"&&!bus.includes(H.bu))H.bu=null;
+  const buCard=b=>{const fs=b==="*"?all:all.filter(f=>buOf(f)===b);const np=b==="*"?projects().length:(b==="(not assigned)"?0:(pBU[b]||0));const lp=new Set(fs.flatMap(f=>[...info[f.id].pids])).size;
+    const c=b==="*"?"#7C5CFC":b==="(not assigned)"?"#98A2B3":buColor(b);
+    return `<button type="button" class="e2bu${H.bu===b?" on":""}" data-e2bu="${esc(b)}" style="--bc:${c}"><span class="dot"></span><b>${esc(b==="*"?"All business units":b==="(not assigned)"?"Not assigned":b)}</b>
+      <small>${fs.length} flow map${fs.length===1?"":"s"}${b==="(not assigned)"?" · link projects or set a BU":` · ${lp} linked of ${np} project${np===1?"":"s"}`}</small>${fs.length?'<i class="e2bu-flow" aria-hidden="true"></i>':""}</button>`};
+  const head=`<div class="e2h"><div><div class="e2kick">E2E process flows</div><h2>${H.bu&&H.bu!=="*"?esc(H.bu==="(not assigned)"?"Flows without a BU":H.bu+" E2E flows"):"E2E flows"}</h2>
+      <p class="muted">${H.bu?"Select a process box to explore its flow maps.":"Start by choosing a business unit — then explore its processes and flow maps."}</p></div><span style="flex:1"></span>
+      ${all.some(f=>/p2p/i.test(f.name+f.area))?"":`<button class="btn" id="fhSeed" title="Adds the P2P Domestic AS-IS + TO-BE from the Shared Services deck">＋ P2P example</button>`}<button class="btn new" id="fhNew" ${e2eCanEdit()?"":"hidden"}>＋ New flow</button></div>
+    <div class="card e2bus"><div class="e2step"><span>1</span>Business unit${H.bu?` <button type="button" class="ovlink" id="e2buClr">change</button>`:""}</div><div class="e2bugrid">${[...bus,"*"].map(buCard).join("")}</div></div>`;
+  if(!H.bu){m.innerHTML=head+`<div class="card pad e2pick"><b>👆 Pick a business unit</b><span class="muted">Each BU shows its finance landscape and the flow maps behind it.</span></div><div id="e2eSlot" data-hidden="1"></div>`;e2eAttach(m.querySelector("#e2eSlot"));e2eHomeBind(m,all);return}
+  /* ---- step 2: big flow ---- */
+  const fl=H.bu==="*"?all:all.filter(f=>buOf(f)===H.bu);
+  const areaKey=a=>a||"(no area)";
+  let areas=uniqOrder([...(H.bu!=="*"&&H.bu!=="(not assigned)"?e2eBUAreas(H.bu):[]),...fl.map(f=>areaKey(f.area))]);
+  areas=areas.filter(a=>!/^other$/i.test(a)||fl.some(f=>areaKey(f.area)===a));
+  if(H.area&&!areas.includes(H.area))H.area="";
+  const top=areas.filter(a=>!E2E_BOTTOM.test(a)),bot=areas.filter(a=>E2E_BOTTOM.test(a));
+  const box=(a,big)=>{const fs=fl.filter(f=>areaKey(f.area)===a);const d=E2E_AREA[a.toUpperCase()]||[a==="(no area)"?"No process area set":"","",""];const pr=new Set(fs.flatMap(f=>[...info[f.id].pids])).size;
+    const k=d[2]||"g"+(Math.abs([...a].reduce((h,c)=>h*31+c.charCodeAt(0)|0,7))%3);
+    return `<button type="button" class="e2a a-${k}${big?" big":""}${H.area===a?" on":""}${fs.length?" live":""}" data-e2area="${esc(a)}" title="${fs.length?"Show its flow maps":"No flow maps yet"}">
+      <span class="e2a-t"><b>${esc(a==="(no area)"?"Other":a)}</b>${big&&d[0]?`<em>${esc(d[0])}</em>`:""}<span class="e2a-go" aria-hidden="true">↗</span></span>
+      ${big?`<span class="e2a-d">${esc(d[1])}</span>`:`${d[0]?`<em>${esc(d[0])}</em>`:""}${d[1]?`<span class="e2a-d">${esc(d[1])}</span>`:""}`}
+      <span class="e2a-n">${fs.length?`${fs.length} flow map${fs.length>1?"s":""} · ${pr} project${pr===1?"":"s"}`:"No flow maps yet"}</span>${fs.length?'<span class="e2a-stream" aria-hidden="true"></span>':""}</button>`};
+  const n=top.length,cols=Math.min(Math.max(n,1),5);
+  const con=on=>`<span class="e2c${on?" on":""}" aria-hidden="true"><i></i></span>`;
+  const totP=new Set(fl.flatMap(f=>[...info[f.id].pids])).size;
+  const glance=`<div class="card e2g"><div class="e2gh"><div><div class="e2step"><span>2</span>${esc(H.bu==="*"?"All BUs":H.bu==="(not assigned)"?"Not assigned":H.bu)} at a glance</div><div class="muted" style="font-size:12.5px">${areas.length} process area${areas.length===1?"":"s"} / ${fl.length} flow map${fl.length===1?"":"s"} / ${totP} linked project${totP===1?"":"s"}</div></div>
+      <span class="muted" style="font-size:12.5px">${H.area?`Showing <b>${esc(H.area)}</b> · <a href="#" id="e2aClr">show all</a>`:"Select a process box to explore its flows"}</span></div>
+    ${areas.length?`${n?`<div class="e2row" style="grid-template-columns:repeat(${cols},1fr)">${top.map(a=>box(a,false)).join("")}</div>
+      <div class="e2cons" style="grid-template-columns:repeat(${n<=5?cols:1},1fr)">${(n<=5?top:["x"]).map(a=>con(a==="x"||fl.some(f=>areaKey(f.area)===a))).join("")}</div>`:""}
+      <div class="e2db"><span class="e2db-ic" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7"><ellipse cx="12" cy="5.5" rx="7.5" ry="2.8"/><path d="M4.5 5.5v6.5c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8V5.5M4.5 12v6.5c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8V12"/></svg></span><div><b>Central ERP database / general ledger</b><small>AR, AP, cash, bank and master data</small></div><span style="flex:1"></span><span class="e2db-tag">SHARED DATA FOUNDATION</span><span class="e2db-flow" aria-hidden="true"></span></div>
+      ${bot.length?`<div class="e2cons" style="grid-template-columns:1fr">${con(bot.some(a=>fl.some(f=>areaKey(f.area)===a)))}</div><div class="e2row bot">${bot.map(a=>box(a,true)).join("")}</div>`:""}`
+      :`<div class="muted pad">No process areas or flow maps for this BU yet — add org rows in Settings, or create a flow with ＋ New flow.</div>`}</div>`;
+  /* ---- step 3: library ---- */
+  const q=H.q.trim().toLowerCase();const pname=p=>{const r=projRowById(p);return r?gv("Projects",FP.name,r):""};
+  const hit=f=>{if(!q)return {ok:true,steps:0};const I=info[f.id];const base=[f.name,f.id,f.area,f.owner,f.notes,...I.lanes,...[...I.pids].flatMap(p=>[p,pname(p)])].join(" ").toLowerCase();const steps=I.texts.filter(t=>t.toLowerCase().includes(q)).length;return {ok:base.includes(q)||steps>0,steps}};
   const STATE={"":"All flows",both:"AS-IS + TO-BE",asis:"AS-IS only",tobe:"TO-BE missing steps",untimed:"Steps not timed",proj:"Linked to projects",noproj:"No projects linked"};
-  const okState=f=>{const I=info[f.id];switch(H.state){case "both":return I.steps["AS-IS"]>0&&I.steps["TO-BE"]>0;case "asis":return I.steps["AS-IS"]>0&&!I.steps["TO-BE"];case "tobe":return !I.steps["TO-BE"];
-    case "untimed":return I.t.steps>0&&I.t.timed<I.t.steps;case "proj":return I.pids.size>0;case "noproj":return !I.pids.size;default:return true}};
-  let list=fl.filter(f=>(!H.area||(f.area||"(no area)")===H.area)&&okState(f)&&hit(f).ok);
-  const S_={name:(a,b)=>a.name.localeCompare(b.name),area:(a,b)=>(a.area||"~").localeCompare(b.area||"~")||a.name.localeCompare(b.name),proj:(a,b)=>info[b.id].pids.size-info[a.id].pids.size,
-    saving:(a,b)=>(info[b.id].t.cost||0)-(info[a.id].t.cost||0),upd:(a,b)=>info[b.id].upd-info[a.id].upd};list.sort(S_[H.sort]||S_.name);
-  const H1=v=>fmtNum(Math.round(v*10)/10);
+  const okState=f=>{const I=info[f.id];switch(H.state){case "both":return I.steps["AS-IS"]>0&&I.steps["TO-BE"]>0;case "asis":return I.steps["AS-IS"]>0&&!I.steps["TO-BE"];case "tobe":return !I.steps["TO-BE"];case "untimed":return I.t.steps>0&&I.t.timed<I.t.steps;case "proj":return I.pids.size>0;case "noproj":return !I.pids.size;default:return true}};
+  let list=fl.filter(f=>(!H.area||areaKey(f.area)===H.area)&&okState(f)&&hit(f).ok);
+  const ord=a=>{const i=areas.indexOf(areaKey(a.area));return i<0?999:i};
+  const S_={name:(a,b)=>ord(a)-ord(b)||a.name.localeCompare(b.name),proj:(a,b)=>info[b.id].pids.size-info[a.id].pids.size,saving:(a,b)=>(info[b.id].t.cost||0)-(info[a.id].t.cost||0),upd:(a,b)=>info[b.id].upd-info[a.id].upd};list.sort(S_[H.sort]||S_.name);
   const mix=st=>{const ks=STL.filter(s=>st[s]);return ks.length?`<span class="tmix" title="${ks.map(s=>s+": "+st[s]).join(" · ")}">${ks.map(s=>`<i style="flex:${st[s]};background:${SCOL[s]}"></i>`).join("")}</span>`:""};
-  const card=f=>{const I=info[f.id],t=I.t,h=hit(f);const ver=(v,lbl)=>{const n=I.steps[v];return `<button type="button" class="fhver${n?"":" empty"}" data-fopen="${esc(f.id)}" data-fver="${v}" title="${n?`Open ${lbl} — ${n} step(s)`:`Start the ${lbl} version`}"><b>${lbl}</b><span>${n?n+" steps":"not started"}</span></button>`};
-    return `<article class="card fhcard" style="--fc:${buColor(flowBU(f))}"><div class="fhtop"><span class="fharea">${esc(f.area||"no area")}</span><span class="muted mono" style="font-size:11px">${esc(f.id)}</span><span style="flex:1"></span>
-      <button type="button" class="btn small" data-fedit="${esc(f.id)}" title="Rename, process area, owner, notes">⚙</button><button type="button" class="btn small" data-fdup="${esc(f.id)}" title="Duplicate this flow (both versions)">⧉</button><button type="button" class="btn small danger" data-fdel="${esc(f.id)}" title="Delete flow">🗑</button></div>
-      <h3 class="fhname"><a href="#" data-fopen="${esc(f.id)}" data-fver="${I.steps["TO-BE"]?"TO-BE":"AS-IS"}">${esc(f.name)}</a></h3>
-      <div class="muted fhmeta">${f.owner?`Owner ${esc(f.owner)} · `:""}${I.lanes.length} lane${I.lanes.length===1?"":"s"}${I.upd?` · updated ${fmtDate(I.upd)}`:""}${h.steps&&q?` · <b class="fhhit">${h.steps} step${h.steps>1?"s":""} match “${esc(H.q.trim())}”</b>`:""}</div>
-      ${I.lanes.length?`<div class="fhlanes">${I.lanes.slice(0,7).map(l=>`<span>${esc(l)}</span>`).join("")}${I.lanes.length>7?`<span>+${I.lanes.length-7}</span>`:""}</div>`:""}
-      <div class="fhvers">${ver("AS-IS","AS-IS · before")}${ver("TO-BE","TO-BE · new design")}</div>
-      <div class="fhstats"><div><span>Projects</span><b>${I.pids.size}</b>${mix(I.st)}</div><div><span>Process time h/m</span><b>${t.asis||t.tobe?`${H1(t.asis)} → ${H1(t.tobe)}`:"—"}</b><em>${t.steps?`${t.timed}/${t.steps} TO-BE steps timed`:""}</em></div><div><span>Saving THB/yr</span><b>${t.cost?fmtShort(t.cost):"—"}</b><em>${t.saved?`−${H1(t.saved)} h/m`:""}</em></div></div></article>`};
-  const totP=new Set(fl.flatMap(f=>[...info[f.id].pids])).size,totC=fl.reduce((a,f)=>a+(info[f.id].t.cost||0),0);
-  m.innerHTML=`<div class="card pad fhhead"><div class="fhh1"><div><h2 style="margin:0">⇄ E2E process flows</h2><p class="muted" style="margin:4px 0 0;font-size:12.5px">${fl.length} flow${fl.length===1?"":"s"} · ${totP} linked project${totP===1?"":"s"}${totC?` · process saving ${fmtShort(totC)} THB/yr`:""} · search finds flow names, areas, owners, lanes, step text and projects</p></div><span style="flex:1"></span>
-      ${fl.some(f=>/p2p/i.test(f.name+f.area))?"":`<button class="btn" id="fhSeed" title="Adds the P2P Domestic AS-IS + TO-BE from the Shared Services deck">＋ P2P example</button>`}<button class="btn new" id="fhNew" ${e2eCanEdit()?"":"hidden"}>＋ New flow</button></div>
-    <div class="fhfilt"><input type="search" id="fhQ" placeholder="Search flows, lanes, steps or projects…" value="${esc(H.q)}" aria-label="Search flows">
-      <span class="fhchips" role="group" aria-label="Process area">${["",...areas].map(a=>`<button type="button" class="e2ech${H.area===a?" on":""}" data-farea="${esc(a)}">${esc(a||"All areas")} <b>${a?fl.filter(f=>(f.area||"(no area)")===a).length:fl.length}</b></button>`).join("")}</span>
-      <label class="muted">Show <select id="fhState">${Object.entries(STATE).map(([k,v])=>`<option value="${k}" ${H.state===k?"selected":""}>${v}</option>`).join("")}</select></label>
-      <label class="muted">Sort <select id="fhSort">${[["name","Name"],["area","Process area"],["proj","Most projects"],["saving","Biggest saving"],["upd","Recently updated"]].map(([k,v])=>`<option value="${k}" ${H.sort===k?"selected":""}>${v}</option>`).join("")}</select></label>
-      <span class="muted" style="margin-left:auto">${list.length} of ${fl.length}</span></div></div>
-   ${fl.length?(list.length?`<div class="fhgrid">${list.map(card).join("")}</div>`:`<div class="card pad muted">No flow matches — <a href="#" id="fhClr">clear the search and filters</a>.</div>`)
-     :`<div class="card pad"><h2>No process flows yet</h2><p class="muted">Create a blank flow, or start from the Shared Services deck's P2P Domestic flow (AS-IS + TO-BE).</p></div>`}
-   <div id="e2eSlot" data-hidden="1"></div>`;
-  e2eAttach(m.querySelector("#e2eSlot"));
-  const re=()=>{const y=scrollY;vE2EHome(m);window.scrollTo(0,y)};
-  const qi=$("#fhQ");qi.oninput=()=>{H.q=qi.value;clearTimeout(vE2EHome._t);vE2EHome._t=setTimeout(()=>{re();const n=$("#fhQ");if(n){n.focus();n.setSelectionRange(n.value.length,n.value.length)}},250)};
-  m.querySelectorAll("[data-farea]").forEach(b=>b.onclick=()=>{H.area=b.dataset.farea;re()});
-  $("#fhState").onchange=e=>{H.state=e.target.value;re()};$("#fhSort").onchange=e=>{H.sort=e.target.value;re()};
+  const ak=a=>{const d=E2E_AREA[String(a||"").toUpperCase()];return d?d[2]:"g"+(Math.abs([...areaKey(a)].reduce((h,c)=>h*31+c.charCodeAt(0)|0,7))%3)};
+  const row=f=>{const I=info[f.id],h=hit(f);const vc=(v)=>{const n=I.steps[v];return `<td><button type="button" class="e2v${n?"":" empty"}" data-fopen="${esc(f.id)}" data-fver="${v}" title="${n?`Open ${v}`:`Start the ${v} version`}">${n?n+" steps":"Not started"}</button></td>`};
+    return `<tr><td><span class="e2chip a-${ak(f.area)}">${esc(f.area||"—")}</span></td><td class="nm"><a href="#" data-fopen="${esc(f.id)}" data-fver="${I.steps["TO-BE"]?"TO-BE":"AS-IS"}">${esc(f.name)}</a><small>${esc(f.id)}${f.owner?" · "+esc(f.owner):""}${H.bu==="*"?` · ${buChip(e2eFlowBU(f))||"no BU"}`:""}${h.steps&&q?` · <b class="fhhit">${h.steps} step${h.steps>1?"s":""} match</b>`:""}</small></td>
+      <td class="muted">${I.lanes.length} lane${I.lanes.length===1?"":"s"}</td>${vc("AS-IS")}${vc("TO-BE")}<td><b>${I.pids.size}</b> ${mix(I.st)}</td><td class="muted">${I.upd?fmtDate(I.upd):"—"}</td>
+      <td class="act"><button type="button" class="btn small" data-fedit="${esc(f.id)}" title="Rename, BU, process area, owner, notes">⚙</button><button type="button" class="btn small" data-fdup="${esc(f.id)}" title="Duplicate">⧉</button><button type="button" class="btn small danger" data-fdel="${esc(f.id)}" title="Delete">🗑</button></td></tr>`};
+  const lib=`<div class="e2lib" id="e2lib"><div class="e2libh"><div><div class="e2step"><span>3</span>Flow map library</div><div class="muted" style="font-size:12.5px">${H.area?`${list.length} map${list.length===1?"":"s"} in ${esc(H.area)}`:`All ${fl.length} map${fl.length===1?"":"s"}, grouped by finance process`}</div></div><span style="flex:1"></span>
+      <input type="search" id="fhQ" placeholder="Search flows, lanes, steps or projects…" value="${esc(H.q)}" aria-label="Search flows">
+      <select id="fhState" aria-label="Show">${Object.entries(STATE).map(([k,v])=>`<option value="${k}" ${H.state===k?"selected":""}>${v}</option>`).join("")}</select>
+      <select id="fhSort" aria-label="Sort">${[["name","Process ▸ name"],["proj","Most projects"],["saving","Biggest saving"],["upd","Recently updated"]].map(([k,v])=>`<option value="${k}" ${H.sort===k?"selected":""}>${v}</option>`).join("")}</select></div>
+    <div class="card e2tbl">${list.length?`<table><thead><tr><th>Process</th><th>Flow map</th><th>Lanes</th><th>AS-IS</th><th>TO-BE</th><th>Projects</th><th>Updated</th><th></th></tr></thead><tbody>${list.map(row).join("")}</tbody></table>`
+      :`<div class="pad muted">${fl.length?`No flow matches — <a href="#" id="fhClr">clear the search and filters</a>.`:"No flow maps for this BU yet — create one with ＋ New flow."}</div>`}</div></div>`;
+  m.innerHTML=head+glance+lib+`<div id="e2eSlot" data-hidden="1"></div>`;e2eAttach(m.querySelector("#e2eSlot"));e2eHomeBind(m,all)}
+function e2eHomeBind(m,all){const H=UI.e2eH;const re=()=>{const y=scrollY;vE2EHome(m);window.scrollTo(0,y)};
+  m.querySelectorAll("[data-e2bu]").forEach(b=>b.onclick=()=>{const v=b.dataset.e2bu;H.bu=H.bu===v?null:v;H.area="";re()});
+  const bc=m.querySelector("#e2buClr");if(bc)bc.onclick=()=>{H.bu=null;H.area="";re()};
+  m.querySelectorAll("[data-e2area]").forEach(b=>b.onclick=()=>{const a=b.dataset.e2area;H.area=H.area===a?"":a;re();if(H.area){const l=$("#e2lib");if(l)l.scrollIntoView({behavior:"smooth",block:"start"})}});
+  const ac=m.querySelector("#e2aClr");if(ac)ac.onclick=e=>{e.preventDefault();H.area="";re()};
+  const qi=$("#fhQ");if(qi)qi.oninput=()=>{H.q=qi.value;clearTimeout(vE2EHome._t);vE2EHome._t=setTimeout(()=>{re();const n=$("#fhQ");if(n){n.focus();n.setSelectionRange(n.value.length,n.value.length)}},250)};
+  if($("#fhState"))$("#fhState").onchange=e=>{H.state=e.target.value;re()};if($("#fhSort"))$("#fhSort").onchange=e=>{H.sort=e.target.value;re()};
   if($("#fhClr"))$("#fhClr").onclick=e=>{e.preventDefault();H.q="";H.area="";H.state="";re()};
   $("#fhNew").onclick=e2eNewFlow;if($("#fhSeed"))$("#fhSeed").onclick=async()=>{UI.e2e.home=false;UI.e2e.flow=null;await e2eSeedP2P()};
   m.querySelectorAll("[data-fopen]").forEach(b=>b.onclick=e=>{e.preventDefault();UI.e2e.home=false;UI.e2e.flow=b.dataset.fopen;UI.e2e.ver=b.dataset.fver;UI.e2e.link=null;render();window.scrollTo(0,0)});
   m.querySelectorAll("[data-fedit]").forEach(b=>b.onclick=()=>{const f=e2eFlow(b.dataset.fedit);if(f)e2eEditFlow(f)});
   m.querySelectorAll("[data-fdel]").forEach(b=>b.onclick=()=>{const f=e2eFlow(b.dataset.fdel);if(f)e2eDeleteFlow(f)});
-  m.querySelectorAll("[data-fdup]").forEach(b=>b.onclick=()=>{const f=e2eFlow(b.dataset.fdup);if(f)e2eDupFlow(f)});
-}
+  m.querySelectorAll("[data-fdup]").forEach(b=>b.onclick=()=>{const f=e2eFlow(b.dataset.fdup);if(f)e2eDupFlow(f)})}
 async function e2eDupFlow(f){const k=await choose("Duplicate flow",`<p>Copy <b>${esc(f.name)}</b> (both versions) as a new flow.</p><label class="field"><span>New name</span><input id="fdName" value="${esc(f.name+" (copy)")}"></label>
   <label class="connauto" style="justify-content:flex-start"><input type="checkbox" id="fdLinks"> Keep the step ↔ project links</label>`,[["c","Cancel"],["ok","Duplicate","primary"]]);if(k!=="ok")return;
   const name=($("#fdName").value||"").trim()||f.name+" (copy)",keep=$("#fdLinks").checked;const nf={id:e2eNewId(f.area),name,area:f.area,owner:f.owner,notes:f.notes,v:{}};
   for(const v of VERS){const d=f.v[v]&&f.v[v].doc;if(!d)continue;const c=JSON.parse(JSON.stringify(d));c.id="d"+Date.now()+v.length;c.name=name+" "+v;c.title=name;if(!keep)(c.shapes||[]).forEach(sh=>{sh.proj=[]});
     const cur=e2eFlow(nf.id)||nf;if(!e2eWriteDoc(cur,v,c))return;E2E_CACHE=null}
-  const x=e2eFlow(nf.id);if(x)VERS.forEach(v=>{if(x.v[v])eSet(E2EF,EF.notes,x.v[v].r,f.notes||"")});E2E_CACHE=null;e2eRebuildMap();render();toast(`Duplicated as ${name} (${nf.id})`)}
+  const x=e2eFlow(nf.id);if(x)VERS.forEach(v=>{if(x.v[v]){eSet(E2EF,EF.notes,x.v[v].r,f.notes||"");e2eSetBU(x.v[v].r,f.bu||"")}});E2E_CACHE=null;e2eRebuildMap();render();toast(`Duplicated as ${name} (${nf.id})`)}
+
+function e2eSetBU(r,bu){if(bu&&gv(E2EF,EF.bu,5)==="")eSet(E2EF,EF.bu,5,"Business unit");eSet(E2EF,EF.bu,r,bu||"")}
 
 /* 14b-e2e-import.js — build an E2E flow from an Excel sheet / pasted table (and a ready-made prompt so any AI can write that sheet).
    FORMAT (one sheet per version):
