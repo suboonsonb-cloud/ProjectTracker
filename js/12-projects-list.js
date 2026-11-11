@@ -355,7 +355,7 @@ function quFilterBar(){const F=UI.qu;const {all,P1,P2,P2a,P2b,off}=quRows();cons
 function quFilterBind(m,re){const F=UI.qu;const qi=$("#quQ");qi.oninput=()=>{F.q=qi.value;clearTimeout(quFilterBind._t);quFilterBind._t=setTimeout(()=>{re();const e2=$("#quQ");if(e2){e2.focus();e2.setSelectionRange(e2.value.length,e2.value.length)}},300)};
   $("#quCF").onchange=e=>{F.cf=e.target.value;F.proc="";F.team="";re()};$("#quProc").onchange=e=>{F.proc=e.target.value;F.team="";re()};$("#quTeam").onchange=e=>{F.team=e.target.value;re()};if($("#quRd"))$("#quRd").onchange=e=>{F.rd=e.target.value;re()};e2eBarBind(m,re);$("#quChg").onchange=e=>{F.chg=e.target.checked;re()};
   bindStChips(m,"qst",F,re)}
-function vQuick(m,simple){if(simple&&UI.plist!=="simple"&&UI.plist!=="table")return vPList(m);const F=UI.qu;F.simple=!!simple;liveCalc();const {all,P1,P2,P2a,P2b,rows,off}=quRows();const EO=e2eFilterOpts(P2b);const lanes=laneOpts(F.flow);if(F.lane&&!lanes.includes(F.lane))F.lane="";const fv=(r,c)=>gv("Projects",c,r)||"(blank)";
+function vQuick(m,simple){if(simple&&UI.plist==="table")return v2T(m);if(simple&&UI.plist!=="simple"&&UI.plist!=="table")return vPList(m);const F=UI.qu;F.simple=!!simple;liveCalc();const {all,P1,P2,P2a,P2b,rows,off}=quRows();const EO=e2eFilterOpts(P2b);const lanes=laneOpts(F.flow);if(F.lane&&!lanes.includes(F.lane))F.lane="";const fv=(r,c)=>gv("Projects",c,r)||"(blank)";
   const cfs=uniq(all.map(r=>fv(r,FP.cf)));const procs=uniq(P1.map(r=>fv(r,FP.proc)));if(F.proc&&!procs.includes(F.proc))F.proc="";
   const sts=off.size?STL.slice():STL.filter(s=>P2.some(r=>pStat(r)===s));const re=()=>{const y=scrollY;vQuick(m,simple);window.scrollTo(0,y)};
   const head=simple?projHead(true)

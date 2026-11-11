@@ -138,7 +138,7 @@ function openCfPop(btn,title,vals,cnt,cur,onApply,onSort,sortDir){
   pop.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{close();onSort(+b.dataset.s)});
   pop.querySelector(".cfq").focus();
 }
-function vProjects(m){if(UI.f.Projects){delete UI.f.Projects.flow;delete UI.f.Projects.lane}if(UI.plist!=="table")return vQuick(m,true);listView(m,"Projects",{noun:"project",pre:pviewToggle()+plistToggle(),onOpen:openProject,onNew:newProject,
+function vProjects(m){if(UI.f.Projects){delete UI.f.Projects.flow;delete UI.f.Projects.lane}return vQuick(m,true);listView(m,"Projects",{noun:"project",pre:pviewToggle()+plistToggle(),onOpen:openProject,onNew:newProject,
   order:rows=>{const nw=S.newRows.Projects||new Set();return [...rows].sort((a,b)=>(nw.has(b)-nw.has(a))||(b-a))},
   panelBelow:true,noSearch:true,top:projHead(false),panel:()=>quFilterBar(),rowFilter:(()=>{const keep=new Set(quRows().rows);const nw=S.newRows.Projects||new Set();return r=>keep.has(r)||nw.has(r)})(),bind:m=>{quFilterBind(m,()=>{const y=scrollY;vProjects(m);window.scrollTo(0,y)})},
   filters:[],
