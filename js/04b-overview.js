@@ -39,6 +39,11 @@ function ovNewHtml(P,Bl){const pids=new Set(P.map(pId));const byId=new Map(P.map
           ${L.procs.map((p,i)=>`<div class="ovpc${q&&(hit(p.title)||p.pids.some(projHit))?" hit":""}"><div class="ovpch"><div><small>Process ${String(i+1).padStart(2,"0")}</small><b>${esc(p.title)}</b></div><span class="muted">${p.pids.length} project${p.pids.length!==1?"s":""}</span></div>${p.pids.map(projRow).join("")}</div>`).join("")}`:""}</div></div>
         <div class="ovff"><span class="muted">Projects can support several swimlanes; workflow totals count each project once.</span><button type="button" class="ovlink" data-ovmap="${esc(F.f.id)}">View workflow details →</button></div>`:""}</div>`};
   /* project health */
+  const SO={"Delayed":0,"At Risk":1,"On Track":2,"Not Started":3,"On-Hold":4,"Completed":5,"Cancelled":6};
+  const drill=(rows,key)=>{const lim=D.hlAll===key?rows.length:8;const srt=[...rows].sort((a,b)=>(SO[pStat(a)]??9)-(SO[pStat(b)]??9)||(pLive(b).comp||0)-(pLive(a).comp||0));
+    return `<div class="ovdrill">${srt.slice(0,lim).map(r=>{const c=pLive(r).comp||0;const pe=+gv("Projects",FP.pe,r)||0;const late=pe&&pe<TODAY&&!["Completed","Cancelled"].includes(pStat(r));
+      return `<button type="button" class="ovdr" data-ovopen="${r}" title="Open project"><span class="n"><b>${esc(gv("Projects",FP.name,r))}</b><small>${esc(pId(r))}${gv("Projects",FP.lead,r)?" · "+esc(gv("Projects",FP.lead,r)):""}${typeof curStage==="function"&&!["Completed","Cancelled"].includes(pStat(r))?" · "+esc(curStage(r)):""}</small></span>${pill(pStat(r))}<span class="pc">${pct(c)}%${bar(c,pStat(r)==="Completed"?"ok":pStat(r)==="Delayed"?"bad":"")}</span><span class="dt${late?" bad":""}">${pe?fmtDate(pe):"—"}</span><span class="cv">›</span></button>`}).join("")||'<p class="muted" style="margin:6px 4px">No projects.</p>'}
+      ${rows.length>8?`<button type="button" class="ovlink" data-hlall="${esc(key)}">${D.hlAll===key?"Show fewer":`Show all ${rows.length}`}</button>`:""}</div>`};
   const tot=P.length||1;const stRows=STL.map(s=>({s,n:P.filter(r=>pStat(r)===s).length}));
   const openP=P.filter(r=>!["Completed","Cancelled"].includes(pStat(r)));const stg=[...listFromName("L_StageWF"),...listFromName("L_StageAG"),"(no tasks)","All complete"];
   const sg=uniqOrder(stg).map(s=>({s,n:openP.filter(r=>curStage(r)===s).length})).filter(x=>x.n);const smax=Math.max(1,...sg.map(x=>x.n));
@@ -56,10 +61,10 @@ function ovNewHtml(P,Bl){const pids=new Set(P.map(pId));const byId=new Map(P.map
       ${lst.length>10?`<button type="button" class="ovlink ovunmm" id="ovUnmAll">${D.unmAll?"Show fewer":`Show all ${lst.length}`}</button>`:""}</div>`:""}</div>`})():""}
   <div class="ovsec"><div><h2>Project health at a glance</h2><p>Portfolio-wide · includes mapped and unmapped projects</p></div></div>
   <div class="ovhl"><div class="card ovhc"><div class="hh"><b>Where projects stand</b><span class="muted">${P.length} total projects</span></div>
-      ${stRows.map(x=>`<button type="button" class="ovhr" data-ovst="${esc(x.s)}" title="Show these projects"><span>${esc(x.s)}</span><span class="ovbar"><b style="width:${x.n/tot*100}%;background:${SCOL[x.s]||"#888"}"></b></span><b>${x.n}</b><small>${Math.round(x.n/tot*100)}%</small></button>`).join("")}
+      ${stRows.map(x=>{const k="st:"+x.s,o=D.hlOpen===k;return `<button type="button" class="ovhr${o?" on":""}" data-hlk="${esc(k)}" ${x.n?"":"disabled"} aria-expanded="${o}" title="Show these projects"><span><i class="cv2">${o?"⌄":"›"}</i>${esc(x.s)}</span><span class="ovbar"><b style="width:${x.n/tot*100}%;background:${SCOL[x.s]||"#888"}"></b></span><b>${x.n}</b><small>${Math.round(x.n/tot*100)}%</small></button>${o?drill(P.filter(r=>pStat(r)===x.s),k):""}`}).join("")}
       ${delayed?`<p class="ft bad">${delayed} delayed project${delayed>1?"s":""} need${delayed>1?"":"s"} attention.</p>`:`<p class="ft">No delayed projects.</p>`}</div>
     <div class="card ovhc"><div class="hh"><b>Where open work is concentrated</b><span class="muted">${openP.length} open projects</span></div>
-      ${sg.map(x=>`<div class="ovhr st"><span>${esc(x.s)}</span><span class="ovbar"><b style="width:${x.n/smax*100}%"></b></span><b>${x.n}</b><small></small></div>`).join("")||'<p class="muted">No open projects.</p>'}
+      ${sg.map(x=>{const k="sg:"+x.s,o=D.hlOpen===k;return `<button type="button" class="ovhr st${o?" on":""}" data-hlk="${esc(k)}" aria-expanded="${o}" title="Show these projects"><span><i class="cv2">${o?"⌄":"›"}</i>${esc(x.s)}</span><span class="ovbar"><b style="width:${x.n/smax*100}%"></b></span><b>${x.n}</b><small></small></button>${o?drill(openP.filter(r=>curStage(r)===x.s),k):""}`}).join("")||'<p class="muted">No open projects.</p>'}
       ${top2.length?`<p class="ft acc">${top2.reduce((a,x)=>a+x.n,0)} of ${openP.length} open projects are in ${top2.map(x=>esc(x.s)).join(" or ")}.</p>`:""}</div></div>
   <div class="ovnote"><span>Process groupings come from the E2E flow maps; project data follows the tracker.</span><span>Planned benefits are estimates, not realised savings.</span></div>`}
 function ovNewBind(m){const D=UI.dash;const re=()=>vDash(m,true);
@@ -71,5 +76,7 @@ function ovNewBind(m){const D=UI.dash;const re=()=>vDash(m,true);
   const ua=m.querySelector("#ovUnmAll");if(ua)ua.onclick=()=>{D.unmAll=!D.unmAll;re()};
   m.querySelectorAll(".ovunm [data-ovopen]").forEach(b=>b.onclick=()=>openProject(+b.dataset.ovopen));
   const u=m.querySelector("#ovUnm");if(u)u.onclick=()=>{UI.qu.flow="none";UI.qu.lane="";view="Projects";UI.pview="projects";render();window.scrollTo(0,0)};
-  m.querySelectorAll("[data-ovst]").forEach(b=>b.onclick=()=>{UI.qu.stOff=STL.filter(s=>s!==b.dataset.ovst);UI.qu.flow="";view="Projects";UI.pview="projects";render();window.scrollTo(0,0)});
+  m.querySelectorAll("[data-hlk]").forEach(b=>b.onclick=()=>{D.hlOpen=D.hlOpen===b.dataset.hlk?"":b.dataset.hlk;D.hlAll="";re()});
+  m.querySelectorAll("[data-hlall]").forEach(b=>b.onclick=()=>{D.hlAll=D.hlAll===b.dataset.hlall?"":b.dataset.hlall;re()});
+  m.querySelectorAll(".ovdrill [data-ovopen]").forEach(b=>b.onclick=()=>openProject(+b.dataset.ovopen));
   const ps=m.querySelector("#ovProcSel");if(ps)ps.onchange=e=>{D.proc=e.target.value;D.init="";D.cell=null;D.zoom=null;vDash(m,true)}}
