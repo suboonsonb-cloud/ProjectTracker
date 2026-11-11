@@ -1101,3 +1101,34 @@ button.ovhr{cursor:pointer}button.ovhr:hover{background:#F6F3FF}
 .ovdr .pc{display:flex;flex-direction:column;gap:3px;font-size:11.5px}.ovdr .pc .ovbar{width:100%}.ovdr .dt{font-size:11.5px;color:#3F3A57;text-align:right}.ovdr .dt.bad{color:#C4320A;font-weight:600}.ovdr .cv{color:var(--muted)}
 .ovdrill>.ovlink{align-self:flex-start;margin-top:4px;font-size:12px}
 .ovhl{align-items:start}
+/* r65 — E2E workflow visuals */
+.ovfh{grid-template-columns:22px 44px minmax(200px,1.6fr) auto auto 1fr 1fr 1fr}
+.ovficon{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#8B6CFF,#5B3FE0);display:grid;place-items:center;box-shadow:0 6px 14px rgba(124,92,252,.3)}
+.ovficon svg{width:24px;height:24px;fill:rgba(255,255,255,.25);stroke:#fff;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.ovflow:not(.open) .ovstrip{border-top:1px dashed #EEEBF8}
+.ovstrip{display:flex;align-items:center;gap:2px;padding:10px 18px 14px 98px;overflow-x:auto;background:linear-gradient(180deg,#fff,#FCFBFF)}
+.ovnode{display:inline-flex;align-items:center;gap:6px;border:1px solid #E6E1F7;background:#fff;border-radius:999px;padding:4px 6px 4px 8px;font:inherit;font-size:12px;color:#3F3A57;cursor:pointer;white-space:nowrap;transition:transform .12s,box-shadow .12s}
+.ovnode:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(124,92,252,.15)}
+.ovnode i{width:8px;height:8px;border-radius:50%;background:#A895F7;flex:none}
+.ovnode b{font-size:11px;background:#F1EDFF;color:var(--accent-d);border-radius:999px;padding:0 6px;line-height:16px}
+.ovnode.bad i{background:#D92D20;box-shadow:0 0 0 3px #FEE4E2}.ovnode.risk i{background:#F79009;box-shadow:0 0 0 3px #FEF0C7}.ovnode.ok i{background:#2E9D5B;box-shadow:0 0 0 3px #DCF2E4}.ovnode.ns i{background:#98A2B3}.ovnode.ip i{background:var(--accent);box-shadow:0 0 0 3px #EDE8FF}
+.ovnode.on{border-color:var(--accent);background:#F5F2FF;color:var(--accent-d);font-weight:600}
+.ovarr{color:#C9BEFA;display:inline-flex;flex:none}.ovarr svg{width:22px;height:10px}
+.ovring{--c:var(--accent);width:24px;height:24px;border-radius:50%;flex:none;display:grid;place-items:center;background:conic-gradient(var(--c) calc(var(--p)*1%),#E9E4FB 0)}
+.ovring b{width:18px;height:18px;border-radius:50%;background:#FAF9FE;display:grid;place-items:center;font-size:8.5px!important;font-weight:700;color:#3F3A57!important}
+.ovring.bad{--c:#D92D20}.ovring.risk{--c:#F79009}.ovring.ok{--c:#2E9D5B}.ovring.ns{--c:#98A2B3}
+.ovl.on .ovring b{background:#EDE8FF}
+.ovpc{position:relative;margin-left:30px}
+.ovnum{position:absolute;left:-31px;top:10px;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;box-shadow:0 0 0 4px #fff}
+.ovpc::before{content:"";position:absolute;left:-21px;top:34px;bottom:-14px;width:2px;background:repeating-linear-gradient(180deg,#D9D1FA 0 4px,transparent 4px 8px)}
+.ovpc.last::before{display:none}
+@media (max-width:1200px){.ovfh{grid-template-columns:22px 44px 1fr auto}.ovstrip{padding-left:18px}}
+.ovl .ovring{flex:none}
+/* E2E workflows section framed and labelled */
+.ove2e{background:linear-gradient(180deg,#F6F3FF 0%,#FBFAFF 140px,#FBFAFF 100%);border:1px solid #E6E0FA;border-radius:18px;padding:18px 18px 6px;margin:22px 0 26px;position:relative}
+.ove2e::before{content:"";position:absolute;left:0;top:18px;bottom:18px;width:4px;border-radius:0 4px 4px 0;background:linear-gradient(180deg,#8B6CFF,#5B3FE0)}
+.ove2e>.ovsec{margin-top:0;align-items:center}
+.ove2eic{width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,#8B6CFF,#5B3FE0);display:grid;place-items:center;flex:none;box-shadow:0 6px 14px rgba(124,92,252,.3)}
+.ove2eic svg{width:26px;height:26px;fill:rgba(255,255,255,.25);stroke:#fff;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.ove2etag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--accent-d);background:#EDE8FF;border-radius:999px;padding:2px 9px;margin-bottom:4px}
+.ove2e .ovunm{margin-bottom:12px}
