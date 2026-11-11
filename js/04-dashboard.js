@@ -29,8 +29,11 @@ function renderTabs(){const nc=S.changes.length?e2eNetCount(netChanges()):0;cons
   requestAnimationFrame(stickVars)}
 /* leaving a page with unsaved changes → remind to save (people forget) */
 async function saveNudge(){const n=S.changes.length?e2eNetCount(netChanges()):0;if(!n||(typeof canEdit==="function"&&!canEdit())||document.getElementById("btnSave").disabled)return true;
-  const k=await choose(`💾 ${n} unsaved change${n>1?"s":""}`,`<p style="margin-top:0">Your changes are only in this browser until you <b>Save to database</b>. Save now so nobody loses them?</p>`,[["later","Not now"],["save","Save to database","primary"]]);
-  if(k==="save"){try{await save(false)}catch(e){}}return true}
+  const k=await choose(`💾 ${n} unsaved change${n>1?"s":""}`,`<p style="margin-top:0">Your changes are only in this browser until you <b>Save to database</b>. Save now so nobody loses them?</p>`,[["discard","Don't save","danger"],["later","Not now"],["save","Save to database","primary"]]);
+  if(k==="save"){try{await save(false)}catch(e){}}
+  else if(k==="discard"){try{await discardChanges()}catch(e){toast(e.message,5000)}}return true}
+/* throw away every unsaved edit: reload the workbook as it was last saved */
+async function discardChanges(){const blob=await writeZip(S.zip,{});const buf=await blob.arrayBuffer();S.changes=[];await loadWorkbook(buf,S.fileName,S.handle,S.lastMod);if(UI.qu&&UI.qu.edited)UI.qu.edited.clear();updateBadge();toast("Unsaved changes discarded",3500)}
 /* screen size: bigger UI on big screens (Auto) or a fixed size chosen in Settings → Display */
 const UI_SCALES=[["auto","Auto"],["1","100%"],["1.15","115%"],["1.3","130%"],["1.5","150%"]];
 function uiScalePref(){try{return localStorage.getItem("itd.uiScale")||"auto"}catch(e){return "auto"}}

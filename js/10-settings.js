@@ -189,6 +189,6 @@ function vChanges(m){
   <p style="margin-top:12px"><button class="btn primary" id="saveNow">Save to database</button> <button class="btn" id="discard">Discard all changes</button></p>`:`<p class="muted">No unsaved changes.</p>`}</div>`;
   if($("#saveNow"))$("#saveNow").onclick=()=>save(false);
   if($("#discard"))$("#discard").onclick=async()=>{if(await choose("Discard all unsaved changes?",`<p>${tot} unsaved change(s) will be lost. The file is not touched.</p>`,[["c","Keep them"],["ok","Discard all","danger"]])!=="ok")return;
-    const blob=await writeZip(S.zip,{});const buf=await blob.arrayBuffer();S.changes=[];await loadWorkbook(buf,S.fileName,S.handle,S.lastMod);updateBadge();render()};
+    await discardChanges();render()};
 }
 
