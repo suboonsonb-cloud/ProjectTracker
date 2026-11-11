@@ -138,3 +138,43 @@ function ovKpiBind(m){const U=UI.dash;const re=()=>vDash(m,true);
   m.querySelectorAll("[data-kst]").forEach(b=>b.onclick=()=>{U.kSt=U.kSt||{};U.kSt[b.dataset.kkey]=b.dataset.kst;U.kAll="";re()});
   m.querySelectorAll("[data-kall]").forEach(b=>b.onclick=()=>{U.kAll=U.kAll===b.dataset.kall?"":b.dataset.kall;re()});
   m.querySelectorAll("#ovKp [data-ovopen]").forEach(b=>b.onclick=()=>openProject(+b.dataset.ovopen))}
+/* ---- bottom of the dashboard: benefit realisation + simple ranked breakdowns ---- */
+function ovAnalysisHtml(P,Bl,months,scope){const U=UI.dash;const BlA=Bl.filter(b=>!b.drop);
+  const plan=months.map((_,i)=>BlA.reduce((a,b)=>a+(b.plan[i]||0),0)),act=months.map((_,i)=>BlA.reduce((a,b)=>a+(b.act[i]||0),0));
+  const td=months.map(mm=>mm.s<=TODAY);const pTD=plan.reduce((a,v,i)=>a+(td[i]?v:0),0),aTD=act.reduce((a,v,i)=>a+(td[i]?v:0),0);
+  const lab=mm=>{const d=serialToDate(mm.s);return {m:MON[d.getUTCMonth()],y:d.getUTCFullYear()}};
+  /* chart */
+  let chart='<p class="muted">No benefit plan yet.</p>';
+  if(months.length){const n=months.length,bw=50,pl=64,pr=16,pt=34,ph=250,W=pl+n*bw+pr,H=pt+ph+64;const mx0=Math.max(1,...plan,...act);
+    const step=(()=>{const raw=mx0/4,p=Math.pow(10,Math.floor(Math.log10(raw)));return [1,2,2.5,5,10].map(k=>k*p).find(k=>k>=raw)})();const mx=step*4;
+    const Y=v=>pt+ph-v/mx*ph;const ti=months.findIndex(mm=>mm.s<=TODAY&&TODAY<(months[months.indexOf(mm)+1]||{s:9e9}).s);
+    let g="";for(let k=0;k<=4;k++){const v=step*k;g+=`<line x1="${pl}" x2="${W-pr}" y1="${Y(v)}" y2="${Y(v)}" class="gl"/><text x="${pl-10}" y="${Y(v)+4}" text-anchor="end" class="ax">${fmtShort(v)}</text>`}
+    let bars="",xl="",yrs="";let y0=null,ys=0;
+    months.forEach((mm,i)=>{const x=pl+i*bw;const L=lab(mm);const p=plan[i],a=act[i];
+      bars+=`<g><title>${L.m} ${L.y} · plan ${fmtNum(Math.round(p))} THB${a?` · actual ${fmtNum(Math.round(a))} THB`:""}</title><rect x="${x+9}" y="${Y(p)}" width="${bw-18}" height="${Math.max(0,pt+ph-Y(p))}" rx="4" class="${td[i]?"bp":"bf"}"/>${a?`<rect x="${x+17}" y="${Y(a)}" width="${bw-34}" height="${pt+ph-Y(a)}" rx="3" class="ba"/>`:""}</g>`;
+      xl+=`<text x="${x+bw/2}" y="${pt+ph+20}" text-anchor="middle" class="ax">${L.m}</text>`;
+      if(L.y!==y0){if(y0!==null){yrs+=`<text x="${pl+(ys+i)/2*bw}" y="${pt+ph+52}" text-anchor="middle" class="yr">${y0}</text><line x1="${x}" x2="${x}" y1="${pt-6}" y2="${pt+ph+34}" class="ys"/>`}y0=L.y;ys=i}});
+    yrs+=`<text x="${pl+(ys+n)/2*bw}" y="${pt+ph+52}" text-anchor="middle" class="yr">${y0}</text>`;
+    let tl="";if(ti>=0){const x=pl+(ti+1)*bw;const L=lab(months[ti]);tl=`<line x1="${x}" x2="${x}" y1="${pt-6}" y2="${pt+ph}" class="td"/><g transform="translate(${x-62},${pt-30})"><rect width="124" height="22" rx="6" class="tdb"/><text x="62" y="15" text-anchor="middle" class="tdt">Today · ${L.m} ${L.y}</text></g>`}
+    chart=`<div class="ovbch"><span class="ovbu">THB / month</span><div class="ovbsv"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Monthly planned and actual benefit">${g}${bars}${tl}${xl}${yrs}</svg></div></div>`}
+  const rng=months.length?`${lab(months[0]).m} ${lab(months[0]).y} – ${lab(months[months.length-1]).m} ${lab(months[months.length-1]).y}`:"";
+  const ben=`<div class="card ovan"><div class="ovanh"><div><h3>Monthly benefit realisation</h3><p>${esc(scope)} · ${Bl.length} benefit line${Bl.length!==1?"s":""}</p></div><span class="sp"></span>${rng?`<span class="ovrng">Monthly · ${rng}</span>`:""}</div>
+    <div class="ovsum"><div><small>Planned to date</small><b>THB ${fmtNum(Math.round(pTD))}</b></div><div><small>Actual to date</small><b class="ok">THB ${fmtNum(Math.round(aTD))}</b><span>${aTD?"Realised benefits logged":"No realised benefits recorded"}</span></div><div><small>Plan achieved</small><b>${pTD?Math.round(aTD/pTD*100):0}%</b><span>Actual ÷ planned to date</span></div></div>
+    ${chart}<div class="ovleg"><span><i class="bp"></i>Planned (to date)</span><span><i class="bf"></i>Planned (future)</span><span><i class="ba"></i>Actual</span><span><i class="td"></i>Today</span></div></div>`;
+  /* ranked lists */
+  const tot=P.length||1;const rank=(key,title,sub,fn,opts={})=>{const by={};P.forEach(r=>{const k=fn(r)||opts.none||"(blank)";(by[k]=by[k]||[]).push(r)});
+    const ks=Object.keys(by).sort((a,b)=>(a===opts.none)-(b===opts.none)||by[b].length-by[a].length);const mxn=Math.max(1,...ks.map(k=>by[k].length));
+    const rows=ks.map((k,i)=>{const id=key+":"+k,o=U.anOpen===id,nn=by[k].length;return `<button type="button" class="ovrk${o?" on":""}${k===opts.none?" none":""}${i<2&&k!==opts.none?" top":""}" data-anr="${esc(id)}" aria-expanded="${o}"><span class="nm"><i>${o?"⌄":"›"}</i>${esc(k)}</span><span class="ovbar"><b style="width:${nn/mxn*100}%"></b></span><b>${nn}</b><small>${Math.round(nn/tot*100)}%</small></button>${o?ovPRows(srtP(by[k]),id,opts.extra):""}`}).join("");
+    return {html:`<div class="card ovan ovrkc"><div class="ovanh"><div><h3>${title}</h3><p>${P.length} projects · ${sub}</p></div></div><div class="ovrkhd"><span></span><span></span><span>Projects</span><span>Share</span></div>${rows}${opts.foot?opts.foot(by,ks):""}</div>`,by,ks}};
+  const srtP=rs=>[...rs].sort((a,b)=>(OV_SO[pStat(a)]??9)-(OV_SO[pStat(b)]??9));
+  const proc=rank("proc","Projects by process area","ranked by project count",r=>gv("Projects",FP.proc,r),{foot:(by,ks)=>{const t=ks.slice(0,2);const s=t.reduce((a,k)=>a+by[k].length,0);return t.length>1?`<p class="ovins">${t.map(esc).join(" + ")} account for ${s} of ${P.length} projects (${Math.round(s/tot*100)}%).</p>`:""},extra:r=>esc(curStage(r))});
+  const NA="Not assigned";const wsl=rank("wsl","Projects by workstream leader","assignment coverage",r=>gv("Projects",FP.wsl,r),{none:NA,foot:by=>by[NA]?`<p class="ovins warn">${by[NA].length} project${by[NA].length>1?"s have":" has"} no workstream leader assigned.</p>`:`<p class="ovins">Every project has a workstream leader.</p>`,extra:r=>esc(gv("Projects",FP.proc,r)||"")});
+  const bus=uniq(P.map(r=>gv("Projects",FP.bu,r)||"(blank)"));
+  const bu=rank(bus.length>1?"bu":"cf",bus.length>1?"Projects by business unit":"Projects by corporate function",bus.length>1?"ranked by project count":`one business unit in this view (${esc(bus[0]||"—")}) · split by CF`,r=>gv("Projects",bus.length>1?FP.bu:FP.cf,r),{extra:r=>esc(gv("Projects",FP.proc,r)||"")});
+  return `<section class="ovansec"><div class="ovsec"><div><h2>Benefit &amp; portfolio analysis</h2><p>A clearer view of expected value, project distribution and ownership.</p></div></div>
+    ${ben}<div class="ovang"><div>${proc.html}</div><div class="ovangr">${wsl.html}${bu.html}</div></div></section>`}
+function ovAnalysisBind(m){const U=UI.dash;const re=()=>vDash(m,true);
+  m.querySelectorAll("[data-anr]").forEach(b=>b.onclick=()=>{U.anOpen=U.anOpen===b.dataset.anr?"":b.dataset.anr;U.kAll="";re()});
+  m.querySelectorAll(".ovansec [data-kall]").forEach(b=>b.onclick=()=>{U.kAll=U.kAll===b.dataset.kall?"":b.dataset.kall;re()});
+  m.querySelectorAll(".ovansec [data-ovopen]").forEach(b=>b.onclick=()=>openProject(+b.dataset.ovopen));
+  const sv=m.querySelector(".ovbsv");if(sv&&!sv.dataset.sc){sv.dataset.sc=1;const td=sv.querySelector("line.td");if(td)sv.scrollLeft=Math.max(0,+td.getAttribute("x1")-sv.clientWidth*0.55)}}

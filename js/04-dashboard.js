@@ -358,29 +358,19 @@ function vDash(m,keepScroll){const _y=window.scrollY;setTimeout(()=>{if(keepScro
    <span class="muted${nF?" dfcount":""}" style="margin-left:auto">${P.length} of ${allP.length} projects · ${A.length} tasks · ${Bl.length} benefit lines</span>
    <span class="muted finfo" title="Pick a BU, then a CF of that BU, then a project of that CF — or leave any on All. Status: untick a box to hide projects with that status, tick it to show them again (Only = show just that one). Type part of a name in Project to show all matching projects. These filters apply to every chart, KPI and table on the dashboard; dropdowns inside a card only change how that card is drawn.">ⓘ</span></div>
   ${ovKpis(P,A,D,Bl,{valRec,valOne,hrs,fteh,pTD,aTD,pids})}${ovNewHtml(P,Bl)}
-  <details class="card pad ovmore"${UI.dash.more?" open":""}><summary><b>More analysis</b> <span class="muted">— benefit plan vs actual, breakdowns by process area / BU / leader, detail tables</span></summary>
-  <div class="grid one" style="margin-top:14px">
-    <div class="card pad" data-chart="proc"><div class="chead"><h2>By process area</h2><span class="ctl"><span class="muted">Show</span>${selOpt("procView",pv,VIEWS)}</span></div><p class="muted" style="margin:-6px 0 4px;font-size:12px">Click a bar or colour to zoom into its projects</p>${dimChart(r=>gv("Projects",FP.proc,r),pv)}</div>
-    </div>
-  ${UI.dash.zoom&&UI.dash.zoom.chart==="proc"?zoomPanel(P):""}
-  <div style="margin-top:14px">${benefitPanel("dash")}</div>
-  <div class="grid two" style="margin-top:14px">
-    <div class="card pad" data-chart="bu"><div class="chead"><h2>By ${orgName}${bu?` <span class="muted" style="font-size:13px;font-weight:500">in ${esc(bu)}</span>`:""}</h2><span class="ctl"><span class="muted">Show</span>${selOpt("buView",bv,VIEWS.filter(v=>!(bu&&v[0]==="cfcount")))}</span></div><p class="muted" style="margin:-6px 0 4px;font-size:12px">${bu?"Bars = corporate functions of the selected BU":"Bars = BUs (pick a BU in the filter to see its CFs)"} · click a bar or colour to zoom in</p>${dimChart(r=>gv("Projects",orgDim,r),bv==="cfcount"&&bu?"status":bv)}</div>
-    <div class="card pad${UI.dash.lshow?"":" lcollapsed"}"><div class="chead"><h2>Projects by ${LDIM==="lead"?"working team (project lead)":"workstream leader"}</h2><span class="ctl">${UI.dash.lshow?`<span class="muted">Show</span>${selOpt("ldim",LDIM,[["wsl","Workstream leader"],["lead","Working team (project lead)"]])}`:""}<button type="button" class="btn small" id="lshow" aria-expanded="${!!UI.dash.lshow}">${UI.dash.lshow?"▾ Hide":"▸ Show chart"}</button></span></div>${UI.dash.lshow?`<p class="muted" style="margin:-6px 0 4px;font-size:12px">${LDIM==="lead"?"Working team = the project lead running each project (dev / BA team on the project page)":"Workstream leader = owner of the programme area (e.g. P Oh for SSC simplification)"} · click a bar to list the projects</p>${stackedH(leads,leadSeries,{click:true})}`:`<p class="muted" style="margin:0;font-size:12.5px">${leads.filter(x=>x!==LNONE).length} ${LDIM==="lead"?"project leads":"workstream leaders"} · hidden — click <b>Show chart</b> to see projects by workstream leader or working team.</p>`}</div>
-  </div>
-  ${UI.dash.zoom&&UI.dash.zoom.chart!=="proc"?zoomPanel(P):""}
+  ${ovAnalysisHtml(P,Bl,months,F.cf||bu||"All business units")}
   <div id="cellList"></div>
   <details class="card pad" style="margin-top:14px"><summary><b>Detail tables</b> <span class="muted">— status × BU / CF / process area and the delayed & at-risk list</span></summary>
     <h2 style="margin-top:12px">Projects by status × ${bu?"CF":"BU"}</h2>${matrix(bu?"CF":"BU",P,r=>gv("Projects",bu?FP.cf:FP.bu,r),{})}
     <h2 style="margin-top:12px">Projects by status × process area</h2>${matrix("Process Area",P,r=>gv("Projects",FP.proc,r),{})}
-    <h2 style="margin-top:12px">Delayed & at-risk projects</h2>${riskList(P)}</details></details>`;
+    <h2 style="margin-top:12px">Delayed & at-risk projects</h2>${riskList(P)}</details>`;
   const reF=()=>{UI.dash.cell=null;UI.dash.zoom=null;vDash(m,true)};
-  ovBind(m);ovNewBind(m);ovKpiBind(m);{const mo=m.querySelector(".ovmore");if(mo)mo.ontoggle=()=>{UI.dash.more=mo.open}}$("#fBU").onchange=e=>{F.bu=e.target.value;F.cf="";F.proc="";reF()};$("#fCF").onchange=e=>{F.cf=e.target.value;F.proc="";reF()};$("#fProc").onchange=e=>{F.proc=e.target.value;F.init="";reF()};$("#fInit").onchange=e=>{F.init=e.target.value;reF()};bindStChips(m,"dst",F,reF);
+  ovBind(m);ovNewBind(m);ovKpiBind(m);$("#fBU").onchange=e=>{F.bu=e.target.value;F.cf="";F.proc="";reF()};$("#fCF").onchange=e=>{F.cf=e.target.value;F.proc="";reF()};$("#fProc").onchange=e=>{F.proc=e.target.value;F.init="";reF()};$("#fInit").onchange=e=>{F.init=e.target.value;reF()};bindStChips(m,"dst",F,reF);
   $("#fQ").addEventListener("change",e=>{F.q=e.target.value.trim();reF()});
   m.querySelectorAll("[data-dfclr]").forEach(b=>b.onclick=()=>{const k=b.dataset.dfclr;if(k==="all"){F.bu=F.cf=F.proc=F.init=F.q="";F.stOff=[]}else if(k==="bu"){F.bu=F.cf=F.proc=""}else if(k==="cf"){F.cf=F.proc=""}else if(k==="st")F.stOff=[];else F[k]="";reF()});
   ["fBU","fCF","fProc","fInit"].forEach(id=>{const el=$("#"+id);if(el&&el.value){el.classList.add("act");const lb=el.closest("label");if(lb)lb.classList.add("act")}});{const q=$("#fQ");if(q&&q.value){q.classList.add("act");const lb=q.closest("label");if(lb)lb.classList.add("act")}}
   if($("#clrAll"))$("#clrAll").onclick=()=>{F.bu=F.cf=F.proc=F.init=F.q="";F.stOff=[];reF()};
-  $("#procView").onchange=e=>{UI.dash.procView=e.target.value;vDash(m,true)};$("#buView").onchange=e=>{UI.dash.buView=e.target.value;vDash(m,true)};
+  if($("#procView"))$("#procView").onchange=e=>{UI.dash.procView=e.target.value;vDash(m,true)};if($("#buView"))$("#buView").onchange=e=>{UI.dash.buView=e.target.value;vDash(m,true)};ovAnalysisBind(m);
   m.querySelectorAll("svg [data-click]").forEach(el=>el.onclick=()=>{const chart=el.closest("[data-chart]").dataset.chart;const seg=el.dataset.seg||"";
     const view=chart==="proc"?pv:chart==="bu"?bv:null;
     const segType=({status:"status",stage:"stage",value:"cf",cfcount:"cf",delay:"delay"})[view];

@@ -1165,11 +1165,38 @@ button.ovhr{cursor:pointer}button.ovhr:hover{background:#F6F3FF}
 .dfc b{font-weight:700}.dfc i{font-style:normal;opacity:.8;font-size:11px}.dfc:hover{background:var(--accent-d)}
 .dfc.all{background:#fff;color:var(--accent-d)}.dfc.all:hover{background:#F1EDFF}
 .dfcount{color:var(--accent-d)!important;font-weight:700}
+/* r70 — Benefit & portfolio analysis */
+.ovansec{margin-top:30px}
+.ovan{padding:20px 22px!important;border-radius:16px!important;border:1px solid #ECE9F6!important}
+.ovanh{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}.ovanh .sp{flex:1}.ovanh h3{margin:0;font-size:17px;color:var(--ink)}.ovanh p{margin:4px 0 0;font-size:12.5px;color:var(--muted)}
+.ovrng{border:1px solid #E4E0F5;border-radius:10px;padding:7px 12px;font-size:12.5px;color:var(--ink);background:#fff;white-space:nowrap}
+.ovsum{display:grid;grid-template-columns:repeat(3,1fr);background:#F7F6FB;border-radius:12px;padding:14px 4px;margin-bottom:16px}
+.ovsum>div{padding:0 18px;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px}.ovsum>div+div{border-left:1px solid #E7E4F0}
+.ovsum small{flex-basis:100%;font-size:10.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
+.ovsum b{font-size:24px;letter-spacing:-.4px;color:var(--ink)}.ovsum b.ok{color:#1E7B4E}.ovsum span{font-size:12px;color:var(--muted)}
+.ovbch{position:relative}.ovbu{font-size:11.5px;color:var(--muted)}
+.ovbsv{overflow-x:auto;padding-bottom:4px}.ovbsv svg{display:block;max-width:none}
+.ovbsv .gl{stroke:#EFEDF5}.ovbsv .ax{font-size:11px;fill:#8A84A3}.ovbsv .yr{font-size:13px;font-weight:700;fill:#3F3A57}.ovbsv .ys{stroke:#E7E4F0}
+.ovbsv .bp{fill:#9B87E8}.ovbsv .bf{fill:#DCD3F5}.ovbsv .ba{fill:#2E9D5B}
+.ovbsv .td{stroke:#C2410C;stroke-width:1.5;stroke-dasharray:4 4}.ovbsv .tdb{fill:#FDEBDD}.ovbsv .tdt{font-size:11.5px;font-weight:600;fill:#9A3412}
+.ovleg{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px}.ovleg span{display:inline-flex;align-items:center;gap:6px}
+.ovleg i{width:14px;height:10px;border-radius:3px;display:inline-block}.ovleg i.bp{background:#9B87E8}.ovleg i.bf{background:#DCD3F5}.ovleg i.ba{background:#2E9D5B}.ovleg i.td{width:2px;height:12px;background:#C2410C}
+.ovang{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;align-items:start}.ovangr{display:flex;flex-direction:column;gap:16px}
+.ovrkhd{display:grid;grid-template-columns:150px 1fr 50px 50px;gap:12px;font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted);padding:0 4px 4px}.ovrkhd span:nth-child(3),.ovrkhd span:nth-child(4){text-align:right}
+.ovrk{display:grid;grid-template-columns:150px 1fr 50px 50px;gap:12px;align-items:center;width:100%;border:0;background:transparent;border-radius:8px;padding:7px 4px;font:inherit;font-size:13px;color:#3F3A57;text-align:left;cursor:pointer}
+.ovrk:hover{background:#F6F3FF}.ovrk.on{background:#F1EDFF}
+.ovrk .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ovrk .nm i{font-style:normal;display:inline-block;width:14px;color:var(--muted)}
+.ovrk .ovbar{width:100%;height:8px}.ovrk .ovbar>b{background:#BFB2F2}.ovrk.top .ovbar>b{background:#6A4FE0}
+.ovrk.none{color:#A15C00}.ovrk.none .ovbar>b{background:#B98552}
+.ovrk>b{text-align:right;color:var(--ink)}.ovrk small{text-align:right;font-size:11.5px;color:var(--muted)}
+.ovins{margin:12px 0 0;background:#F1EDFF;color:var(--accent-d);border-radius:10px;padding:9px 12px;font-size:12px}.ovins.warn{background:#FBF2E6;color:#9A5B13}
+.ovrkc .ovdrill{margin-left:18px}
+@media (max-width:1100px){.ovang{grid-template-columns:1fr}.ovsum{grid-template-columns:1fr}.ovsum>div+div{border-left:0;border-top:1px solid #E7E4F0;padding-top:10px;margin-top:10px}}
 </style>
 </head>
 <body>
 <aside class="side" id="side" aria-label="Main navigation">
-  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r69</span></small></span></div>
+  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r70</span></small></span></div>
   <div class="sglab">WORKSPACE</div>
   <button type="button" class="wschip" id="btnOpen" title="Open the workbook (the database)"><span class="wsdot" aria-hidden="true"></span><span class="file" id="fileName">No workbook loaded</span><span class="chev" aria-hidden="true">⌄</span></button>
   <nav class="sidenav hidden" id="tabs"></nav>
@@ -2382,29 +2409,19 @@ function vDash(m,keepScroll){const _y=window.scrollY;setTimeout(()=>{if(keepScro
    <span class="muted${nF?" dfcount":""}" style="margin-left:auto">${P.length} of ${allP.length} projects · ${A.length} tasks · ${Bl.length} benefit lines</span>
    <span class="muted finfo" title="Pick a BU, then a CF of that BU, then a project of that CF — or leave any on All. Status: untick a box to hide projects with that status, tick it to show them again (Only = show just that one). Type part of a name in Project to show all matching projects. These filters apply to every chart, KPI and table on the dashboard; dropdowns inside a card only change how that card is drawn.">ⓘ</span></div>
   ${ovKpis(P,A,D,Bl,{valRec,valOne,hrs,fteh,pTD,aTD,pids})}${ovNewHtml(P,Bl)}
-  <details class="card pad ovmore"${UI.dash.more?" open":""}><summary><b>More analysis</b> <span class="muted">— benefit plan vs actual, breakdowns by process area / BU / leader, detail tables</span></summary>
-  <div class="grid one" style="margin-top:14px">
-    <div class="card pad" data-chart="proc"><div class="chead"><h2>By process area</h2><span class="ctl"><span class="muted">Show</span>${selOpt("procView",pv,VIEWS)}</span></div><p class="muted" style="margin:-6px 0 4px;font-size:12px">Click a bar or colour to zoom into its projects</p>${dimChart(r=>gv("Projects",FP.proc,r),pv)}</div>
-    </div>
-  ${UI.dash.zoom&&UI.dash.zoom.chart==="proc"?zoomPanel(P):""}
-  <div style="margin-top:14px">${benefitPanel("dash")}</div>
-  <div class="grid two" style="margin-top:14px">
-    <div class="card pad" data-chart="bu"><div class="chead"><h2>By ${orgName}${bu?` <span class="muted" style="font-size:13px;font-weight:500">in ${esc(bu)}</span>`:""}</h2><span class="ctl"><span class="muted">Show</span>${selOpt("buView",bv,VIEWS.filter(v=>!(bu&&v[0]==="cfcount")))}</span></div><p class="muted" style="margin:-6px 0 4px;font-size:12px">${bu?"Bars = corporate functions of the selected BU":"Bars = BUs (pick a BU in the filter to see its CFs)"} · click a bar or colour to zoom in</p>${dimChart(r=>gv("Projects",orgDim,r),bv==="cfcount"&&bu?"status":bv)}</div>
-    <div class="card pad${UI.dash.lshow?"":" lcollapsed"}"><div class="chead"><h2>Projects by ${LDIM==="lead"?"working team (project lead)":"workstream leader"}</h2><span class="ctl">${UI.dash.lshow?`<span class="muted">Show</span>${selOpt("ldim",LDIM,[["wsl","Workstream leader"],["lead","Working team (project lead)"]])}`:""}<button type="button" class="btn small" id="lshow" aria-expanded="${!!UI.dash.lshow}">${UI.dash.lshow?"▾ Hide":"▸ Show chart"}</button></span></div>${UI.dash.lshow?`<p class="muted" style="margin:-6px 0 4px;font-size:12px">${LDIM==="lead"?"Working team = the project lead running each project (dev / BA team on the project page)":"Workstream leader = owner of the programme area (e.g. P Oh for SSC simplification)"} · click a bar to list the projects</p>${stackedH(leads,leadSeries,{click:true})}`:`<p class="muted" style="margin:0;font-size:12.5px">${leads.filter(x=>x!==LNONE).length} ${LDIM==="lead"?"project leads":"workstream leaders"} · hidden — click <b>Show chart</b> to see projects by workstream leader or working team.</p>`}</div>
-  </div>
-  ${UI.dash.zoom&&UI.dash.zoom.chart!=="proc"?zoomPanel(P):""}
+  ${ovAnalysisHtml(P,Bl,months,F.cf||bu||"All business units")}
   <div id="cellList"></div>
   <details class="card pad" style="margin-top:14px"><summary><b>Detail tables</b> <span class="muted">— status × BU / CF / process area and the delayed & at-risk list</span></summary>
     <h2 style="margin-top:12px">Projects by status × ${bu?"CF":"BU"}</h2>${matrix(bu?"CF":"BU",P,r=>gv("Projects",bu?FP.cf:FP.bu,r),{})}
     <h2 style="margin-top:12px">Projects by status × process area</h2>${matrix("Process Area",P,r=>gv("Projects",FP.proc,r),{})}
-    <h2 style="margin-top:12px">Delayed & at-risk projects</h2>${riskList(P)}</details></details>`;
+    <h2 style="margin-top:12px">Delayed & at-risk projects</h2>${riskList(P)}</details>`;
   const reF=()=>{UI.dash.cell=null;UI.dash.zoom=null;vDash(m,true)};
-  ovBind(m);ovNewBind(m);ovKpiBind(m);{const mo=m.querySelector(".ovmore");if(mo)mo.ontoggle=()=>{UI.dash.more=mo.open}}$("#fBU").onchange=e=>{F.bu=e.target.value;F.cf="";F.proc="";reF()};$("#fCF").onchange=e=>{F.cf=e.target.value;F.proc="";reF()};$("#fProc").onchange=e=>{F.proc=e.target.value;F.init="";reF()};$("#fInit").onchange=e=>{F.init=e.target.value;reF()};bindStChips(m,"dst",F,reF);
+  ovBind(m);ovNewBind(m);ovKpiBind(m);$("#fBU").onchange=e=>{F.bu=e.target.value;F.cf="";F.proc="";reF()};$("#fCF").onchange=e=>{F.cf=e.target.value;F.proc="";reF()};$("#fProc").onchange=e=>{F.proc=e.target.value;F.init="";reF()};$("#fInit").onchange=e=>{F.init=e.target.value;reF()};bindStChips(m,"dst",F,reF);
   $("#fQ").addEventListener("change",e=>{F.q=e.target.value.trim();reF()});
   m.querySelectorAll("[data-dfclr]").forEach(b=>b.onclick=()=>{const k=b.dataset.dfclr;if(k==="all"){F.bu=F.cf=F.proc=F.init=F.q="";F.stOff=[]}else if(k==="bu"){F.bu=F.cf=F.proc=""}else if(k==="cf"){F.cf=F.proc=""}else if(k==="st")F.stOff=[];else F[k]="";reF()});
   ["fBU","fCF","fProc","fInit"].forEach(id=>{const el=$("#"+id);if(el&&el.value){el.classList.add("act");const lb=el.closest("label");if(lb)lb.classList.add("act")}});{const q=$("#fQ");if(q&&q.value){q.classList.add("act");const lb=q.closest("label");if(lb)lb.classList.add("act")}}
   if($("#clrAll"))$("#clrAll").onclick=()=>{F.bu=F.cf=F.proc=F.init=F.q="";F.stOff=[];reF()};
-  $("#procView").onchange=e=>{UI.dash.procView=e.target.value;vDash(m,true)};$("#buView").onchange=e=>{UI.dash.buView=e.target.value;vDash(m,true)};
+  if($("#procView"))$("#procView").onchange=e=>{UI.dash.procView=e.target.value;vDash(m,true)};if($("#buView"))$("#buView").onchange=e=>{UI.dash.buView=e.target.value;vDash(m,true)};ovAnalysisBind(m);
   m.querySelectorAll("svg [data-click]").forEach(el=>el.onclick=()=>{const chart=el.closest("[data-chart]").dataset.chart;const seg=el.dataset.seg||"";
     const view=chart==="proc"?pv:chart==="bu"?bv:null;
     const segType=({status:"status",stage:"stage",value:"cf",cfcount:"cf",delay:"delay"})[view];
@@ -2564,6 +2581,46 @@ function ovKpiBind(m){const U=UI.dash;const re=()=>vDash(m,true);
   m.querySelectorAll("[data-kst]").forEach(b=>b.onclick=()=>{U.kSt=U.kSt||{};U.kSt[b.dataset.kkey]=b.dataset.kst;U.kAll="";re()});
   m.querySelectorAll("[data-kall]").forEach(b=>b.onclick=()=>{U.kAll=U.kAll===b.dataset.kall?"":b.dataset.kall;re()});
   m.querySelectorAll("#ovKp [data-ovopen]").forEach(b=>b.onclick=()=>openProject(+b.dataset.ovopen))}
+/* ---- bottom of the dashboard: benefit realisation + simple ranked breakdowns ---- */
+function ovAnalysisHtml(P,Bl,months,scope){const U=UI.dash;const BlA=Bl.filter(b=>!b.drop);
+  const plan=months.map((_,i)=>BlA.reduce((a,b)=>a+(b.plan[i]||0),0)),act=months.map((_,i)=>BlA.reduce((a,b)=>a+(b.act[i]||0),0));
+  const td=months.map(mm=>mm.s<=TODAY);const pTD=plan.reduce((a,v,i)=>a+(td[i]?v:0),0),aTD=act.reduce((a,v,i)=>a+(td[i]?v:0),0);
+  const lab=mm=>{const d=serialToDate(mm.s);return {m:MON[d.getUTCMonth()],y:d.getUTCFullYear()}};
+  /* chart */
+  let chart='<p class="muted">No benefit plan yet.</p>';
+  if(months.length){const n=months.length,bw=50,pl=64,pr=16,pt=34,ph=250,W=pl+n*bw+pr,H=pt+ph+64;const mx0=Math.max(1,...plan,...act);
+    const step=(()=>{const raw=mx0/4,p=Math.pow(10,Math.floor(Math.log10(raw)));return [1,2,2.5,5,10].map(k=>k*p).find(k=>k>=raw)})();const mx=step*4;
+    const Y=v=>pt+ph-v/mx*ph;const ti=months.findIndex(mm=>mm.s<=TODAY&&TODAY<(months[months.indexOf(mm)+1]||{s:9e9}).s);
+    let g="";for(let k=0;k<=4;k++){const v=step*k;g+=`<line x1="${pl}" x2="${W-pr}" y1="${Y(v)}" y2="${Y(v)}" class="gl"/><text x="${pl-10}" y="${Y(v)+4}" text-anchor="end" class="ax">${fmtShort(v)}</text>`}
+    let bars="",xl="",yrs="";let y0=null,ys=0;
+    months.forEach((mm,i)=>{const x=pl+i*bw;const L=lab(mm);const p=plan[i],a=act[i];
+      bars+=`<g><title>${L.m} ${L.y} · plan ${fmtNum(Math.round(p))} THB${a?` · actual ${fmtNum(Math.round(a))} THB`:""}</title><rect x="${x+9}" y="${Y(p)}" width="${bw-18}" height="${Math.max(0,pt+ph-Y(p))}" rx="4" class="${td[i]?"bp":"bf"}"/>${a?`<rect x="${x+17}" y="${Y(a)}" width="${bw-34}" height="${pt+ph-Y(a)}" rx="3" class="ba"/>`:""}</g>`;
+      xl+=`<text x="${x+bw/2}" y="${pt+ph+20}" text-anchor="middle" class="ax">${L.m}</text>`;
+      if(L.y!==y0){if(y0!==null){yrs+=`<text x="${pl+(ys+i)/2*bw}" y="${pt+ph+52}" text-anchor="middle" class="yr">${y0}</text><line x1="${x}" x2="${x}" y1="${pt-6}" y2="${pt+ph+34}" class="ys"/>`}y0=L.y;ys=i}});
+    yrs+=`<text x="${pl+(ys+n)/2*bw}" y="${pt+ph+52}" text-anchor="middle" class="yr">${y0}</text>`;
+    let tl="";if(ti>=0){const x=pl+(ti+1)*bw;const L=lab(months[ti]);tl=`<line x1="${x}" x2="${x}" y1="${pt-6}" y2="${pt+ph}" class="td"/><g transform="translate(${x-62},${pt-30})"><rect width="124" height="22" rx="6" class="tdb"/><text x="62" y="15" text-anchor="middle" class="tdt">Today · ${L.m} ${L.y}</text></g>`}
+    chart=`<div class="ovbch"><span class="ovbu">THB / month</span><div class="ovbsv"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Monthly planned and actual benefit">${g}${bars}${tl}${xl}${yrs}</svg></div></div>`}
+  const rng=months.length?`${lab(months[0]).m} ${lab(months[0]).y} – ${lab(months[months.length-1]).m} ${lab(months[months.length-1]).y}`:"";
+  const ben=`<div class="card ovan"><div class="ovanh"><div><h3>Monthly benefit realisation</h3><p>${esc(scope)} · ${Bl.length} benefit line${Bl.length!==1?"s":""}</p></div><span class="sp"></span>${rng?`<span class="ovrng">Monthly · ${rng}</span>`:""}</div>
+    <div class="ovsum"><div><small>Planned to date</small><b>THB ${fmtNum(Math.round(pTD))}</b></div><div><small>Actual to date</small><b class="ok">THB ${fmtNum(Math.round(aTD))}</b><span>${aTD?"Realised benefits logged":"No realised benefits recorded"}</span></div><div><small>Plan achieved</small><b>${pTD?Math.round(aTD/pTD*100):0}%</b><span>Actual ÷ planned to date</span></div></div>
+    ${chart}<div class="ovleg"><span><i class="bp"></i>Planned (to date)</span><span><i class="bf"></i>Planned (future)</span><span><i class="ba"></i>Actual</span><span><i class="td"></i>Today</span></div></div>`;
+  /* ranked lists */
+  const tot=P.length||1;const rank=(key,title,sub,fn,opts={})=>{const by={};P.forEach(r=>{const k=fn(r)||opts.none||"(blank)";(by[k]=by[k]||[]).push(r)});
+    const ks=Object.keys(by).sort((a,b)=>(a===opts.none)-(b===opts.none)||by[b].length-by[a].length);const mxn=Math.max(1,...ks.map(k=>by[k].length));
+    const rows=ks.map((k,i)=>{const id=key+":"+k,o=U.anOpen===id,nn=by[k].length;return `<button type="button" class="ovrk${o?" on":""}${k===opts.none?" none":""}${i<2&&k!==opts.none?" top":""}" data-anr="${esc(id)}" aria-expanded="${o}"><span class="nm"><i>${o?"⌄":"›"}</i>${esc(k)}</span><span class="ovbar"><b style="width:${nn/mxn*100}%"></b></span><b>${nn}</b><small>${Math.round(nn/tot*100)}%</small></button>${o?ovPRows(srtP(by[k]),id,opts.extra):""}`}).join("");
+    return {html:`<div class="card ovan ovrkc"><div class="ovanh"><div><h3>${title}</h3><p>${P.length} projects · ${sub}</p></div></div><div class="ovrkhd"><span></span><span></span><span>Projects</span><span>Share</span></div>${rows}${opts.foot?opts.foot(by,ks):""}</div>`,by,ks}};
+  const srtP=rs=>[...rs].sort((a,b)=>(OV_SO[pStat(a)]??9)-(OV_SO[pStat(b)]??9));
+  const proc=rank("proc","Projects by process area","ranked by project count",r=>gv("Projects",FP.proc,r),{foot:(by,ks)=>{const t=ks.slice(0,2);const s=t.reduce((a,k)=>a+by[k].length,0);return t.length>1?`<p class="ovins">${t.map(esc).join(" + ")} account for ${s} of ${P.length} projects (${Math.round(s/tot*100)}%).</p>`:""},extra:r=>esc(curStage(r))});
+  const NA="Not assigned";const wsl=rank("wsl","Projects by workstream leader","assignment coverage",r=>gv("Projects",FP.wsl,r),{none:NA,foot:by=>by[NA]?`<p class="ovins warn">${by[NA].length} project${by[NA].length>1?"s have":" has"} no workstream leader assigned.</p>`:`<p class="ovins">Every project has a workstream leader.</p>`,extra:r=>esc(gv("Projects",FP.proc,r)||"")});
+  const bus=uniq(P.map(r=>gv("Projects",FP.bu,r)||"(blank)"));
+  const bu=rank(bus.length>1?"bu":"cf",bus.length>1?"Projects by business unit":"Projects by corporate function",bus.length>1?"ranked by project count":`one business unit in this view (${esc(bus[0]||"—")}) · split by CF`,r=>gv("Projects",bus.length>1?FP.bu:FP.cf,r),{extra:r=>esc(gv("Projects",FP.proc,r)||"")});
+  return `<section class="ovansec"><div class="ovsec"><div><h2>Benefit &amp; portfolio analysis</h2><p>A clearer view of expected value, project distribution and ownership.</p></div></div>
+    ${ben}<div class="ovang"><div>${proc.html}</div><div class="ovangr">${wsl.html}${bu.html}</div></div></section>`}
+function ovAnalysisBind(m){const U=UI.dash;const re=()=>vDash(m,true);
+  m.querySelectorAll("[data-anr]").forEach(b=>b.onclick=()=>{U.anOpen=U.anOpen===b.dataset.anr?"":b.dataset.anr;U.kAll="";re()});
+  m.querySelectorAll(".ovansec [data-kall]").forEach(b=>b.onclick=()=>{U.kAll=U.kAll===b.dataset.kall?"":b.dataset.kall;re()});
+  m.querySelectorAll(".ovansec [data-ovopen]").forEach(b=>b.onclick=()=>openProject(+b.dataset.ovopen));
+  const sv=m.querySelector(".ovbsv");if(sv&&!sv.dataset.sc){sv.dataset.sc=1;const td=sv.querySelector("line.td");if(td)sv.scrollLeft=Math.max(0,+td.getAttribute("x1")-sv.clientWidth*0.55)}}
 
 /* ---- benefits analysis (chart panel on the Benefits page) ---- */
 UI.ben={bu:"",seg:"bu",view:"pva",metric:"gross"};
