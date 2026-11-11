@@ -1258,3 +1258,21 @@ select.msnative{display:none!important}
 .ovdraft .ovarr{color:#CFCDD8}
 .ovdraft .ovlink{color:#5F5C70}
 .ovunm .ovunmb{color:#fff!important}.ovunm.open .ovunmb{color:var(--accent-d)!important}
+/* r82 — BU colours on project highlights */
+.buchip{display:inline-flex;align-items:center;gap:4px;font:700 10px/1.5 inherit;font-family:inherit;color:var(--bc);background:color-mix(in srgb,var(--bc) 10%,#fff);border:1px solid color-mix(in srgb,var(--bc) 35%,#fff);border-radius:5px;padding:0 5px;vertical-align:1px}
+.buchip i{width:6px;height:6px;border-radius:50%;background:var(--bc)}
+tr.burow td:first-child{box-shadow:inset 4px 0 0 var(--bc)}
+tr.burow.sel td{background:color-mix(in srgb,var(--bc) 9%,#fff)!important}
+.ovpr,.ovdr,.ovur{box-shadow:inset 3px 0 0 var(--bc,transparent)}
+.ovpr:hover,.ovdr:hover,.ovur:hover{background:color-mix(in srgb,var(--bc,#7C5CFC) 7%,#fff)}
+.gx .g-left .g-row.p{box-shadow:inset 3px 0 0 var(--bc,transparent)}
+.gx-bud{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--bc);margin-right:5px;vertical-align:0}
+.gx .g-row.p.ghl{box-shadow:inset 3px 0 0 var(--bc,#F79009)!important;background:color-mix(in srgb,var(--bc,#F79009) 10%,#fff)!important}
+.gx-step.hit{background:var(--bc,var(--accent));border-color:var(--bc,var(--accent));box-shadow:0 4px 12px color-mix(in srgb,var(--bc,#7C5CFC) 35%,transparent)}
+.t2 tbody tr td.fz0{box-shadow:inset 4px 0 0 var(--bc,transparent)}
+.t2 tbody tr.changed td.fz0{box-shadow:inset 4px 0 0 var(--bc,transparent),inset 7px 0 0 var(--accent)}
+/* flows take their BU colour */
+.ovflow[style*="--fc"]:not(.ovdraft){border-left:4px solid var(--fc)!important}
+.ovflow[style*="--fc"]:not(.ovdraft) .ovficon{background:linear-gradient(135deg,color-mix(in srgb,var(--fc) 70%,#fff),var(--fc));box-shadow:0 6px 14px color-mix(in srgb,var(--fc) 35%,transparent)}
+.fhcard[style*="--fc"]{border-top:4px solid var(--fc)!important}
+.ovpc.hit,.ovl.on{border-left-color:var(--fc,var(--accent))}

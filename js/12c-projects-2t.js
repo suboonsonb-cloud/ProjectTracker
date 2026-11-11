@@ -69,7 +69,7 @@ function t2Cols(){const ro=typeof canEdit==="function"&&!canEdit();const dis=ro?
   {g:"x",h:"E2E flow",w:170,f:r=>e2eChip(pId(r),true)},
   {g:"x",h:"Updated",w:92,f:r=>{const d=n(gv("Projects","AN",r));return d?`<span class="t2ro">${fmtDate(d)}</span>`:""}}]}
 const T2G={p:["Project","#7C5CFC"],s:["Schedule & status","#2E90FA"],u:["Update","#12B76A"],b:["Benefit","#F79009"],x:["Tracker detail (not in 2T file)","#6E6893"]};
-function t2RowHtml(r,C){const F=UI.qu;return `<tr data-t2row="${r}" class="${F.edited.has(r)?"changed":""}">${C.map((c,i)=>`<td class="g-${c.g} ${c.cls||""}${i<2?" fz fz"+i:""}">${c.f(r)}</td>`).join("")}</tr>`}
+function t2RowHtml(r,C){const F=UI.qu;return `<tr data-t2row="${r}" class="${F.edited.has(r)?"changed":""}" style="--bc:${buColor(gv("Projects",FP.bu,r))}">${C.map((c,i)=>`<td class="g-${c.g} ${c.cls||""}${i<2?" fz fz"+i:""}">${c.f(r)}</td>`).join("")}</tr>`}
 function v2T(m){const F=UI.qu;F.simple=true;liveCalc();const {rows}=quRows();const re=()=>{const y=scrollY;v2T(m);window.scrollTo(0,y)};
   const showX=UI.t2x!==false;const C=t2Cols().filter(c=>showX||c.g!=="x");
   const groups=[];C.forEach(c=>{const g=groups[groups.length-1];if(g&&g.g===c.g)g.n++;else groups.push({g:c.g,n:1})});

@@ -170,7 +170,18 @@ function projMeth(pid){const r=projRowById(pid);return r&&gv("Projects",FP.meth,
 function codeFor(listNm,codeNm,val,def){const a=listFromName(listNm),b=listFromName(codeNm);const i=a.indexOf(val);return i>=0&&b[i]?b[i]:def}
 function maxSuffix(ids,prefix,width){let m=0;for(const id of ids){if(typeof id==="string"&&id.startsWith(prefix)){const n=parseInt(id.slice(prefix.length),10);if(!isNaN(n)&&id.length===prefix.length+width)m=Math.max(m,n)}}return m}
 /* ID prefix = programme: 2T (old 2T Club project, Programme Tag "2T") or SIMP (simplification — everything else) */
-function progChip(id){const p=String(id||"").split("-")[0];return p==="2T"?`<span class="pchipP p2t" title="Old 2T Club project">2T</span> `:p==="SIMP"?`<span class="pchipP psimp" title="Simplification project">SIMP</span> `:p==="CR"?`<span class="pchipP pcr" title="Complexity Reduction project">CR</span> `:""}
+function progChip(id){return progChip0(id)+(typeof buChip==="function"?buChip(buOfPid(id)):"")}
+function progChip0(id){const p=String(id||"").split("-")[0];return p==="2T"?`<span class="pchipP p2t" title="Old 2T Club project">2T</span> `:p==="SIMP"?`<span class="pchipP psimp" title="Simplification project">SIMP</span> `:p==="CR"?`<span class="pchipP pcr" title="Complexity Reduction project">CR</span> `:""}
+/* each BU has its own colour (order of the BU list; Finance keeps the app purple) — used to tint project highlights */
+const BU_PAL=["#7C5CFC","#0E9384","#E04F16","#2E90FA","#C11574","#669F2A","#B54708","#DD2590","#0BA5EC","#15B79E","#CA8504","#3E4784"];
+function buColor(bu){bu=String(bu||"");if(!bu)return "#98A2B3";let L=[];try{L=listFromName("L_BU").map(String)}catch(e){}const fi=L.indexOf("Finance");
+  let i=L.indexOf(bu);if(bu==="Finance")return BU_PAL[0];if(i<0){let h=0;for(const c of bu)h=(h*31+c.charCodeAt(0))>>>0;i=h}else if(fi>=0&&i<fi)i=i+1;
+  return BU_PAL[1+(i%(BU_PAL.length-1))]}
+function buOfPid(pid){const r=typeof projRowById==="function"?projRowById(pid):null;return r?gv("Projects",FP.bu,r):""}
+function buColorPid(pid){return buColor(buOfPid(pid))}
+/* a flow's colour = the BU most of its linked projects belong to */
+function flowBU(f){const n={};for(const v of ["TO-BE","AS-IS"]){const d=f&&f.v&&f.v[v]&&f.v[v].doc;if(!d)continue;for(const sh of d.shapes||[])for(const p of sh.proj||[]){const b=buOfPid(p);if(b)n[b]=(n[b]||0)+1}}const k=Object.keys(n).sort((a,b)=>n[b]-n[a]);return k[0]||""}
+function buChip(bu){if(!bu)return "";const c=buColor(bu);let code=bu;try{code=codeFor("L_BU","L_BUCode",bu,bu)}catch(e){}return `<span class="buchip" style="--bc:${c}" title="BU: ${esc(bu)}"><i></i>${esc(code)}</span> `}
 /* programme (initiative) = Projects!AE: 2T · Complexity Reduction · everything else (Simplification, Deep Dives, blank) = SIMP */
 const PROGS=["SIMP","2T","Complexity Reduction"];
 function progTag(r){const t=String(gv("Projects","AE",r)||"").trim().toUpperCase();return t==="2T"?"2T":/COMPLEX/.test(t)?"Complexity Reduction":"SIMP"}
