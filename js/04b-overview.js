@@ -45,7 +45,15 @@ function ovNewHtml(P,Bl){const pids=new Set(P.map(pId));const byId=new Map(P.map
   const top2=[...sg].sort((a,b)=>b.n-a.n).slice(0,2);
   return `  <div class="ovsec"><div><h2>E2E workflows</h2><p>Explore the business process first. Find projects where the work happens.</p></div><span class="sp"></span><label class="ovsrch"><input type="search" id="ovQ" placeholder="Search workflows or projects…" value="${esc(D.ovQ||"")}"></label></div>
   ${FLs.map(flowCard).join("")||`<div class="card pad muted">${FL.length?"Nothing matches the search.":"No E2E workflow is mapped yet — draw one under E2E flow maps and link its steps to projects."}</div>`}
-  ${unm.length?`<div class="ovunm"><div><b>${unm.length} project${unm.length>1?"s are":" is"} not mapped to a process yet</b><span>Assign them to an E2E workflow, swimlane and process to see their business impact.</span></div><button type="button" class="btn new" id="ovUnm">Review unmapped projects →</button></div>`:""}
+  ${unm.length?(()=>{const SO={"Delayed":0,"At Risk":1,"On Track":2,"Not Started":3,"On-Hold":4,"Completed":5,"Cancelled":6};
+    const fl=D.unmSt||"";const lst=unm.filter(r=>!fl||pStat(r)===fl).sort((a,b)=>(SO[pStat(a)]??9)-(SO[pStat(b)]??9)||String(gv("Projects",FP.name,a)).localeCompare(String(gv("Projects",FP.name,b))));
+    const lim=D.unmAll?lst.length:10;const stc=STL.map(s=>[s,unm.filter(r=>pStat(r)===s).length]).filter(x=>x[1]);
+    return `<div class="ovunm${D.unmOpen?" open":""}"><button type="button" class="ovunmh" id="ovUnmT" aria-expanded="${!!D.unmOpen}"><span class="chev">${D.unmOpen?"⌄":"›"}</span><div><b>${unm.length} project${unm.length>1?"s are":" is"} not mapped to a process yet</b><span>Assign them to an E2E workflow, swimlane and process to see their business impact.</span></div><span class="ovunmb">${D.unmOpen?"Hide list":"Show projects"}</span></button>
+    ${D.unmOpen?`<div class="ovunmb2"><div class="ovunmf"><button type="button" data-unmst="" class="${fl?"":"on"}">All <b>${unm.length}</b></button>${stc.map(([s,n])=>`<button type="button" data-unmst="${esc(s)}" class="${fl===s?"on":""}"><i style="background:${SCOL[s]||"#888"}"></i>${esc(s)} <b>${n}</b></button>`).join("")}<span class="sp"></span><button type="button" class="ovlink" id="ovUnm">Open in Projects →</button></div>
+      <div class="ovunml"><div class="ovunmhd"><span>Project</span><span>Status</span><span>Progress</span><span>Owner</span><span>Plan end</span><span></span></div>
+      ${lst.slice(0,lim).map(r=>{const c=pLive(r).comp||0;const pe=+gv("Projects",FP.pe,r)||0;const late=pe&&pe<TODAY&&!["Completed","Cancelled"].includes(pStat(r));
+        return `<button type="button" class="ovur" data-ovopen="${r}"><span class="n"><b>${esc(gv("Projects",FP.name,r))}</b><small>${esc(pId(r))}${gv("Projects",FP.proc,r)?" · "+esc(gv("Projects",FP.proc,r)):""}${gv("Projects","AB",r)?" · "+esc(gv("Projects","AB",r)):""}</small></span>${pill(pStat(r))}<span class="pc">${pct(c)}%${bar(c,pStat(r)==="Completed"?"ok":pStat(r)==="Delayed"?"bad":"")}</span><span class="ow">${esc(gv("Projects",FP.lead,r)||"—")}</span><span class="dt${late?" bad":""}">${pe?fmtDate(pe):"—"}</span><span class="cv">›</span></button>`}).join("")}</div>
+      ${lst.length>10?`<button type="button" class="ovlink ovunmm" id="ovUnmAll">${D.unmAll?"Show fewer":`Show all ${lst.length}`}</button>`:""}</div>`:""}</div>`})():""}
   <div class="ovsec"><div><h2>Project health at a glance</h2><p>Portfolio-wide · includes mapped and unmapped projects</p></div></div>
   <div class="ovhl"><div class="card ovhc"><div class="hh"><b>Where projects stand</b><span class="muted">${P.length} total projects</span></div>
       ${stRows.map(x=>`<button type="button" class="ovhr" data-ovst="${esc(x.s)}" title="Show these projects"><span>${esc(x.s)}</span><span class="ovbar"><b style="width:${x.n/tot*100}%;background:${SCOL[x.s]||"#888"}"></b></span><b>${x.n}</b><small>${Math.round(x.n/tot*100)}%</small></button>`).join("")}
@@ -58,6 +66,10 @@ function ovNewBind(m){const D=UI.dash;const re=()=>vDash(m,true);
   m.querySelectorAll("[data-ovflow]").forEach(b=>b.onclick=()=>{D.ovOpen=D.ovOpen===b.dataset.ovflow?"":b.dataset.ovflow;re()});
   m.querySelectorAll("[data-ovlane]").forEach(b=>b.onclick=()=>{D.ovLane[b.dataset.ovf]=b.dataset.ovlane;re()});
   const q=m.querySelector("#ovQ");if(q)q.oninput=()=>{clearTimeout(ovNewBind._t);ovNewBind._t=setTimeout(()=>{D.ovQ=q.value;D.ovOpen=undefined;re();const n=m.querySelector("#ovQ");if(n){n.focus();n.setSelectionRange(n.value.length,n.value.length)}},300)};
+  const ut=m.querySelector("#ovUnmT");if(ut)ut.onclick=()=>{D.unmOpen=!D.unmOpen;re()};
+  m.querySelectorAll("[data-unmst]").forEach(b=>b.onclick=()=>{D.unmSt=b.dataset.unmst;D.unmAll=false;re()});
+  const ua=m.querySelector("#ovUnmAll");if(ua)ua.onclick=()=>{D.unmAll=!D.unmAll;re()};
+  m.querySelectorAll(".ovunm [data-ovopen]").forEach(b=>b.onclick=()=>openProject(+b.dataset.ovopen));
   const u=m.querySelector("#ovUnm");if(u)u.onclick=()=>{UI.qu.flow="none";UI.qu.lane="";view="Projects";UI.pview="projects";render();window.scrollTo(0,0)};
   m.querySelectorAll("[data-ovst]").forEach(b=>b.onclick=()=>{UI.qu.stOff=STL.filter(s=>s!==b.dataset.ovst);UI.qu.flow="";view="Projects";UI.pview="projects";render();window.scrollTo(0,0)});
   const ps=m.querySelector("#ovProcSel");if(ps)ps.onchange=e=>{D.proc=e.target.value;D.init="";D.cell=null;D.zoom=null;vDash(m,true)}}

@@ -1077,11 +1077,32 @@ button.ovhr{cursor:pointer}button.ovhr:hover{background:#F6F3FF}
 .grid.one{display:grid;grid-template-columns:1fr;gap:14px}
 @media (max-width:1200px){.ovfh{grid-template-columns:22px 1fr auto;}.ovfh .m{display:none}.ovk2s{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:860px){.ovfb{grid-template-columns:1fr}.ovlanes{flex-direction:row;flex-wrap:wrap;border-right:0;border-bottom:1px solid #EEEBF8}.ovhl{grid-template-columns:1fr}.ovpr{grid-template-columns:1fr auto}.ovpr .k,.ovpr .pc,.ovpr .cv{display:none}}
+/* r63 — unmapped projects drop-down on Overview */
+.ovunm{flex-direction:column;align-items:stretch;padding:0!important;gap:0;overflow:hidden}
+.ovunmh{display:flex;align-items:center;gap:14px;width:100%;border:0;background:transparent;font:inherit;text-align:left;padding:14px 18px;cursor:pointer}
+.ovunmh:hover{background:#ECE6FF}.ovunmh .chev{font-size:16px;color:var(--accent-d);width:14px;text-align:center}
+.ovunmh>div{flex:1;display:flex;flex-direction:column;gap:3px}
+.ovunmb{background:var(--accent);color:#fff;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600;white-space:nowrap}
+.ovunm.open .ovunmb{background:#fff;color:var(--accent-d);box-shadow:inset 0 0 0 1.5px var(--accent)}
+.ovunmb2{background:#fff;border-top:1px solid #E2DBFB;padding:12px 18px 14px}
+.ovunmf{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px}.ovunmf .sp{flex:1}
+.ovunmf [data-unmst]{border:1px solid #E2DDF5;background:#fff;border-radius:999px;padding:4px 11px;font:inherit;font-size:12px;color:#3F3A57;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.ovunmf [data-unmst] i{width:8px;height:8px;border-radius:50%}.ovunmf [data-unmst] b{color:var(--muted);font-weight:600}
+.ovunmf [data-unmst].on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-d);font-weight:600}
+.ovunml{display:flex;flex-direction:column}
+.ovunmhd,.ovur{display:grid;grid-template-columns:minmax(240px,1fr) 120px 150px 130px 100px 14px;gap:14px;align-items:center;padding:8px 8px}
+.ovunmhd{font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid #EEEBF8}
+.ovur{border:0;border-bottom:1px solid #F3F1F8;background:transparent;font:inherit;text-align:left;cursor:pointer;width:100%}.ovur:hover{background:#F8F6FF}
+.ovur .n b{display:block;font-size:13px;font-weight:600;color:var(--ink)}.ovur .n small{font-size:11px;color:var(--muted)}
+.ovur .pc{display:flex;flex-direction:column;gap:4px;font-size:12px}.ovur .pc .ovbar{width:100%}
+.ovur .ow,.ovur .dt{font-size:12.5px;color:#3F3A57}.ovur .dt.bad{color:#C4320A;font-weight:600}.ovur .cv{color:var(--muted)}
+.ovunmm{margin-top:8px}
+@media (max-width:900px){.ovunmhd{display:none}.ovur{grid-template-columns:1fr auto}.ovur .pc,.ovur .ow,.ovur .dt,.ovur .cv{display:none}}
 </style>
 </head>
 <body>
 <aside class="side" id="side" aria-label="Main navigation">
-  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r62</span></small></span></div>
+  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r63</span></small></span></div>
   <div class="sglab">WORKSPACE</div>
   <button type="button" class="wschip" id="btnOpen" title="Open the workbook (the database)"><span class="wsdot" aria-hidden="true"></span><span class="file" id="fileName">No workbook loaded</span><span class="chev" aria-hidden="true">⌄</span></button>
   <nav class="sidenav hidden" id="tabs"></nav>
@@ -2380,7 +2401,15 @@ function ovNewHtml(P,Bl){const pids=new Set(P.map(pId));const byId=new Map(P.map
   const top2=[...sg].sort((a,b)=>b.n-a.n).slice(0,2);
   return `  <div class="ovsec"><div><h2>E2E workflows</h2><p>Explore the business process first. Find projects where the work happens.</p></div><span class="sp"></span><label class="ovsrch"><input type="search" id="ovQ" placeholder="Search workflows or projects…" value="${esc(D.ovQ||"")}"></label></div>
   ${FLs.map(flowCard).join("")||`<div class="card pad muted">${FL.length?"Nothing matches the search.":"No E2E workflow is mapped yet — draw one under E2E flow maps and link its steps to projects."}</div>`}
-  ${unm.length?`<div class="ovunm"><div><b>${unm.length} project${unm.length>1?"s are":" is"} not mapped to a process yet</b><span>Assign them to an E2E workflow, swimlane and process to see their business impact.</span></div><button type="button" class="btn new" id="ovUnm">Review unmapped projects →</button></div>`:""}
+  ${unm.length?(()=>{const SO={"Delayed":0,"At Risk":1,"On Track":2,"Not Started":3,"On-Hold":4,"Completed":5,"Cancelled":6};
+    const fl=D.unmSt||"";const lst=unm.filter(r=>!fl||pStat(r)===fl).sort((a,b)=>(SO[pStat(a)]??9)-(SO[pStat(b)]??9)||String(gv("Projects",FP.name,a)).localeCompare(String(gv("Projects",FP.name,b))));
+    const lim=D.unmAll?lst.length:10;const stc=STL.map(s=>[s,unm.filter(r=>pStat(r)===s).length]).filter(x=>x[1]);
+    return `<div class="ovunm${D.unmOpen?" open":""}"><button type="button" class="ovunmh" id="ovUnmT" aria-expanded="${!!D.unmOpen}"><span class="chev">${D.unmOpen?"⌄":"›"}</span><div><b>${unm.length} project${unm.length>1?"s are":" is"} not mapped to a process yet</b><span>Assign them to an E2E workflow, swimlane and process to see their business impact.</span></div><span class="ovunmb">${D.unmOpen?"Hide list":"Show projects"}</span></button>
+    ${D.unmOpen?`<div class="ovunmb2"><div class="ovunmf"><button type="button" data-unmst="" class="${fl?"":"on"}">All <b>${unm.length}</b></button>${stc.map(([s,n])=>`<button type="button" data-unmst="${esc(s)}" class="${fl===s?"on":""}"><i style="background:${SCOL[s]||"#888"}"></i>${esc(s)} <b>${n}</b></button>`).join("")}<span class="sp"></span><button type="button" class="ovlink" id="ovUnm">Open in Projects →</button></div>
+      <div class="ovunml"><div class="ovunmhd"><span>Project</span><span>Status</span><span>Progress</span><span>Owner</span><span>Plan end</span><span></span></div>
+      ${lst.slice(0,lim).map(r=>{const c=pLive(r).comp||0;const pe=+gv("Projects",FP.pe,r)||0;const late=pe&&pe<TODAY&&!["Completed","Cancelled"].includes(pStat(r));
+        return `<button type="button" class="ovur" data-ovopen="${r}"><span class="n"><b>${esc(gv("Projects",FP.name,r))}</b><small>${esc(pId(r))}${gv("Projects",FP.proc,r)?" · "+esc(gv("Projects",FP.proc,r)):""}${gv("Projects","AB",r)?" · "+esc(gv("Projects","AB",r)):""}</small></span>${pill(pStat(r))}<span class="pc">${pct(c)}%${bar(c,pStat(r)==="Completed"?"ok":pStat(r)==="Delayed"?"bad":"")}</span><span class="ow">${esc(gv("Projects",FP.lead,r)||"—")}</span><span class="dt${late?" bad":""}">${pe?fmtDate(pe):"—"}</span><span class="cv">›</span></button>`}).join("")}</div>
+      ${lst.length>10?`<button type="button" class="ovlink ovunmm" id="ovUnmAll">${D.unmAll?"Show fewer":`Show all ${lst.length}`}</button>`:""}</div>`:""}</div>`})():""}
   <div class="ovsec"><div><h2>Project health at a glance</h2><p>Portfolio-wide · includes mapped and unmapped projects</p></div></div>
   <div class="ovhl"><div class="card ovhc"><div class="hh"><b>Where projects stand</b><span class="muted">${P.length} total projects</span></div>
       ${stRows.map(x=>`<button type="button" class="ovhr" data-ovst="${esc(x.s)}" title="Show these projects"><span>${esc(x.s)}</span><span class="ovbar"><b style="width:${x.n/tot*100}%;background:${SCOL[x.s]||"#888"}"></b></span><b>${x.n}</b><small>${Math.round(x.n/tot*100)}%</small></button>`).join("")}
@@ -2393,6 +2422,10 @@ function ovNewBind(m){const D=UI.dash;const re=()=>vDash(m,true);
   m.querySelectorAll("[data-ovflow]").forEach(b=>b.onclick=()=>{D.ovOpen=D.ovOpen===b.dataset.ovflow?"":b.dataset.ovflow;re()});
   m.querySelectorAll("[data-ovlane]").forEach(b=>b.onclick=()=>{D.ovLane[b.dataset.ovf]=b.dataset.ovlane;re()});
   const q=m.querySelector("#ovQ");if(q)q.oninput=()=>{clearTimeout(ovNewBind._t);ovNewBind._t=setTimeout(()=>{D.ovQ=q.value;D.ovOpen=undefined;re();const n=m.querySelector("#ovQ");if(n){n.focus();n.setSelectionRange(n.value.length,n.value.length)}},300)};
+  const ut=m.querySelector("#ovUnmT");if(ut)ut.onclick=()=>{D.unmOpen=!D.unmOpen;re()};
+  m.querySelectorAll("[data-unmst]").forEach(b=>b.onclick=()=>{D.unmSt=b.dataset.unmst;D.unmAll=false;re()});
+  const ua=m.querySelector("#ovUnmAll");if(ua)ua.onclick=()=>{D.unmAll=!D.unmAll;re()};
+  m.querySelectorAll(".ovunm [data-ovopen]").forEach(b=>b.onclick=()=>openProject(+b.dataset.ovopen));
   const u=m.querySelector("#ovUnm");if(u)u.onclick=()=>{UI.qu.flow="none";UI.qu.lane="";view="Projects";UI.pview="projects";render();window.scrollTo(0,0)};
   m.querySelectorAll("[data-ovst]").forEach(b=>b.onclick=()=>{UI.qu.stOff=STL.filter(s=>s!==b.dataset.ovst);UI.qu.flow="";view="Projects";UI.pview="projects";render();window.scrollTo(0,0)});
   const ps=m.querySelector("#ovProcSel");if(ps)ps.onchange=e=>{D.proc=e.target.value;D.init="";D.cell=null;D.zoom=null;vDash(m,true)}}
