@@ -79,8 +79,8 @@ function pdHtml(r){const pid=pId(r),st=pStat(r),L=pLive(r),pc=(L.comp||0)*100,pl
     ${sec("upd","Update notes",gv("Projects","AM",r)?"⚠ issue noted":"done · issues",`<label class="pdl">Last update — done</label>${ta("done",gv("Projects","AK",r),"What was done…")}<label class="pdl">Issues / blockers</label>${ta("iss",gv("Projects","AM",r),"Anything blocking?")}`)}
     ${sec("ppl","People &amp; team",esc(gv("Projects","AB",r)||gv("Projects",FP.team,r)||""),`<div class="pdform"><label>Workstream leader ${inp("wsl",gv("Projects",FP.wsl,r),"text",'list="quPeople"')}</label><label>Project lead ${inp("lead",gv("Projects",FP.lead,r),"text",'list="quPeople"')}</label><label>Division / team ${inp("team",gv("Projects","AB",r),"text",'list="quTeams"')}</label><label>Project type <select data-qu="${r}" data-k="pd${r}_init" data-f="init" ${ro?"disabled":""}><option value="">—</option>${uniqOrder([...listFromName("L_Init"),gv("Projects",FP.init,r)].filter(Boolean)).map(v=>`<option ${v===gv("Projects",FP.init,r)?"selected":""}>${esc(v)}</option>`).join("")}</select></label></div>${gv("Projects",FP.team,r)?`<p class="muted" style="margin:6px 0 0;font-size:12px">Team: ${esc(gv("Projects",FP.team,r))}</p>`:""}`)}
     ${sec("ben","Benefits",B.length?fmtShort(bPlan)+" planned":"no benefit plan",`<div class="qben pdben">${quBenCell(r)}</div>`)}
-    ${sec("raidd","RAIDD",open.length?`${open.length} open · ${Object.entries(byT).map(([t,n])=>n+" "+t.toLowerCase()).join(", ")}`:"nothing open",`${open.slice(0,6).map(x=>`<div class="pdrd"><span class="t">${esc(gv("RAIDD",FD.type,x))}</span><span class="d">${esc(String(gv("RAIDD",FD.desc,x)||"").slice(0,120))}</span>${+gv("RAIDD",FD.due,x)?`<span class="muted">due ${fmtDate(gv("RAIDD",FD.due,x))}</span>`:""}</div>`).join("")}<button type="button" class="btn small" data-rd="${esc(pid)}">⚑ Open RAIDD (${rd.length})</button>`)}
-    ${sec("tasks","Tasks",ts.length?`${ts.filter(t=>tStat(t)==="Completed").length}/${ts.length} done${lateT?" · "+lateT+" late":""}`:"none yet",quTasksHtml(r))}
+    ${sec("raidd","RAIDD",open.length?`${open.length} open · ${Object.entries(byT).map(([t,n])=>n+" "+t.toLowerCase()).join(", ")}`:"nothing open",pdRaiddHtml(r,pid))}
+    ${sec("tasks","Tasks",ts.length?`${ts.filter(t=>tStat(t)==="Completed").length}/${ts.length} done${lateT?" · "+lateT+" late":""}`:"none yet",pdTasksHtml(r))}
     <div class="pde2e"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="6" height="6" rx="1.2"/><rect x="15" y="3" width="6" height="6" rx="1.2"/><rect x="9" y="15" width="6" height="6" rx="1.2"/><path d="M6 9v2a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9M12 13v2"/></svg></span><div><b>E2E flow map</b><span>${flows.length?esc(flows.map(f=>f.name).join(", "))+(x.lanes.length?" · "+esc(x.lanes.join(", ")):""):"Not mapped yet"}</span></div><span class="sp"></span>${flows.length?`<button type="button" class="btn small" data-pdmap="${esc(flows[0].id)}">View map</button>`:`<button type="button" class="btn small" data-pdfull>Link project</button>`}</div>
   </div>
   <div class="pdfoot"><nav class="pdnav" aria-label="Step through projects"><button type="button" data-pdgo="${ix-1}" ${ix<=0?"disabled":""} aria-label="Previous project">‹</button><span>${ix>=0?ix+1:"–"} / ${cur.length}</span><button type="button" data-pdgo="${ix+1}" ${ix<0||ix>=cur.length-1?"disabled":""} aria-label="Next project">›</button></nav><span class="sp"></span><button type="button" class="btn primary" data-pdfull>Open full project ›</button></div>`}
@@ -88,6 +88,7 @@ function pdBind(w,r){const pid=pId(r);w.querySelector(".pdx").onclick=()=>pdClos
   w.onkeydown=e=>{if(e.key==="Escape"&&!$("#drawer").classList.contains("on")&&!/^(INPUT|TEXTAREA|SELECT)$/.test((e.target||{}).tagName||"")){e.preventDefault();pdClose()}};
   w.querySelectorAll("details.pdsec").forEach(d=>d.ontoggle=()=>{UI.qu.pdOpen=UI.qu.pdOpen||new Set();if(d.open)UI.qu.pdOpen.add(d.dataset.sec);else UI.qu.pdOpen.delete(d.dataset.sec)});
   quBindRow(document,w);
+  pdRaiddBind(w,r,pid);
   w.querySelectorAll("[data-pdst]").forEach(el=>el.onchange=async()=>{const [kind,val]=el.value.split(/:(.*)/);if(!kind)return;const ov=gv("Projects",FP.ovr,r);let ok=false;
     if(kind==="ovr")ok=await quSet(r,"ovr",val);else if(ov)ok=await quSet(r,"ovr","");if(ok){liveCalc();UI.qu.edited.add(r)}
     UI.qu.pdOpen=UI.qu.pdOpen||new Set();UI.qu.pdOpen.add("tasks");UI.qu.tkMsg=r;UI.qu.tkWant=kind==="calc"?val:"";pdRender();const t=document.querySelector('#pdw [data-sec="tasks"]');if(t)t.scrollIntoView({block:"start",behavior:"smooth"});pdListRow(r)});
@@ -99,3 +100,84 @@ function pdBind(w,r){const pid=pId(r);w.querySelector(".pdx").onclick=()=>pdClos
 /* keep the list row in step with edits made in the panel */
 function pdListRow(r){const tr=document.querySelector(`tr[data-prow="${r}"]`);if(!tr)return;const st=pStat(r),L=pLive(r),pe=+gv("Projects",FP.pe,r)||0,late=pe&&pe<TODAY&&!["Completed","Cancelled"].includes(st);
   tr.children[0].innerHTML=`<b class="pnm">${esc(gv("Projects",FP.name,r))}</b><small>${esc(pId(r))}</small>`;tr.children[1].innerHTML=plPill(st);tr.children[2].innerHTML=plBar((L.comp||0)*100,st);tr.children[3].textContent=plOwner(r);tr.children[4].textContent=plDate(pe);tr.children[4].className=late?"late":""}
+/* r57 — Tasks in the details panel: one card per stage/task with Plan vs Actual (forecast) bars and a % done slider that saves right away */
+function pdTasksHtml(r){const pid=pId(r);const ts=tasksOfProject(pid);if(!ts.length)return quTasksHtml(r);
+  const msg=(quTasksHtml(r).match(/^<div class="qtk">(<div class="qtkmsg">[\s\S]*?<\/div>)/)||[])[1]||"";
+  const tovr=listFromName("L_TOvr");
+  const D=ts.map(t=>{const L=tLive(t)||{};return {t,ps:+gv("Activities",FA.ps,t)||0,pe:+gv("Activities",FA.pe,t)||0,fs:+L.fs||0,fe:+L.fe||0}});
+  const all=D.flatMap(d=>[d.ps,d.pe,d.fs,d.fe]).filter(x=>x>0);let a=all.length?Math.min(...all):TODAY-30,b=all.length?Math.max(...all):TODAY+30;a=Math.min(a,TODAY);b=Math.max(b,TODAY)+1;const span=Math.max(1,b-a);
+  const P=s=>((s-a)/span*100).toFixed(2)+"%",Wd=(s,e)=>(Math.max(0.6,(e+1-s)/span*100)).toFixed(2)+"%";
+  const tdy=`<i class="pdtk-today" style="left:${P(TODAY)}"></i>`;
+  return `<div class="qtk pdtks">${msg}<div class="pdtk-leg"><span><i class="pl"></i>Plan</span><span><i class="ac"></i>Actual / forecast (dark = % done)</span><span><i class="lt"></i>Late</span><span><i class="td"></i>Today</span><span class="pdtk-rng-l">${fmtDate(a)} – ${fmtDate(b-1)}</span></div>
+  ${D.map(({t,ps,pe,fs,fe})=>{const pc=Math.round((+gv("Activities",FA.act,t)||0)*100);const st=tStat(t);const late=fe&&pe&&fe>pe?fe-pe:0;const done=st==="Completed"||pc>=100;
+    const n=rowsOf("RAIDD").filter(x=>gv("RAIDD",FD.tid,x)===tId(t)&&gv("RAIDD",FD.type,x)!=="Re-plan"&&gv("RAIDD",FD.status,x)!=="Closed").length;
+    return `<div class="pdtk${late&&!done?" late":""}${done?" done":""}">
+      <div class="pdtk-h"><span class="pdtk-st">${esc(gv("Activities",FA.stage,t)||"Task")}</span><span class="pdtk-pic" title="PIC">${esc(gv("Activities",FA.pic,t)||"—")}</span>
+        <select class="qts pdtk-sel st-${esc(st).replace(/\W/g,"")}" data-qts="${t}" data-r="${r}" aria-label="Task status"><option value="">${esc(gv("Activities",FA.ovr,t)?"Auto":st)}</option>${tovr.map(o=>`<option ${o===gv("Activities",FA.ovr,t)?"selected":""}>${esc(o)}</option>`).join("")}</select></div>
+      <div class="pdtk-n">${esc(gv("Activities",FA.task,t))}</div>
+      <div class="pdtk-row"><span class="lb">Plan</span><div class="trk">${ps&&pe?`<i class="pl" style="left:${P(ps)};width:${Wd(ps,pe)}"></i>`:""}${tdy}</div><span class="dt">${ps?fmtDate(ps):"—"} → ${pe?fmtDate(pe):"—"}</span></div>
+      <div class="pdtk-row"><span class="lb">Actual</span><div class="trk">${fs&&fe?`<i class="ac" style="left:${P(fs)};width:${Wd(fs,fe)}"><b style="width:${pc}%"></b></i>`:""}${tdy}</div><span class="dt${late&&!done?" bad":""}">${fs?fmtDate(fs):"—"} → ${fe?fmtDate(fe):"—"}${late&&!done?` <em>+${late}d</em>`:""}</span></div>
+      <div class="pdtk-p"><input type="range" class="pdtk-r" data-qtk="${t}" data-r="${r}" min="0" max="100" step="5" value="${pc}" style="--v:${pc}%" aria-label="% done"><output>${pc}%</output>
+        <span class="pdtk-q">${[0,50,100].map(v=>`<button type="button" data-pdq="${v}" class="${pc===v?"on":""}">${v}</button>`).join("")}</span>
+        <button type="button" class="btn small qdly${n?" on":""}" data-qdly="${t}" title="Say why this task is late and when it will be done — the forecast and the Gantt move">⚑ ${n?n+" open":"Late?"}</button></div>
+    </div>`}).join("")}</div>`}
+/* slider: show the value while dragging; quick buttons set it and save */
+document.addEventListener("input",e=>{const el=e.target;if(!el.classList||!el.classList.contains("pdtk-r"))return;el.style.setProperty("--v",el.value+"%");const o=el.nextElementSibling;if(o)o.textContent=el.value+"%";
+  const b=el.closest(".pdtk")&&el.closest(".pdtk").querySelector(".ac b");if(b)b.style.width=el.value+"%"});
+document.addEventListener("click",e=>{const q=e.target.closest&&e.target.closest("[data-pdq]");if(!q)return;const el=q.closest(".pdtk-p").querySelector(".pdtk-r");if(!el)return;el.value=q.dataset.pdq;el.dispatchEvent(new Event("input",{bubbles:true}));el.dispatchEvent(new Event("change",{bubbles:true}))});
+/* r57 — RAIDD filled in right here in the details panel (no second pop-up): edit open items in place, add new ones, Late? on a task pre-fills the form */
+function pdRaiddHtml(r,pid){const ro=typeof canEdit==="function"&&!canEdit();const rd=raiddOf(pid);
+  const lst=(n,fb)=>{const v=listFromName(n);return v&&v.length?v.map(String):fb};
+  const TY=uniqOrder([...lst("L_RType",[]),"Risk","Issue","Action","Decision","Dependency","Re-plan"]).filter(Boolean),ST=lst("L_RStatus",["Open","In Progress","Closed"]),PR=lst("L_Priority",["High","Medium","Low"]),IM=lst("L_Impact",[]);
+  const ts=tasksOfProject(pid);const stg=uniqOrder(ts.map(t=>gv("Activities",FA.stage,t)).filter(Boolean));
+  /* attach to: whole project · a whole stage · one task */
+  const tOpt=(v,sv)=>`<option value="">Whole project</option>${stg.map(st=>`<optgroup label="${esc(st)}"><option value="stg:${esc(st)}" ${sv===st?"selected":""}>▣ Whole ${esc(st)} stage</option>${ts.filter(t=>gv("Activities",FA.stage,t)===st).map(t=>`<option value="${esc(tId(t))}" ${!sv&&tId(t)===v?"selected":""}>↳ ${esc(gv("Activities",FA.task,t))}</option>`).join("")}</optgroup>`).join("")}`;
+  const so=(a,v,blank)=>`${blank?`<option value="">${blank}</option>`:""}${a.map(o=>`<option ${o===String(v)?"selected":""}>${esc(o)}</option>`).join("")}`;
+  const iso=v=>+v?isoFromSerial(+v):"";
+  const open=rd.filter(x=>gv("RAIDD",FD.status,x)!=="Closed"),closed=rd.filter(x=>gv("RAIDD",FD.status,x)==="Closed");
+  const item=x=>{const ty=gv("RAIDD",FD.type,x),due=+gv("RAIDD",FD.due,x)||0,od=due&&due<TODAY&&gv("RAIDD",FD.status,x)!=="Closed";const tid=gv("RAIDD",FD.tid,x);const tk=tid&&ts.find(t=>tId(t)===tid);
+    if(ro)return `<div class="pdri"><div class="pdri-h"><span class="pdri-t t-${esc(ty).replace(/\W/g,"")}">${esc(ty||"Item")}</span><span class="muted">${pdStageOf(gv("RAIDD",FD.desc,x))?esc(pdStageOf(gv("RAIDD",FD.desc,x)))+" stage":tk?esc(gv("Activities",FA.task,tk)):"Whole project"}</span><span class="sp"></span>${due?`<span class="${od?"bad":"muted"}">due ${fmtDate(due)}</span>`:""}</div><div class="pdri-d">${esc(pdStageStrip(gv("RAIDD",FD.desc,x)))}</div></div>`;
+    return `<div class="pdri${od?" od":""}" data-rdr="${x}"><div class="pdri-h"><select class="pdri-t t-${esc(ty).replace(/\W/g,"")}" data-rdf="${FD.type}" aria-label="Type">${so(TY,ty)}</select><select data-rdatt class="pdri-tk" aria-label="Attached to">${tOpt(tid,pdStageOf(gv("RAIDD",FD.desc,x)))}</select><span class="sp"></span><span class="pdri-id muted">${esc(gv("RAIDD",FD.id,x)||"new")}</span></div>
+      <textarea data-rdf="${FD.desc}" rows="2" aria-label="Description">${esc(pdStageStrip(gv("RAIDD",FD.desc,x)))}</textarea>
+      <div class="pdri-g"><label>Due<input type="date" data-rdf="${FD.due}" data-dt value="${iso(due)}"></label><label>Status<select data-rdf="${FD.status}">${so(ST,gv("RAIDD",FD.status,x))}</select></label><label>Priority<select data-rdf="${FD.prio}">${so(PR,gv("RAIDD",FD.prio,x),"—")}</select></label>${IM.length?`<label>Impact<select data-rdf="${FD.impact}">${so(IM,gv("RAIDD",FD.impact,x),"Blocks end")}</select></label>`:""}
+      ${ty==="Re-plan"?`<label>New plan end<input type="date" data-rdf="${FD.rpend}" data-dt value="${iso(gv("RAIDD",FD.rpend,x))}"></label><label>Approved<select data-rdf="${FD.rpok}">${so(["N","Y"],gv("RAIDD",FD.rpok,x)||"N")}</select></label>`:""}
+      <label class="w">Action / remark<input type="text" data-rdf="T" value="${esc(gv("RAIDD","T",x))}"></label></div>
+      ${od?`<div class="pdri-od">Overdue ${TODAY-due}d — move the due date or close it</div>`:""}</div>`};
+  const F=UI.qu.rdForm&&UI.qu.rdForm.r===r?UI.qu.rdForm:null;
+  const form=ro?"":F?`<div class="pdrf"><div class="pdrf-h"><b>New RAIDD item</b><span class="sp"></span><button type="button" class="gx-link" data-rdcancel>Cancel</button></div>
+      <div class="pdri-g"><label>Type<select id="rfT">${so(TY,F.type||"Issue")}</select></label><label class="w2">Attach to<select id="rfK">${tOpt(F.tid||"",F.stg||"")}</select></label></div>
+      <label class="pdrf-l">Description<textarea id="rfD" rows="3" placeholder="What is the risk / issue / action? For a delay: the reason">${esc(F.desc||"")}</textarea></label>
+      <div class="pdri-g"><label>Due date<input type="date" id="rfU" value="${F.due?isoFromSerial(F.due):""}"></label><label>Priority<select id="rfP">${so(PR,F.prio||"Medium","—")}</select></label><label>Owner / PIC<input type="text" id="rfO" placeholder="optional" value="${esc(F.pic||"")}"></label></div>
+      ${F.tid?`<p class="pdrf-n">Tip: for a late task, the <b>Due date</b> = when it will now be done — the task forecast and the Gantt move to it.</p>`:""}
+      <div class="pdrf-f"><button type="button" class="btn new" data-rdadd>＋ Add to RAIDD</button></div></div>`
+    :`<button type="button" class="btn small pdr-new" data-rdnew>＋ Add RAIDD item</button>`;
+  return `<div class="pdr">${form}${open.length?open.map(item).join(""):`<p class="muted" style="margin:6px 0">Nothing open.</p>`}
+    ${closed.length?`<details class="pdr-cl"><summary>${closed.length} closed</summary>${closed.map(item).join("")}</details>`:""}
+    <div class="pdr-f"><button type="button" class="gx-link" data-rd="${esc(pid)}">Open full RAIDD log ›</button></div></div>`}
+function pdRaiddBind(w,r,pid){const keepOpen=()=>{UI.qu.pdOpen=UI.qu.pdOpen||new Set();UI.qu.pdOpen.add("raidd")};
+  const done=()=>{quStamp(r);liveCalc();UI.qu.edited.add(r);keepOpen();pdRender();pdListRow(r)};
+  w.querySelectorAll("[data-rdr] [data-rdf]").forEach(el=>el.onchange=()=>{const x=+el.closest("[data-rdr]").dataset.rdr,c=el.dataset.rdf;let v=el.value;if(el.hasAttribute("data-dt"))v=v?serialFromIso(v):"";
+    if(c===FD.desc){if(!String(v).trim()){toast("Description can't be empty",4000);el.value=pdStageStrip(gv("RAIDD",FD.desc,x));return}const sg=pdStageOf(gv("RAIDD",FD.desc,x));if(sg)v=`[${sg} stage] `+v}
+    if(String(v)===String(gv("RAIDD",c,x)))return;try{setCell("RAIDD",c,x,v)}catch(e){toast(e.message,5000);return}done()});
+  w.querySelectorAll("[data-rdatt]").forEach(el=>el.onchange=()=>{const x=+el.closest("[data-rdr]").dataset.rdr;const a=pdAttach(pid,el.value);const d=pdStageStrip(gv("RAIDD",FD.desc,x));
+    try{setCell("RAIDD",FD.tid,x,a.tid);setCell("RAIDD",FD.desc,x,(a.stg?`[${a.stg} stage] `:"")+d)}catch(e){toast(e.message,5000);return}done()});
+  const nb=w.querySelector("[data-rdnew]");if(nb)nb.onclick=()=>{UI.qu.rdForm={r,type:"Issue"};keepOpen();pdRender();setTimeout(()=>{const d=document.querySelector("#pdw #rfD");if(d)d.focus()},50)};
+  const cb=w.querySelector("[data-rdcancel]");if(cb)cb.onclick=()=>{UI.qu.rdForm=null;keepOpen();pdRender()};
+  const ab=w.querySelector("[data-rdadd]");if(ab)ab.onclick=()=>{const v=id=>(w.querySelector(id)||{}).value||"";const desc=v("#rfD").trim();if(!desc){toast("Write a description first",4000);w.querySelector("#rfD").focus();return}
+    const x=firstFree("RAIDD");if(!x){toast("No free rows left in the RAIDD table — insert more rows in Excel first",6000);return}
+    S.newRows.RAIDD=S.newRows.RAIDD||new Set();S.newRows.RAIDD.add(x);
+    const put=(c,val)=>{if(val!==""&&val!=null)setCell("RAIDD",c,x,val)};
+    try{put(FD.type,v("#rfT"));put(FD.pid,pid);const at=pdAttach(pid,v("#rfK"));put(FD.tid,at.tid);put(FD.desc,(at.stg?`[${at.stg} stage] `:"")+desc);put(FD.status,"Open");put(FD.raised,TODAY);put(FD.due,v("#rfU")?serialFromIso(v("#rfU")):"");put(FD.prio,v("#rfP"));put(FD.re,v("#rfO").trim());if(v("#rfT")==="Re-plan")put(FD.rpok,"N")}catch(e){toast(e.message,5000);return}
+    UI.qu.rdForm=null;toast("RAIDD item added — Save to database when you're done",4000);done()};
+  /* Late? on a task: open the form here, pre-filled, instead of another pop-up */
+  w.querySelectorAll("[data-qdly]").forEach(b=>b.onclick=e=>{e.stopPropagation();const t=+b.dataset.qdly;const tid=tId(t);
+    const openIt=rowsOf("RAIDD").find(x=>gv("RAIDD",FD.tid,x)===tid&&gv("RAIDD",FD.type,x)!=="Re-plan"&&gv("RAIDD",FD.status,x)!=="Closed");keepOpen();
+    if(openIt){UI.qu.rdForm=null;pdRender();const el=document.querySelector(`#pdw [data-rdr="${openIt}"]`);if(el){el.scrollIntoView({block:"center",behavior:"smooth"});el.classList.add("flash");setTimeout(()=>el.classList.remove("flash"),2000)}return}
+    UI.qu.rdForm={r,type:"Issue",tid,desc:"Delay — reason: ",prio:"High"};pdRender();setTimeout(()=>{const d=document.querySelector("#pdw #rfD");if(d){d.closest(".pdrf").scrollIntoView({block:"center",behavior:"smooth"});d.focus();d.setSelectionRange(d.value.length,d.value.length)}},60)})}
+
+/* a RAIDD item on a whole stage: Task ID = the stage's last-ending task (so its forecast moves the stage end) + "[Stage stage] " at the start of the description */
+function pdStageOf(d){const m=/^\[(.+?) stage\] /.exec(String(d||""));return m?m[1]:""}
+function pdStageStrip(d){return String(d||"").replace(/^\[(.+?) stage\] /,"")}
+function pdAttach(pid,v){if(!v)return {tid:"",stg:""};if(!v.startsWith("stg:"))return {tid:v,stg:""};const st=v.slice(4);
+  const ts=tasksOfProject(pid).filter(t=>gv("Activities",FA.stage,t)===st);const end=t=>+(tLive(t)||{}).fe||+gv("Activities",FA.pe,t)||0;
+  const last=ts.sort((a,b)=>end(b)-end(a))[0];return {tid:last?tId(last):"",stg:st}}
