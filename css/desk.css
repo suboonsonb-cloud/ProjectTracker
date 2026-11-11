@@ -1080,7 +1080,7 @@ button.ovhr{cursor:pointer}button.ovhr:hover{background:#F6F3FF}
 .ovunmf [data-unmst] i{width:8px;height:8px;border-radius:50%}.ovunmf [data-unmst] b{color:var(--muted);font-weight:600}
 .ovunmf [data-unmst].on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-d);font-weight:600}
 .ovunml{display:flex;flex-direction:column}
-.ovunmhd,.ovur{display:grid;grid-template-columns:minmax(240px,1fr) 120px 150px 130px 100px 14px;gap:14px;align-items:center;padding:8px 8px}
+.ovunmhd,.ovur{display:grid;grid-template-columns:minmax(220px,1fr) 110px 130px 100px 100px 120px 90px 14px;gap:14px;align-items:center;padding:8px 8px}
 .ovunmhd{font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid #EEEBF8}
 .ovur{border:0;border-bottom:1px solid #F3F1F8;background:transparent;font:inherit;text-align:left;cursor:pointer;width:100%}.ovur:hover{background:#F8F6FF}
 .ovur .n b{display:block;font-size:13px;font-weight:600;color:var(--ink)}.ovur .n small{font-size:11px;color:var(--muted)}
@@ -1093,7 +1093,7 @@ button.ovhr{cursor:pointer}button.ovhr:hover{background:#F6F3FF}
 .ovhr.on{background:#F1EDFF}.ovhr.on .cv2{color:var(--accent-d)}button.ovhr:disabled{cursor:default;opacity:.6}
 .ovhc .ovhr{grid-template-columns:170px 1fr 36px 40px}
 .ovdrill{margin:2px 0 8px 18px;border-left:2px solid #E2DBFB;padding:2px 0 2px 10px;display:flex;flex-direction:column}
-.ovdr{display:grid;grid-template-columns:1fr auto 110px 76px 10px;gap:10px;align-items:center;border:0;border-bottom:1px solid #F3F1F8;background:transparent;font:inherit;text-align:left;padding:7px 6px;cursor:pointer;width:100%}
+.ovdr,.ovdrh{display:grid;grid-template-columns:minmax(0,1fr) 92px 100px 86px 86px 76px 10px;gap:10px;align-items:center;border:0;border-bottom:1px solid #F3F1F8;background:transparent;font:inherit;text-align:left;padding:7px 6px;cursor:pointer;width:100%}
 .ovdr:hover{background:#F8F6FF}.ovdr .n{min-width:0}.ovdr .n b{display:block;font-size:12.5px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ovdr .n small{font-size:11px;color:var(--muted)}
 .ovdr .pc{display:flex;flex-direction:column;gap:3px;font-size:11.5px}.ovdr .pc .ovbar{width:100%}.ovdr .dt{font-size:11.5px;color:#3F3A57;text-align:right}.ovdr .dt.bad{color:#C4320A;font-weight:600}.ovdr .cv{color:var(--muted)}
 .ovdrill>.ovlink{align-self:flex-start;margin-top:4px;font-size:12px}
@@ -1349,3 +1349,11 @@ tr.burow.sel td{background:color-mix(in srgb,var(--bc) 9%,#fff)!important}
 .e2chip.a-p2p{--a1:#FDEDE8;--a2:#A63A24}.e2chip.a-trs{--a1:#FEF6E1;--a2:#8A5A00}.e2chip.a-o2c{--a1:#E8F5EE;--a2:#1E6B48}.e2chip.a-r2r{--a1:#EFEBFF;--a2:#5B3FD1}.e2chip.a-ir{--a1:#E9F2FE;--a2:#1F57A8}.e2chip.a-itc{--a1:#E7F7F8;--a2:#0E7076}.e2chip.a-g0{--a1:#EAF2FF;--a2:#2459B8}.e2chip.a-g1{--a1:#E7F7F8;--a2:#0E7076}.e2chip.a-g2{--a1:#F4F0FF;--a2:#6941C6}
 .e2v{border:0;background:none;font:inherit;font-size:12.5px;color:var(--ink);cursor:pointer;padding:2px 6px;border-radius:6px}.e2v:hover{background:#F1EDFF;color:var(--accent)}.e2v.empty{color:#98A2B3}
 @media (max-width:760px){.e2row{grid-template-columns:1fr!important}.e2cons{display:none}.e2db-tag{display:none}}
+
+/* r87 — plan / actual saving columns in overview breakdowns */
+.ovdrh{padding:4px 6px 6px;border-bottom:1px solid #EEEBF8;font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted)}.ovdrh span:nth-child(6){text-align:right}
+.ovdr .ovst{justify-self:start}
+.ovur .sv,.ovdr .sv{display:flex;flex-direction:column;line-height:1.2}.ovur .sv b,.ovdr .sv b{font-size:12.5px;font-weight:600;color:var(--ink)}.ovur .sv small,.ovdr .sv small{font-size:10.5px;color:var(--muted)}
+.ovur .sv.a b,.ovdr .sv.a b{color:#98A2B3}.ovur .sv.a b.ok,.ovdr .sv.a b.ok{color:#1E7B4E}
+@media (max-width:900px){.ovur .sv,.ovdr .sv,.ovdrh{display:none}}
+.ovhc .ovdr,.ovhc .ovdrh{grid-template-columns:minmax(0,1fr) 88px 78px 78px 10px}.ovhc .ovdr .pc,.ovhc .ovdr .dt,.ovhc .ovdrh span:nth-child(3),.ovhc .ovdrh span:nth-child(6){display:none}
