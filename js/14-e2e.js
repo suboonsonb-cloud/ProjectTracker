@@ -493,9 +493,10 @@ const E2E_AREA={P2P:["Procure to pay","Supplier to payment","p2p"],O2C:["Order t
   R2R:["Record to report","Close, reconcile, consolidate, report","r2r"],IR:["Investor relations","Results, MD&A and investor communication","ir"]};
 const E2E_BOTTOM=/^(R2R|IR|FP&?A|TAX|ACR|REPORTING)$/i;
 function e2eFlowBU(f){return f.bu||flowBU(f)||""}
+function e2eArea(f){if(f.area)return f.area;const m=String(f.name+" "+f.id).match(/\b(P2P|PTP|O2C|OTC|R2R|RTR|Treasury|IR)\b/i);if(!m)return "";const k=m[1].toUpperCase();return {PTP:"P2P",OTC:"O2C",RTR:"R2R",TREASURY:"Treasury"}[k]||k}
 function e2eBUAreas(bu){let rs=[];try{if(hasMD())rs=mdRows(ORGC).filter(r=>mg("J",r)&&(mg("F",r)===bu||mg("F",r)===""))}catch(e){}return uniqOrder(rs.map(r=>String(mg("J",r))))}
 function vE2EHome(m){e2eHide();const H=UI.e2eH;const all=e2eFlows();const info=Object.fromEntries(all.map(f=>[f.id,e2eFlowInfo(f)]));
-  const buOf=f=>e2eFlowBU(f)||"(not assigned)";
+  const buOf=f=>e2eFlowBU(f)||"Finance";/* E2E flows default to Finance (drafts with no BU / projects included) */
   /* ---- step 1: business units ---- */
   let BUL=[];try{BUL=listFromName("L_BU").map(String).filter(Boolean)}catch(e){}
   const pBU={};projects().forEach(p=>{const b=String(gv("Projects",FP.bu,p.r)||"");if(b)pBU[b]=(pBU[b]||0)+1});
@@ -513,14 +514,16 @@ function vE2EHome(m){e2eHide();const H=UI.e2eH;const all=e2eFlows();const info=O
   /* ---- step 2: big flow ---- */
   const fl=H.bu==="*"?all:all.filter(f=>buOf(f)===H.bu);
   const areaKey=a=>a||"(no area)";
-  let areas=uniqOrder([...(H.bu!=="*"&&H.bu!=="(not assigned)"?e2eBUAreas(H.bu):[]),...fl.map(f=>areaKey(f.area))]);
-  areas=areas.filter(a=>!/^other$/i.test(a)||fl.some(f=>areaKey(f.area)===a));
+  const isFin=H.bu==="Finance"||H.bu==="*";
+  const ownAreas=bu=>{let rs=[];try{if(hasMD())rs=mdRows(ORGC).filter(r=>mg("J",r)&&mg("F",r)===bu)}catch(e){}return [...rs.map(r=>String(mg("J",r))),...projects().filter(p=>gv("Projects",FP.bu,p.r)===bu).map(p=>String(gv("Projects",FP.proc,p.r)||"")).filter(Boolean)]};
+  let areas=uniqOrder([...(H.bu==="Finance"?e2eBUAreas(H.bu):H.bu!=="*"&&H.bu!=="(not assigned)"?ownAreas(H.bu):[]),...fl.map(f=>areaKey(e2eArea(f)))]);
+  areas=areas.filter(a=>!/^other$/i.test(a)||fl.some(f=>areaKey(e2eArea(f))===a));
   if(H.area&&!areas.includes(H.area))H.area="";
   const pick=nm=>areas.find(a=>a.toUpperCase()===nm)||(nm==="TREASURY"?"Treasury":nm);
   const noArea=areas.includes("(no area)");
   const top=["P2P","TREASURY","O2C"].map(pick),bot=[pick("R2R")];const core=new Set([...top,...bot].map(a=>a.toUpperCase()));
-  const extra=areas.filter(a=>a!=="(no area)"&&!core.has(a.toUpperCase())&&fl.some(f=>areaKey(f.area)===a));
-  const box=(a,big)=>{const fs=fl.filter(f=>areaKey(f.area)===a);const d=E2E_AREA[a.toUpperCase()]||[a==="(no area)"?"No process area set":"","",""];const pr=new Set(fs.flatMap(f=>[...info[f.id].pids])).size;
+  const extra=areas.filter(a=>a!=="(no area)"&&!core.has(a.toUpperCase())&&fl.some(f=>areaKey(e2eArea(f))===a));
+  const box=(a,big)=>{const fs=fl.filter(f=>areaKey(e2eArea(f))===a);const d=E2E_AREA[a.toUpperCase()]||[a==="(no area)"?"No process area set":"","",""];const pr=new Set(fs.flatMap(f=>[...info[f.id].pids])).size;
     const k=d[2]||"g"+(Math.abs([...a].reduce((h,c)=>h*31+c.charCodeAt(0)|0,7))%3);
     return `<button type="button" class="e2a a-${k}${big?" big":""}${H.area===a?" on":""}${fs.length?" live":""}" data-e2area="${esc(a)}" title="${fs.length?"Show its flow maps":"No flow maps yet"}">
       <span class="e2a-t"><b>${esc(a==="(no area)"?"Other":a)}</b>${big&&d[0]?`<em>${esc(d[0])}</em>`:""}<span class="e2a-go" aria-hidden="true">↗</span></span>
@@ -529,30 +532,33 @@ function vE2EHome(m){e2eHide();const H=UI.e2eH;const all=e2eFlows();const info=O
   const n=top.length;
   const con=on=>`<span class="e2c${on?" on":""}" aria-hidden="true"><i></i></span>`;
   const totP=new Set(fl.flatMap(f=>[...info[f.id].pids])).size;
-  const glance=`<div class="card e2g"><div class="e2gh"><div><div class="e2step"><span>2</span>${esc(H.bu==="*"?"All BUs":H.bu==="(not assigned)"?"Not assigned":H.bu)} at a glance</div><div class="muted" style="font-size:12.5px">${top.length+bot.length+extra.length} process area${top.length+bot.length+extra.length===1?"":"s"} / ${fl.length} flow map${fl.length===1?"":"s"} / ${totP} linked project${totP===1?"":"s"}</div></div>
+  const gen=()=>{const ga=areas.filter(a=>a!=="(no area)");const harr=on=>`<span class="e2hc${on?" on":""}" aria-hidden="true"><i></i></span>`;
+    return ga.length?`<div class="e2gen">${ga.map((a,i)=>(i?harr(fl.some(f=>areaKey(e2eArea(f))===a)||fl.some(f=>areaKey(e2eArea(f))===ga[i-1])):"")+box(a,false)).join("")}</div>${noArea?`<div class="e2noarea"><button type="button" class="e2nb${H.area==="(no area)"?" on":""}" data-e2area="(no area)">⚠ ${fl.filter(f=>!e2eArea(f)).length} flow map(s) with no process area — show</button></div>`:""}`
+      :`<div class="e2empty"><b>No E2E process map for ${esc(H.bu==="(not assigned)"?"these flows":H.bu)} yet</b><span class="muted">The finance landscape (P2P · Treasury · O2C → ERP → R2R) is for Finance only. Create a flow with ＋ New flow and pick this BU — its process areas will appear here.</span></div>`};
+  const glance=`<div class="card e2g"><div class="e2gh"><div><div class="e2step"><span>2</span>${esc(H.bu==="*"?"All BUs":H.bu==="(not assigned)"?"Not assigned":H.bu)} at a glance</div><div class="muted" style="font-size:12.5px">${(()=>{const k=isFin?top.length+bot.length+extra.length:areas.filter(a=>a!=="(no area)").length;return k+" process area"+(k===1?"":"s")})()} / ${fl.length} flow map${fl.length===1?"":"s"} / ${totP} linked project${totP===1?"":"s"}</div></div>
       <span class="muted" style="font-size:12.5px">${H.area?`Showing <b>${esc(H.area)}</b> · <a href="#" id="e2aClr">show all</a>`:"Select a process box to explore its flows"}</span></div>
-    ${areas.length?`${n?`<div class="e2row top" style="grid-template-columns:repeat(${n},minmax(0,1fr))">${top.map(a=>box(a,false)).join("")}</div>
-      <div class="e2cons" style="grid-template-columns:repeat(${n},minmax(0,1fr))">${top.map(a=>con(fl.some(f=>areaKey(f.area)===a))).join("")}</div>`:""}
+    ${!isFin?gen():areas.length?`${n?`<div class="e2row top" style="grid-template-columns:repeat(${n},minmax(0,1fr))">${top.map(a=>box(a,false)).join("")}</div>
+      <div class="e2cons" style="grid-template-columns:repeat(${n},minmax(0,1fr))">${top.map(a=>con(fl.some(f=>areaKey(e2eArea(f))===a))).join("")}</div>`:""}
       <div class="e2db"><span class="e2db-ic" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7"><ellipse cx="12" cy="5.5" rx="7.5" ry="2.8"/><path d="M4.5 5.5v6.5c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8V5.5M4.5 12v6.5c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8V12"/></svg></span><div><b>Central ERP database / general ledger</b><small>AR, AP, cash, bank and master data</small></div><span style="flex:1"></span><span class="e2db-tag">SHARED DATA FOUNDATION</span><span class="e2db-flow" aria-hidden="true"></span></div>
-      ${bot.map((a,i)=>`<div class="e2cons one">${con(fl.some(f=>areaKey(f.area)===a)||(i===0&&fl.length>0))}</div><div class="e2row bot">${box(a,true)}</div>`).join("")}
-      ${extra.length?`<div class="e2noarea"><span class="muted">Other process areas</span>${extra.map(a=>{const c=fl.filter(f=>areaKey(f.area)===a).length;return `<button type="button" class="e2xb${H.area===a?" on":""}" data-e2area="${esc(a)}">${esc(a)} <b>${c}</b></button>`}).join("")}</div>`:""}
-      ${noArea?`<div class="e2noarea"><button type="button" class="e2nb${H.area==="(no area)"?" on":""}" data-e2area="(no area)">⚠ ${fl.filter(f=>!f.area).length} flow map${fl.filter(f=>!f.area).length>1?"s have":" has"} no process area — show ${H.area==="(no area)"?"all":"them"}</button><span class="muted">Set one with ⚙ in the library so it sits in the flow above.</span></div>`:""}`
+      ${bot.map((a,i)=>`<div class="e2cons one">${con(fl.some(f=>areaKey(e2eArea(f))===a)||(i===0&&fl.length>0))}</div><div class="e2row bot">${box(a,true)}</div>`).join("")}
+      ${extra.length?`<div class="e2noarea"><span class="muted">Other process areas</span>${extra.map(a=>{const c=fl.filter(f=>areaKey(e2eArea(f))===a).length;return `<button type="button" class="e2xb${H.area===a?" on":""}" data-e2area="${esc(a)}">${esc(a)} <b>${c}</b></button>`}).join("")}</div>`:""}
+      ${noArea?`<div class="e2noarea"><button type="button" class="e2nb${H.area==="(no area)"?" on":""}" data-e2area="(no area)">⚠ ${fl.filter(f=>!e2eArea(f)).length} flow map${fl.filter(f=>!e2eArea(f)).length>1?"s have":" has"} no process area — show ${H.area==="(no area)"?"all":"them"}</button><span class="muted">Set one with ⚙ in the library so it sits in the flow above.</span></div>`:""}`
       :`<div class="muted pad">No process areas or flow maps for this BU yet — add org rows in Settings, or create a flow with ＋ New flow.</div>`}</div>`;
   /* ---- step 3: library ---- */
   const q=H.q.trim().toLowerCase();const pname=p=>{const r=projRowById(p);return r?gv("Projects",FP.name,r):""};
   const hit=f=>{if(!q)return {ok:true,steps:0};const I=info[f.id];const base=[f.name,f.id,f.area,f.owner,f.notes,...I.lanes,...[...I.pids].flatMap(p=>[p,pname(p)])].join(" ").toLowerCase();const steps=I.texts.filter(t=>t.toLowerCase().includes(q)).length;return {ok:base.includes(q)||steps>0,steps}};
   const STATE={"":"All flows",both:"AS-IS + TO-BE",asis:"AS-IS only",tobe:"TO-BE missing steps",untimed:"Steps not timed",proj:"Linked to projects",noproj:"No projects linked"};
   const okState=f=>{const I=info[f.id];switch(H.state){case "both":return I.steps["AS-IS"]>0&&I.steps["TO-BE"]>0;case "asis":return I.steps["AS-IS"]>0&&!I.steps["TO-BE"];case "tobe":return !I.steps["TO-BE"];case "untimed":return I.t.steps>0&&I.t.timed<I.t.steps;case "proj":return I.pids.size>0;case "noproj":return !I.pids.size;default:return true}};
-  let list=fl.filter(f=>(!H.area||areaKey(f.area)===H.area)&&okState(f)&&hit(f).ok);
-  const ord=a=>{const i=areas.indexOf(areaKey(a.area));return i<0?999:i};
+  let list=fl.filter(f=>(!H.area||areaKey(e2eArea(f))===H.area)&&okState(f)&&hit(f).ok);
+  const ord=a=>{const i=areas.indexOf(areaKey(e2eArea(a)));return i<0?999:i};
   const S_={name:(a,b)=>ord(a)-ord(b)||a.name.localeCompare(b.name),proj:(a,b)=>info[b.id].pids.size-info[a.id].pids.size,saving:(a,b)=>(info[b.id].t.cost||0)-(info[a.id].t.cost||0),upd:(a,b)=>info[b.id].upd-info[a.id].upd};list.sort(S_[H.sort]||S_.name);
   const mix=st=>{const ks=STL.filter(s=>st[s]);return ks.length?`<span class="tmix" title="${ks.map(s=>s+": "+st[s]).join(" · ")}">${ks.map(s=>`<i style="flex:${st[s]};background:${SCOL[s]}"></i>`).join("")}</span>`:""};
   const ak=a=>{const d=E2E_AREA[String(a||"").toUpperCase()];return d?d[2]:"g"+(Math.abs([...areaKey(a)].reduce((h,c)=>h*31+c.charCodeAt(0)|0,7))%3)};
   const row=f=>{const I=info[f.id],h=hit(f);const vc=(v)=>{const n=I.steps[v];return `<td><button type="button" class="e2v${n?"":" empty"}" data-fopen="${esc(f.id)}" data-fver="${v}" title="${n?`Open ${v}`:`Start the ${v} version`}">${n?n+" steps":"Not started"}</button></td>`};
-    return `<tr><td><span class="e2chip a-${ak(f.area)}">${esc(f.area||"—")}</span></td><td class="nm"><a href="#" data-fopen="${esc(f.id)}" data-fver="${I.steps["TO-BE"]?"TO-BE":"AS-IS"}">${esc(f.name)}</a><small>${esc(f.id)}${f.owner?" · "+esc(f.owner):""}${H.bu==="*"?` · ${buChip(e2eFlowBU(f))||"no BU"}`:""}${h.steps&&q?` · <b class="fhhit">${h.steps} step${h.steps>1?"s":""} match</b>`:""}</small></td>
+    return `<tr><td><span class="e2chip a-${ak(e2eArea(f))}">${esc(e2eArea(f)||"—")}</span></td><td class="nm"><a href="#" data-fopen="${esc(f.id)}" data-fver="${I.steps["TO-BE"]?"TO-BE":"AS-IS"}">${esc(f.name)}</a><small>${esc(f.id)}${f.owner?" · "+esc(f.owner):""}${H.bu==="*"?` · ${buChip(e2eFlowBU(f))||"no BU"}`:""}${h.steps&&q?` · <b class="fhhit">${h.steps} step${h.steps>1?"s":""} match</b>`:""}</small></td>
       <td class="muted">${I.lanes.length} lane${I.lanes.length===1?"":"s"}</td>${vc("AS-IS")}${vc("TO-BE")}<td><b>${I.pids.size}</b> ${mix(I.st)}</td><td class="muted">${I.upd?fmtDate(I.upd):"—"}</td>
       <td class="act"><button type="button" class="btn small" data-fedit="${esc(f.id)}" title="Rename, BU, process area, owner, notes">⚙</button><button type="button" class="btn small" data-fdup="${esc(f.id)}" title="Duplicate">⧉</button><button type="button" class="btn small danger" data-fdel="${esc(f.id)}" title="Delete">🗑</button></td></tr>`};
-  const lib=`<div class="e2lib" id="e2lib"><div class="e2libh"><div><div class="e2step"><span>3</span>Flow map library</div><div class="muted" style="font-size:12.5px">${H.area?`${list.length} map${list.length===1?"":"s"} in ${esc(H.area)}`:`All ${fl.length} map${fl.length===1?"":"s"}, grouped by finance process`}</div></div><span style="flex:1"></span>
+  const lib=`<div class="e2lib" id="e2lib"><div class="e2libh"><div><div class="e2step"><span>3</span>Flow map library</div><div class="muted" style="font-size:12.5px">${H.area?`${list.length} map${list.length===1?"":"s"} in ${esc(H.area)}`:`All ${fl.length} map${fl.length===1?"":"s"}, grouped by ${isFin?"finance ":""}process`}</div></div><span style="flex:1"></span>
       <input type="search" id="fhQ" placeholder="Search flows, lanes, steps or projects…" value="${esc(H.q)}" aria-label="Search flows">
       <select id="fhState" aria-label="Show">${Object.entries(STATE).map(([k,v])=>`<option value="${k}" ${H.state===k?"selected":""}>${v}</option>`).join("")}</select>
       <select id="fhSort" aria-label="Sort">${[["name","Process ▸ name"],["proj","Most projects"],["saving","Biggest saving"],["upd","Recently updated"]].map(([k,v])=>`<option value="${k}" ${H.sort===k?"selected":""}>${v}</option>`).join("")}</select></div>

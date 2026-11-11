@@ -1367,3 +1367,12 @@ tr.burow.sel td{background:color-mix(in srgb,var(--bc) 9%,#fff)!important}
 .e2xb{border:1px solid #E6E3F0;background:#fff;border-radius:8px;padding:4px 10px;font:inherit;font-size:12px;font-weight:600;cursor:pointer;color:var(--ink)}.e2xb b{color:var(--accent);margin-left:3px}.e2xb.on{border-color:var(--accent);background:#F1EDFF}
 /* r90 — data flow on arrows only */
 .e2a-stream,.e2db-flow,.e2bu-flow{display:none}.e2a.live::after{content:none}
+/* r91 — non-finance BU: own process areas in a row, animated arrows between */
+.e2gen{display:flex;align-items:stretch;gap:0;overflow-x:auto;padding-bottom:4px}.e2gen .e2a{flex:1 1 0;min-width:170px}
+.e2hc{flex:0 0 40px;display:flex;align-items:center;position:relative}.e2hc i{height:2px;width:100%;background:#D0D5DD;position:relative;overflow:hidden}
+.e2hc i::after{content:"";position:absolute;top:-2px;height:6px;width:100%;background:repeating-linear-gradient(90deg,transparent 0 8px,#98A2B3 8px 13px);animation:e2flowH 1s linear infinite}
+.e2hc.on i{background:#C8BEF8}.e2hc.on i::after{background:repeating-linear-gradient(90deg,transparent 0 8px,var(--accent) 8px 13px)}
+.e2hc::after{content:"";position:absolute;right:-1px;top:50%;transform:translateY(-50%);border:5px solid transparent;border-left:6px solid #98A2B3;border-right:0}.e2hc.on::after{border-left-color:var(--accent)}
+@keyframes e2flowH{from{transform:translateX(-13px)}to{transform:translateX(0)}}
+@media (prefers-reduced-motion:reduce){.e2hc i::after{animation:none}}
+.e2empty{display:flex;flex-direction:column;gap:4px;align-items:center;text-align:center;padding:34px 20px;border:1px dashed #D9D4EE;border-radius:12px;background:#FBFAFE}
