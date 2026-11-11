@@ -244,23 +244,23 @@ function ovKpis(P,A,D,Bl,x){const M=ovMonths(6);const done=s=>s==="Completed"||s
   const del=P.filter(r=>pStat(r)==="Delayed").length,risk=P.filter(r=>pStat(r)==="At Risk").length;
   const openR=D.filter(r=>gv("RAIDD",FD.status,r)!=="Closed"&&gv("RAIDD",FD.type,r)!=="Re-plan").length;
   const tag=(v,suf)=>`<span class="tag ${v>0?"up":v<0?"dn":"nu"}">${v>0?"+":""}${v}${suf||""}</span>`;
-  const card=(lab,val,dl,sp,title,go)=>`<div class="card${go?" ovgo":""}" ${go?`data-ovgo="${go}" role="button" tabindex="0"`:""} title="${esc(title)}"><div class="lab">${lab}</div><div class="val">${val}</div>${sp}<div class="dl">${dl}</div></div>`;
+  const K=UI.dash.kOpen||"";const card=(lab,val,dl,sp,title,go)=>`<div class="card ovgo${K===go?" on":""}" data-ovk="${go}" role="button" tabindex="0" aria-expanded="${K===go}" title="${esc(title)} — click for the breakdown"><div class="lab">${lab}</div><div class="val">${val}</div>${sp}<div class="dl">${dl}</div></div>`;
   const mapped=typeof hasE2E==="function"&&hasE2E()?(()=>{const G=e2eGroups(x.pids);return x.pids.size-G.rest.length})():null;
   return `<div class="ovk">
-    ${card("Active projects",activeNow,`${tag(dA)} vs. last month`,ovSpark(act,"#7C5CFC"),"Not completed or cancelled · trend = active in each of the last 6 months","Projects")}
-    ${card("Tasks completed",fmtNum(comp.length),`${tag(cm[cm.length-1])} this month`,ovSpark(cm,"#2E8B57"),"Completed tasks · trend = finished per month","Gantt")}
-    ${card("On-time delivery",otNow==null?"—":Math.round(otNow)+"%",otNow==null?"no completed tasks with a plan yet":`${tag(dOt,"%")} vs. last month`,ovSpark(ot,"#7C5CFC"),"Completed tasks finished on or before their plan end","Gantt")}
+    ${card("Active projects",activeNow,`${tag(dA)} vs. last month`,ovSpark(act,"#7C5CFC"),"Not completed or cancelled · trend = active in each of the last 6 months","active")}
+    ${card("Tasks completed",fmtNum(comp.length),`${tag(cm[cm.length-1])} this month`,ovSpark(cm,"#2E8B57"),"Completed tasks · trend = finished per month","tasks")}
+    ${card("On-time delivery",otNow==null?"—":Math.round(otNow)+"%",otNow==null?"no completed tasks with a plan yet":`${tag(dOt,"%")} vs. last month`,ovSpark(ot,"#7C5CFC"),"Completed tasks finished on or before their plan end","ontime")}
     ${card("Needs attention",String(del+risk).padStart(2,"0"),`<span class="tag wa">${risk} at risk</span> ${del} delayed · across ${P.length} projects`,"","Delayed + at-risk projects","attn")}
   </div>
   <div class="ovk2">
-    <div class="st"><span>Recurring value</span><b>${fmtShort(x.valRec)}</b><small>THB / yr</small></div>
-    <div class="st"><span>One-off value</span><b>${fmtShort(x.valOne)}</b><small>THB</small></div>
-    <div class="st"><span>Hours saved / month</span><b>${fmtNum(x.hrs)}</b><small>≈ ${(x.hrs/x.fteh).toFixed(1)} FTE</small></div>
-    <div class="st"><span>Realised to date</span><b>${fmtShort(x.aTD)}</b><small>of ${fmtShort(x.pTD)} plan · ${x.pTD?Math.round(x.aTD/x.pTD*100):0}%</small></div>
-    <div class="st"><span>Open RAIDD items</span><b>${openR}</b><small>risks, issues, actions…</small></div>
-    ${mapped!=null?`<div class="st"><span>Mapped to E2E</span><b>${mapped} / ${x.pids.size}</b><small>projects on process steps</small></div>`:""}
-    <div class="st"><span>Re-planned</span><b>${P.filter(r=>pLive(r).rpdays>0).length}</b><small>projects with approved new dates</small></div>
-  </div>`}
+    <div class="st" data-ovk="rec" role="button" tabindex="0"><span>Recurring value</span><b>${fmtShort(x.valRec)}</b><small>THB / yr</small></div>
+    <div class="st" data-ovk="one" role="button" tabindex="0"><span>One-off value</span><b>${fmtShort(x.valOne)}</b><small>THB</small></div>
+    <div class="st" data-ovk="hrs" role="button" tabindex="0"><span>Hours saved / month</span><b>${fmtNum(x.hrs)}</b><small>≈ ${(x.hrs/x.fteh).toFixed(1)} FTE</small></div>
+    <div class="st" data-ovk="real" role="button" tabindex="0"><span>Realised to date</span><b>${fmtShort(x.aTD)}</b><small>of ${fmtShort(x.pTD)} plan · ${x.pTD?Math.round(x.aTD/x.pTD*100):0}%</small></div>
+    <div class="st" data-ovk="raidd" role="button" tabindex="0"><span>Open RAIDD items</span><b>${openR}</b><small>risks, issues, actions…</small></div>
+    ${mapped!=null?`<div class="st" data-ovk="mapped" role="button" tabindex="0"><span>Mapped to E2E</span><b>${mapped} / ${x.pids.size}</b><small>projects on process steps</small></div>`:""}
+    <div class="st" data-ovk="rp" role="button" tabindex="0"><span>Re-planned</span><b>${P.filter(r=>pLive(r).rpdays>0).length}</b><small>projects with approved new dates</small></div>
+  </div>${K&&typeof ovKpiPanel==="function"?ovKpiPanel(K,P,A,D,Bl):""}`}
 function ovHero(pids){if(typeof hasE2E!=="function"||!hasE2E())return "";const G=e2eGroups(pids);const fl=G.flows.filter(g=>g.ids.size).sort((a,b)=>b.ids.size-a.ids.size)[0]||G.flows[0];
   const nConn=pids.size-G.rest.length;let svg="";
   if(fl){const L=fl.lanes.filter(l=>l.ids.size).slice(0,4);const lanes=L.length>=2?L:fl.lanes.slice(0,4);
@@ -374,7 +374,7 @@ function vDash(m,keepScroll){const _y=window.scrollY;setTimeout(()=>{if(keepScro
     <h2 style="margin-top:12px">Projects by status × process area</h2>${matrix("Process Area",P,r=>gv("Projects",FP.proc,r),{})}
     <h2 style="margin-top:12px">Delayed & at-risk projects</h2>${riskList(P)}</details></details>`;
   const reF=()=>{UI.dash.cell=null;UI.dash.zoom=null;vDash(m,true)};
-  ovBind(m);ovNewBind(m);{const mo=m.querySelector(".ovmore");if(mo)mo.ontoggle=()=>{UI.dash.more=mo.open}}$("#fBU").onchange=e=>{F.bu=e.target.value;F.cf="";F.proc="";reF()};$("#fCF").onchange=e=>{F.cf=e.target.value;F.proc="";reF()};$("#fProc").onchange=e=>{F.proc=e.target.value;F.init="";reF()};$("#fInit").onchange=e=>{F.init=e.target.value;reF()};bindStChips(m,"dst",F,reF);
+  ovBind(m);ovNewBind(m);ovKpiBind(m);{const mo=m.querySelector(".ovmore");if(mo)mo.ontoggle=()=>{UI.dash.more=mo.open}}$("#fBU").onchange=e=>{F.bu=e.target.value;F.cf="";F.proc="";reF()};$("#fCF").onchange=e=>{F.cf=e.target.value;F.proc="";reF()};$("#fProc").onchange=e=>{F.proc=e.target.value;F.init="";reF()};$("#fInit").onchange=e=>{F.init=e.target.value;reF()};bindStChips(m,"dst",F,reF);
   $("#fQ").addEventListener("change",e=>{F.q=e.target.value.trim();reF()});
   if($("#clrAll"))$("#clrAll").onclick=()=>{F.bu=F.cf=F.proc=F.init=F.q="";F.stOff=[];reF()};
   $("#procView").onchange=e=>{UI.dash.procView=e.target.value;vDash(m,true)};$("#buView").onchange=e=>{UI.dash.buView=e.target.value;vDash(m,true)};

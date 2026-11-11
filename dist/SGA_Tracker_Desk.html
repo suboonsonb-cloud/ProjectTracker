@@ -1028,9 +1028,6 @@ table.t2{border-collapse:separate;border-spacing:0;table-layout:fixed;width:max-
 /* ===== r61 — Overview: E2E workflow ▸ swimlane ▸ process ▸ project ===== */
 .ovh2 .eyebrow{display:block;font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
 .ovh2 #ovProcSel{min-width:180px}
-.ovk2s{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:14px 0 26px}
-.ovk2{padding:16px 18px!important;border-radius:14px!important;border:1px solid #ECE9F6!important}
-.ovk2 .lab{font-size:12.5px;color:var(--muted)}.ovk2 .val{font-size:28px;font-weight:700;color:var(--ink);margin:6px 0 4px;letter-spacing:-.5px}.ovk2 .val .acc{color:var(--accent)}.ovk2 .val .warn{color:#B54708}.ovk2 .sub{font-size:12px;color:var(--muted)}
 .ovsec{display:flex;align-items:flex-end;gap:12px;margin:8px 0 12px;flex-wrap:wrap}.ovsec h2{margin:0;font-size:19px;color:var(--ink)}.ovsec p{margin:4px 0 0;font-size:12.5px;color:var(--muted)}.ovsec .sp{flex:1}
 .ovsrch input{height:36px;width:280px;max-width:70vw;border:1px solid #DCD6F2;border-radius:10px;padding:0 12px;font:inherit;font-size:13px;background:#fff}.ovsrch input:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,92,252,.14)}
 .ovflow{padding:0!important;border-radius:14px!important;border:1px solid #ECE9F6!important;margin-bottom:12px;overflow:hidden}
@@ -1139,11 +1136,29 @@ button.ovhr{cursor:pointer}button.ovhr:hover{background:#F6F3FF}
 .ove2eic svg{width:26px;height:26px;fill:rgba(255,255,255,.25);stroke:#fff;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .ove2etag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--accent-d);background:#EDE8FF;border-radius:999px;padding:2px 9px;margin-bottom:4px}
 .ove2e .ovunm{margin-bottom:12px}
+/* r67 — KPI cards open a breakdown on the page */
+.ovk .card.ovgo{cursor:pointer;transition:box-shadow .15s,border-color .15s}.ovk .card.ovgo:hover{box-shadow:0 6px 16px rgba(124,92,252,.12)}
+.ovk .card.ovgo.on{border-color:var(--accent)!important;box-shadow:0 0 0 3px rgba(124,92,252,.15)}
+.ovk .card.ovgo::after{content:"⌄";position:absolute;right:16px;bottom:12px;color:#B9AEF0;font-size:14px}.ovk .card.ovgo.on::after{color:var(--accent);transform:rotate(180deg)}
+.ovk2 .st{cursor:pointer;transition:border-color .15s,background .15s}.ovk2 .st:hover{border-color:#C9BEFA;background:#FCFBFF}.ovk2 .st.on{border-color:var(--accent);background:#F5F2FF}
+.ovkp{padding:16px 18px!important;border-radius:16px!important;border:1px solid #D9D1FA!important;box-shadow:0 8px 22px rgba(124,92,252,.1)!important;margin:-4px 0 18px}
+.ovkph{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}.ovkph>div{flex:1;display:flex;flex-direction:column;gap:3px}.ovkph b{font-size:15px}.ovkph span{font-size:12.5px;color:var(--muted)}
+.ovkx{border:0;background:#F4F2FA;border-radius:8px;width:30px;height:30px;cursor:pointer;color:#6E6893}.ovkx:hover{background:#EDE8FF;color:var(--accent-d)}
+.ovkeq{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#FAF9FE;border:1px solid #EEEBF8;border-radius:12px;padding:10px 14px;margin-bottom:10px}
+.ovkeq>div{display:flex;flex-direction:column}.ovkeq b{font-size:22px;letter-spacing:-.4px;color:var(--ink)}.ovkeq span{font-size:11.5px;color:var(--muted)}.ovkeq em{font-style:normal;font-size:18px;color:#B9AEF0;font-weight:700}
+.ovkeq .tot b{color:var(--ink)}
+.ovkchips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.ovkchips button{border:1px solid #E2DDF5;background:#fff;border-radius:999px;padding:4px 11px;font:inherit;font-size:12px;color:#3F3A57;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.ovkchips button i{width:8px;height:8px;border-radius:50%}.ovkchips button b{color:var(--muted);font-weight:600}
+.ovkchips button.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-d);font-weight:600}
+.ovdrill.flat{margin:0;border-left:0;padding:0}
+.ovdr.t{grid-template-columns:1fr auto 110px 110px 10px}
+.ovkv{color:var(--accent-d);font-weight:700}
 </style>
 </head>
 <body>
 <aside class="side" id="side" aria-label="Main navigation">
-  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r66</span></small></span></div>
+  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r67</span></small></span></div>
   <div class="sglab">WORKSPACE</div>
   <button type="button" class="wschip" id="btnOpen" title="Open the workbook (the database)"><span class="wsdot" aria-hidden="true"></span><span class="file" id="fileName">No workbook loaded</span><span class="chev" aria-hidden="true">⌄</span></button>
   <nav class="sidenav hidden" id="tabs"></nav>
@@ -2242,23 +2257,23 @@ function ovKpis(P,A,D,Bl,x){const M=ovMonths(6);const done=s=>s==="Completed"||s
   const del=P.filter(r=>pStat(r)==="Delayed").length,risk=P.filter(r=>pStat(r)==="At Risk").length;
   const openR=D.filter(r=>gv("RAIDD",FD.status,r)!=="Closed"&&gv("RAIDD",FD.type,r)!=="Re-plan").length;
   const tag=(v,suf)=>`<span class="tag ${v>0?"up":v<0?"dn":"nu"}">${v>0?"+":""}${v}${suf||""}</span>`;
-  const card=(lab,val,dl,sp,title,go)=>`<div class="card${go?" ovgo":""}" ${go?`data-ovgo="${go}" role="button" tabindex="0"`:""} title="${esc(title)}"><div class="lab">${lab}</div><div class="val">${val}</div>${sp}<div class="dl">${dl}</div></div>`;
+  const K=UI.dash.kOpen||"";const card=(lab,val,dl,sp,title,go)=>`<div class="card ovgo${K===go?" on":""}" data-ovk="${go}" role="button" tabindex="0" aria-expanded="${K===go}" title="${esc(title)} — click for the breakdown"><div class="lab">${lab}</div><div class="val">${val}</div>${sp}<div class="dl">${dl}</div></div>`;
   const mapped=typeof hasE2E==="function"&&hasE2E()?(()=>{const G=e2eGroups(x.pids);return x.pids.size-G.rest.length})():null;
   return `<div class="ovk">
-    ${card("Active projects",activeNow,`${tag(dA)} vs. last month`,ovSpark(act,"#7C5CFC"),"Not completed or cancelled · trend = active in each of the last 6 months","Projects")}
-    ${card("Tasks completed",fmtNum(comp.length),`${tag(cm[cm.length-1])} this month`,ovSpark(cm,"#2E8B57"),"Completed tasks · trend = finished per month","Gantt")}
-    ${card("On-time delivery",otNow==null?"—":Math.round(otNow)+"%",otNow==null?"no completed tasks with a plan yet":`${tag(dOt,"%")} vs. last month`,ovSpark(ot,"#7C5CFC"),"Completed tasks finished on or before their plan end","Gantt")}
+    ${card("Active projects",activeNow,`${tag(dA)} vs. last month`,ovSpark(act,"#7C5CFC"),"Not completed or cancelled · trend = active in each of the last 6 months","active")}
+    ${card("Tasks completed",fmtNum(comp.length),`${tag(cm[cm.length-1])} this month`,ovSpark(cm,"#2E8B57"),"Completed tasks · trend = finished per month","tasks")}
+    ${card("On-time delivery",otNow==null?"—":Math.round(otNow)+"%",otNow==null?"no completed tasks with a plan yet":`${tag(dOt,"%")} vs. last month`,ovSpark(ot,"#7C5CFC"),"Completed tasks finished on or before their plan end","ontime")}
     ${card("Needs attention",String(del+risk).padStart(2,"0"),`<span class="tag wa">${risk} at risk</span> ${del} delayed · across ${P.length} projects`,"","Delayed + at-risk projects","attn")}
   </div>
   <div class="ovk2">
-    <div class="st"><span>Recurring value</span><b>${fmtShort(x.valRec)}</b><small>THB / yr</small></div>
-    <div class="st"><span>One-off value</span><b>${fmtShort(x.valOne)}</b><small>THB</small></div>
-    <div class="st"><span>Hours saved / month</span><b>${fmtNum(x.hrs)}</b><small>≈ ${(x.hrs/x.fteh).toFixed(1)} FTE</small></div>
-    <div class="st"><span>Realised to date</span><b>${fmtShort(x.aTD)}</b><small>of ${fmtShort(x.pTD)} plan · ${x.pTD?Math.round(x.aTD/x.pTD*100):0}%</small></div>
-    <div class="st"><span>Open RAIDD items</span><b>${openR}</b><small>risks, issues, actions…</small></div>
-    ${mapped!=null?`<div class="st"><span>Mapped to E2E</span><b>${mapped} / ${x.pids.size}</b><small>projects on process steps</small></div>`:""}
-    <div class="st"><span>Re-planned</span><b>${P.filter(r=>pLive(r).rpdays>0).length}</b><small>projects with approved new dates</small></div>
-  </div>`}
+    <div class="st" data-ovk="rec" role="button" tabindex="0"><span>Recurring value</span><b>${fmtShort(x.valRec)}</b><small>THB / yr</small></div>
+    <div class="st" data-ovk="one" role="button" tabindex="0"><span>One-off value</span><b>${fmtShort(x.valOne)}</b><small>THB</small></div>
+    <div class="st" data-ovk="hrs" role="button" tabindex="0"><span>Hours saved / month</span><b>${fmtNum(x.hrs)}</b><small>≈ ${(x.hrs/x.fteh).toFixed(1)} FTE</small></div>
+    <div class="st" data-ovk="real" role="button" tabindex="0"><span>Realised to date</span><b>${fmtShort(x.aTD)}</b><small>of ${fmtShort(x.pTD)} plan · ${x.pTD?Math.round(x.aTD/x.pTD*100):0}%</small></div>
+    <div class="st" data-ovk="raidd" role="button" tabindex="0"><span>Open RAIDD items</span><b>${openR}</b><small>risks, issues, actions…</small></div>
+    ${mapped!=null?`<div class="st" data-ovk="mapped" role="button" tabindex="0"><span>Mapped to E2E</span><b>${mapped} / ${x.pids.size}</b><small>projects on process steps</small></div>`:""}
+    <div class="st" data-ovk="rp" role="button" tabindex="0"><span>Re-planned</span><b>${P.filter(r=>pLive(r).rpdays>0).length}</b><small>projects with approved new dates</small></div>
+  </div>${K&&typeof ovKpiPanel==="function"?ovKpiPanel(K,P,A,D,Bl):""}`}
 function ovHero(pids){if(typeof hasE2E!=="function"||!hasE2E())return "";const G=e2eGroups(pids);const fl=G.flows.filter(g=>g.ids.size).sort((a,b)=>b.ids.size-a.ids.size)[0]||G.flows[0];
   const nConn=pids.size-G.rest.length;let svg="";
   if(fl){const L=fl.lanes.filter(l=>l.ids.size).slice(0,4);const lanes=L.length>=2?L:fl.lanes.slice(0,4);
@@ -2372,7 +2387,7 @@ function vDash(m,keepScroll){const _y=window.scrollY;setTimeout(()=>{if(keepScro
     <h2 style="margin-top:12px">Projects by status × process area</h2>${matrix("Process Area",P,r=>gv("Projects",FP.proc,r),{})}
     <h2 style="margin-top:12px">Delayed & at-risk projects</h2>${riskList(P)}</details></details>`;
   const reF=()=>{UI.dash.cell=null;UI.dash.zoom=null;vDash(m,true)};
-  ovBind(m);ovNewBind(m);{const mo=m.querySelector(".ovmore");if(mo)mo.ontoggle=()=>{UI.dash.more=mo.open}}$("#fBU").onchange=e=>{F.bu=e.target.value;F.cf="";F.proc="";reF()};$("#fCF").onchange=e=>{F.cf=e.target.value;F.proc="";reF()};$("#fProc").onchange=e=>{F.proc=e.target.value;F.init="";reF()};$("#fInit").onchange=e=>{F.init=e.target.value;reF()};bindStChips(m,"dst",F,reF);
+  ovBind(m);ovNewBind(m);ovKpiBind(m);{const mo=m.querySelector(".ovmore");if(mo)mo.ontoggle=()=>{UI.dash.more=mo.open}}$("#fBU").onchange=e=>{F.bu=e.target.value;F.cf="";F.proc="";reF()};$("#fCF").onchange=e=>{F.cf=e.target.value;F.proc="";reF()};$("#fProc").onchange=e=>{F.proc=e.target.value;F.init="";reF()};$("#fInit").onchange=e=>{F.init=e.target.value;reF()};bindStChips(m,"dst",F,reF);
   $("#fQ").addEventListener("change",e=>{F.q=e.target.value.trim();reF()});
   if($("#clrAll"))$("#clrAll").onclick=()=>{F.bu=F.cf=F.proc=F.init=F.q="";F.stOff=[];reF()};
   $("#procView").onchange=e=>{UI.dash.procView=e.target.value;vDash(m,true)};$("#buView").onchange=e=>{UI.dash.buView=e.target.value;vDash(m,true)};
@@ -2485,6 +2500,56 @@ function ovNewBind(m){const D=UI.dash;const re=()=>vDash(m,true);
   m.querySelectorAll("[data-hlall]").forEach(b=>b.onclick=()=>{D.hlAll=D.hlAll===b.dataset.hlall?"":b.dataset.hlall;re()});
   m.querySelectorAll(".ovdrill [data-ovopen]").forEach(b=>b.onclick=()=>openProject(+b.dataset.ovopen));
   const ps=m.querySelector("#ovProcSel");if(ps)ps.onchange=e=>{D.proc=e.target.value;D.init="";D.cell=null;D.zoom=null;vDash(m,true)}}
+/* ---- KPI cards: click → breakdown panel right under the KPI rows (stays on the page) ---- */
+const OV_SO={"Delayed":0,"At Risk":1,"On Track":2,"Not Started":3,"On-Hold":4,"Completed":5,"Cancelled":6};
+function ovPRows(rows,key,extra){const D=UI.dash;const lim=D.kAll===key?rows.length:10;const pct=v=>Math.round(v*100);
+  const bar=(v,c)=>`<span class="ovbar ${c}"><b style="width:${Math.min(100,pct(v))}%"></b></span>`;const pill=s=>`<span class="ovst st-${esc(s).replace(/\W/g,"")}">${esc(s)}</span>`;
+  return `<div class="ovdrill flat">${rows.slice(0,lim).map(r=>{const c=pLive(r).comp||0;const pe=+gv("Projects",FP.pe,r)||0;const late=pe&&pe<TODAY&&!["Completed","Cancelled"].includes(pStat(r));
+    return `<button type="button" class="ovdr" data-ovopen="${r}" title="Open project"><span class="n"><b>${esc(gv("Projects",FP.name,r))}</b><small>${esc(pId(r))}${gv("Projects",FP.lead,r)?" · "+esc(gv("Projects",FP.lead,r)):""}${extra?" · "+extra(r):""}</small></span>${pill(pStat(r))}<span class="pc">${pct(c)}%${bar(c,pStat(r)==="Completed"?"ok":pStat(r)==="Delayed"?"bad":"")}</span><span class="dt${late?" bad":""}">${pe?fmtDate(pe):"—"}</span><span class="cv">›</span></button>`}).join("")||'<p class="muted" style="margin:6px 4px">Nothing here.</p>'}
+    ${rows.length>10?`<button type="button" class="ovlink" data-kall="${esc(key)}">${D.kAll===key?"Show fewer":`Show all ${rows.length}`}</button>`:""}</div>`}
+function ovChips(items,key){const D=UI.dash;const cur=D.kSt&&D.kSt[key]||"";return `<div class="ovkchips">${items.map(([v,l,n,c])=>`<button type="button" data-kst="${esc(v)}" data-kkey="${esc(key)}" class="${cur===v?"on":""}">${c?`<i style="background:${c}"></i>`:""}${esc(l)} <b>${n}</b></button>`).join("")}</div>`}
+function ovKpiPanel(k,P,A,D,Bl){const U=UI.dash;U.kSt=U.kSt||{};const done=s=>s==="Completed"||s==="Cancelled";const tot=P.length;const sel=U.kSt[k]||"";
+  const srt=rs=>[...rs].sort((a,b)=>(OV_SO[pStat(a)]??9)-(OV_SO[pStat(b)]??9)||String(gv("Projects",FP.name,a)).localeCompare(String(gv("Projects",FP.name,b))));
+  const byPid=new Map(P.map(r=>[pId(r),r]));const box=(title,sub,body)=>`<div class="card ovkp" id="ovKp"><div class="ovkph"><div><b>${title}</b><span>${sub}</span></div><button type="button" class="ovkx" data-ovk="${k}" title="Close">✕</button></div>${body}</div>`;
+  const eq=(parts)=>`<div class="ovkeq">${parts.map(([n,l,c,cls])=>`<div class="${cls||""}"><b style="${c?`color:${c}`:""}">${n}</b><span>${l}</span></div>`).join('<em>+</em>').replace(/<em>\+<\/em>(<div class="tot)/,'<em>=</em>$1')}</div>`;
+  if(k==="active"){const act=P.filter(r=>!done(pStat(r))),cmp=P.filter(r=>pStat(r)==="Completed"),can=P.filter(r=>pStat(r)==="Cancelled");
+    const sts=["Delayed","At Risk","On Track","Not Started","On-Hold"].map(s=>[s,s,act.filter(r=>pStat(r)===s).length,SCOL[s]]).filter(x=>x[2]);
+    const rows=srt(sel==="Completed"?cmp:sel==="Cancelled"?can:act.filter(r=>!sel||pStat(r)===sel));
+    return box("Active projects","Active = every project that is not Completed or Cancelled (On-Hold still counts as active).",
+      eq([[act.length,"active","var(--accent)"],[cmp.length,"completed",SCOL.Completed],[can.length,"cancelled","#98A2B3"],[tot,"projects in the current filter","", "tot"]])+
+      ovChips([["","All active",act.length,""],...sts,["Completed","Completed",cmp.length,SCOL.Completed],["Cancelled","Cancelled",can.length,"#98A2B3"]],k)+ovPRows(rows,k,r=>curStage(r)))}
+  if(k==="attn"){const del=P.filter(r=>pStat(r)==="Delayed"),risk=P.filter(r=>pStat(r)==="At Risk");const rows=srt(sel==="At Risk"?risk:sel==="Delayed"?del:[...del,...risk]);
+    return box("Needs attention","Delayed + at-risk projects. Delayed = a task is past its plan end or forecast late; At risk = slipping or an overdue RAIDD.",
+      ovChips([["","All",del.length+risk.length,""],["Delayed","Delayed",del.length,SCOL.Delayed],["At Risk","At risk",risk.length,SCOL["At Risk"]]],k)+ovPRows(rows,k,r=>{const L=pLive(r);return L.slip>0?`forecast +${L.slip}d late`:curStage(r)}))}
+  if(k==="tasks"||k==="ontime"){const comp=A.filter(t=>tStat(t)==="Completed");const fe=t=>+tLive(t).fe||0,pe=t=>+tLive(t).pe||+gv("Activities",FA.pe,t)||0;
+    const withPlan=comp.filter(t=>pe(t));const late=withPlan.filter(t=>fe(t)>pe(t)),ontime=withPlan.filter(t=>fe(t)<=pe(t));
+    const list=(k==="ontime"?(sel==="late"?late:sel==="on"?ontime:withPlan):comp).sort((a,b)=>fe(b)-fe(a));const lim=U.kAll===k?list.length:12;
+    const rowsT=list.slice(0,lim).map(t=>{const pr=byPid.get(gv("Activities",FA.pid,t));const d=pe(t)?fe(t)-pe(t):0;return `<button type="button" class="ovdr t" ${pr!=null?`data-ovopen="${pr}"`:""}><span class="n"><b>${esc(gv("Activities",FA.task,t))}</b><small>${esc(gv("Activities",FA.stage,t))} · ${esc(pr!=null?gv("Projects",FP.name,pr):gv("Activities",FA.pid,t))}</small></span><span class="ovst ${d>0?"st-Delayed":"st-Completed"}">${d>0?`+${d}d late`:"on time"}</span><span class="dt">done ${fe(t)?fmtDate(fe(t)):"—"}</span><span class="dt">plan ${pe(t)?fmtDate(pe(t)):"—"}</span><span class="cv">›</span></button>`}).join("");
+    const open=A.length-comp.length;
+    return box(k==="tasks"?"Tasks completed":"On-time delivery",k==="tasks"?`Tasks marked 100 % done, newest first. ${comp.length} of ${A.length} tasks done · ${open} still open.`:"Completed tasks that finished on or before their plan end (only tasks with a plan end count).",
+      (k==="ontime"?eq([[ontime.length,"on time",SCOL.Completed],[late.length,"late",SCOL.Delayed],[withPlan.length,"completed with a plan end","","tot"]])+ovChips([["","All",withPlan.length,""],["on","On time",ontime.length,SCOL.Completed],["late","Late",late.length,SCOL.Delayed]],k)
+        :eq([[comp.length,"completed",SCOL.Completed],[open,"open","var(--accent)"],[A.length,"tasks in the current filter","","tot"]]))+`<div class="ovdrill flat">${rowsT||'<p class="muted" style="margin:6px 4px">Nothing here.</p>'}${list.length>12?`<button type="button" class="ovlink" data-kall="${k}">${U.kAll===k?"Show fewer":`Show all ${list.length}`}</button>`:""}</div>`)}
+  if(k==="rec"||k==="one"||k==="hrs"||k==="real"){const by={};const ms=k==="real"?(benefitSeries().months||[]).map(mm=>mm.s<=TODAY):[];Bl.filter(b=>!b.drop).forEach(b=>{const o=by[b.pid]=by[b.pid]||{rec:0,one:0,hrs:0,real:0,plan:0};if(b.one)o.one+=b.gross;else o.rec+=b.gross;o.hrs+=b.hrs;
+      o.real+=(b.act||[]).reduce((a,v,i)=>a+(ms[i]?v:0),0);o.plan+=(b.plan||[]).reduce((a,v,i)=>a+(ms[i]?v:0),0)});
+    const val=pid=>(by[pid]||{})[k]||0;const rows=P.filter(r=>val(pId(r))>0).sort((a,b)=>val(pId(b))-val(pId(a)));const none=P.length-rows.length;
+    const unit=k==="hrs"?" h/mo":" THB";const f=v=>k==="hrs"?fmtNum(Math.round(v)):fmtShort(v);
+    const T={rec:["Recurring value","Gross recurring benefit per year, from the projects' benefit lines (largest first)."],one:["One-off value","One-off benefit from the benefit lines (largest first)."],hrs:["Hours saved / month","Time saved per month on the benefit lines (largest first). 1 FTE ≈ "+(+setting("S_FTEh")||176)+" h."],real:["Realised to date","Actual benefit logged so far vs the plan to date (largest first)."]}[k];
+    return box(T[0],T[1]+` ${rows.length} project${rows.length!==1?"s":""} with a value · ${none} without.`,ovPRows(rows,k,r=>{const o=by[pId(r)]||{};return k==="real"?`<b class="ovkv">${fmtShort(o.real)}</b> of ${fmtShort(o.plan)} plan`:`<b class="ovkv">${f(val(pId(r)))}${unit}</b>`}))}
+  if(k==="raidd"){const open=D.filter(x=>gv("RAIDD",FD.status,x)!=="Closed"&&gv("RAIDD",FD.type,x)!=="Re-plan");const types=uniqOrder(open.map(x=>gv("RAIDD",FD.type,x)||"Item"));
+    const list=open.filter(x=>!sel||(gv("RAIDD",FD.type,x)||"Item")===sel).sort((a,b)=>(+gv("RAIDD",FD.due,a)||9e9)-(+gv("RAIDD",FD.due,b)||9e9));
+    return box("Open RAIDD items","Risks, assumptions, issues, dependencies and decisions that are not closed (re-plans not counted). Earliest due first.",
+      ovChips([["","All",open.length,""],...types.map(t=>[t,t,open.filter(x=>(gv("RAIDD",FD.type,x)||"Item")===t).length,""])],k)+
+      `<div class="ovdrill flat">${list.map(x=>{const pr=byPid.get(gv("RAIDD",FD.pid,x));const due=+gv("RAIDD",FD.due,x)||0;const od=due&&due<TODAY;return `<button type="button" class="ovdr t" data-rd="${esc(gv("RAIDD",FD.pid,x))}"><span class="n"><b>${esc(String(gv("RAIDD",FD.desc,x)||"").slice(0,140))}</b><small>${esc(pr!=null?gv("Projects",FP.name,pr):gv("RAIDD",FD.pid,x))}${gv("RAIDD",FD.prio,x)?" · "+esc(gv("RAIDD",FD.prio,x))+" priority":""}</small></span><span class="ovst">${esc(gv("RAIDD",FD.type,x)||"Item")}</span><span class="dt${od?" bad":""}">${due?"due "+fmtDate(due):"no due date"}</span><span class="dt">${esc(gv("RAIDD",FD.status,x)||"")}</span><span class="cv">›</span></button>`}).join("")||'<p class="muted" style="margin:6px 4px">Nothing open.</p>'}</div>`)}
+  if(k==="mapped"){const FL=ovFlows(new Set(P.map(pId)));const m=new Set(FL.flatMap(F=>[...F.pids]));const yes=P.filter(r=>m.has(pId(r))),no=P.filter(r=>!m.has(pId(r)));
+    const rows=srt(sel==="no"?no:yes);return box("Mapped to E2E","Projects linked to at least one step of an E2E flow map.",eq([[yes.length,"mapped","var(--accent)"],[no.length,"not mapped yet","#98A2B3"],[P.length,"projects","","tot"]])+ovChips([["","Mapped",yes.length,"#7C5CFC"],["no","Not mapped",no.length,"#98A2B3"]],k)+ovPRows(rows,k,r=>{const x=projE2E(pId(r));return x.flows.length?esc(x.flows.map(f=>f.name).join(", ")):"no E2E flow"}))}
+  if(k==="rp"){const rows=srt(P.filter(r=>pLive(r).rpdays>0));return box("Re-planned","Projects whose dates moved through an approved Re-plan in the RAIDD log.",ovPRows(rows,k,r=>`re-planned +${pLive(r).rpdays}d`))}
+  return ""}
+function ovKpiBind(m){const U=UI.dash;const re=()=>vDash(m,true);
+  m.querySelectorAll("[data-ovk]").forEach(c=>{const f=()=>{const k=c.dataset.ovk;U.kOpen=U.kOpen===k?"":k;U.kAll="";re();if(U.kOpen){const p=m.querySelector("#ovKp");if(p)p.scrollIntoView({block:"nearest",behavior:"smooth"})}};c.onclick=f;c.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();f()}}});
+  m.querySelectorAll(`.ovk2 [data-ovk="${CSS.escape(U.kOpen||"-")}"]`).forEach(c=>c.classList.add("on"));
+  m.querySelectorAll("[data-kst]").forEach(b=>b.onclick=()=>{U.kSt=U.kSt||{};U.kSt[b.dataset.kkey]=b.dataset.kst;U.kAll="";re()});
+  m.querySelectorAll("[data-kall]").forEach(b=>b.onclick=()=>{U.kAll=U.kAll===b.dataset.kall?"":b.dataset.kall;re()});
+  m.querySelectorAll("#ovKp [data-ovopen]").forEach(b=>b.onclick=()=>openProject(+b.dataset.ovopen))}
 
 /* ---- benefits analysis (chart panel on the Benefits page) ---- */
 UI.ben={bu:"",seg:"bu",view:"pva",metric:"gross"};
