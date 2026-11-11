@@ -94,7 +94,12 @@ async function readOldWorkbook(buf,fname,lastMod){
   if(ps&&by[ps.path]){const PG=await grid(ps.path);let h=null,rc=null,nc=null;
     for(let r=1;r<=8&&!h;r++){const row=PG.get(r);if(!row)continue;row.forEach((v,c)=>{const s=String(v).trim().toLowerCase();if(s==="remark"||s==="remarks")rc=c;if(s==="project name")nc=c});if(rc){h=r}}
     if(h){const keyc="A";PG.forEach((row,r)=>{if(r<=h)return;const nm=tx(row.get(keyc)),rm=tx(row.get(rc));if(nm&&rm)prog.push({name:nm,alt:tx(row.get(nc)),remark:rm})})}}
-  return {fname,lastMod:lastMod||0,modified,sheet:found.sheet,sheets:shs.map(s=>s.name),hr,map,unmapped,notesCols,recs,prog};
+  /* optional "System Value Update" sheet: list entries (BU / CF / process area / project type / region / leader) + their codes, set up before the projects are added */
+  const setup=[];const ss=shs.find(s=>/^system[\s_-]*values?[\s_-]*update$/i.test(s.name.trim()))||shs.find(s=>/^(tracker[\s_-]*)?(settings|setup)$/i.test(s.name.trim()));
+  if(ss&&by[ss.path]){const SG=await grid(ss.path);let h=0,C={};
+    for(let r=1;r<=10&&!h;r++){const row=SG.get(r);if(!row)continue;const c={};row.forEach((v,k)=>{const t=String(v).trim().toLowerCase();if(/^(list|type|setting)$/.test(t))c.type=k;else if(/^(value|name)$/.test(t))c.value=k;else if(/^code$/.test(t))c.code=k;else if(/^bu$|business\s*unit/.test(t))c.bu=k;else if(/^cf$|corporate\s*function/.test(t))c.cf=k});if(c.type&&c.value){h=r;C=c}}
+    if(h)SG.forEach((row,r)=>{if(r<=h)return;const g=k=>C[k]?tx(row.get(C[k])):"";const type=g("type"),value=g("value");if(type&&value)setup.push({type,value,code:g("code").toUpperCase(),bu:g("bu"),cf:g("cf")})})}
+  return {fname,lastMod:lastMod||0,modified,sheet:found.sheet,sheets:shs.map(s=>s.name),hr,map,unmapped,notesCols,recs,prog,setup};
 }
 
 /* ---------- old row → values in the database's language ---------- */
@@ -256,10 +261,10 @@ function setProjectProgress(pr,p){const pid=pId(pr);let ts=tasksOfProject(pid);
   const basis=st.names.map((sn,k)=>ts.some(t=>gv("Activities",FA.stage,t)===sn&&live(t))?(anyC?cus[k]:(st.w[k]||0)):0);const bs=basis.reduce((a,b)=>a+b,0);if(!bs)return;
   let rem=p;st.names.forEach((sn,k)=>{if(!basis[k])return;const share=basis[k]/bs;const fr=rem>=share-1e-9?1:Math.max(0,rem/share);rem=Math.max(0,rem-share);
     for(const t of ts){if(gv("Activities",FA.stage,t)!==sn||!live(t)||gv("Activities",FA.ae,t)!=="")continue;const v=Math.round(fr*1000)/1000;if((+gv("Activities",FA.act,t)||0)!==v)setCell("Activities",FA.act,t,v)}})}
-function createProject(a){const O=a.O;const r=nextProjectRow();if(!r){toast("No free rows left in the Projects table",6000);return null}
+function createProject(a){const O={...a.O};const DF=SY.defaults||{};if(!O.bu&&DF.bu)O.bu=DF.bu;if(!O.cf&&DF.cf)O.cf=DF.cf;if(!O.tag&&DF.prog)O.tag=DF.prog;if(!O.area&&DF.proc)O.area=DF.proc;const r=nextProjectRow();if(!r){toast("No free rows left in the Projects table",6000);return null}
   S.newRows.Projects=S.newRows.Projects||new Set();S.newRows.Projects.add(r);const set=(c,v)=>{if(v!==""&&v!=null)setCell("Projects",c,r,v)};
   const inits=listFromName("L_Init");const init=/process\s*improv/i.test(O.category)?(inits.find(x=>/process improvement/i.test(x))||inits[0]):(inits.find(x=>/automation/i.test(x))||inits[0]);
-  set(FP.init,init);const glob=/\b(us|eu|oversea|overseas|global|cross.?region)\b/i.test([O.name,O.subfn,a.x.rec.raw.division].join(" "));if(glob&&listFromName("L_Region").includes("Global"))set(FP.region,"Global");
+  set(FP.init,!O.category&&DF.init&&inits.includes(DF.init)?DF.init:init);if(DF.region&&listFromName("L_Region").includes(DF.region))set(FP.region,DF.region);const glob=/\b(us|eu|oversea|overseas|global|cross.?region)\b/i.test([O.name,O.subfn,a.x.rec.raw.division].join(" "));if(glob&&listFromName("L_Region").includes("Global"))set(FP.region,"Global");
   /* BU / CF columns in the file (new in r73) — matched to the tracker lists; otherwise Finance as before */
   const BUs=listFromName("L_BU").map(String);const nq=v=>String(v||"").toLowerCase().replace(/[^a-z0-9]/g,"");const bq=nq(O.bu);
   const buM=bq?(BUs.find(x=>nq(x)===bq)||BUs.find(x=>nq(x).includes(bq)||bq.includes(nq(x)))):"";
@@ -294,6 +299,7 @@ function writeBaseline(key,O,rawName){const sh=S.sheets[SYNC_SHEET];if(!sh||!sh.
   setIf(SYNC_SHEET,SYNC_C.key,r,key);setIf(SYNC_SHEET,SYNC_C.oid,r,O.id||"");setIf(SYNC_SHEET,SYNC_C.oname,r,rawName);if(!same){setCell(SYNC_SHEET,SYNC_C.json,r,js);setCell(SYNC_SHEET,SYNC_C.at,r,TODAY)}return true}
 async function applySync(opts={}){const P=SY.plan;if(!P)return;const moved=new Set();let nCells=S.changes.length,nItems=0,nNew=0,nProj=0;
   const stamp=dateToSerial(new Date(P.oldDate||Date.now()));
+  const nSet=P.old.setup&&P.old.setup.length?applySetup(P.old.setup):0;
   for(const g of P.groups){const sel=g.items.filter(i=>i.on&&i.apply);if(sel.length){nProj++;for(const it of sel){it.apply();nItems++;if(it.k==="start"||it.k==="end")moved.add(g.pr)}liveCalc();setIf("Projects","AN",g.pr,stamp)}}
   for(const a of P.adds){if(a.on){const r=createProject(a);if(r){a.pr=r;nNew++;liveCalc()}}}
   let bOk=true;for(const g of P.groups)bOk=writeBaseline(g.pid,g.O,g.x.rec.raw.name)&&bOk;
@@ -314,6 +320,7 @@ function vSync(m){const P=SY.plan;
   const head=`<div class="banner inp"><b>⇄ SYNC OLD FILE</b><span>Bring updates from the old-format tracker (Project 2T Club Update) into this workbook. This workbook stays the database: the old file is only read. Nothing changes until you click <b>Apply</b>; then use <b>Review changes</b> → <b>Save to database</b>.</span></div>`;
   if(!P){m.innerHTML=head+`<div class="card pad"><h2>1 · Database (new format)</h2><p>✓ <b>${esc(S.fileName)}</b> is open.</p>
     <h2 style="margin-top:14px">2 · Old-format file</h2><p class="muted">Pick the latest <b>Project_2T_Club_Update …xlsx</b>. The app finds the project sheet and its columns by header names, so moved or extra columns are fine.</p>
+    <div class="note"><b>Optional sheet “System Value Update”</b> — add it to the file to set up list values before the projects are added: columns <b>Setting</b> (BU · CF · Process area · Project type · Region · Leader, or <b>Default BU / CF / Programme / Project type / Process area / Region</b> = grouping for the file's new projects) · <b>Value</b> · <b>Code</b> · <b>BU</b> · <b>CF</b>. Missing values are added to ⚙ Settings → Lists and their codes set, so new project codes use them (e.g. BU Ambient OEM = AOEM → CR-AUT-AOEM-…).</div>
     <p><button class="btn primary" id="syPick">Choose old-format file…</button></p>
     ${SY.lastApplied?`<div class="note">Last apply: ${SY.lastApplied.nItems} field update(s), ${SY.lastApplied.nNew} new project(s), ${SY.lastApplied.cells} cell(s). ${S.changes.length?"Not saved yet — open <b>Review changes</b>.":""}</div>`:""}
     <h2 style="margin-top:14px">How it decides which side is newer</h2><ol class="rules">
@@ -349,7 +356,9 @@ function vSync(m){const P=SY.plan;
     <div class="tablewrap"><table class="data"><tr><th>Old column</th><th>Used as</th></tr>${Object.entries(o.map).map(([k,c])=>`<tr><td>${esc(Array.isArray(c)?c.join(", "):c)}</td><td>${esc(k)}</td></tr>`).join("")}
     ${o.notesCols.map(n=>`<tr><td>${esc(n.c)} <span class="muted">${esc(n.h)}</span></td><td>notes → Remark</td></tr>`).join("")}</table></div>
     ${o.unmapped.length?`<div class="warnbox" style="margin-top:10px"><b>Columns not used</b> (new or renamed in the old file — tell the admin if they matter): ${o.unmapped.map(u=>`${esc(u.c)} “${esc(u.h)}”`).join(", ")}</div>`:`<p class="bok">All old-file columns are understood.</p>`}`}
-  m.innerHTML=head+`<div class="card pad"><div class="kprow">
+  const SU=P.old.setup||[];const suHtml=SU.length?`<div class="card pad sysetup"><h3>⚙ System Value Update <span class="muted">(sheet “System Value Update” in this file — these list values and codes are set up first when you click Apply, then the projects are added)</span></h3><div class="tablewrap"><table class="data"><tr><th>Setting</th><th>Value</th><th>Code</th><th>Under BU</th><th>Under CF</th><th></th></tr>${SU.map(x=>{const k=setupKind(x.type);const have=k==="bu"?listFromName("L_BU").map(String).includes(x.value):k==="init"?listFromName("L_Init").map(String).includes(x.value):k==="cf"?(typeof orgCF==="function"&&orgCF(x.bu).map(String).includes(x.value)):k==="proc"?(typeof orgProc==="function"&&orgProc(x.bu,x.cf).map(String).includes(x.value)):false;
+    if(k.startsWith("def:"))return `<tr><td>${esc(x.type)}</td><td><b>${esc(x.value)}</b></td><td>—</td><td colspan="2" class="muted">grouping for new projects that leave this column blank</td><td><span class="ok">default</span></td></tr>`;return `<tr><td>${esc(x.type)}</td><td><b>${esc(x.value)}</b></td><td>${x.code?`<code>${esc(x.code)}</code>`:"—"}</td><td>${esc(x.bu||"")}</td><td>${esc(x.cf||"")}</td><td>${!k?'<span class="bad">unknown setting</span>':have?'<span class="muted">already there'+(x.code?" · code updated":"")+'</span>':'<span class="ok">will be added</span>'}</td></tr>`}).join("")}</table></div></div>`:"";
+  m.innerHTML=head+suHtml+`<div class="card pad"><div class="kprow">
      <div class="kpgrp"><div class="kp"><span>Old file</span><b>${esc(P.old.fname)}</b></div><div class="kp"><span>saved</span><b>${dt(od)}</b></div></div>
      <div class="kpgrp"><div class="kp"><span>Database</span><b>${esc(S.fileName)}</b></div><div class="kp"><span>saved</span><b>${dt(dd)}</b></div></div>
      <div class="kpgrp"><div class="kp"><span>Matched projects</span><b>${P.groups.length}</b></div><div class="kp"><span>Old file ahead on</span><b>${fwd}</b></div><div class="kp"><span>Database ahead on</span><b>${back}</b></div></div></div>
@@ -374,3 +383,19 @@ function vSync(m){const P=SY.plan;
   $("#syApply").onclick=async()=>{if(!sel){toast("Nothing selected");return}const k=await choose("Apply to the database?",`<p>${all.filter(i=>i.on).length} field update(s) and ${P.adds.filter(a=>a.on).length} new project(s) will be written into the open workbook (not saved yet).</p><p class="muted">You can still review every cell and discard before saving.</p>`,[["c","Cancel"],["ok","Apply","primary"]]);if(k==="ok")applySync()}}
 
 
+
+/* apply the file's Tracker_Settings rows to Master_Data: add missing entries and set their codes (BU first, then CF, process area, type …) */
+function setupKind(t){t=String(t).toLowerCase();if(/^default/.test(t))return "def:"+(/bu|business/.test(t)?"bu":/cf|corporate/.test(t)?"cf":/program/.test(t)?"prog":/type|initiative/.test(t)?"init":/process/.test(t)?"proc":/region/.test(t)?"region":"?");return /^bu$|business\s*unit/.test(t)?"bu":/^cf$|corporate|function/.test(t)?"cf":/process/.test(t)?"proc":/type|initiative/.test(t)?"init":/region/.test(t)?"region":/lead/.test(t)?"leader":/people|person|pic/.test(t)?"people":""}
+function applySetup(rows){if(typeof addMaster!=="function"||typeof hasMD!=="function"||!hasMD()){toast("This workbook has no Master_Data sheet — the settings sheet was skipped",6000);return 0}
+  const ord={bu:0,cf:1,proc:2,init:3,region:4,leader:5,people:6};let n=0;const done=[];
+  /* "Default …" rows = the grouping for every new project in this file that leaves that column blank */
+  SY.defaults={};for(const x of rows){const k=setupKind(x.type);if(k.startsWith("def:")){SY.defaults[k.slice(4)]=x.value;done.push(`${x.type}: ${x.value}`)}}
+  const setCode=(match,col,code)=>{if(!code)return;for(const r of mdRows(ORGC.concat(["B","C"])))if(match(r)&&mg(col,r)!==code){setCell("Master_Data",col,r,code)}};
+  for(const x of [...rows].sort((a,b)=>(ord[setupKind(a.type)]??9)-(ord[setupKind(b.type)]??9))){const k=setupKind(x.type);let v="";
+    try{if(k==="bu"){v=addMaster("L_BU",x.value);setCode(r=>mg("F",r)===v,"G",x.code)}
+      else if(k==="cf"){v=addMaster("L_CF",x.value,{bu:x.bu});setCode(r=>mg("H",r)===v&&(!x.bu||mg("F",r)===x.bu),"I",x.code);if(x.bu)setCode(r=>mg("F",r)===x.bu&&mg("H",r)===v,"G",codeFor("L_BU","L_BUCode",x.bu,""))}
+      else if(k==="proc")v=addMaster("L_Proc",x.value,{bu:x.bu,cf:x.cf});
+      else if(k==="init"){v=addMaster("L_Init",x.value);setCode(r=>mg("B",r)===v,"C",x.code)}
+      else if(k==="region")v=addMaster("L_Region",x.value);else if(k==="leader")v=addMaster("L_Leader",x.value);else if(k==="people")v=addMaster("L_People",x.value)}catch(e){console.warn(e)}
+    if(v){n++;done.push(`${x.type}: ${v}${x.code?" ("+x.code+")":""}`)}}
+  if(done.length)toast("System Value Update: "+done.join(" · "),8000);return n}
