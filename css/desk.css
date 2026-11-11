@@ -1376,3 +1376,10 @@ tr.burow.sel td{background:color-mix(in srgb,var(--bc) 9%,#fff)!important}
 @keyframes e2flowH{from{transform:translateX(-13px)}to{transform:translateX(0)}}
 @media (prefers-reduced-motion:reduce){.e2hc i::after{animation:none}}
 .e2empty{display:flex;flex-direction:column;gap:4px;align-items:center;text-align:center;padding:34px 20px;border:1px dashed #D9D4EE;border-radius:12px;background:#FBFAFE}
+/* r92 — E2E process project rows: status, progress, plan / actual saving, owner, plan end */
+.ovpr,.ovprh{grid-template-columns:minmax(0,1fr) 92px 90px 76px 72px 84px 66px 10px!important;gap:10px!important}.ovpr .k,.ovprh span:first-child{display:none}
+.ovprh{display:grid;gap:12px;padding:2px 6px 4px;font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid #F1EFF7}
+.ovpr .ovst{justify-self:start}.ovpr .sv{display:flex;flex-direction:column;line-height:1.2}.ovpr .sv b{font-size:12.5px;font-weight:600;color:var(--ink)}.ovpr .sv small{font-size:10.5px;color:var(--muted)}
+.ovpr .sv.a b{color:#98A2B3}.ovpr .sv.a b.ok{color:#1E7B4E}.ovpr .ow{font-size:12px;color:#3F3A57;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ovpr .dt{font-size:12px;color:#3F3A57;text-align:right}.ovpr .dt.bad{color:#C4320A;font-weight:600}.ovprh span:nth-child(8){text-align:right}.ovpr .n small{display:block}
+@media (max-width:1100px){.ovpr,.ovprh{grid-template-columns:minmax(0,1fr) 92px 76px 72px 10px!important}.ovpr .pc,.ovpr .ow,.ovpr .dt,.ovprh span:nth-child(4),.ovprh span:nth-child(7),.ovprh span:nth-child(8){display:none}}
+@media (max-width:860px){.ovprh{display:none!important}.ovpr{grid-template-columns:1fr auto!important}.ovpr .sv{display:none}}
