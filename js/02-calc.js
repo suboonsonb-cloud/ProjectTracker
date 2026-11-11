@@ -41,6 +41,7 @@ function liveCalc(){
     const ts=p.tasks,n=ts.length;const ps=+gv("Projects",FP.ps,p.r)||"",pe=+gv("Projects",FP.pe,p.r)||"";
     let st;if(p.ovr)st=p.ovr;else if(!n)st="Not Started";else if(ts.every(t=>t.status==="Completed"||t.status==="Cancelled"))st="Completed";
     else if(ts.some(t=>t.status==="Delayed"))st="Delayed";else if(ts.some(t=>t.status==="At Risk"))st="At Risk";
+    else if(ts.some(t=>t.status==="On-Hold"))st="On-Hold";/* a task put on hold holds the project (unless something is already late / at risk) */
     else if(ts.some(t=>t.status==="In Progress"||t.status==="Completed"))st="On Track";else st="Not Started";
     const ag=p.meth==="Agile";const stages=listFromName(ag?"L_StageAG":"L_StageWF"),tpl=listFromName(ag?"L_WAG":"L_WWF").map(Number);
     const cus=["T","U","V","W","X","Y"].map(c=>+gv("Projects",c,p.r)||0);const anyC=cus.some(x=>x>0);

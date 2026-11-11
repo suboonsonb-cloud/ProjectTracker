@@ -253,10 +253,9 @@ function ovKpis(P,A,D,Bl,x){const M=ovMonths(6);const done=s=>s==="Completed"||s
     ${card("Needs attention",String(del+risk).padStart(2,"0"),`<span class="tag wa">${risk} at risk</span> ${del} delayed · across ${P.length} projects`,"","Delayed + at-risk projects","attn")}
   </div>
   <div class="ovk2">
-    <div class="st" data-ovk="rec" role="button" tabindex="0"><span>Recurring value</span><b>${fmtShort(x.valRec)}</b><small>THB / yr</small></div>
-    <div class="st" data-ovk="one" role="button" tabindex="0"><span>One-off value</span><b>${fmtShort(x.valOne)}</b><small>THB</small></div>
+    <div class="st stsave" data-ovk="save" role="button" tabindex="0" title="Recurring (per year) + one-off write-off — planned values, not realised. Click for the breakdown"><span>Estimated saving <em class="tg est">ESTIMATE</em></span><b>${fmtShort(x.valRec+x.valOne)}</b><small>${fmtShort(x.valRec)} /yr recurring + ${fmtShort(x.valOne)} one-off</small></div>
     <div class="st" data-ovk="hrs" role="button" tabindex="0"><span>Hours saved / month</span><b>${fmtNum(x.hrs)}</b><small>≈ ${(x.hrs/x.fteh).toFixed(1)} FTE</small></div>
-    <div class="st" data-ovk="real" role="button" tabindex="0"><span>Realised to date</span><b>${fmtShort(x.aTD)}</b><small>of ${fmtShort(x.pTD)} plan · ${x.pTD?Math.round(x.aTD/x.pTD*100):0}%</small></div>
+    <div class="st stsave act" data-ovk="save" role="button" tabindex="0" title="Benefit actually realised and logged so far. Click for the breakdown"><span>Actual saving <em class="tg act">ACTUAL</em></span><b>${fmtShort(x.aTD)}</b><small>realised to date · ${x.pTD?Math.round(x.aTD/x.pTD*100):0}% of ${fmtShort(x.pTD)} plan</small></div>
     <div class="st" data-ovk="raidd" role="button" tabindex="0"><span>Open RAIDD items</span><b>${openR}</b><small>risks, issues, actions…</small></div>
     ${mapped!=null?`<div class="st" data-ovk="mapped" role="button" tabindex="0"><span>Mapped to E2E</span><b>${mapped} / ${x.pids.size}</b><small>projects on process steps</small></div>`:""}
     <div class="st" data-ovk="rp" role="button" tabindex="0"><span>Re-planned</span><b>${P.filter(r=>pLive(r).rpdays>0).length}</b><small>projects with approved new dates</small></div>

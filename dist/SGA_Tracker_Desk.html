@@ -1288,11 +1288,27 @@ tr.burow.sel td{background:color-mix(in srgb,var(--bc) 9%,#fff)!important}
 .ovbcov{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;background:#FAF9FE;border:1px solid #EEEBF8;border-radius:12px;padding:10px 14px;margin-bottom:10px;font-size:13px}
 .ovbcov b{font-size:18px}.ovbcov .ovbar{width:100%;height:8px}.ovbcov .ovbar>b{background:#12B76A}.ovbcov .warn{color:#B54708;font-weight:600}.ovbcov .ok{color:#1E7B4E;font-weight:600}
 .ovhb{color:#1E7B4E;font-weight:600}.ovnb{display:inline-block;font-size:10.5px;font-weight:700;color:#B54708;background:#FFF1DB;border:1px solid #FEC98A;border-radius:5px;padding:0 5px;line-height:1.5}
+/* r84 — estimated vs actual saving */
+.tg{font-style:normal;font-size:9.5px;font-weight:800;letter-spacing:.5px;border-radius:5px;padding:1px 5px;margin-left:4px;vertical-align:1px}
+.tg.est{background:#FFF1DB;color:#B54708;border:1px solid #FEC98A}.tg.act{background:#E3F4E8;color:#1E7B4E;border:1px solid #A6E3C8}
+.ovk2 .st.stsave b{color:#B54708}.ovk2 .st.stsave.act b{color:#1E7B4E}
+.ovsv{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px}
+.ovsv>div{border:1px solid #EEEBF8;border-radius:12px;padding:12px 14px;background:#FAF9FE;display:flex;flex-direction:column;gap:6px}
+.ovsv .e{background:#FFFBF2;border-color:#FDE6BF}.ovsv .a{background:#F4FBF6;border-color:#CDEBD6}
+.ovsv .row{display:flex;justify-content:space-between;font-size:13px}.ovsv .row b{font-variant-numeric:tabular-nums}.ovsv .row.tot{border-top:1px solid #E7E4F0;padding-top:6px;font-size:14px}.ovsv .row.tot b{font-size:16px}
+.ovsv .ok{color:#1E7B4E}.ovsv .ovbar{width:100%;height:7px}
+.ovnb0{color:#98A2B3}
+@media (max-width:900px){.ovsv{grid-template-columns:1fr}}
+/* task card dates */
+.pdtk-dates{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:2px}
+.pdtk-dates label{display:flex;flex-direction:column;gap:2px;font-size:10px;font-weight:600;color:#6E6893;text-transform:uppercase;letter-spacing:.2px}
+.pdtk-dates input{height:28px;border:1px solid #E6E3F0;border-radius:7px;padding:0 4px;font:inherit;font-size:11.5px;background:#fff;min-width:0;width:100%;box-sizing:border-box}
+.pdtk-dates input:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,92,252,.12)}
 </style>
 </head>
 <body>
 <aside class="side" id="side" aria-label="Main navigation">
-  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r83</span></small></span></div>
+  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r84</span></small></span></div>
   <div class="sglab">WORKSPACE</div>
   <button type="button" class="wschip" id="btnOpen" title="Open the workbook (the database)"><span class="wsdot" aria-hidden="true"></span><span class="file" id="fileName">No workbook loaded</span><span class="chev" aria-hidden="true">⌄</span></button>
   <nav class="sidenav hidden" id="tabs"></nav>
@@ -1717,6 +1733,7 @@ function liveCalc(){
     const ts=p.tasks,n=ts.length;const ps=+gv("Projects",FP.ps,p.r)||"",pe=+gv("Projects",FP.pe,p.r)||"";
     let st;if(p.ovr)st=p.ovr;else if(!n)st="Not Started";else if(ts.every(t=>t.status==="Completed"||t.status==="Cancelled"))st="Completed";
     else if(ts.some(t=>t.status==="Delayed"))st="Delayed";else if(ts.some(t=>t.status==="At Risk"))st="At Risk";
+    else if(ts.some(t=>t.status==="On-Hold"))st="On-Hold";/* a task put on hold holds the project (unless something is already late / at risk) */
     else if(ts.some(t=>t.status==="In Progress"||t.status==="Completed"))st="On Track";else st="Not Started";
     const ag=p.meth==="Agile";const stages=listFromName(ag?"L_StageAG":"L_StageWF"),tpl=listFromName(ag?"L_WAG":"L_WWF").map(Number);
     const cus=["T","U","V","W","X","Y"].map(c=>+gv("Projects",c,p.r)||0);const anyC=cus.some(x=>x>0);
@@ -2483,10 +2500,9 @@ function ovKpis(P,A,D,Bl,x){const M=ovMonths(6);const done=s=>s==="Completed"||s
     ${card("Needs attention",String(del+risk).padStart(2,"0"),`<span class="tag wa">${risk} at risk</span> ${del} delayed · across ${P.length} projects`,"","Delayed + at-risk projects","attn")}
   </div>
   <div class="ovk2">
-    <div class="st" data-ovk="rec" role="button" tabindex="0"><span>Recurring value</span><b>${fmtShort(x.valRec)}</b><small>THB / yr</small></div>
-    <div class="st" data-ovk="one" role="button" tabindex="0"><span>One-off value</span><b>${fmtShort(x.valOne)}</b><small>THB</small></div>
+    <div class="st stsave" data-ovk="save" role="button" tabindex="0" title="Recurring (per year) + one-off write-off — planned values, not realised. Click for the breakdown"><span>Estimated saving <em class="tg est">ESTIMATE</em></span><b>${fmtShort(x.valRec+x.valOne)}</b><small>${fmtShort(x.valRec)} /yr recurring + ${fmtShort(x.valOne)} one-off</small></div>
     <div class="st" data-ovk="hrs" role="button" tabindex="0"><span>Hours saved / month</span><b>${fmtNum(x.hrs)}</b><small>≈ ${(x.hrs/x.fteh).toFixed(1)} FTE</small></div>
-    <div class="st" data-ovk="real" role="button" tabindex="0"><span>Realised to date</span><b>${fmtShort(x.aTD)}</b><small>of ${fmtShort(x.pTD)} plan · ${x.pTD?Math.round(x.aTD/x.pTD*100):0}%</small></div>
+    <div class="st stsave act" data-ovk="save" role="button" tabindex="0" title="Benefit actually realised and logged so far. Click for the breakdown"><span>Actual saving <em class="tg act">ACTUAL</em></span><b>${fmtShort(x.aTD)}</b><small>realised to date · ${x.pTD?Math.round(x.aTD/x.pTD*100):0}% of ${fmtShort(x.pTD)} plan</small></div>
     <div class="st" data-ovk="raidd" role="button" tabindex="0"><span>Open RAIDD items</span><b>${openR}</b><small>risks, issues, actions…</small></div>
     ${mapped!=null?`<div class="st" data-ovk="mapped" role="button" tabindex="0"><span>Mapped to E2E</span><b>${mapped} / ${x.pids.size}</b><small>projects on process steps</small></div>`:""}
     <div class="st" data-ovk="rp" role="button" tabindex="0"><span>Re-planned</span><b>${P.filter(r=>pLive(r).rpdays>0).length}</b><small>projects with approved new dates</small></div>
@@ -2768,6 +2784,16 @@ function ovKpiPanel(k,P,A,D,Bl){const U=UI.dash;U.kSt=U.kSt||{};const done=s=>s=
       `<div class="ovdrill flat">${list.map(x=>{const pr=byPid.get(gv("RAIDD",FD.pid,x));const due=+gv("RAIDD",FD.due,x)||0;const od=due&&due<TODAY;return `<button type="button" class="ovdr t" data-rd="${esc(gv("RAIDD",FD.pid,x))}"><span class="n"><b>${esc(String(gv("RAIDD",FD.desc,x)||"").slice(0,140))}</b><small>${esc(pr!=null?gv("Projects",FP.name,pr):gv("RAIDD",FD.pid,x))}${gv("RAIDD",FD.prio,x)?" · "+esc(gv("RAIDD",FD.prio,x))+" priority":""}</small></span><span class="ovst">${esc(gv("RAIDD",FD.type,x)||"Item")}</span><span class="dt${od?" bad":""}">${due?"due "+fmtDate(due):"no due date"}</span><span class="dt">${esc(gv("RAIDD",FD.status,x)||"")}</span><span class="cv">›</span></button>`}).join("")||'<p class="muted" style="margin:6px 4px">Nothing open.</p>'}</div>`)}
   if(k==="mapped"){const FL=ovFlows(new Set(P.map(pId)));const m=new Set(FL.flatMap(F=>[...F.pids]));const yes=P.filter(r=>m.has(pId(r))),no=P.filter(r=>!m.has(pId(r)));
     const rows=srt(sel==="no"?no:yes);return box("Mapped to E2E","Projects linked to at least one step of an E2E flow map.",eq([[yes.length,"mapped","var(--accent)"],[no.length,"not mapped yet","#98A2B3"],[P.length,"projects","","tot"]])+ovChips([["","Mapped",yes.length,"#7C5CFC"],["no","Not mapped",no.length,"#98A2B3"]],k)+ovPRows(rows,k,r=>{const x=projE2E(pId(r));return x.flows.length?esc(x.flows.map(f=>f.name).join(", ")):"no E2E flow"}))}
+  if(k==="save"){const ms=(benefitSeries().months||[]).map(mm=>mm.s<=TODAY);const by={};Bl.filter(b=>!b.drop).forEach(b=>{const o=by[b.pid]=by[b.pid]||{rec:0,one:0,plan:0,act:0};if(b.one)o.one+=b.gross;else o.rec+=b.gross;
+      o.plan+=(b.plan||[]).reduce((a,v,i)=>a+(ms[i]?v:0),0);o.act+=(b.act||[]).reduce((a,v,i)=>a+(ms[i]?v:0),0)});
+    const T=Object.values(by).reduce((a,o)=>({rec:a.rec+o.rec,one:a.one+o.one,plan:a.plan+o.plan,act:a.act+o.act}),{rec:0,one:0,plan:0,act:0});
+    const est=pid=>{const o=by[pid]||{};return (o.rec||0)+(o.one||0)};const withV=P.filter(r=>est(pId(r))>0),withA=withV.filter(r=>(by[pId(r)]||{}).act>0),noA=withV.filter(r=>!((by[pId(r)]||{}).act>0)),noV=P.filter(r=>!(est(pId(r))>0)&&!["Completed","Cancelled"].includes(pStat(r)));
+    const rows=(sel==="act"?withA:sel==="noact"?noA:sel==="nov"?noV:withV).sort((a,b)=>est(pId(b))-est(pId(a)));const pc=T.plan?Math.round(T.act/T.plan*100):0;
+    return box("Saving — estimate vs actual","Estimated saving = recurring benefit per year + one-off write-off, from the benefit lines (planned, not realised). Actual = benefit logged as realised so far.",
+      `<div class="ovsv"><div class="e"><em class="tg est">ESTIMATE</em><div class="row"><span>Recurring / yr</span><b>THB ${fmtNum(Math.round(T.rec))}</b></div><div class="row"><span>One-off write-off</span><b>THB ${fmtNum(Math.round(T.one))}</b></div><div class="row tot"><span>Estimated saving</span><b>THB ${fmtNum(Math.round(T.rec+T.one))}</b></div></div>
+        <div class="a"><em class="tg act">ACTUAL</em><div class="row"><span>Planned to date</span><b>THB ${fmtNum(Math.round(T.plan))}</b></div><div class="row"><span>Actual to date</span><b class="ok">THB ${fmtNum(Math.round(T.act))}</b></div><div class="row tot"><span>Achieved</span><b>${pc}%</b></div><span class="ovbar ok"><b style="width:${Math.min(100,pc)}%"></b></span>${T.act?"":'<small class="muted">No realised benefit logged yet — enter actuals under Projects ▸ Actuals.</small>'}</div></div>`+
+      ovChips([["","With an estimate",withV.length,"#7C5CFC"],["act","Actual logged",withA.length,"#12B76A"],["noact","No actual yet",noA.length,"#F79009"],["nov","Active, no benefit yet",noV.length,"#98A2B3"]],k)+
+      ovPRows(rows,k,r=>{const o=by[pId(r)]||{};return `<span class="ovkv">est ${fmtShort((o.rec||0)+(o.one||0))}</span>${o.one?` (${fmtShort(o.rec||0)}/yr + ${fmtShort(o.one)} one-off)`:" /yr"} · actual <span class="${o.act?"ovhb":"ovnb0"}">${fmtShort(o.act||0)}</span>`}))}
   if(k==="rp"){const rows=srt(P.filter(r=>pLive(r).rpdays>0));return box("Re-planned","Projects whose dates moved through an approved Re-plan in the RAIDD log.",ovPRows(rows,k,r=>`re-planned +${pLive(r).rpdays}d`))}
   return ""}
 function ovKpiBind(m){const U=UI.dash;const re=()=>vDash(m,true);
@@ -5304,6 +5330,7 @@ function pdTasksHtml(r){const pid=pId(r);const ts=tasksOfProject(pid);if(!ts.len
       <div class="pdtk-n">${esc(gv("Activities",FA.task,t))}</div>
       <div class="pdtk-row"><span class="lb">Plan</span><div class="trk">${ps&&pe?`<i class="pl" style="left:${P(ps)};width:${Wd(ps,pe)}"></i>`:""}${tdy}</div><span class="dt">${ps?fmtDate(ps):"—"} → ${pe?fmtDate(pe):"—"}</span></div>
       <div class="pdtk-row"><span class="lb">Actual</span><div class="trk">${fs&&fe?`<i class="ac" style="left:${P(fs)};width:${Wd(fs,fe)}"><b style="width:${pc}%"></b></i>`:""}${tdy}</div><span class="dt${late&&!done?" bad":""}">${fs?fmtDate(fs):"—"} → ${fe?fmtDate(fe):"—"}${late&&!done?` <em>+${late}d</em>`:""}</span></div>
+      <div class="pdtk-dates">${[["K","Plan start",ps],["L","Plan end",pe],["Q","Actual start",+gv("Activities",FA.as,t)||0],["R","Actual done",+gv("Activities",FA.ae,t)||0]].map(([c,lb,v])=>`<label>${lb}<input type="date" data-tkd="${t}" data-r="${r}" data-c="${c}" value="${v?isoFromSerial(v):""}" ${typeof canEdit==="function"&&!canEdit()?"disabled":""}></label>`).join("")}</div>
       <div class="pdtk-p"><input type="range" class="pdtk-r" data-qtk="${t}" data-r="${r}" min="0" max="100" step="5" value="${pc}" style="--v:${pc}%" aria-label="% done"><output>${pc}%</output>
         <span class="pdtk-q">${[0,50,100].map(v=>`<button type="button" data-pdq="${v}" class="${pc===v?"on":""}">${v}</button>`).join("")}</span>
         <button type="button" class="btn small qdly${n?" on":""}" data-qdly="${t}" title="Say why this task is late and when it will be done — the forecast and the Gantt move">⚑ ${n?n+" open":"Late?"}</button></div>
@@ -5368,6 +5395,14 @@ function pdStageStrip(d){return String(d||"").replace(/^\[(.+?) stage\] /,"")}
 function pdAttach(pid,v){if(!v)return {tid:"",stg:""};if(!v.startsWith("stg:"))return {tid:v,stg:""};const st=v.slice(4);
   const ts=tasksOfProject(pid).filter(t=>gv("Activities",FA.stage,t)===st);const end=t=>+(tLive(t)||{}).fe||+gv("Activities",FA.pe,t)||0;
   const last=ts.sort((a,b)=>end(b)-end(a))[0];return {tid:last?tId(last):"",stg:st}}
+
+/* task dates edited right on the card: plan start / end, actual start / done */
+document.addEventListener("change",e=>{const el=e.target;if(!el.matches||!el.matches("#pdw [data-tkd]"))return;const t=+el.dataset.tkd,r=+el.dataset.r,c=el.dataset.c;const v=el.value?serialFromIso(el.value):"";
+  const other={K:"L",L:"K",Q:"R",R:"Q"}[c];const ov=+gv("Activities",other,t)||0;
+  if(v&&ov&&((c==="K"||c==="Q")?v>ov:v<ov)){toast((c==="K"||c==="L"?"Plan":"Actual")+" end can't be before its start",4500);el.value=gv("Activities",c,t)?isoFromSerial(+gv("Activities",c,t)):"";return}
+  if(String(gv("Activities",c,t))===String(v))return;try{setCell("Activities",c,t,v)}catch(err){toast(err.message,5000);return}
+  if(c==="R"&&v&&(+gv("Activities",FA.act,t)||0)<1){setCell("Activities",FA.act,t,1);toast("Actual done date set — task marked 100 % done",3500)}
+  quStamp(r);liveCalc();UI.qu.edited.add(r);UI.qu.pdOpen=UI.qu.pdOpen||new Set();UI.qu.pdOpen.add("tasks");pdRender();pdListRow(r);if(typeof renderTabs==="function")renderTabs()});
 
 /* 12c-projects-2t.js — "Old view": the project table laid out like the 2T Club Project_Data sheet.
    Every 2T column is filled from the tracker (tasks, benefits, RAIDD); cells are edited in place and written back

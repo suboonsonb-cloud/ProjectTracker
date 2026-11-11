@@ -118,6 +118,7 @@ function pdTasksHtml(r){const pid=pId(r);const ts=tasksOfProject(pid);if(!ts.len
       <div class="pdtk-n">${esc(gv("Activities",FA.task,t))}</div>
       <div class="pdtk-row"><span class="lb">Plan</span><div class="trk">${ps&&pe?`<i class="pl" style="left:${P(ps)};width:${Wd(ps,pe)}"></i>`:""}${tdy}</div><span class="dt">${ps?fmtDate(ps):"—"} → ${pe?fmtDate(pe):"—"}</span></div>
       <div class="pdtk-row"><span class="lb">Actual</span><div class="trk">${fs&&fe?`<i class="ac" style="left:${P(fs)};width:${Wd(fs,fe)}"><b style="width:${pc}%"></b></i>`:""}${tdy}</div><span class="dt${late&&!done?" bad":""}">${fs?fmtDate(fs):"—"} → ${fe?fmtDate(fe):"—"}${late&&!done?` <em>+${late}d</em>`:""}</span></div>
+      <div class="pdtk-dates">${[["K","Plan start",ps],["L","Plan end",pe],["Q","Actual start",+gv("Activities",FA.as,t)||0],["R","Actual done",+gv("Activities",FA.ae,t)||0]].map(([c,lb,v])=>`<label>${lb}<input type="date" data-tkd="${t}" data-r="${r}" data-c="${c}" value="${v?isoFromSerial(v):""}" ${typeof canEdit==="function"&&!canEdit()?"disabled":""}></label>`).join("")}</div>
       <div class="pdtk-p"><input type="range" class="pdtk-r" data-qtk="${t}" data-r="${r}" min="0" max="100" step="5" value="${pc}" style="--v:${pc}%" aria-label="% done"><output>${pc}%</output>
         <span class="pdtk-q">${[0,50,100].map(v=>`<button type="button" data-pdq="${v}" class="${pc===v?"on":""}">${v}</button>`).join("")}</span>
         <button type="button" class="btn small qdly${n?" on":""}" data-qdly="${t}" title="Say why this task is late and when it will be done — the forecast and the Gantt move">⚑ ${n?n+" open":"Late?"}</button></div>
@@ -182,3 +183,11 @@ function pdStageStrip(d){return String(d||"").replace(/^\[(.+?) stage\] /,"")}
 function pdAttach(pid,v){if(!v)return {tid:"",stg:""};if(!v.startsWith("stg:"))return {tid:v,stg:""};const st=v.slice(4);
   const ts=tasksOfProject(pid).filter(t=>gv("Activities",FA.stage,t)===st);const end=t=>+(tLive(t)||{}).fe||+gv("Activities",FA.pe,t)||0;
   const last=ts.sort((a,b)=>end(b)-end(a))[0];return {tid:last?tId(last):"",stg:st}}
+
+/* task dates edited right on the card: plan start / end, actual start / done */
+document.addEventListener("change",e=>{const el=e.target;if(!el.matches||!el.matches("#pdw [data-tkd]"))return;const t=+el.dataset.tkd,r=+el.dataset.r,c=el.dataset.c;const v=el.value?serialFromIso(el.value):"";
+  const other={K:"L",L:"K",Q:"R",R:"Q"}[c];const ov=+gv("Activities",other,t)||0;
+  if(v&&ov&&((c==="K"||c==="Q")?v>ov:v<ov)){toast((c==="K"||c==="L"?"Plan":"Actual")+" end can't be before its start",4500);el.value=gv("Activities",c,t)?isoFromSerial(+gv("Activities",c,t)):"";return}
+  if(String(gv("Activities",c,t))===String(v))return;try{setCell("Activities",c,t,v)}catch(err){toast(err.message,5000);return}
+  if(c==="R"&&v&&(+gv("Activities",FA.act,t)||0)<1){setCell("Activities",FA.act,t,1);toast("Actual done date set — task marked 100 % done",3500)}
+  quStamp(r);liveCalc();UI.qu.edited.add(r);UI.qu.pdOpen=UI.qu.pdOpen||new Set();UI.qu.pdOpen.add("tasks");pdRender();pdListRow(r);if(typeof renderTabs==="function")renderTabs()});
