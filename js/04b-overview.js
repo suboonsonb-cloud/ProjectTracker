@@ -12,14 +12,14 @@ function ovFlows(pids){if(typeof hasE2E!=="function"||!hasE2E())return [];const 
   return out}
 function ovStatusOf(rows){if(!rows.length)return ["Not mapped","nm"];const st=rows.map(pStat);if(st.every(s=>s==="Completed"||s==="Cancelled"))return ["Completed","ok"];
   if(st.every(s=>s==="Not Started"))return ["Not started","ns"];return ["In progress","ip"]}
-function ovNewHtml(P,Bl){const pids=new Set(P.map(pId));const byId=new Map(P.map(r=>[pId(r),r]));const D=UI.dash;D.ovOpen=D.ovOpen||null;D.ovLane=D.ovLane||{};
+function ovNewHtml(P,Bl){const pids=new Set(P.map(pId));const byId=new Map(P.map(r=>[pId(r),r]));const D=UI.dash;D.ovLane=D.ovLane||{};
   const ben=pid=>{const b=Bl.filter(x=>x.pid===pid&&!x.drop);return {yr:b.filter(x=>!x.one).reduce((a,x)=>a+x.gross,0),hrs:b.reduce((a,x)=>a+x.hrs,0)}};
   const FL=ovFlows(pids);const mapped=new Set(FL.flatMap(F=>[...F.pids]));const unm=P.filter(r=>!mapped.has(pId(r)));
   const delayed=P.filter(r=>pStat(r)==="Delayed").length;const mappedYr=[...mapped].reduce((a,p)=>a+ben(p).yr,0);
   const q=String(D.ovQ||"").trim().toLowerCase();const hit=s=>!q||String(s).toLowerCase().includes(q);
   const projHit=pid=>{const r=byId.get(pid);return r&&hit(pid+" "+gv("Projects",FP.name,r))};
   const FLs=FL.filter(F=>F.pids.size&&(hit(F.f.name)||F.lanes.some(L=>hit(L.name)||L.procs.some(p=>hit(p.title)))||[...F.pids].some(projHit)));
-  if(D.ovOpen==null&&FLs.length)D.ovOpen=FLs[0].f.id;
+  if(D.ovOpen===undefined&&FLs.length)D.ovOpen=FLs[0].f.id;
   const kpi=(lab,val,sub,cls="")=>`<div class="card ovk2 ${cls}"><div class="lab">${lab}</div><div class="val">${val}</div><div class="sub">${sub}</div></div>`;
   const pct=v=>Math.round(v*100);const bar=(v,cls="")=>`<span class="ovbar ${cls}"><b style="width:${Math.min(100,pct(v))}%"></b></span>`;
   const pill=s=>`<span class="ovst st-${esc(s).replace(/\W/g,"")}">${esc(s)}</span>`;
@@ -57,7 +57,7 @@ function ovNewHtml(P,Bl){const pids=new Set(P.map(pId));const byId=new Map(P.map
 function ovNewBind(m){const D=UI.dash;const re=()=>vDash(m,true);
   m.querySelectorAll("[data-ovflow]").forEach(b=>b.onclick=()=>{D.ovOpen=D.ovOpen===b.dataset.ovflow?"":b.dataset.ovflow;re()});
   m.querySelectorAll("[data-ovlane]").forEach(b=>b.onclick=()=>{D.ovLane[b.dataset.ovf]=b.dataset.ovlane;re()});
-  const q=m.querySelector("#ovQ");if(q)q.oninput=()=>{clearTimeout(ovNewBind._t);ovNewBind._t=setTimeout(()=>{D.ovQ=q.value;D.ovOpen=null;re();const n=m.querySelector("#ovQ");if(n){n.focus();n.setSelectionRange(n.value.length,n.value.length)}},300)};
+  const q=m.querySelector("#ovQ");if(q)q.oninput=()=>{clearTimeout(ovNewBind._t);ovNewBind._t=setTimeout(()=>{D.ovQ=q.value;D.ovOpen=undefined;re();const n=m.querySelector("#ovQ");if(n){n.focus();n.setSelectionRange(n.value.length,n.value.length)}},300)};
   const u=m.querySelector("#ovUnm");if(u)u.onclick=()=>{UI.qu.flow="none";UI.qu.lane="";view="Projects";UI.pview="projects";render();window.scrollTo(0,0)};
   m.querySelectorAll("[data-ovst]").forEach(b=>b.onclick=()=>{UI.qu.stOff=STL.filter(s=>s!==b.dataset.ovst);UI.qu.flow="";view="Projects";UI.pview="projects";render();window.scrollTo(0,0)});
   const ps=m.querySelector("#ovProcSel");if(ps)ps.onchange=e=>{D.proc=e.target.value;D.init="";D.cell=null;D.zoom=null;vDash(m,true)}}
