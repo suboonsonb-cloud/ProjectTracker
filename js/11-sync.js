@@ -356,8 +356,7 @@ function vSync(m){const P=SY.plan;
     <div class="tablewrap"><table class="data"><tr><th>Old column</th><th>Used as</th></tr>${Object.entries(o.map).map(([k,c])=>`<tr><td>${esc(Array.isArray(c)?c.join(", "):c)}</td><td>${esc(k)}</td></tr>`).join("")}
     ${o.notesCols.map(n=>`<tr><td>${esc(n.c)} <span class="muted">${esc(n.h)}</span></td><td>notes → Remark</td></tr>`).join("")}</table></div>
     ${o.unmapped.length?`<div class="warnbox" style="margin-top:10px"><b>Columns not used</b> (new or renamed in the old file — tell the admin if they matter): ${o.unmapped.map(u=>`${esc(u.c)} “${esc(u.h)}”`).join(", ")}</div>`:`<p class="bok">All old-file columns are understood.</p>`}`}
-  const SU=P.old.setup||[];const suHtml=SU.length?`<div class="card pad sysetup"><h3>⚙ System Value Update <span class="muted">(sheet “System Value Update” in this file — these list values and codes are set up first when you click Apply, then the projects are added)</span></h3><div class="tablewrap"><table class="data"><tr><th>Setting</th><th>Value</th><th>Code</th><th>Under BU</th><th>Under CF</th><th></th></tr>${SU.map(x=>{const k=setupKind(x.type);const have=k==="bu"?listFromName("L_BU").map(String).includes(x.value):k==="init"?listFromName("L_Init").map(String).includes(x.value):k==="cf"?(typeof orgCF==="function"&&orgCF(x.bu).map(String).includes(x.value)):k==="proc"?(typeof orgProc==="function"&&orgProc(x.bu,x.cf).map(String).includes(x.value)):false;
-    if(k.startsWith("def:"))return `<tr><td>${esc(x.type)}</td><td><b>${esc(x.value)}</b></td><td>—</td><td colspan="2" class="muted">grouping for new projects that leave this column blank</td><td><span class="ok">default</span></td></tr>`;return `<tr><td>${esc(x.type)}</td><td><b>${esc(x.value)}</b></td><td>${x.code?`<code>${esc(x.code)}</code>`:"—"}</td><td>${esc(x.bu||"")}</td><td>${esc(x.cf||"")}</td><td>${!k?'<span class="bad">unknown setting</span>':have?'<span class="muted">already there'+(x.code?" · code updated":"")+'</span>':'<span class="ok">will be added</span>'}</td></tr>`}).join("")}</table></div></div>`:"";
+  const suHtml=suTable(P);
   m.innerHTML=head+suHtml+`<div class="card pad"><div class="kprow">
      <div class="kpgrp"><div class="kp"><span>Old file</span><b>${esc(P.old.fname)}</b></div><div class="kp"><span>saved</span><b>${dt(od)}</b></div></div>
      <div class="kpgrp"><div class="kp"><span>Database</span><b>${esc(S.fileName)}</b></div><div class="kp"><span>saved</span><b>${dt(dd)}</b></div></div>
@@ -380,7 +379,8 @@ function vSync(m){const P=SY.plan;
   $("#syFlip").onclick=()=>{SY.oldNewer=!SY.oldNewer;buildPlan(P.old);render()};
   $("#syRe").onclick=()=>{buildPlan(P.old);render()};$("#syNone").onclick=()=>{all.forEach(i=>i.on=false);P.adds.forEach(a=>a.on=false);render()};
   $("#syOther").onclick=pickOld;$("#syClose").onclick=()=>{SY.plan=null;SY.old=null;render()};
-  $("#syApply").onclick=async()=>{if(!sel){toast("Nothing selected");return}const k=await choose("Apply to the database?",`<p>${all.filter(i=>i.on).length} field update(s) and ${P.adds.filter(a=>a.on).length} new project(s) will be written into the open workbook (not saved yet).</p><p class="muted">You can still review every cell and discard before saving.</p>`,[["c","Cancel"],["ok","Apply","primary"]]);if(k==="ok")applySync()}}
+  suBind(m,()=>vSync(m));
+  $("#syApply").onclick=async()=>{const nE=suErrors(P);if(nE){toast(`Fix the ${nE} error(s) in System Value Update first (red rows at the top)`,6000);const t=m.querySelector(".sysetup");if(t)t.scrollIntoView({behavior:"smooth"});return}if(!sel){toast("Nothing selected");return}const k=await choose("Apply to the database?",`<p>${all.filter(i=>i.on).length} field update(s) and ${P.adds.filter(a=>a.on).length} new project(s) will be written into the open workbook (not saved yet).</p><p class="muted">You can still review every cell and discard before saving.</p>`,[["c","Cancel"],["ok","Apply","primary"]]);if(k==="ok")applySync()}}
 
 
 
@@ -399,3 +399,53 @@ function applySetup(rows){if(typeof addMaster!=="function"||typeof hasMD!=="func
       else if(k==="region")v=addMaster("L_Region",x.value);else if(k==="leader")v=addMaster("L_Leader",x.value);else if(k==="people")v=addMaster("L_People",x.value)}catch(e){console.warn(e)}
     if(v){n++;done.push(`${x.type}: ${v}${x.code?" ("+x.code+")":""}`)}}
   if(done.length)toast("System Value Update: "+done.join(" · "),8000);return n}
+
+/* ---- System Value Update: check every row against the tracker lists, show errors, let the user fix them in place ---- */
+const SU_LISTS={bu:["L_BU","L_BUCode"],cf:["L_CF","L_CFCode"],init:["L_Init","L_InitCode"]};
+function suExisting(k,v,bu){if(!SU_LISTS[k])return null;const [l,c]=SU_LISTS[k];if(k==="cf"){const cfs=typeof orgCF==="function"?orgCF(bu||""):[];if(!cfs.map(String).includes(v))return null}else if(!listFromName(l).map(String).includes(v))return null;return codeFor(l,c,v,"")||""}
+function suUsedBy(k,v){const col=k==="bu"?FP.bu:k==="cf"?FP.cf:k==="init"?FP.init:null;return col?rowsOf("Projects").filter(r=>gv("Projects",col,r)===v&&pId(r)).length:0}
+function suCheck(P,x,i){const k=setupKind(x.type);const SU=P.old.setup;const inFile=kk=>SU.filter(y=>setupKind(y.type)===kk).map(y=>y.value);
+  if(!k||k==="def:?")return {lvl:"err",msg:"Unknown setting — pick one"};
+  if(!x.value)return {lvl:"err",msg:"Value is empty"};
+  if(k.startsWith("def:")){const kk=k.slice(4);const ok=kk==="prog"?["2T","Simplification","Complexity Reduction","Deep Dive"].some(p=>p.toLowerCase()===x.value.toLowerCase()||/complex/i.test(x.value)):kk==="bu"?listFromName("L_BU").map(String).includes(x.value)||inFile("bu").includes(x.value):kk==="init"?listFromName("L_Init").map(String).includes(x.value)||inFile("init").includes(x.value):true;
+    return ok?{lvl:"def",msg:"Default for new projects"}:{lvl:"err",msg:`“${x.value}” is not a known ${kk==="prog"?"programme":kk==="bu"?"BU":"project type"} — add it above or fix the value`}}
+  if((k==="cf"||k==="proc")&&!x.bu)return {lvl:"err",msg:"Pick the BU it belongs to"};
+  if((k==="cf"||k==="proc")&&x.bu&&!listFromName("L_BU").map(String).includes(x.bu)&&!inFile("bu").includes(x.bu))return {lvl:"err",msg:`BU “${x.bu}” is not in the lists or this sheet`};
+  if(!SU_LISTS[k])return {lvl:"ok",msg:suExisting(k,x.value)!=null?"Already there":"Will be added"};
+  if(x.code&&!/^[A-Z0-9]{2,6}$/.test(x.code))return {lvl:"err",msg:"Code must be 2–6 letters / digits"};
+  const ex=suExisting(k,x.value,x.bu);
+  if(ex==null){if(!x.code)return {lvl:"err",msg:"New value — needs a code (it goes into the project code)"};
+    const [l,c]=SU_LISTS[k];const clash=listFromName(l).map(String).find(v=>codeFor(l,c,v,"")===x.code&&v!==x.value)||SU.find((y,j)=>j!==i&&setupKind(y.type)===k&&y.code===x.code&&y.value!==x.value)?.value;
+    if(clash)return {lvl:"err",msg:`Code ${x.code} is already used by “${clash}”`};return {lvl:"ok",msg:"Will be added"}}
+  if(!x.code||x.code===ex)return {lvl:"ok",msg:`Already there · code ${ex||"—"}`,ex};
+  const n=suUsedBy(k,x.value);if(n&&!x.force)return {lvl:"err",msg:`Code ${x.code} does not match the existing code ${ex} used by ${n} project(s)`,ex,fix:true};
+  return {lvl:"warn",msg:`Code will change ${ex||"—"} → ${x.code}${n?" (existing project codes stay as they are)":""}`,ex}}
+/* projects in the file whose BU / CF cannot be found anywhere */
+function suProjChecks(P){const SU=P.old.setup||[];const DF={};SU.forEach(y=>{const k=setupKind(y.type);if(k.startsWith("def:"))DF[k.slice(4)]=y.value});
+  const BUs=new Set([...listFromName("L_BU").map(String),...SU.filter(y=>setupKind(y.type)==="bu").map(y=>y.value)]);const out=[];
+  P.adds.filter(a=>a.on).forEach((a,ix)=>{const bu=a.O.bu||DF.bu||"";const cf=a.O.cf||DF.cf||"";
+    if(bu&&!BUs.has(bu))out.push({a,f:"bu",val:bu,msg:`BU “${bu}” not found`});
+    if(cf){const cfs=new Set([...(typeof orgCF==="function"?orgCF(bu):[]).map(String),...SU.filter(y=>setupKind(y.type)==="cf"&&(!y.bu||y.bu===bu)).map(y=>y.value)]);if(!cfs.has(cf))out.push({a,f:"cf",val:cf,msg:`CF “${cf}” not found under ${bu||"the BU"}`})}});return out}
+function suErrors(P){const SU=(P.old&&P.old.setup)||[];return SU.filter((x,i)=>suCheck(P,x,i).lvl==="err").length+suProjChecks(P).length}
+function suTable(P){const SU=P.old.setup||[];const PC=suProjChecks(P);if(!SU.length&&!PC.length)return "";
+  const KINDS=["BU","CF","Process area","Project type","Region","Leader","Person","Default BU","Default CF","Default programme","Default project type","Default process area","Default region"];
+  const BUs=uniq([...listFromName("L_BU").map(String),...SU.filter(y=>setupKind(y.type)==="bu").map(y=>y.value)]);
+  const nE=SU.filter((x,i)=>suCheck(P,x,i).lvl==="err").length+PC.length;
+  return `<div class="card pad sysetup${nE?" haserr":""}"><h3>⚙ System Value Update ${nE?`<span class="suerr">${nE} error(s) — fix them below before Apply</span>`:'<span class="suok">✓ ready</span>'}</h3>
+   <p class="muted" style="margin:2px 0 8px">From the file's “System Value Update” sheet. On Apply these list values and codes are set up first, then the projects are added. Edit any cell here — the file itself is not changed.</p>
+   ${SU.length?`<div class="tablewrap"><table class="data sutab"><tr><th>Setting</th><th>Value</th><th>Code</th><th>Under BU</th><th>Under CF</th><th>Check</th></tr>${SU.map((x,i)=>{const c=suCheck(P,x,i);const k=setupKind(x.type);
+     return `<tr class="su-${c.lvl}"><td><select data-su="${i}" data-f="type">${uniqOrder([x.type,...KINDS]).map(t=>`<option ${t===x.type?"selected":""}>${esc(t)}</option>`).join("")}</select></td>
+       <td><input data-su="${i}" data-f="value" value="${esc(x.value)}"></td>
+       <td>${SU_LISTS[k]?`<input data-su="${i}" data-f="code" value="${esc(x.code)}" class="code" maxlength="6" placeholder="${c.ex?esc(c.ex):"code"}">`:'<span class="muted">—</span>'}</td>
+       <td>${k==="cf"||k==="proc"?`<select data-su="${i}" data-f="bu"><option value="">— pick —</option>${uniqOrder([x.bu,...BUs].filter(Boolean)).map(b=>`<option ${b===x.bu?"selected":""}>${esc(b)}</option>`).join("")}</select>`:'<span class="muted">—</span>'}</td>
+       <td>${k==="proc"?`<input data-su="${i}" data-f="cf" value="${esc(x.cf)}">`:'<span class="muted">—</span>'}</td>
+       <td class="suc">${c.lvl==="err"?"⚠ ":c.lvl==="warn"?"! ":"✓ "}${esc(c.msg)}${c.fix?` <button type="button" class="btn small" data-sufix="${i}" data-code="${esc(c.ex)}">Use ${esc(c.ex)}</button> <button type="button" class="btn small" data-suforce="${i}">Change code anyway</button>`:""}</td></tr>`}).join("")}</table></div>`:""}
+   ${PC.length?`<h4 class="suh">Projects in the file with a BU / CF that cannot be found</h4><div class="tablewrap"><table class="data sutab">${PC.map((e,j)=>`<tr class="su-err"><td><b>${esc(e.a.O.name)}</b></td><td>${e.f.toUpperCase()}</td><td><input data-sup="${P.adds.indexOf(e.a)}" data-f="${e.f}" value="${esc(e.val)}" list="suList${e.f}"></td><td class="suc">⚠ ${esc(e.msg)} — type an existing value or add it as a row above</td></tr>`).join("")}</table>
+     <datalist id="suListbu">${BUs.map(b=>`<option value="${esc(b)}">`).join("")}</datalist><datalist id="suListcf">${uniq([...(typeof orgCF==="function"?orgCF(""):[]).map(String),...SU.filter(y=>setupKind(y.type)==="cf").map(y=>y.value)]).map(b=>`<option value="${esc(b)}">`).join("")}</datalist></div>`:""}
+   ${SU.length?`<p style="margin:8px 0 0"><button type="button" class="btn small" id="suAdd">＋ Add a row</button></p>`:""}</div>`}
+function suBind(m,re){const P=SY.plan;if(!P)return;const SU=P.old.setup=P.old.setup||[];
+  m.querySelectorAll("[data-su]").forEach(el=>el.onchange=()=>{const x=SU[+el.dataset.su];let v=el.value.trim();if(el.dataset.f==="code")v=v.toUpperCase();x[el.dataset.f]=v;if(el.dataset.f==="code")x.force=false;const y=scrollY;re();scrollTo(0,y)});
+  m.querySelectorAll("[data-sup]").forEach(el=>el.onchange=()=>{const a=P.adds[+el.dataset.sup];a.O[el.dataset.f]=el.value.trim();const y=scrollY;re();scrollTo(0,y)});
+  m.querySelectorAll("[data-sufix]").forEach(b=>b.onclick=()=>{SU[+b.dataset.sufix].code=b.dataset.code;const y=scrollY;re();scrollTo(0,y)});
+  m.querySelectorAll("[data-suforce]").forEach(b=>b.onclick=()=>{SU[+b.dataset.suforce].force=true;const y=scrollY;re();scrollTo(0,y)});
+  const ad=m.querySelector("#suAdd");if(ad)ad.onclick=()=>{SU.push({type:"BU",value:"",code:"",bu:"",cf:""});const y=scrollY;re();scrollTo(0,y)}}

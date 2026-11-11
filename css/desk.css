@@ -1218,3 +1218,14 @@ button.ovhr{cursor:pointer}button.ovhr:hover{background:#F6F3FF}
 .cgbtn{border:1px solid #D9D1FA;background:#fff;color:var(--accent-d);border-radius:999px;font:inherit;font-size:11px;font-weight:600;padding:2px 9px;cursor:pointer;margin-left:6px}.cgbtn:hover{background:#F1EDFF}
 .cgcard{margin-bottom:12px}.cgcard>summary{cursor:pointer}.cgcard .cg{margin-top:10px}
 #confirm .box .cg{max-width:760px}
+/* r78 — System Value Update checks */
+.sysetup.haserr{border:1.5px solid #F04438!important;box-shadow:0 0 0 4px #FEE4E2!important}
+.sysetup h3{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.suerr{font-size:12px;font-weight:700;color:#fff;background:#D92D20;border-radius:999px;padding:3px 10px}.suok{font-size:12px;font-weight:700;color:#1E7B4E;background:#E3F4E8;border-radius:999px;padding:3px 10px}
+.sutab input,.sutab select{height:30px;border:1px solid #E2DDF5;border-radius:8px;padding:0 8px;font:inherit;font-size:12.5px;background:#fff;min-width:0;width:100%;box-sizing:border-box}
+.sutab input.code{width:80px;text-transform:uppercase;font-family:ui-monospace,Consolas,monospace}
+.sutab tr.su-err td{background:#FEF3F2}.sutab tr.su-err .suc{color:#B42318;font-weight:600}
+.sutab tr.su-warn td{background:#FFFAEB}.sutab tr.su-warn .suc{color:#B54708}
+.sutab tr.su-ok .suc{color:#1E7B4E}.sutab tr.su-def .suc{color:var(--accent-d)}
+.sutab .suc{font-size:12px;min-width:240px}.sutab .suc .btn{margin-left:4px}
+.suh{margin:14px 0 6px;font-size:13px;color:#B42318}
