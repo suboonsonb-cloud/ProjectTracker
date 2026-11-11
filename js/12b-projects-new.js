@@ -111,14 +111,14 @@ function pdTasksHtml(r){const pid=pId(r);const ts=tasksOfProject(pid);if(!ts.len
   const tdy=`<i class="pdtk-today" style="left:${P(TODAY)}"></i>`;
   return `<div class="qtk pdtks">${msg}<div class="pdtk-leg"><span><i class="pl"></i>Plan</span><span><i class="ac"></i>Actual / forecast (dark = % done)</span><span><i class="lt"></i>Late</span><span><i class="td"></i>Today</span><span class="pdtk-rng-l">${fmtDate(a)} – ${fmtDate(b-1)}</span></div>
   ${D.map(({t,ps,pe,fs,fe})=>{const pc=Math.round((+gv("Activities",FA.act,t)||0)*100);const st=tStat(t);const late=fe&&pe&&fe>pe?fe-pe:0;const done=st==="Completed"||pc>=100;
+    const ro=typeof canEdit==="function"&&!canEdit();const dl=(c,shown,v)=>`<label class="pdtk-dl${ro?" ro":""}" title="${ro?"":"Click to change"}">${shown?fmtDate(shown):"—"}<input type="date" data-tkd="${t}" data-r="${r}" data-c="${c}" value="${v?isoFromSerial(v):""}" ${ro?"disabled":""}></label>`;
     const n=rowsOf("RAIDD").filter(x=>gv("RAIDD",FD.tid,x)===tId(t)&&gv("RAIDD",FD.type,x)!=="Re-plan"&&gv("RAIDD",FD.status,x)!=="Closed").length;
     return `<div class="pdtk${late&&!done?" late":""}${done?" done":""}">
       <div class="pdtk-h"><span class="pdtk-st">${esc(gv("Activities",FA.stage,t)||"Task")}</span><span class="pdtk-pic" title="PIC">${esc(gv("Activities",FA.pic,t)||"—")}</span>
         <select class="qts pdtk-sel st-${esc(st).replace(/\W/g,"")}" data-qts="${t}" data-r="${r}" aria-label="Task status"><option value="">${esc(gv("Activities",FA.ovr,t)?"Auto":st)}</option>${tovr.map(o=>`<option ${o===gv("Activities",FA.ovr,t)?"selected":""}>${esc(o)}</option>`).join("")}</select></div>
       <div class="pdtk-n">${esc(gv("Activities",FA.task,t))}</div>
-      <div class="pdtk-row"><span class="lb">Plan</span><div class="trk">${ps&&pe?`<i class="pl" style="left:${P(ps)};width:${Wd(ps,pe)}"></i>`:""}${tdy}</div><span class="dt">${ps?fmtDate(ps):"—"} → ${pe?fmtDate(pe):"—"}</span></div>
-      <div class="pdtk-row"><span class="lb">Actual</span><div class="trk">${fs&&fe?`<i class="ac" style="left:${P(fs)};width:${Wd(fs,fe)}"><b style="width:${pc}%"></b></i>`:""}${tdy}</div><span class="dt${late&&!done?" bad":""}">${fs?fmtDate(fs):"—"} → ${fe?fmtDate(fe):"—"}${late&&!done?` <em>+${late}d</em>`:""}</span></div>
-      <div class="pdtk-dates">${[["K","Plan start",ps],["L","Plan end",pe],["Q","Actual start",+gv("Activities",FA.as,t)||0],["R","Actual done",+gv("Activities",FA.ae,t)||0]].map(([c,lb,v])=>`<label>${lb}<input type="date" data-tkd="${t}" data-r="${r}" data-c="${c}" value="${v?isoFromSerial(v):""}" ${typeof canEdit==="function"&&!canEdit()?"disabled":""}></label>`).join("")}</div>
+      <div class="pdtk-row"><span class="lb">Plan</span><div class="trk">${ps&&pe?`<i class="pl" style="left:${P(ps)};width:${Wd(ps,pe)}"></i>`:""}${tdy}</div><span class="dt">${dl("K",ps,ps)} → ${dl("L",pe,pe)}</span></div>
+      <div class="pdtk-row"><span class="lb">Actual</span><div class="trk">${fs&&fe?`<i class="ac" style="left:${P(fs)};width:${Wd(fs,fe)}"><b style="width:${pc}%"></b></i>`:""}${tdy}</div><span class="dt${late&&!done?" bad":""}">${dl("Q",fs,+gv("Activities",FA.as,t)||0)} → ${dl("R",fe,+gv("Activities",FA.ae,t)||0)}${late&&!done?` <em>+${late}d</em>`:""}</span></div>
       <div class="pdtk-p"><input type="range" class="pdtk-r" data-qtk="${t}" data-r="${r}" min="0" max="100" step="5" value="${pc}" style="--v:${pc}%" aria-label="% done"><output>${pc}%</output>
         <span class="pdtk-q">${[0,50,100].map(v=>`<button type="button" data-pdq="${v}" class="${pc===v?"on":""}">${v}</button>`).join("")}</span>
         <button type="button" class="btn small qdly${n?" on":""}" data-qdly="${t}" title="Say why this task is late and when it will be done — the forecast and the Gantt move">⚑ ${n?n+" open":"Late?"}</button></div>
@@ -191,3 +191,6 @@ document.addEventListener("change",e=>{const el=e.target;if(!el.matches||!el.mat
   if(String(gv("Activities",c,t))===String(v))return;try{setCell("Activities",c,t,v)}catch(err){toast(err.message,5000);return}
   if(c==="R"&&v&&(+gv("Activities",FA.act,t)||0)<1){setCell("Activities",FA.act,t,1);toast("Actual done date set — task marked 100 % done",3500)}
   quStamp(r);liveCalc();UI.qu.edited.add(r);UI.qu.pdOpen=UI.qu.pdOpen||new Set();UI.qu.pdOpen.add("tasks");pdRender();pdListRow(r);if(typeof renderTabs==="function")renderTabs()});
+
+/* r85 — click a date in the task card → native picker (hidden input) */
+document.addEventListener("click",e=>{const l=e.target.closest(".pdtk-dl:not(.ro)");if(!l)return;const i=l.querySelector("input");if(i&&i.showPicker){e.preventDefault();try{i.showPicker()}catch(_){i.focus()}}});

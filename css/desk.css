@@ -1293,7 +1293,9 @@ tr.burow.sel td{background:color-mix(in srgb,var(--bc) 9%,#fff)!important}
 .ovnb0{color:#98A2B3}
 @media (max-width:900px){.ovsv{grid-template-columns:1fr}}
 /* task card dates */
-.pdtk-dates{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:2px}
-.pdtk-dates label{display:flex;flex-direction:column;gap:2px;font-size:10px;font-weight:600;color:#6E6893;text-transform:uppercase;letter-spacing:.2px}
-.pdtk-dates input{height:28px;border:1px solid #E6E3F0;border-radius:7px;padding:0 4px;font:inherit;font-size:11.5px;background:#fff;min-width:0;width:100%;box-sizing:border-box}
-.pdtk-dates input:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,92,252,.12)}
+
+/* r85 — editable dates inline in task card */
+.pdtk-dl{position:relative;cursor:pointer;border-bottom:1px dashed #B9B3D6;padding:0 1px;border-radius:3px}
+.pdtk-dl:hover{background:#F1EDFF;color:var(--accent);border-bottom-color:var(--accent)}
+.pdtk-dl.ro{cursor:default;border-bottom:0}.pdtk-dl.ro:hover{background:none;color:inherit}
+.pdtk-dl input{position:absolute;left:0;bottom:0;width:100%;height:100%;opacity:0;pointer-events:none;border:0;padding:0}
