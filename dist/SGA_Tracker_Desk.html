@@ -1024,11 +1024,64 @@ table.t2{border-collapse:separate;border-spacing:0;table-layout:fixed;width:max-
 .t2wrap::-webkit-scrollbar-thumb,.t2sbar::-webkit-scrollbar-thumb{background:#C4B8F6;border-radius:8px;border:3px solid #F1EEFB}.t2wrap::-webkit-scrollbar-thumb:hover,.t2sbar::-webkit-scrollbar-thumb:hover{background:var(--accent)}
 .t2wrap{cursor:grab}.t2wrap.drag{cursor:grabbing;user-select:none}.t2wrap input,.t2wrap textarea,.t2wrap select,.t2wrap a,.t2wrap button{cursor:auto}.t2wrap select,.t2wrap a,.t2wrap button{cursor:pointer}
 @media (max-width:900px){.t2tip{display:none}}
+
+/* ===== r61 — Overview: E2E workflow ▸ swimlane ▸ process ▸ project ===== */
+.ovh2 .eyebrow{display:block;font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.ovh2 #ovProcSel{min-width:180px}
+.ovk2s{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:14px 0 26px}
+.ovk2{padding:16px 18px!important;border-radius:14px!important;border:1px solid #ECE9F6!important}
+.ovk2 .lab{font-size:12.5px;color:var(--muted)}.ovk2 .val{font-size:28px;font-weight:700;color:var(--ink);margin:6px 0 4px;letter-spacing:-.5px}.ovk2 .val .acc{color:var(--accent)}.ovk2 .val .warn{color:#B54708}.ovk2 .sub{font-size:12px;color:var(--muted)}
+.ovsec{display:flex;align-items:flex-end;gap:12px;margin:8px 0 12px;flex-wrap:wrap}.ovsec h2{margin:0;font-size:19px;color:var(--ink)}.ovsec p{margin:4px 0 0;font-size:12.5px;color:var(--muted)}.ovsec .sp{flex:1}
+.ovsrch input{height:36px;width:280px;max-width:70vw;border:1px solid #DCD6F2;border-radius:10px;padding:0 12px;font:inherit;font-size:13px;background:#fff}.ovsrch input:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,92,252,.14)}
+.ovflow{padding:0!important;border-radius:14px!important;border:1px solid #ECE9F6!important;margin-bottom:12px;overflow:hidden}
+.ovfh{display:grid;grid-template-columns:22px minmax(220px,1.6fr) auto auto 1fr 1fr 1fr;align-items:center;gap:14px;width:100%;border:0;background:#fff;padding:16px 18px;font:inherit;text-align:left;cursor:pointer}
+.ovfh:hover{background:#FCFBFF}
+.ovfh .chev{font-size:16px;color:var(--muted);text-align:center}
+.ovfh .nm b{display:block;font-size:15.5px;color:var(--ink)}.ovfh .nm small{font-size:12px;color:var(--muted)}
+.ovfst{font-size:11.5px;font-weight:600;border-radius:6px;padding:3px 10px;background:#F1EDFF;color:var(--accent-d);white-space:nowrap}.ovfst.ok{background:#E3F4E8;color:#1E8E3E}.ovfst.ns{background:#F2F4F7;color:#475467}
+.ovfdl{font-size:11.5px;font-weight:600;color:#C4320A;background:#FEECEA;border-radius:6px;padding:3px 8px;white-space:nowrap}
+.ovfh .m small{display:block;font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted)}.ovfh .m b{font-size:17px;color:var(--ink)}
+.ovfh .m.pg b{margin-right:8px}
+.ovbar{display:inline-block;width:110px;height:6px;border-radius:3px;background:#ECE8FB;vertical-align:middle;overflow:hidden;position:relative}.ovbar>b{display:block;height:100%;background:var(--accent);border-radius:3px}
+.ovbar.ok>b{background:#2E9D5B}.ovbar.bad>b{background:#C2410C}
+.ovfb{display:grid;grid-template-columns:220px 1fr;border-top:1px solid #EEEBF8}
+.ovlanes{background:#FAF9FE;border-right:1px solid #EEEBF8;padding:12px 8px;display:flex;flex-direction:column;gap:2px}
+.ovlanes .cap{font-size:10.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);padding:2px 8px 8px}
+.ovl{display:flex;align-items:center;gap:8px;border:0;background:transparent;border-radius:8px;padding:8px 10px;font:inherit;font-size:13px;color:#3F3A57;cursor:pointer;text-align:left}
+.ovl span{flex:1}.ovl b{font-weight:600;color:var(--muted);font-size:12px}.ovl i{font-style:normal;color:transparent}
+.ovl:hover{background:#F1EEFB}.ovl.on{background:#EDE8FF;color:var(--accent-d);font-weight:600}.ovl.on i{color:var(--accent)}
+.ovproc{padding:14px 18px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.ovph{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.ovph b{font-size:15px}.ovph .sp{flex:1}.ovph .crumb{font-size:11.5px;color:var(--muted)}
+.ovpc{border:1px solid #ECE9F6;border-left:3px solid #C9BEFA;border-radius:10px;padding:10px 12px;background:#fff}.ovpc.hit{border-left-color:var(--accent);background:#FCFBFF}
+.ovpch{display:flex;align-items:flex-start;gap:10px;padding-bottom:8px;border-bottom:1px solid #F1EFF8;margin-bottom:6px}.ovpch>div{flex:1}.ovpch small{display:block;font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--accent)}.ovpch b{font-size:13.5px}.ovpch .muted{font-size:12px}
+.ovpr{display:grid;grid-template-columns:62px 1fr auto 150px 14px;align-items:center;gap:12px;width:100%;border:0;background:transparent;border-radius:8px;padding:8px 6px;font:inherit;text-align:left;cursor:pointer}
+.ovpr:hover{background:#F6F3FF}.ovpr .k{font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted)}
+.ovpr .n b{display:block;font-size:13px;font-weight:600;color:var(--ink)}.ovpr .n small{font-size:11px;color:var(--muted)}
+.ovpr .pc{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#3F3A57}.ovpr .pc .ovbar{width:100%}.ovpr .cv{color:var(--muted);font-size:16px}
+.ovst{font-size:11.5px;font-weight:600;border-radius:6px;padding:3px 9px;background:#F2F4F7;color:#475467;white-space:nowrap}
+.ovst.st-Delayed{background:#FEECEA;color:#C4320A}.ovst.st-Completed{background:#E3F4E8;color:#1E8E3E}.ovst.st-OnTrack{background:#EDE8FF;color:var(--accent-d)}.ovst.st-AtRisk{background:#FFF1DB;color:#B54708}.ovst.st-OnHold{background:#ECECF2;color:#5A5870}
+.ovff{display:flex;align-items:center;gap:12px;padding:10px 18px;border-top:1px solid #EEEBF8;font-size:12px}.ovff .muted{flex:1}
+.ovlink{border:0;background:none;color:var(--accent-d);font:inherit;font-size:13px;font-weight:600;cursor:pointer}.ovlink:hover{text-decoration:underline}
+.ovunm{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:#F1EDFF;border:1px solid #E2DBFB;border-radius:14px;padding:14px 18px;margin:4px 0 28px}
+.ovunm>div{flex:1;display:flex;flex-direction:column;gap:3px}.ovunm b{font-size:14px;color:var(--ink)}.ovunm span{font-size:12.5px;color:var(--muted)}
+.ovhl{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.ovhc{padding:16px 18px!important;border-radius:14px!important;border:1px solid #ECE9F6!important}
+.ovhc .hh{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.ovhc .hh b{font-size:14px}.ovhc .hh .muted{font-size:12px}
+.ovhr{display:grid;grid-template-columns:150px 1fr 36px 40px;align-items:center;gap:12px;width:100%;border:0;background:transparent;padding:7px 4px;border-radius:7px;font:inherit;font-size:13px;color:#3F3A57;text-align:left}
+button.ovhr{cursor:pointer}button.ovhr:hover{background:#F6F3FF}
+.ovhr .ovbar{width:100%;height:7px}.ovhr>b{text-align:right;color:var(--ink)}.ovhr small{font-size:11.5px;color:var(--muted);text-align:right}
+.ovhr.st .ovbar>b{background:#A895F7}
+.ovhc .ft{margin:10px 0 0;font-size:12px;color:var(--muted)}.ovhc .ft.bad{color:#B54708}.ovhc .ft.acc{color:var(--accent-d)}
+.ovnote{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);border-top:1px solid #E7E5EE;margin-top:22px;padding-top:12px}
+.ovmore{margin-top:18px;border-radius:14px!important}.ovmore>summary{cursor:pointer;font-size:14px}
+.grid.one{display:grid;grid-template-columns:1fr;gap:14px}
+@media (max-width:1200px){.ovfh{grid-template-columns:22px 1fr auto;}.ovfh .m{display:none}.ovk2s{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:860px){.ovfb{grid-template-columns:1fr}.ovlanes{flex-direction:row;flex-wrap:wrap;border-right:0;border-bottom:1px solid #EEEBF8}.ovhl{grid-template-columns:1fr}.ovpr{grid-template-columns:1fr auto}.ovpr .k,.ovpr .pc,.ovpr .cv{display:none}}
 </style>
 </head>
 <body>
 <aside class="side" id="side" aria-label="Main navigation">
-  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r60</span></small></span></div>
+  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r61</span></small></span></div>
   <div class="sglab">WORKSPACE</div>
   <button type="button" class="wschip" id="btnOpen" title="Open the workbook (the database)"><span class="wsdot" aria-hidden="true"></span><span class="file" id="fileName">No workbook loaded</span><span class="chev" aria-hidden="true">⌄</span></button>
   <nav class="sidenav hidden" id="tabs"></nav>
@@ -2239,13 +2292,11 @@ function vDash(m,keepScroll){const _y=window.scrollY;setTimeout(()=>{if(keepScro
    ${nF?`<button class="btn small" id="clrAll">✕ Clear filters (${nF})</button>`:""}
    <span class="muted" style="margin-left:auto">${P.length} of ${allP.length} projects · ${A.length} tasks · ${Bl.length} benefit lines</span>
    <span class="muted finfo" title="Pick a BU, then a CF of that BU, then a project of that CF — or leave any on All. Status: untick a box to hide projects with that status, tick it to show them again (Only = show just that one). Type part of a name in Project to show all matching projects. These filters apply to every chart, KPI and table on the dashboard; dropdowns inside a card only change how that card is drawn.">ⓘ</span></div>
-  ${ovKpis(P,A,D,Bl,{valRec,valOne,hrs,fteh,pTD,aTD,pids})}${ovHero(pids)}${ovPortfolio(P)}
-  ${typeof hasE2E==="function"&&hasE2E()?`<div class="card pad dsec" style="margin-top:14px"><div class="chead"><h2>By end-to-end process</h2><span class="muted" style="font-size:12px">Click a flow to see its swimlanes (left lane first), a lane to see its projects, a project to open it · process time comes from the E2E step pop-ups</span></div>${e2eTreeHtml(pids,"dash",BS)}</div>`:""}
-  <div class="grid three" style="margin-top:14px">
-    <div class="card pad"><h2>All project status</h2>${donut(stCount.map(x=>({n:x.n,v:x.v,c:x.c})),{center:P.length})}</div>
+  ${ovKpis(P,A,D,Bl,{valRec,valOne,hrs,fteh,pTD,aTD,pids})}${ovNewHtml(P,Bl)}
+  <details class="card pad ovmore"${UI.dash.more?" open":""}><summary><b>More analysis</b> <span class="muted">— benefit plan vs actual, breakdowns by process area / BU / leader, detail tables</span></summary>
+  <div class="grid one" style="margin-top:14px">
     <div class="card pad" data-chart="proc"><div class="chead"><h2>By process area</h2><span class="ctl"><span class="muted">Show</span>${selOpt("procView",pv,VIEWS)}</span></div><p class="muted" style="margin:-6px 0 4px;font-size:12px">Click a bar or colour to zoom into its projects</p>${dimChart(r=>gv("Projects",FP.proc,r),pv)}</div>
-    <div class="card pad"><h2>Open projects by current stage</h2><p class="muted" style="margin:-6px 0 8px;font-size:12px">Stage of the first unfinished task · colour = project status</p>${stgKeys.length?stackedH(stgKeys,stageSeries):`<p class="muted">No open projects</p>`}</div>
-  </div>
+    </div>
   ${UI.dash.zoom&&UI.dash.zoom.chart==="proc"?zoomPanel(P):""}
   <div style="margin-top:14px">${benefitPanel("dash")}</div>
   <div class="grid two" style="margin-top:14px">
@@ -2257,9 +2308,9 @@ function vDash(m,keepScroll){const _y=window.scrollY;setTimeout(()=>{if(keepScro
   <details class="card pad" style="margin-top:14px"><summary><b>Detail tables</b> <span class="muted">— status × BU / CF / process area and the delayed & at-risk list</span></summary>
     <h2 style="margin-top:12px">Projects by status × ${bu?"CF":"BU"}</h2>${matrix(bu?"CF":"BU",P,r=>gv("Projects",bu?FP.cf:FP.bu,r),{})}
     <h2 style="margin-top:12px">Projects by status × process area</h2>${matrix("Process Area",P,r=>gv("Projects",FP.proc,r),{})}
-    <h2 style="margin-top:12px">Delayed & at-risk projects</h2>${riskList(P)}</details>`;
+    <h2 style="margin-top:12px">Delayed & at-risk projects</h2>${riskList(P)}</details></details>`;
   const reF=()=>{UI.dash.cell=null;UI.dash.zoom=null;vDash(m,true)};
-  ovBind(m);$("#fBU").onchange=e=>{F.bu=e.target.value;F.cf="";F.proc="";reF()};$("#fCF").onchange=e=>{F.cf=e.target.value;F.proc="";reF()};$("#fProc").onchange=e=>{F.proc=e.target.value;F.init="";reF()};$("#fInit").onchange=e=>{F.init=e.target.value;reF()};bindStChips(m,"dst",F,reF);
+  ovBind(m);ovNewBind(m);{const mo=m.querySelector(".ovmore");if(mo)mo.ontoggle=()=>{UI.dash.more=mo.open}}$("#fBU").onchange=e=>{F.bu=e.target.value;F.cf="";F.proc="";reF()};$("#fCF").onchange=e=>{F.cf=e.target.value;F.proc="";reF()};$("#fProc").onchange=e=>{F.proc=e.target.value;F.init="";reF()};$("#fInit").onchange=e=>{F.init=e.target.value;reF()};bindStChips(m,"dst",F,reF);
   $("#fQ").addEventListener("change",e=>{F.q=e.target.value.trim();reF()});
   if($("#clrAll"))$("#clrAll").onclick=()=>{F.bu=F.cf=F.proc=F.init=F.q="";F.stOff=[];reF()};
   $("#procView").onchange=e=>{UI.dash.procView=e.target.value;vDash(m,true)};$("#buView").onchange=e=>{UI.dash.buView=e.target.value;vDash(m,true)};
@@ -2281,6 +2332,70 @@ function banner(kind,sheet){
   if(kind==="report")return `<div class="banner rep"><b>REPORT · read-only</b><span>Calculated live from the 5 input sheets. Change data under <b>Update data</b>, then <b>Save to database</b>.</span></div>`;
   return `<div class="banner inp"><b>INPUT · ${esc(sheet)}</b><span>Edits here are written into the ${esc(sheet)} sheet of the Excel file when you click <b>Save to database</b>. ${({Realisation:"Type the actual THB for each month in the grid.",RAIDD:"Use <b>Edit</b> / <b>Delete</b> on each row, or <b>+ New</b>.",Projects:"Click a row to open it, or <b>+ New</b>.",Benefits:"Click a row to open it, or <b>+ New</b>.",Activities:"Click a row to open it, or <b>+ New</b>."})[sheet]||""}</span></div>`;
 }
+
+/* 04b-overview.js — Overview organised around E2E workflow ▸ swimlane ▸ process (step) ▸ project,
+   plus KPI cards, a clear "unmapped projects" action and two plain status / stage summaries. */
+"use strict";
+/* every flow with its lanes ▸ steps that carry projects, limited to the projects in view (pids) */
+function ovFlows(pids){if(typeof hasE2E!=="function"||!hasE2E())return [];const out=[];
+  for(const f of e2eFlows()){const ver=f.v["TO-BE"]&&f.v["TO-BE"].doc?"TO-BE":f.v["AS-IS"]&&f.v["AS-IS"].doc?"AS-IS":"";if(!ver)continue;
+    const doc=f.v[ver].doc,flat=e2eFlat(doc);const lanes=(flat.lanes||[]).map(l=>({name:l.name,procs:[],pids:new Set()}));
+    let steps=[];try{steps=stepOrder(doc)}catch(e){steps=(flat.shapes||[]).filter(isStep)}
+    for(const sh of steps){const ps=(sh.proj||[]).filter(p=>pids.has(p));if(!ps.length)continue;const ln=laneOfShape(flat,sh)||"(no lane)";
+      let L=lanes.find(x=>x.name===ln);if(!L){L={name:ln,procs:[],pids:new Set()};lanes.push(L)}L.procs.push({id:sh.id,title:stepTitle(sh),pids:ps});ps.forEach(p=>L.pids.add(p))}
+    const all=new Set(lanes.flatMap(L=>[...L.pids]));out.push({f,ver,lanes,pids:all})}
+  return out}
+function ovStatusOf(rows){if(!rows.length)return ["Not mapped","nm"];const st=rows.map(pStat);if(st.every(s=>s==="Completed"||s==="Cancelled"))return ["Completed","ok"];
+  if(st.every(s=>s==="Not Started"))return ["Not started","ns"];return ["In progress","ip"]}
+function ovNewHtml(P,Bl){const pids=new Set(P.map(pId));const byId=new Map(P.map(r=>[pId(r),r]));const D=UI.dash;D.ovOpen=D.ovOpen||null;D.ovLane=D.ovLane||{};
+  const ben=pid=>{const b=Bl.filter(x=>x.pid===pid&&!x.drop);return {yr:b.filter(x=>!x.one).reduce((a,x)=>a+x.gross,0),hrs:b.reduce((a,x)=>a+x.hrs,0)}};
+  const FL=ovFlows(pids);const mapped=new Set(FL.flatMap(F=>[...F.pids]));const unm=P.filter(r=>!mapped.has(pId(r)));
+  const delayed=P.filter(r=>pStat(r)==="Delayed").length;const mappedYr=[...mapped].reduce((a,p)=>a+ben(p).yr,0);
+  const q=String(D.ovQ||"").trim().toLowerCase();const hit=s=>!q||String(s).toLowerCase().includes(q);
+  const projHit=pid=>{const r=byId.get(pid);return r&&hit(pid+" "+gv("Projects",FP.name,r))};
+  const FLs=FL.filter(F=>F.pids.size&&(hit(F.f.name)||F.lanes.some(L=>hit(L.name)||L.procs.some(p=>hit(p.title)))||[...F.pids].some(projHit)));
+  if(D.ovOpen==null&&FLs.length)D.ovOpen=FLs[0].f.id;
+  const kpi=(lab,val,sub,cls="")=>`<div class="card ovk2 ${cls}"><div class="lab">${lab}</div><div class="val">${val}</div><div class="sub">${sub}</div></div>`;
+  const pct=v=>Math.round(v*100);const bar=(v,cls="")=>`<span class="ovbar ${cls}"><b style="width:${Math.min(100,pct(v))}%"></b></span>`;
+  const pill=s=>`<span class="ovst st-${esc(s).replace(/\W/g,"")}">${esc(s)}</span>`;
+  const flowCard=F=>{const rows=[...F.pids].map(p=>byId.get(p)).filter(Boolean);const open=D.ovOpen===F.f.id;const [stT,stC]=ovStatusOf(rows);
+    const prog=rows.length?rows.reduce((a,r)=>a+(pLive(r).comp||0),0)/rows.length:0;const yr=rows.reduce((a,r)=>a+ben(pId(r)).yr,0),hr=rows.reduce((a,r)=>a+ben(pId(r)).hrs,0);
+    const nDel=rows.filter(r=>pStat(r)==="Delayed").length;const lanes=F.lanes.filter(L=>L.procs.length);
+    let selL=D.ovLane[F.f.id];if(!lanes.some(L=>L.name===selL))selL=(lanes.find(L=>q&&(hit(L.name)||L.procs.some(p=>hit(p.title)||p.pids.some(projHit))))||lanes[0]||{}).name;
+    const L=lanes.find(x=>x.name===selL);
+    const projRow=pid=>{const r=byId.get(pid);if(!r)return "";const other=F.lanes.filter(x=>x.name!==selL&&x.pids.has(pid)).length;const c=pLive(r).comp||0;
+      return `<button type="button" class="ovpr" data-ovopen="${r}"><span class="k">Project</span><span class="n"><b>${esc(gv("Projects",FP.name,r))}</b><small>${esc(pid)}${gv("Projects","AB",r)?" · "+esc(gv("Projects","AB",r)):""}${other?` · Also supports ${other} lane${other>1?"s":""}`:""}</small></span>${pill(pStat(r))}<span class="pc">${pct(c)}%${bar(c,pStat(r)==="Completed"?"ok":pStat(r)==="Delayed"?"bad":"")}</span><span class="cv">›</span></button>`};
+    return `<div class="card ovflow${open?" open":""}"><button type="button" class="ovfh" data-ovflow="${esc(F.f.id)}" aria-expanded="${open}">
+      <span class="chev">${open?"⌄":"›"}</span><span class="nm"><b>${esc(F.f.name)}</b><small>${lanes.length} swimlane${lanes.length!==1?"s":""} · ${F.pids.size} unique project${F.pids.size!==1?"s":""}${F.ver==="AS-IS"?" · AS-IS map":""}</small></span>
+      <span class="ovfst ${stC}">${stT}</span>${nDel?`<span class="ovfdl">${nDel} delayed</span>`:""}
+      <span class="m pg"><small>Project progress</small><b>${pct(prog)}%</b>${bar(prog,stC==="ok"?"ok":"")}</span><span class="m"><small>Planned / year</small><b>${yr?"THB "+fmtShort(yr):"—"}</b></span><span class="m"><small>Planned time saved</small><b>${hr?fmtNum(Math.round(hr))+" h/mo":"—"}</b></span></button>
+      ${open?`<div class="ovfb"><div class="ovlanes"><div class="cap">Swimlanes</div>${lanes.map(x=>`<button type="button" class="ovl${x.name===selL?" on":""}" data-ovlane="${esc(x.name)}" data-ovf="${esc(F.f.id)}"><span>${esc(x.name)}</span><b>${x.pids.size}</b><i>›</i></button>`).join("")||'<span class="muted">No steps linked yet</span>'}</div>
+        <div class="ovproc">${L?`<div class="ovph"><b>${esc(L.name)}</b><span class="muted">${L.procs.length} process${L.procs.length!==1?"es":""} / ${L.pids.size} project${L.pids.size!==1?"s":""}</span><span class="sp"></span><span class="crumb">Workflow › Swimlane › Process › Project</span></div>
+          ${L.procs.map((p,i)=>`<div class="ovpc${q&&(hit(p.title)||p.pids.some(projHit))?" hit":""}"><div class="ovpch"><div><small>Process ${String(i+1).padStart(2,"0")}</small><b>${esc(p.title)}</b></div><span class="muted">${p.pids.length} project${p.pids.length!==1?"s":""}</span></div>${p.pids.map(projRow).join("")}</div>`).join("")}`:""}</div></div>
+        <div class="ovff"><span class="muted">Projects can support several swimlanes; workflow totals count each project once.</span><button type="button" class="ovlink" data-ovmap="${esc(F.f.id)}">View workflow details →</button></div>`:""}</div>`};
+  /* project health */
+  const tot=P.length||1;const stRows=STL.map(s=>({s,n:P.filter(r=>pStat(r)===s).length}));
+  const openP=P.filter(r=>!["Completed","Cancelled"].includes(pStat(r)));const stg=[...listFromName("L_StageWF"),...listFromName("L_StageAG"),"(no tasks)","All complete"];
+  const sg=uniqOrder(stg).map(s=>({s,n:openP.filter(r=>curStage(r)===s).length})).filter(x=>x.n);const smax=Math.max(1,...sg.map(x=>x.n));
+  const top2=[...sg].sort((a,b)=>b.n-a.n).slice(0,2);
+  return `  <div class="ovsec"><div><h2>E2E workflows</h2><p>Explore the business process first. Find projects where the work happens.</p></div><span class="sp"></span><label class="ovsrch"><input type="search" id="ovQ" placeholder="Search workflows or projects…" value="${esc(D.ovQ||"")}"></label></div>
+  ${FLs.map(flowCard).join("")||`<div class="card pad muted">${FL.length?"Nothing matches the search.":"No E2E workflow is mapped yet — draw one under E2E flow maps and link its steps to projects."}</div>`}
+  ${unm.length?`<div class="ovunm"><div><b>${unm.length} project${unm.length>1?"s are":" is"} not mapped to a process yet</b><span>Assign them to an E2E workflow, swimlane and process to see their business impact.</span></div><button type="button" class="btn new" id="ovUnm">Review unmapped projects →</button></div>`:""}
+  <div class="ovsec"><div><h2>Project health at a glance</h2><p>Portfolio-wide · includes mapped and unmapped projects</p></div></div>
+  <div class="ovhl"><div class="card ovhc"><div class="hh"><b>Where projects stand</b><span class="muted">${P.length} total projects</span></div>
+      ${stRows.map(x=>`<button type="button" class="ovhr" data-ovst="${esc(x.s)}" title="Show these projects"><span>${esc(x.s)}</span><span class="ovbar"><b style="width:${x.n/tot*100}%;background:${SCOL[x.s]||"#888"}"></b></span><b>${x.n}</b><small>${Math.round(x.n/tot*100)}%</small></button>`).join("")}
+      ${delayed?`<p class="ft bad">${delayed} delayed project${delayed>1?"s":""} need${delayed>1?"":"s"} attention.</p>`:`<p class="ft">No delayed projects.</p>`}</div>
+    <div class="card ovhc"><div class="hh"><b>Where open work is concentrated</b><span class="muted">${openP.length} open projects</span></div>
+      ${sg.map(x=>`<div class="ovhr st"><span>${esc(x.s)}</span><span class="ovbar"><b style="width:${x.n/smax*100}%"></b></span><b>${x.n}</b><small></small></div>`).join("")||'<p class="muted">No open projects.</p>'}
+      ${top2.length?`<p class="ft acc">${top2.reduce((a,x)=>a+x.n,0)} of ${openP.length} open projects are in ${top2.map(x=>esc(x.s)).join(" or ")}.</p>`:""}</div></div>
+  <div class="ovnote"><span>Process groupings come from the E2E flow maps; project data follows the tracker.</span><span>Planned benefits are estimates, not realised savings.</span></div>`}
+function ovNewBind(m){const D=UI.dash;const re=()=>vDash(m,true);
+  m.querySelectorAll("[data-ovflow]").forEach(b=>b.onclick=()=>{D.ovOpen=D.ovOpen===b.dataset.ovflow?"":b.dataset.ovflow;re()});
+  m.querySelectorAll("[data-ovlane]").forEach(b=>b.onclick=()=>{D.ovLane[b.dataset.ovf]=b.dataset.ovlane;re()});
+  const q=m.querySelector("#ovQ");if(q)q.oninput=()=>{clearTimeout(ovNewBind._t);ovNewBind._t=setTimeout(()=>{D.ovQ=q.value;D.ovOpen=null;re();const n=m.querySelector("#ovQ");if(n){n.focus();n.setSelectionRange(n.value.length,n.value.length)}},300)};
+  const u=m.querySelector("#ovUnm");if(u)u.onclick=()=>{UI.qu.flow="none";UI.qu.lane="";view="Projects";UI.pview="projects";render();window.scrollTo(0,0)};
+  m.querySelectorAll("[data-ovst]").forEach(b=>b.onclick=()=>{UI.qu.stOff=STL.filter(s=>s!==b.dataset.ovst);UI.qu.flow="";view="Projects";UI.pview="projects";render();window.scrollTo(0,0)});
+  const ps=m.querySelector("#ovProcSel");if(ps)ps.onchange=e=>{D.proc=e.target.value;D.init="";D.cell=null;D.zoom=null;vDash(m,true)}}
 
 /* ---- benefits analysis (chart panel on the Benefits page) ---- */
 UI.ben={bu:"",seg:"bu",view:"pva",metric:"gross"};
