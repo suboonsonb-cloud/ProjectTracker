@@ -1169,7 +1169,7 @@ button.ovhr{cursor:pointer}button.ovhr:hover{background:#F6F3FF}
 </head>
 <body>
 <aside class="side" id="side" aria-label="Main navigation">
-  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r68</span></small></span></div>
+  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r69</span></small></span></div>
   <div class="sglab">WORKSPACE</div>
   <button type="button" class="wschip" id="btnOpen" title="Open the workbook (the database)"><span class="wsdot" aria-hidden="true"></span><span class="file" id="fileName">No workbook loaded</span><span class="chev" aria-hidden="true">⌄</span></button>
   <nav class="sidenav hidden" id="tabs"></nav>
@@ -5112,7 +5112,7 @@ function t2Scroll(m,C){const w=m.querySelector(".t2wrap"),bar=m.querySelector(".
   const end=e=>{if(!d)return;d=null;w.classList.remove("drag");try{w.releasePointerCapture(e.pointerId)}catch(_){}};w.addEventListener("pointerup",end);w.addEventListener("pointercancel",end);
   if(!t2Scroll._rs){t2Scroll._rs=1;window.addEventListener("resize",()=>{const b=document.querySelector(".t2sbar"),tt=document.querySelector("table.t2"),ww=document.querySelector(".t2wrap");if(b&&tt&&ww){b.firstElementChild.style.width=tt.offsetWidth+"px";b.style.display=tt.offsetWidth>ww.clientWidth+2?"":"none"}})}
   /* the box always ends inside the window, so its sideways scrollbar is always on screen */
-  const fit=()=>{if(!document.body.contains(w)){window.removeEventListener("scroll",onS);window.removeEventListener("resize",onS);return}const top=w.getBoundingClientRect().top;const vh=innerHeight/ZF();w.style.maxHeight=Math.max(200,Math.round(vh-Math.max(top,0)-14))+"px"};
+  const fit=()=>{if(!document.body.contains(w)){window.removeEventListener("scroll",onS);window.removeEventListener("resize",onS);return}const top=w.getBoundingClientRect().top;const vh=innerHeight/ZF();w.style.maxHeight=Math.max(Math.round(vh-140),Math.round(vh-Math.max(top,0)-14))+"px"};
   let raf=0;const onS=()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;fit()})};window.addEventListener("scroll",onS,{passive:true});window.addEventListener("resize",onS);fit();
   if(UI.qu.t2L)w.scrollLeft=UI.qu.t2L;w.addEventListener("scroll",()=>{UI.qu.t2L=w.scrollLeft})}
 

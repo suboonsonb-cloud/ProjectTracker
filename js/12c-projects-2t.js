@@ -130,6 +130,6 @@ function t2Scroll(m,C){const w=m.querySelector(".t2wrap"),bar=m.querySelector(".
   const end=e=>{if(!d)return;d=null;w.classList.remove("drag");try{w.releasePointerCapture(e.pointerId)}catch(_){}};w.addEventListener("pointerup",end);w.addEventListener("pointercancel",end);
   if(!t2Scroll._rs){t2Scroll._rs=1;window.addEventListener("resize",()=>{const b=document.querySelector(".t2sbar"),tt=document.querySelector("table.t2"),ww=document.querySelector(".t2wrap");if(b&&tt&&ww){b.firstElementChild.style.width=tt.offsetWidth+"px";b.style.display=tt.offsetWidth>ww.clientWidth+2?"":"none"}})}
   /* the box always ends inside the window, so its sideways scrollbar is always on screen */
-  const fit=()=>{if(!document.body.contains(w)){window.removeEventListener("scroll",onS);window.removeEventListener("resize",onS);return}const top=w.getBoundingClientRect().top;const vh=innerHeight/ZF();w.style.maxHeight=Math.max(200,Math.round(vh-Math.max(top,0)-14))+"px"};
+  const fit=()=>{if(!document.body.contains(w)){window.removeEventListener("scroll",onS);window.removeEventListener("resize",onS);return}const top=w.getBoundingClientRect().top;const vh=innerHeight/ZF();w.style.maxHeight=Math.max(Math.round(vh-140),Math.round(vh-Math.max(top,0)-14))+"px"};
   let raf=0;const onS=()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;fit()})};window.addEventListener("scroll",onS,{passive:true});window.addEventListener("resize",onS);fit();
   if(UI.qu.t2L)w.scrollLeft=UI.qu.t2L;w.addEventListener("scroll",()=>{UI.qu.t2L=w.scrollLeft})}
