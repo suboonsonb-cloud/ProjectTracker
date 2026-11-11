@@ -1240,7 +1240,7 @@ button.ovhr{cursor:pointer}button.ovhr:hover{background:#F6F3FF}
 </head>
 <body>
 <aside class="side" id="side" aria-label="Main navigation">
-  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r78</span></small></span></div>
+  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r79</span></small></span></div>
   <div class="sglab">WORKSPACE</div>
   <button type="button" class="wschip" id="btnOpen" title="Open the workbook (the database)"><span class="wsdot" aria-hidden="true"></span><span class="file" id="fileName">No workbook loaded</span><span class="chev" aria-hidden="true">⌄</span></button>
   <nav class="sidenav hidden" id="tabs"></nav>
@@ -4090,7 +4090,9 @@ const SESS_KEY = "sga_acc";
 function sessSave(keep) { const v = JSON.stringify({ login: ACC.login, until: keep ? Date.now() + 30 * 864e5 : 0 }); try { sessionStorage.setItem(SESS_KEY, v); if (keep) localStorage.setItem(SESS_KEY, v); else localStorage.removeItem(SESS_KEY); localStorage.setItem("sga_lastlogin", ACC.login); } catch (e) { } }
 function sessGet() { try { const v = JSON.parse(sessionStorage.getItem(SESS_KEY) || localStorage.getItem(SESS_KEY) || "null"); if (v && v.until && v.until < Date.now()) { localStorage.removeItem(SESS_KEY); return null; } return v; } catch (e) { return null; } }
 function sessClear() { try { sessionStorage.removeItem(SESS_KEY); localStorage.removeItem(SESS_KEY); } catch (e) { } }
-function signInAs(u, keep) { ACC = { r: u.r, login: u.login, name: u.name || u.login, role: u.role, bu: u.role === "Admin" ? null : u.bu }; SC_CACHE = { k: "" }; sessSave(keep); paintAcc(); }
+function signInAs(u, keep) { ACC = { r: u.r, login: u.login, name: u.name || u.login, role: u.role, bu: u.role === "Admin" ? null : u.bu }; SC_CACHE = { k: "" }; sessSave(keep); paintAcc();
+  /* redraw with the new role — the sidebar and pages drawn before sign-in were in view-only mode */
+  if (S.zip && typeof render === "function") setTimeout(() => { try { render(); } catch (e) {} }, 0); }
 function signOut() { ACC = null; sessClear(); paintAcc(); accessGate(true).then(ok => { if (ok && view) render(); }); }
 
 /* ---- after a workbook is opened: who are you? ---- */

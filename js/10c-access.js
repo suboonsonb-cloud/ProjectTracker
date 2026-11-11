@@ -88,7 +88,9 @@ const SESS_KEY = "sga_acc";
 function sessSave(keep) { const v = JSON.stringify({ login: ACC.login, until: keep ? Date.now() + 30 * 864e5 : 0 }); try { sessionStorage.setItem(SESS_KEY, v); if (keep) localStorage.setItem(SESS_KEY, v); else localStorage.removeItem(SESS_KEY); localStorage.setItem("sga_lastlogin", ACC.login); } catch (e) { } }
 function sessGet() { try { const v = JSON.parse(sessionStorage.getItem(SESS_KEY) || localStorage.getItem(SESS_KEY) || "null"); if (v && v.until && v.until < Date.now()) { localStorage.removeItem(SESS_KEY); return null; } return v; } catch (e) { return null; } }
 function sessClear() { try { sessionStorage.removeItem(SESS_KEY); localStorage.removeItem(SESS_KEY); } catch (e) { } }
-function signInAs(u, keep) { ACC = { r: u.r, login: u.login, name: u.name || u.login, role: u.role, bu: u.role === "Admin" ? null : u.bu }; SC_CACHE = { k: "" }; sessSave(keep); paintAcc(); }
+function signInAs(u, keep) { ACC = { r: u.r, login: u.login, name: u.name || u.login, role: u.role, bu: u.role === "Admin" ? null : u.bu }; SC_CACHE = { k: "" }; sessSave(keep); paintAcc();
+  /* redraw with the new role — the sidebar and pages drawn before sign-in were in view-only mode */
+  if (S.zip && typeof render === "function") setTimeout(() => { try { render(); } catch (e) {} }, 0); }
 function signOut() { ACC = null; sessClear(); paintAcc(); accessGate(true).then(ok => { if (ok && view) render(); }); }
 
 /* ---- after a workbook is opened: who are you? ---- */
