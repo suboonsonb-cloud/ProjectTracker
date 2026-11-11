@@ -172,6 +172,10 @@ function maxSuffix(ids,prefix,width){let m=0;for(const id of ids){if(typeof id==
 /* ID prefix = programme: 2T (old 2T Club project, Programme Tag "2T") or SIMP (simplification — everything else) */
 function progChip(id){return progChip0(id)+(typeof buChip==="function"?buChip(buOfPid(id)):"")}
 function progChip0(id){const p=String(id||"").split("-")[0];return p==="2T"?`<span class="pchipP p2t" title="Old 2T Club project">2T</span> `:p==="SIMP"?`<span class="pchipP psimp" title="Simplification project">SIMP</span> `:p==="CR"?`<span class="pchipP pcr" title="Complexity Reduction project">CR</span> `:""}
+/* does the project have a benefit yet? = at least one benefit line with a value, hours or a description (cached per change count) */
+let HB_C={k:-1,s:null};
+function hasBenefit(pid){const k=(S.changes||[]).length+"|"+(S.fileName||"");if(HB_C.k!==k||!HB_C.s){const s=new Set();for(const r of rowsOf("Benefits")){const p=gv("Benefits",FB.pid,r);if(!p)continue;
+    const v=["J","K","L",FB.trh].some(c=>+gv("Benefits",c,r)>0)||String(gv("Benefits",FB.desc,r)||"").trim()!=="";if(v)s.add(p)}HB_C={k,s}}return HB_C.s.has(pid)}
 /* each BU has its own colour (order of the BU list; Finance keeps the app purple) — used to tint project highlights */
 const BU_PAL=["#7C5CFC","#0E9384","#E04F16","#2E90FA","#C11574","#669F2A","#B54708","#DD2590","#0BA5EC","#15B79E","#CA8504","#3E4784"];
 function buColor(bu){bu=String(bu||"");if(!bu)return "#98A2B3";let L=[];try{L=listFromName("L_BU").map(String)}catch(e){}const fi=L.indexOf("Finance");

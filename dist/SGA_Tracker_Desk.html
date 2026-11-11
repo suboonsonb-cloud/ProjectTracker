@@ -1283,11 +1283,16 @@ tr.burow.sel td{background:color-mix(in srgb,var(--bc) 9%,#fff)!important}
 .ovflow[style*="--fc"]:not(.ovdraft) .ovficon{background:linear-gradient(135deg,color-mix(in srgb,var(--fc) 70%,#fff),var(--fc));box-shadow:0 6px 14px color-mix(in srgb,var(--fc) 35%,transparent)}
 .fhcard[style*="--fc"]{border-top:4px solid var(--fc)!important}
 .ovpc.hit,.ovl.on{border-left-color:var(--fc,var(--accent))}
+/* r83 — benefit coverage */
+.ovbn{font-weight:600;color:#1E7B4E}.ovbn.warn{color:#B54708}
+.ovbcov{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;background:#FAF9FE;border:1px solid #EEEBF8;border-radius:12px;padding:10px 14px;margin-bottom:10px;font-size:13px}
+.ovbcov b{font-size:18px}.ovbcov .ovbar{width:100%;height:8px}.ovbcov .ovbar>b{background:#12B76A}.ovbcov .warn{color:#B54708;font-weight:600}.ovbcov .ok{color:#1E7B4E;font-weight:600}
+.ovhb{color:#1E7B4E;font-weight:600}.ovnb{display:inline-block;font-size:10.5px;font-weight:700;color:#B54708;background:#FFF1DB;border:1px solid #FEC98A;border-radius:5px;padding:0 5px;line-height:1.5}
 </style>
 </head>
 <body>
 <aside class="side" id="side" aria-label="Main navigation">
-  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r82</span></small></span></div>
+  <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4a2.5 2.5 0 0 1 2.5 2.5v5"/><path d="M14 17.5h-4A2.5 2.5 0 0 1 7.5 15v-5"/></svg></span><span class="bname">Initiatives<small>Tracker Desk <span class="buildtag" title="App version">r83</span></small></span></div>
   <div class="sglab">WORKSPACE</div>
   <button type="button" class="wschip" id="btnOpen" title="Open the workbook (the database)"><span class="wsdot" aria-hidden="true"></span><span class="file" id="fileName">No workbook loaded</span><span class="chev" aria-hidden="true">⌄</span></button>
   <nav class="sidenav hidden" id="tabs"></nav>
@@ -1546,6 +1551,10 @@ function maxSuffix(ids,prefix,width){let m=0;for(const id of ids){if(typeof id==
 /* ID prefix = programme: 2T (old 2T Club project, Programme Tag "2T") or SIMP (simplification — everything else) */
 function progChip(id){return progChip0(id)+(typeof buChip==="function"?buChip(buOfPid(id)):"")}
 function progChip0(id){const p=String(id||"").split("-")[0];return p==="2T"?`<span class="pchipP p2t" title="Old 2T Club project">2T</span> `:p==="SIMP"?`<span class="pchipP psimp" title="Simplification project">SIMP</span> `:p==="CR"?`<span class="pchipP pcr" title="Complexity Reduction project">CR</span> `:""}
+/* does the project have a benefit yet? = at least one benefit line with a value, hours or a description (cached per change count) */
+let HB_C={k:-1,s:null};
+function hasBenefit(pid){const k=(S.changes||[]).length+"|"+(S.fileName||"");if(HB_C.k!==k||!HB_C.s){const s=new Set();for(const r of rowsOf("Benefits")){const p=gv("Benefits",FB.pid,r);if(!p)continue;
+    const v=["J","K","L",FB.trh].some(c=>+gv("Benefits",c,r)>0)||String(gv("Benefits",FB.desc,r)||"").trim()!=="";if(v)s.add(p)}HB_C={k,s}}return HB_C.s.has(pid)}
 /* each BU has its own colour (order of the BU list; Finance keeps the app purple) — used to tint project highlights */
 const BU_PAL=["#7C5CFC","#0E9384","#E04F16","#2E90FA","#C11574","#669F2A","#B54708","#DD2590","#0BA5EC","#15B79E","#CA8504","#3E4784"];
 function buColor(bu){bu=String(bu||"");if(!bu)return "#98A2B3";let L=[];try{L=listFromName("L_BU").map(String)}catch(e){}const fi=L.indexOf("Finance");
@@ -2468,7 +2477,7 @@ function ovKpis(P,A,D,Bl,x){const M=ovMonths(6);const done=s=>s==="Completed"||s
   const K=UI.dash.kOpen||"";const card=(lab,val,dl,sp,title,go)=>`<div class="card ovgo${K===go?" on":""}" data-ovk="${go}" role="button" tabindex="0" aria-expanded="${K===go}" title="${esc(title)} — click for the breakdown"><div class="lab">${lab}</div><div class="val">${val}</div>${sp}<div class="dl">${dl}</div></div>`;
   const mapped=typeof hasE2E==="function"&&hasE2E()?(()=>{const G=e2eGroups(x.pids);return x.pids.size-G.rest.length})():null;
   return `<div class="ovk">
-    ${card("Active projects",activeNow,`${tag(dA)} vs. last month`,ovSpark(act,"#7C5CFC"),"Not completed or cancelled · trend = active in each of the last 6 months","active")}
+    ${card("Active projects",activeNow,`${tag(dA)} vs. last month · <span class="ovbn${P.filter(r=>!["Completed","Cancelled"].includes(pStat(r))&&!hasBenefit(pId(r))).length?" warn":""}" title="Active projects that have at least one benefit line">💰 ${P.filter(r=>!["Completed","Cancelled"].includes(pStat(r))&&hasBenefit(pId(r))).length} of ${activeNow} with benefit</span>`,ovSpark(act,"#7C5CFC"),"Not completed or cancelled · trend = active in each of the last 6 months","active")}
     ${card("Tasks completed",fmtNum(comp.length),`${tag(cm[cm.length-1])} this month`,ovSpark(cm,"#2E8B57"),"Completed tasks · trend = finished per month","tasks")}
     ${card("On-time delivery",otNow==null?"—":Math.round(otNow)+"%",otNow==null?"no completed tasks with a plan yet":`${tag(dOt,"%")} vs. last month`,ovSpark(ot,"#7C5CFC"),"Completed tasks finished on or before their plan end","ontime")}
     ${card("Needs attention",String(del+risk).padStart(2,"0"),`<span class="tag wa">${risk} at risk</span> ${del} delayed · across ${P.length} projects`,"","Delayed + at-risk projects","attn")}
@@ -2728,12 +2737,13 @@ function ovKpiPanel(k,P,A,D,Bl){const U=UI.dash;U.kSt=U.kSt||{};const done=s=>s=
   const srt=rs=>[...rs].sort((a,b)=>(OV_SO[pStat(a)]??9)-(OV_SO[pStat(b)]??9)||String(gv("Projects",FP.name,a)).localeCompare(String(gv("Projects",FP.name,b))));
   const byPid=new Map(P.map(r=>[pId(r),r]));const box=(title,sub,body)=>`<div class="card ovkp" id="ovKp"><div class="ovkph"><div><b>${title}</b><span>${sub}</span></div><button type="button" class="ovkx" data-ovk="${k}" title="Close">✕</button></div>${body}</div>`;
   const eq=(parts)=>`<div class="ovkeq">${parts.map(([n,l,c,cls])=>`<div class="${cls||""}"><b style="${c?`color:${c}`:""}">${n}</b><span>${l}</span></div>`).join('<em>+</em>').replace(/<em>\+<\/em>(<div class="tot)/,'<em>=</em>$1')}</div>`;
-  if(k==="active"){const act=P.filter(r=>!done(pStat(r))),cmp=P.filter(r=>pStat(r)==="Completed"),can=P.filter(r=>pStat(r)==="Cancelled");
+  if(k==="active"){const act=P.filter(r=>!done(pStat(r))),cmp=P.filter(r=>pStat(r)==="Completed"),can=P.filter(r=>pStat(r)==="Cancelled");const actB=act.filter(r=>hasBenefit(pId(r))),actN=act.filter(r=>!hasBenefit(pId(r)));
     const sts=["Delayed","At Risk","On Track","Not Started","On-Hold"].map(s=>[s,s,act.filter(r=>pStat(r)===s).length,SCOL[s]]).filter(x=>x[2]);
-    const rows=srt(sel==="Completed"?cmp:sel==="Cancelled"?can:act.filter(r=>!sel||pStat(r)===sel));
+    const rows=srt(sel==="Completed"?cmp:sel==="Cancelled"?can:sel==="ben"?actB:sel==="noben"?actN:act.filter(r=>!sel||pStat(r)===sel));
     return box("Active projects","Active = every project that is not Completed or Cancelled (On-Hold still counts as active).",
       eq([[act.length,"active","var(--accent)"],[cmp.length,"completed",SCOL.Completed],[can.length,"cancelled","#98A2B3"],[tot,"projects in the current filter","", "tot"]])+
-      ovChips([["","All active",act.length,""],...sts,["Completed","Completed",cmp.length,SCOL.Completed],["Cancelled","Cancelled",can.length,"#98A2B3"]],k)+ovPRows(rows,k,r=>curStage(r)))}
+      `<div class="ovbcov"><div><b>${actB.length}</b> of ${act.length} active projects have a benefit line</div><span class="ovbar ${actN.length?"":"ok"}"><b style="width:${act.length?actB.length/act.length*100:0}%"></b></span><span class="${actN.length?"warn":"ok"}">${actN.length?`${actN.length} still need a benefit`:"all covered"}</span></div>`+
+      ovChips([["","All active",act.length,""],["ben","💰 With benefit",actB.length,"#12B76A"],["noben","No benefit yet",actN.length,"#F79009"],...sts,["Completed","Completed",cmp.length,SCOL.Completed],["Cancelled","Cancelled",can.length,"#98A2B3"]],k)+ovPRows(rows,k,r=>`${esc(curStage(r))} · ${hasBenefit(pId(r))?'<span class="ovhb">💰 benefit</span>':'<span class="ovnb">no benefit yet</span>'}`))}
   if(k==="attn"){const del=P.filter(r=>pStat(r)==="Delayed"),risk=P.filter(r=>pStat(r)==="At Risk");const rows=srt(sel==="At Risk"?risk:sel==="Delayed"?del:[...del,...risk]);
     return box("Needs attention","Delayed + at-risk projects. Delayed = a task is past its plan end or forecast late; At risk = slipping or an overdue RAIDD.",
       ovChips([["","All",del.length+risk.length,""],["Delayed","Delayed",del.length,SCOL.Delayed],["At Risk","At risk",risk.length,SCOL["At Risk"]]],k)+ovPRows(rows,k,r=>{const L=pLive(r);return L.slip>0?`forecast +${L.slip}d late`:curStage(r)}))}
@@ -5179,7 +5189,7 @@ const PL_PAGE=10;
 function plFiltered(){const F=UI.qu;const {all,P2,rows,off}=quRows();const T=F.ptab||"all";
   const attn=r=>["Delayed","At Risk"].includes(pStat(r));
   const st=F.st1||"";const base=rows.filter(r=>mIn(st,pStat(r)));
-  const tabs=[["all","All projects",base],["active","Active",base.filter(r=>!["Completed","Cancelled"].includes(pStat(r)))],["attn","Needs attention",base.filter(attn)],["done","Completed",base.filter(r=>pStat(r)==="Completed")]];
+  const tabs=[["all","All projects",base],["active","Active",base.filter(r=>!["Completed","Cancelled"].includes(pStat(r)))],["attn","Needs attention",base.filter(attn)],["done","Completed",base.filter(r=>pStat(r)==="Completed")],["noben","No benefit yet",base.filter(r=>!["Completed","Cancelled"].includes(pStat(r))&&!hasBenefit(pId(r)))]];
   const cur=(tabs.find(t=>t[0]===T)||tabs[0])[2];return {all,P2,tabs,cur,T}}
 function plOwner(r){return gv("Projects",FP.lead,r)||gv("Projects",FP.wsl,r)||"—"}
 function plDate(v){v=+v||0;if(!v)return "—";const d=new Date(isoFromSerial(v)+"T00:00:00");return d.toLocaleDateString("en",{month:"short",day:"numeric",year:"numeric"})}
@@ -5211,7 +5221,7 @@ function vPList(m){const F=UI.qu;liveCalc();const {all,tabs,cur,T}=plFiltered();
     <div class="pltabs" role="tablist">${tabs.map(([k,t,a])=>`<button type="button" role="tab" aria-selected="${k===T}" class="${k===T?"on":""}" data-pltab="${k}">${t} <span class="c">${a.length}</span></button>`).join("")}</div>
     <div class="pltw"><table class="pltbl"><thead><tr><th>Project</th><th>Status</th><th>Progress</th><th>Owner</th><th>Plan end</th><th aria-label="Open"></th></tr></thead>
     <tbody>${list.map(r=>{const st=pStat(r),L=pLive(r),pc=(L.comp||0)*100,pe=+gv("Projects",FP.pe,r)||0,late=pe&&pe<TODAY&&!["Completed","Cancelled"].includes(st);
-      return `<tr data-prow="${r}" tabindex="0" class="burow ${UI.qu.pd===r?"sel":""}" style="--bc:${buColor(gv("Projects",FP.bu,r))}"><td><b class="pnm">${esc(gv("Projects",FP.name,r))}</b><small>${buChip(gv("Projects",FP.bu,r))}${esc(pId(r))}</small></td><td>${plPill(st)}</td><td>${plBar(pc,st)}</td><td class="own">${esc(plOwner(r))}</td><td class="${late?"late":""}">${plDate(pe)}</td><td class="chv" aria-hidden="true">›</td></tr>`}).join("")||`<tr><td colspan="6" class="muted" style="text-align:center;padding:32px">No projects match.</td></tr>`}</tbody></table></div>
+      return `<tr data-prow="${r}" tabindex="0" class="burow ${UI.qu.pd===r?"sel":""}" style="--bc:${buColor(gv("Projects",FP.bu,r))}"><td><b class="pnm">${esc(gv("Projects",FP.name,r))}</b><small>${buChip(gv("Projects",FP.bu,r))}${esc(pId(r))}${!["Completed","Cancelled"].includes(st)&&!hasBenefit(pId(r))?' <span class="ovnb" title="No benefit line yet — add it in the project details (Benefits)">no benefit yet</span>':""}</small></td><td>${plPill(st)}</td><td>${plBar(pc,st)}</td><td class="own">${esc(plOwner(r))}</td><td class="${late?"late":""}">${plDate(pe)}</td><td class="chv" aria-hidden="true">›</td></tr>`}).join("")||`<tr><td colspan="6" class="muted" style="text-align:center;padding:32px">No projects match.</td></tr>`}</tbody></table></div>
     <datalist id="quTeams">${uniq(_rowsOf0Safe("Projects").map(r=>String(gv("Projects","AB",r)||"").trim()).filter(Boolean)).sort().map(x=>`<option value="${esc(x)}">`).join("")}</datalist><datalist id="quPeople">${uniq([...listFromName("L_Leader"),..._rowsOf0Safe("Projects").flatMap(x=>[gv("Projects",FP.lead,x),gv("Projects",FP.wsl,x)])].filter(Boolean)).sort().map(x=>`<option value="${esc(x)}">`).join("")}</datalist>
     <div class="plfoot"><span class="muted">Showing ${n?from+1:0}–${Math.min(n,from+PL_PAGE)} of ${n} projects</span><span class="sp"></span><nav class="plpg" aria-label="Pages"><button type="button" data-plpg="${F.pg-1}" ${F.pg<=1?"disabled":""} aria-label="Previous page">‹</button>${pgBtns}<button type="button" data-plpg="${F.pg+1}" ${F.pg>=pages?"disabled":""} aria-label="Next page">›</button></nav></div>
   </div>`;

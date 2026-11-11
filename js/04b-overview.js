@@ -109,12 +109,13 @@ function ovKpiPanel(k,P,A,D,Bl){const U=UI.dash;U.kSt=U.kSt||{};const done=s=>s=
   const srt=rs=>[...rs].sort((a,b)=>(OV_SO[pStat(a)]??9)-(OV_SO[pStat(b)]??9)||String(gv("Projects",FP.name,a)).localeCompare(String(gv("Projects",FP.name,b))));
   const byPid=new Map(P.map(r=>[pId(r),r]));const box=(title,sub,body)=>`<div class="card ovkp" id="ovKp"><div class="ovkph"><div><b>${title}</b><span>${sub}</span></div><button type="button" class="ovkx" data-ovk="${k}" title="Close">✕</button></div>${body}</div>`;
   const eq=(parts)=>`<div class="ovkeq">${parts.map(([n,l,c,cls])=>`<div class="${cls||""}"><b style="${c?`color:${c}`:""}">${n}</b><span>${l}</span></div>`).join('<em>+</em>').replace(/<em>\+<\/em>(<div class="tot)/,'<em>=</em>$1')}</div>`;
-  if(k==="active"){const act=P.filter(r=>!done(pStat(r))),cmp=P.filter(r=>pStat(r)==="Completed"),can=P.filter(r=>pStat(r)==="Cancelled");
+  if(k==="active"){const act=P.filter(r=>!done(pStat(r))),cmp=P.filter(r=>pStat(r)==="Completed"),can=P.filter(r=>pStat(r)==="Cancelled");const actB=act.filter(r=>hasBenefit(pId(r))),actN=act.filter(r=>!hasBenefit(pId(r)));
     const sts=["Delayed","At Risk","On Track","Not Started","On-Hold"].map(s=>[s,s,act.filter(r=>pStat(r)===s).length,SCOL[s]]).filter(x=>x[2]);
-    const rows=srt(sel==="Completed"?cmp:sel==="Cancelled"?can:act.filter(r=>!sel||pStat(r)===sel));
+    const rows=srt(sel==="Completed"?cmp:sel==="Cancelled"?can:sel==="ben"?actB:sel==="noben"?actN:act.filter(r=>!sel||pStat(r)===sel));
     return box("Active projects","Active = every project that is not Completed or Cancelled (On-Hold still counts as active).",
       eq([[act.length,"active","var(--accent)"],[cmp.length,"completed",SCOL.Completed],[can.length,"cancelled","#98A2B3"],[tot,"projects in the current filter","", "tot"]])+
-      ovChips([["","All active",act.length,""],...sts,["Completed","Completed",cmp.length,SCOL.Completed],["Cancelled","Cancelled",can.length,"#98A2B3"]],k)+ovPRows(rows,k,r=>curStage(r)))}
+      `<div class="ovbcov"><div><b>${actB.length}</b> of ${act.length} active projects have a benefit line</div><span class="ovbar ${actN.length?"":"ok"}"><b style="width:${act.length?actB.length/act.length*100:0}%"></b></span><span class="${actN.length?"warn":"ok"}">${actN.length?`${actN.length} still need a benefit`:"all covered"}</span></div>`+
+      ovChips([["","All active",act.length,""],["ben","💰 With benefit",actB.length,"#12B76A"],["noben","No benefit yet",actN.length,"#F79009"],...sts,["Completed","Completed",cmp.length,SCOL.Completed],["Cancelled","Cancelled",can.length,"#98A2B3"]],k)+ovPRows(rows,k,r=>`${esc(curStage(r))} · ${hasBenefit(pId(r))?'<span class="ovhb">💰 benefit</span>':'<span class="ovnb">no benefit yet</span>'}`))}
   if(k==="attn"){const del=P.filter(r=>pStat(r)==="Delayed"),risk=P.filter(r=>pStat(r)==="At Risk");const rows=srt(sel==="At Risk"?risk:sel==="Delayed"?del:[...del,...risk]);
     return box("Needs attention","Delayed + at-risk projects. Delayed = a task is past its plan end or forecast late; At risk = slipping or an overdue RAIDD.",
       ovChips([["","All",del.length+risk.length,""],["Delayed","Delayed",del.length,SCOL.Delayed],["At Risk","At risk",risk.length,SCOL["At Risk"]]],k)+ovPRows(rows,k,r=>{const L=pLive(r);return L.slip>0?`forecast +${L.slip}d late`:curStage(r)}))}
