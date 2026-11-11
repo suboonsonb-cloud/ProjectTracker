@@ -4,7 +4,7 @@
 "use strict";
 const T2_TAGS=["2T","Deep Dive","Simplification"];
 function t2Ben(r){return typeof benefitRowOf==="function"?benefitRowOf(pId(r)):null}
-function t2Basis(br){const s=br!=null?String(gv("Benefits",FB.basis,br)||""):"";const m=/^As-is (.*?) → To-be (.*?)(?: \(saving (.*?)\))?\.?(?:\s*\|\s*([\s\S]*))?$/.exec(s);
+function t2Basis(br){const s=br!=null?String(gv("Benefits","AJ",br)||""):"";const m=/^As-is (.*?) → To-be (.*?)(?: \(saving (.*?)\))?\.?(?:\s*\|\s*([\s\S]*))?$/.exec(s);
   return m?{a:m[1]==="?"?"":m[1],b:m[2]==="?"?"":m[2],s:m[3]||"",rest:m[4]||""}:{a:"",b:"",s:"",rest:s}}
 function t2Apps(r){return String(gv("Projects","AF",r)||"").split(/\s*\/\s*|\s*,\s*/).map(x=>x.trim()).filter(Boolean)}
 /* current phase = first stage (in stage order) that still has unfinished tasks */
@@ -105,7 +105,7 @@ function t2Bind(m,tr,C){
         if(String(cur)!==v){if(br==null){if(!v){el._busy=false;return}br=addBenefit(r);if(br==null){el._busy=false;return}setCell("Benefits",FB.desc,br,"Time saving — "+gv("Projects",FP.name,r))}
           if(k==="bfreq")setCell("Benefits","N",br,v);
           else if(k==="bh"){const h=v===""?"":Math.max(0,+v);if(v!==""&&isNaN(h)){toast("Saving hours must be a number",4000);el._busy=false;return}setCell("Benefits",FB.trh,br,h)}
-          else{const B=t2Basis(br);B[k.slice(1)]=v;const txt=B.a||B.b||B.s?`As-is ${B.a||"?"} → To-be ${B.b||"?"}${B.s?` (saving ${B.s})`:""}.`+(B.rest?" | "+B.rest:""):B.rest;setCell("Benefits",FB.basis,br,txt)}ok=true}}
+          else{const B=t2Basis(br);B[k.slice(1)]=v;const txt=B.a||B.b||B.s?`As-is ${B.a||"?"} → To-be ${B.b||"?"}${B.s?` (saving ${B.s})`:""}.`+(B.rest?" | "+B.rest:""):B.rest;setCell("Benefits","AJ",br,txt)}ok=true}}
       if(ok&&!["prog","ps","pe","ovr"].includes(k))quStamp(r)}catch(e){toast(e.message,6000)}
     el._busy=false;if(!ok)return;UI.qu.edited.add(r);liveCalc();const rr=m.querySelector(`tr[data-t2row="${r}"]`);if(rr){const t=document.createElement("tbody");t.innerHTML=t2RowHtml(r,C);const nr=t.firstElementChild;rr.replaceWith(nr);t2Bind(m,nr,C);nr.querySelectorAll("textarea.t2t").forEach(t2Grow);nr.classList.add("t2flash")}
     const qc=$("#quCount");if(qc)qc.textContent=quCountText();renderTabs()};

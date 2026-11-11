@@ -42,7 +42,7 @@ const OLDH=[["id",/^(project\s*)?id$|^no\.?$|^#$/],["name",/^project\s*name$|^pr
   ["members",/^member/],["phase",/^phase$/],["quarter",/^time\s*line|^target\s*quarter|^timeline/],["start",/^start(\s*date)?$/],["end",/^end(\s*date)?$|^finish(\s*date)?$/],
   ["progress",/^progress$|^%\s*complete|^completion/],["status",/^(project\s*)?status$/],["done",/^done$|^last\s*update/],["willdo",/^will\s*do|^next\s*steps?/],["issue",/^issues?|^blocker/],
   ["frequency",/^frequency/],["asis",/as\s*-?\s*is/],["tobe",/to\s*-?\s*be/],["savingtxt",/^saving\s*time/],["savinghrs",/^saving\s*hours?/],["priority",/^priority/],
-  ["requester",/^requester|business\s*owner/],["_skip",/^days$|^plan\s*%|^est\.?\s*cost|^saving\s*fte/]];
+  ["requester",/^requester|business\s*owner/],["bu",/^bu$|^business\s*unit$/],["programme",/^program(me)?(\s*tag)?$/],["cf",/^cf$|^corporate\s*function$/],["costyr",/^cost\s*sav(ing)?s?\s*\(?\s*thb\s*\/\s*y(ea)?r\s*\)?$/],["_skip",/^days$|^plan\s*%|^est\.?\s*cost|^saving\s*fte/]];
 async function readOldWorkbook(buf,fname,lastMod){
   const list=readZip(buf);const by={};list.forEach(e=>by[e.name]=e);
   if(!by["xl/workbook.xml"])throw new Error("This is not an Excel workbook");
@@ -86,7 +86,7 @@ async function readOldWorkbook(buf,fname,lastMod){
     recs.push({row:r,raw:{id:g("id"),name:rawName,objective:g("objective"),category:g("category"),process:g("process"),division:g("division"),function:g("function"),
       apps:(map.app||[]).map(c=>row.has(c)?row.get(c):""),lead:g("lead"),members:g("members"),phase:g("phase"),quarter:g("quarter"),start:g("start"),end:g("end"),
       progress:g("progress"),status:g("status"),done:g("done"),willdo:g("willdo"),issue:g("issue"),frequency:g("frequency"),asis:g("asis"),tobe:g("tobe"),
-      savingtxt:g("savingtxt"),savinghrs:g("savinghrs"),priority:g("priority"),requester:g("requester"),
+      savingtxt:g("savingtxt"),savinghrs:g("savinghrs"),priority:g("priority"),requester:g("requester"),bu:g("bu"),cf:g("cf"),programme:g("programme"),costyr:g("costyr"),
       phase2:map.phase2&&row.has(map.phase2)?row.get(map.phase2):"",upd:(map.upd||[]).map(u=>({h:u.h,v:row.has(u.c)?row.get(u.c):""})).filter(u=>tx(u.v)),
       notes:notesCols.map(n=>row.has(n.c)?row.get(n.c):"").filter(v=>v!==""&&v!=null)}})}
   // optional "Progress" sheet: remarks per project name
@@ -120,7 +120,7 @@ function oldValues(rec){const R=rec.raw,O={};const nm=splitName(R.name);O.name=n
   O.flag=cancel?"Cancelled":/^hold$|on.?hold/i.test(st)?"On-Hold":/go\s*live/i.test(st)?"Go Live":st?"Active":"";
   O.checkCancel=O.nameNotes.some(n=>/cancel/i.test(n));
   O.done=one(R.done);O.willdo=one(R.willdo);O.issue=one(R.issue);O.priority=one(R.priority);O.requester=one(R.requester);
-  O.category=one(R.category);O.id=tx(R.id);
+  O.category=one(R.category);O.id=tx(R.id);O.bu=one(R.bu||"");O.cf=one(R.cf||"");{const c=parseFloat(String(R.costyr==null?"":R.costyr).replace(/[^\d.\-]/g,""));O.costyr=isNaN(c)||c<=0?"":c}
   O.notes=[...R.notes.filter(v=>typeof v!=="number"&&typeof v!=="boolean").map(one).filter(v=>v&&!PHASE_RX.test(v)&&!STATUSW.test(v)&&parseDateAny(v)===""&&!/^monthly hours|\(\s*\d+\s*\*\s*\d+\s*\)/i.test(v)),...O.nameNotes];
   /* dated update columns → "[04.11.2026] note" at the front of the remark */
   O.upd=(R.upd||[]).map(u=>`[${u.h}] ${one(String(u.v).replace(/^\s*'/gm,""))}`);
@@ -129,7 +129,7 @@ function oldValues(rec){const R=rec.raw,O={};const nm=splitName(R.name);O.name=n
   O.notes=[...O.upd,...O.notes,...p2n];O.remark=O.notes.join(" | ");
   const hrs=typeof R.savinghrs==="number"?R.savinghrs:parseFloat(R.savinghrs);O.hrs=isNaN(hrs)||hrs<=0?"":hrs;
   O.freq=isBlank(R.frequency)?"":one(R.frequency);O.asis=isBlank(R.asis)?"":one(R.asis);O.tobe=isBlank(R.tobe)?"":one(R.tobe);O.savingtxt=isBlank(R.savingtxt)?"":one(R.savingtxt);
-  const tag=tx(R.name).match(/\(([^()]*(deep\s*dive|simplification|2t\b)[^()]*)\)/i);O.tag=tag?one(tag[1]):"";
+  const tag=tx(R.name).match(/\(([^()]*(deep\s*dive|simplification|2t\b)[^()]*)\)/i);O.tag=tag?one(tag[1]):"";{const pg=one(R.programme||"");const m=["2T","Deep Dive","Simplification"].find(x=>x.toLowerCase()===pg.toLowerCase());if(m)O.tag=m}
   return O}
 
 /* ---------- the database side ---------- */
@@ -260,15 +260,23 @@ function createProject(a){const O=a.O;const r=nextProjectRow();if(!r){toast("No 
   S.newRows.Projects=S.newRows.Projects||new Set();S.newRows.Projects.add(r);const set=(c,v)=>{if(v!==""&&v!=null)setCell("Projects",c,r,v)};
   const inits=listFromName("L_Init");const init=/process\s*improv/i.test(O.category)?(inits.find(x=>/process improvement/i.test(x))||inits[0]):(inits.find(x=>/automation/i.test(x))||inits[0]);
   set(FP.init,init);const glob=/\b(us|eu|oversea|overseas|global|cross.?region)\b/i.test([O.name,O.subfn,a.x.rec.raw.division].join(" "));if(glob&&listFromName("L_Region").includes("Global"))set(FP.region,"Global");
-  set(FP.bu,listFromName("L_BU").includes("Finance")?"Finance":(listFromName("L_BU")[0]||""));const cf=cfForArea(O.area);set(FP.cf,cf);set(FP.name,O.name);
+  /* BU / CF columns in the file (new in r73) — matched to the tracker lists; otherwise Finance as before */
+  const BUs=listFromName("L_BU").map(String);const nq=v=>String(v||"").toLowerCase().replace(/[^a-z0-9]/g,"");const bq=nq(O.bu);
+  const buM=bq?(BUs.find(x=>nq(x)===bq)||BUs.find(x=>nq(x).includes(bq)||bq.includes(nq(x)))):"";
+  if(O.bu&&!buM)toast(`BU "${O.bu}" is not in the tracker's BU list — "${O.name}" was put under Finance. Add the BU in Settings → Lists, then change it on the project.`,9000);
+  const buV=buM||(BUs.includes("Finance")?"Finance":(BUs[0]||""));set(FP.bu,buV);
+  const CFs=(typeof orgCF==="function"?orgCF(buV):[]).map(String);const cq=nq(O.cf);const cfM=cq?(CFs.find(x=>nq(x)===cq)||CFs.find(x=>nq(x).includes(cq)||cq.includes(nq(x)))):"";
+  const cf=cfM||(buM&&buV!=="Finance"?(CFs.includes("Other")?"Other":""):cfForArea(O.area));set(FP.cf,cf);set(FP.name,O.name);
   const lead=O.lead||O.members;set(FP.lead,lead);setCell("Projects",FP.meth,r,"Waterfall");set("R","Equal");set(FP.ps,O.start);set(FP.pe,O.end);
   set("Z",/^n?$/i.test(tx(O.id))?"":O.id);set(FP.proc,O.area);set("AB",O.subfn);set(FP.prio,O.priority);set("AD",O.objective);set("AE",O.tag||(/^n/i.test(tx(O.id))?"Simplification":"2T"));/* old 2T Club rows are 2T unless tagged deep dive / simplification; "n" rows are new simplification items */set("AF",O.tools);set("AG",O.members);set("AH",O.requester);
-  set("AI",O.quarter);set("AJ",O.phase);set("AK",O.done);set("AL",O.willdo);set("AM",O.issue);set("M",O.notes.join(" | "));set("AN",dateToSerial(new Date(SY.plan.oldDate||Date.now())));
+  set("AI",O.quarter);set("AJ",O.phase);set("AK",O.done);set("AL",O.willdo);set("AM",O.issue);set("M",[...O.notes,...(O.costyr&&!(+O.hrs>0)?["Cost savings "+fmtNum(O.costyr)+" THB/yr (from file)"]:[])].join(" | "));set("AN",dateToSerial(new Date(SY.plan.oldDate||Date.now())));
   if(O.flag==="Cancelled")set(FP.ovr,"Cancelled");else if(O.flag==="On-Hold")set(FP.ovr,"On-Hold");
   setCell("Projects",FP.lock,r,genProjectId(r));const pid=pId(r);
   const st=stagesOf(r);st.names.forEach((n,k)=>{const w=stdWindow(r,k);addTask(r,n,{name:st.std[k]||n,ps:w?w.s:"",pe:w?w.e:"",pic:lead})});
   if(O.progress!=="")setProjectProgress(r,O.progress);
-  if(O.hrs!==""){const br=addBenefit(r);if(br!=null){setCell("Benefits",FB.desc,br,"Time saving — "+O.name);setCell("Benefits",FB.trh,br,O.hrs);if(O.freq)setCell("Benefits","N",br,O.freq);if(O.asis||O.tobe)setCell("Benefits","AJ",br,basisText(O))}}
+  if(O.hrs!==""){const br=addBenefit(r);if(br!=null){setCell("Benefits",FB.desc,br,"Time saving — "+O.name);setCell("Benefits",FB.trh,br,O.hrs);if(O.freq)setCell("Benefits","N",br,O.freq);if(O.asis||O.tobe)setCell("Benefits","AJ",br,basisText(O));
+    /* "Cost savings (THB/yr)" column: set the line's hourly rate so its value matches the file */
+    if(O.costyr&&+O.hrs>0)setCell("Benefits",FB.rate,br,Math.round(O.costyr/(+O.hrs*12)*100)/100)}}
   if(O.issue&&!looksMisplaced("issue",O.issue))addRaidd(pid,"Issue",O.issue,"Open");
   if(O.flag==="Cancelled")addRaidd(pid,"Decision","Project cancelled (from old tracker).","Closed");
   return r}
