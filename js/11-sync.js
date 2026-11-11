@@ -263,10 +263,13 @@ function createProject(a){const O=a.O;const r=nextProjectRow();if(!r){toast("No 
   /* BU / CF columns in the file (new in r73) — matched to the tracker lists; otherwise Finance as before */
   const BUs=listFromName("L_BU").map(String);const nq=v=>String(v||"").toLowerCase().replace(/[^a-z0-9]/g,"");const bq=nq(O.bu);
   const buM=bq?(BUs.find(x=>nq(x)===bq)||BUs.find(x=>nq(x).includes(bq)||bq.includes(nq(x)))):"";
-  if(O.bu&&!buM)toast(`BU "${O.bu}" is not in the tracker's BU list — "${O.name}" was put under Finance. Add the BU in Settings → Lists, then change it on the project.`,9000);
-  const buV=buM||(BUs.includes("Finance")?"Finance":(BUs[0]||""));set(FP.bu,buV);
+  /* a BU that is not in the list yet is added to Master_Data (with a code) so the project code uses it — never silently Finance */
+  let buN=buM;if(O.bu&&!buM&&typeof addMaster==="function"){buN=addMaster("L_BU",O.bu)||"";if(buN)toast(`Added BU “${buN}” to the lists (code ${codeFor("L_BU","L_BUCode",buN,"?")}).`,6000)}
+  if(O.bu&&!buN)toast(`BU "${O.bu}" could not be added — "${O.name}" was put under Finance.`,9000);
+  const buV=buN||(BUs.includes("Finance")?"Finance":(BUs[0]||""));set(FP.bu,buV);
   const CFs=(typeof orgCF==="function"?orgCF(buV):[]).map(String);const cq=nq(O.cf);const cfM=cq?(CFs.find(x=>nq(x)===cq)||CFs.find(x=>nq(x).includes(cq)||cq.includes(nq(x)))):"";
-  const cf=cfM||(buM&&buV!=="Finance"?(CFs.includes("Other")?"Other":""):cfForArea(O.area));set(FP.cf,cf);set(FP.name,O.name);
+  let cf=cfM;if(!cf&&O.cf&&buN&&typeof addMaster==="function")cf=addMaster("L_CF",O.cf,{bu:buV})||"";
+  if(!cf)cf=buN&&buV!=="Finance"?(CFs.includes("Other")?"Other":""):cfForArea(O.area);set(FP.cf,cf);set(FP.name,O.name);
   const lead=O.lead||O.members;set(FP.lead,lead);setCell("Projects",FP.meth,r,"Waterfall");set("R","Equal");set(FP.ps,O.start);set(FP.pe,O.end);
   set("Z",/^n?$/i.test(tx(O.id))?"":O.id);set(FP.proc,O.area);set("AB",O.subfn);set(FP.prio,O.priority);set("AD",O.objective);set("AE",O.tag||(/^n/i.test(tx(O.id))?"Simplification":"2T"));/* old 2T Club rows are 2T unless tagged deep dive / simplification; "n" rows are new simplification items */set("AF",O.tools);set("AG",O.members);set("AH",O.requester);
   set("AI",O.quarter);set("AJ",O.phase);set("AK",O.done);set("AL",O.willdo);set("AM",O.issue);set("M",[...O.notes,...(O.costyr&&!(+O.hrs>0)?["Cost savings "+fmtNum(O.costyr)+" THB/yr (from file)"]:[])].join(" | "));set("AN",dateToSerial(new Date(SY.plan.oldDate||Date.now())));
