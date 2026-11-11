@@ -302,7 +302,12 @@ function ovBind(m){const go=v=>{view=v;render();window.scrollTo(0,0)};
   m.querySelectorAll("[data-ovopen]").forEach(b=>b.onclick=()=>openProject(+b.dataset.ovopen));
   m.querySelectorAll("[data-ovmap]").forEach(b=>b.onclick=()=>{UI.e2e.home=false;UI.e2e.flow=b.dataset.ovmap;UI.e2e.ver="TO-BE";UI.e2e.focus=b.dataset.ovpid;go("E2E")});
   const a=m.querySelector("#ovAll");if(a)a.onclick=e=>{e.preventDefault();UI.dash.pAll=!UI.dash.pAll;vDash(m,true)};const pj=m.querySelector("#ovProj");if(pj)pj.onclick=e=>{e.preventDefault();go("Projects")}}
-function vDash(m,keepScroll){const _y=window.scrollY;setTimeout(()=>{if(keepScroll)window.scrollTo(0,_y)},0);
+function vDash(m,keepScroll){const _y=window.scrollY,_x=window.scrollX;
+  /* re-drawing after a filter / click must not move the page: hold the height while it redraws, put the scroll back, then let go */
+  if(keepScroll&&m.offsetHeight){m.style.minHeight=m.offsetHeight+"px";const put=()=>{if(Math.abs(window.scrollY-_y)>1)window.scrollTo(_x,_y)};
+    setTimeout(()=>{put();requestAnimationFrame(()=>{put();requestAnimationFrame(()=>{m.style.minHeight="";put()})})},0)}
+  vDash0(m);if(keepScroll&&Math.abs(window.scrollY-_y)>1)window.scrollTo(_x,_y)}
+function vDash0(m){
   const allP=rowsOf("Projects");const F=UI.dash;const fv=(r,c)=>gv("Projects",c,r)||"(blank)";
   const bus=uniq(allP.map(r=>fv(r,FP.bu)));if(F.bu&&!bus.includes(F.bu))F.bu="";const bu=F.bu;
   const P1=allP.filter(r=>!bu||fv(r,FP.bu)===bu);const cfs_=uniq(P1.map(r=>fv(r,FP.cf)));if(F.cf&&!cfs_.includes(F.cf))F.cf="";
